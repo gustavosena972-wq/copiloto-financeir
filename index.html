@@ -195,7 +195,7 @@ function renderAuth(){
   $('#app').innerHTML=`<div class="hero"><div class="art"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
   <div class="pitch">${ARTE}<h2>Copiloto Financeiro</h2><p style="font-size:18px;margin:-4px 0 12px"><b>Um aplicativo brasileiro de finanças para famílias.</b></p>
   <p>Lance as contas do mês e o Copiloto soma tudo, mostra para onde o dinheiro vai e aponta onde dá para economizar.</p>
-  <div class="ticks"><span>✔ Cálculo automático do mês e do ano</span><span>✔ Importa a sua planilha do Excel</span><span>✔ Checape: aponta onde dá para economizar</span><span>✔ Copiloto de IA em preparação</span><span>✔ Acesso por ${brl(PIX.valor)} via Pix</span></div></div></div>
+  <div class="ticks"><span>✔ Cálculo automático do mês e do ano</span><span>✔ Importa a sua planilha do Excel</span><span>✔ Checape: aponta onde dá para economizar</span><span>✔ Acesso por ${brl(PIX.valor)} via Pix</span></div></div></div>
   <div class="login"><h3>Bem-vindo</h3><div class="mu" style="margin-bottom:6px">Entre ou crie sua conta para começar.</div>
   <input id="nome" placeholder="Seu nome (só para criar conta)"><input id="email" type="email" placeholder="E-mail"><input id="senha" type="password" placeholder="Senha (mín. 8)">
   <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a> (só para criar conta).</span></label>
@@ -212,13 +212,13 @@ function renderSemFamilia(){
 /* ---------- app ---------- */
 function render(){
   const ed=canEdit()&&mesAberto();
-  const TL={planilha:'📋 Planilha',ano:'📊 Visão do ano',checape:'💡 Checape',plan:'🎯 Planejamento',copiloto:'🤖 Copiloto',família:'👨‍👩‍👧 Família'};
+  const TL={planilha:'📋 Planilha',ano:'📊 Visão do ano',checape:'💡 Checape',plan:'🎯 Planejamento',família:'👨‍👩‍👧 Família'};
   if(S.admin)TL.admin='💼 Admin'+(S.admPend?' ('+S.admPend+')':'');
   const tabs=Object.keys(TL).map(t=>`<button class="${S.view===t?'on':''}" data-act="view" data-v="${t}">${TL[t]}</button>`).join('');
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   let body='';
-  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='copiloto')body=viewIA();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
-  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='copiloto'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
+  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
+  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
   $('#app').innerHTML=`<div class="top"><div class="brand"><span class="brandlogo">${LOGO} Copiloto <span class="mu" style="font-weight:500">· ${esc(S.fam.nome)}</span> <span class="live">● ao vivo</span></span><div class="mu" style="font-size:13px">${saudacao()}, ${esc(S.me.nome.split(' ')[0])} · ${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</div></div>
   <div class="row" style="margin:0">${S.notifs&&S.notifs.length?`<button class="sec chip" data-act="sino">🔔 ${S.notifs.length}</button>`:''}<button class="sec chip" data-act="anoant" title="Ano anterior">◀</button><select id="anosel">${anos}</select><button class="sec chip" data-act="anoprox" title="Próximo ano">${S.anos.some(x=>x.ano===S.ano.ano+1)?'▶':'＋ '+(S.ano.ano+1)}</button><button class="sec" data-act="sair">Sair</button></div></div>
   <div class="tabs">${tabs}</div>${meses}${body}${viewImport()}${viewModais()}`;
@@ -456,7 +456,7 @@ function ligarTempoReal(){
     clearTimeout(t);t=setTimeout(()=>{const a=document.activeElement;if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&$('#app').contains(a))S.pend=true;else atualizarAoVivo()},700)}));
   S.rt.subscribe();
 }
-async function atualizarAoVivo(){S.pend=false;if(S.mes&&S.view!=='copiloto')await loadMes();if(S.view==='plan')await carregarPlan()}
+async function atualizarAoVivo(){S.pend=false;if(S.mes)await loadMes();if(S.view==='plan')await carregarPlan()}
 async function carregarPlan(rd=true){
   const[m,d,i,p]=await Promise.all([q(sb.from('metas').select('*').eq('familia_id',S.fam.id).order('atualizado_em')),
     q(sb.from('dividas').select('*').eq('familia_id',S.fam.id).eq('ativa',true)),
@@ -542,7 +542,7 @@ async function renderPaywall(){
    ${pend?'<div class="aviso ok">✅ Recebemos o seu aviso de pagamento. Assim que o Pix for conferido, o acesso é liberado e esta tela atualiza sozinha. Pode fechar e voltar depois.</div>':pagar}`;
   $('#app').innerHTML=`<div class="hero pwall"><div class="art"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
   <div class="pitch">${ARTE}<h2>Copiloto Financeiro</h2><p><b>Um aplicativo brasileiro de finanças para famílias.</b></p>
-  <div class="ticks"><span>✔ Planilha que soma sozinha, mês a mês</span><span>✔ Importa e exporta Excel sem duplicar</span><span>✔ Checape de cortes · Copiloto de IA em preparação</span><span>✔ Fecha mês e ano, metas, dívidas e patrimônio</span></div></div></div>
+  <div class="ticks"><span>✔ Planilha que soma sozinha, mês a mês</span><span>✔ Importa e exporta Excel sem duplicar</span><span>✔ Checape de cortes e oportunidades de economia</span><span>✔ Fecha mês e ano, metas, dívidas e patrimônio</span></div></div></div>
   <div class="login">${miolo}<button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button><div class="mu" style="font-size:12px;text-align:center"><a href="#" data-act="legal" data-t="termos">Termos de Uso</a> · <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a></div></div></div>`;
   clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pwall'))boot()},20000);
 }
@@ -566,20 +566,7 @@ function viewCats2(){
   <div class="scroll"><table style="min-width:560px"><tbody>${rows}</tbody></table></div>
   <div class="row" style="margin-top:10px"><input id="c_nome" placeholder="Nova categoria" style="flex:1" ${d}><select id="c_grupo" ${d}>${go('variaveis')}</select><select id="c_pai" ${d}><option value="">Categoria principal</option>${pais.filter(p=>p.tipo==='despesa').map(p=>`<option value="${p.id}">Dentro de: ${esc(p.nome)}</option>`).join('')}</select><button data-act="addcat" ${d}>Criar</button></div></div>`;
 }
-function aposRender(){if(S.view==='copiloto'){const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight;const i=$('#ia_in');if(i&&!S.typing)i.focus()}}
-const fmt=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^[-•] (.+)$/gm,'• $1').replace(/\n/g,'<br>');
-function viewIA(){
-  const sug=['Onde posso cortar gastos este mês?','Como funciona o checape?','Como montar minha reserva de emergência?','Como devo investir o que sobra?','Como sair das dívidas do cartão?','Como importo minha planilha?'];
-  const msgs=S.chat.map((m,i)=>`<div class="msg ${m.r}">${fmt(m.t)}${m.r==='a'&&m.t.length>80?`<div style="margin-top:6px"><button class="sec chip" data-act="plano" data-i="${i}">📌 Salvar como plano</button></div>`:''}</div>`).join('');
-  const convs=S.convs.map(c=>`<div class="conv ${c.id===S.cid?'on':''}" data-act="abrir" data-id="${c.id}"><span>${esc(c.titulo||'Conversa')}</span><i data-act="delconv" data-id="${c.id}" title="Excluir">✕</i></div>`).join('')||'<div class="mu" style="padding:6px">Nenhuma conversa ainda</div>';
-  const planos=S.planos.map(p=>`<div class="conv" data-act="verplano" data-id="${p.id}"><span>📌 ${esc(p.titulo)}</span></div>`).join('')||'<div class="mu" style="padding:6px">Salve respostas úteis como plano</div>';
-  return `<div class="iagrid"><aside class="side"><button data-act="nova">＋ Nova conversa</button><input id="busca_ia" placeholder="Buscar conversas e planos…">
-  <div class="lbl">Conversas</div>${convs}<div class="lbl">Planos salvos</div>${planos}<button class="sec" style="margin-top:8px" data-act="pers">⚙ Personalizar o Copiloto</button></aside>
-  <div class="card chat"><div id="msgs">${msgs||'<div class="msg a">Olá! Sou o <b>Copiloto</b>. Posso explicar como usar cada ferramenta, analisar os números da sua família, sugerir onde cortar e ensinar como organizar e investir seu dinheiro. Por onde quer começar?</div>'}${S.typing?'<div class="msg a typing"><i></i><i></i><i></i></div>':''}</div>
-  <div class="chips">${sug.map(x=>`<button class="sec chip" data-act="perg" data-q="${esc(x)}">${esc(x)}</button>`).join('')}</div>
-  <div class="row" style="margin:0"><input id="ia_in" placeholder="Pergunte sobre seu orçamento, cortes ou investimentos…" style="flex:1"><button data-act="ia">Enviar</button></div>
-  <small class="mu">Orientação educativa geral gerada por IA. Não substitui um profissional habilitado.</small></div></div>`;
-}
+
 function viewModais(){
   if(S.sino)return `<div class="modal"><div class="card box"><b>🔔 Avisos</b><div style="margin:10px 0;max-height:50vh;overflow:auto">${S.notifs.map(n=>`<div class="item"><b>${esc(n.titulo)}</b><div class="mu">${esc(n.mensagem||'')}</div></div>`).join('')||'<div class="mu">Nenhum aviso.</div>'}</div><div class="row"><button data-act="lerTodos">Marcar todos como lidos</button><button class="sec" data-act="fecharmodal">Fechar</button></div></div></div>`;
   if(S.hist)return `<div class="modal"><div class="card box"><b>↶ Desfazer alterações</b><div class="mu" style="margin:6px 0">Últimas mudanças nos lançamentos. Desfazer volta o item ao que era antes.</div><div style="margin:8px 0;max-height:52vh;overflow:auto">${S.hist.map(h=>{const d=h.dados_depois||h.dados_antes||{};const rot={INSERT:'Criado',UPDATE:'Alterado',DELETE:'Apagado'}[h.acao];return `<div class="item row" style="justify-content:space-between;margin:0"><span><b>${rot}</b> · ${esc(d.descricao||'')} ${brl(d.valor)}<div class="mu">${new Date(h.criado_em).toLocaleString('pt-BR')}</div></span><button class="sec chip" data-act="desfazer" data-id="${h.id}" ${canEdit()?'':'disabled'}>Desfazer</button></div>`}).join('')||'<div class="mu">Nada para desfazer ainda.</div>'}</div><div class="row"><button class="sec" data-act="fecharmodal">Fechar</button></div></div></div>`;
@@ -587,35 +574,6 @@ function viewModais(){
   if(S.pers)return `<div class="modal"><div class="card box"><b>⚙ Personalizar o Copiloto</b><div class="mu" style="margin:6px 0">Diga como quer ser atendido: tom, nível de detalhe, prioridades da família. Vale para todas as suas conversas.</div><textarea id="pref" maxlength="1500" rows="6" style="width:100%">${esc(S.pref)}</textarea><div class="row" style="margin-top:10px"><button data-act="salvapers">Salvar</button><button class="sec" data-act="fecharmodal">Cancelar</button></div></div></div>`;
   return '';
 }
-async function carregarIA(tudo=true){
-  const[c,p]=await Promise.all([
-    q(sb.from('conversas_ia').select('id,titulo,criado_em').eq('familia_id',S.fam.id).eq('usuario_id',S.user.id).order('criado_em',{ascending:false}).limit(50)),
-    q(sb.from('planos').select('*').eq('familia_id',S.fam.id).order('criado_em',{ascending:false}))]);
-  S.convs=c;S.planos=p;
-  if(tudo){const pf=await q(sb.from('perfis').select('instrucoes_ia').eq('id',S.user.id).single());S.pref=pf.instrucoes_ia||''}
-  render();
-}
-async function perguntar(txt){
-  txt=(txt||'').trim();if(!txt||S.typing)return;
-  S.chat.push({r:'u',t:txt});S.typing=true;render();
-  try{
-    const chamada=sb.functions.invoke('copiloto-ia',{body:{familia_id:S.fam.id,conversa_id:S.cid,mensagem:txt}});
-    const limite=new Promise((_,reject)=>setTimeout(()=>reject(new Error('A resposta demorou mais que o esperado. Tente novamente.')),45000));
-    const{data,error}=await Promise.race([chamada,limite]);
-    if(error||(data&&data.erro)){
-      let m=data&&data.erro,det=data&&data.detalhe;
-      if(!m&&error&&error.context&&error.context.json){try{const j=await error.context.json();m=j.erro;det=j.detalhe}catch(e){}}
-      throw new Error((m||'Não consegui responder agora.')+(S.admin&&det?' (detalhe técnico: '+det+')':''));
-    }
-    S.cid=data.conversa_id||S.cid;S.chat.push({r:'a',t:data.resposta||'Não recebi uma resposta válida. Tente novamente.'});
-  }catch(err){
-    S.chat.push({r:'a',t:err?.message||'Ocorreu um erro ao falar com o Copiloto. Tente novamente.'});
-  }finally{
-    S.typing=false;
-    try{await carregarIA(false)}catch(e){render()}
-  }
-}
-S.chat=[];S.convs=[];S.planos=[];S.pref='';
 const LEGAL={nome:'',cnpj:'',email:'',versao:'1'};
 async function carregarConfig(){
   try{const{data}=await sb.from('config_app').select('*');S.cfg={};(data||[]).forEach(r=>{S.cfg[r.chave]=r.valor});const c=S.cfg;
@@ -638,7 +596,7 @@ function legalHtml(t){
    ['Quem é o responsável','O controlador dos seus dados é '+esc(op)+cj+'. Contato para assuntos de privacidade (encarregado): '+esc(ct)+'.'],
    ['Dados que coletamos','Conta: nome, e-mail e senha (protegida). Dados financeiros que você registra ou importa: lançamentos, categorias, metas, dívidas, patrimônio, membros da família e rendas informadas. Pagamento: nome informado, horário e valor. Uso técnico: registros de acesso e segurança.'],
    ['Para que usamos e por quê','Para prestar o serviço contratado (execução de contrato); para conferir pagamentos e cumprir obrigações legais; e para manter a segurança e evitar fraudes (legítimo interesse). Não vendemos os seus dados e não os usamos para publicidade de terceiros.'],
-   ['Com quem compartilhamos','Supabase: hospedagem e banco de dados. Quando o usuário utiliza o Copiloto de IA, a mensagem digitada e as instruções de personalização são enviadas à OpenAI para gerar a resposta. O aplicativo não envia automaticamente lançamentos, saldos ou extratos financeiros. Evite incluir dados pessoais ou bancários sensíveis nas mensagens. O histórico de conversas permanece armazenado no Supabase.'],
+   ['Com quem compartilhamos','Supabase: hospedagem e banco de dados. O aplicativo não oferece recursos de inteligência artificial nem envia mensagens financeiras à OpenAI. O aplicativo não envia automaticamente lançamentos, saldos ou extratos financeiros. Evite incluir dados pessoais ou bancários sensíveis nas mensagens. O histórico de conversas permanece armazenado no Supabase.'],
    ['Transferência internacional','No momento, o módulo de IA está desativado. Caso um recurso futuro envolva transferência internacional de dados, a política será atualizada com as informações aplicáveis antes de sua ativação.'],
    ['Por quanto tempo guardamos','Enquanto a sua conta existir. Ao excluir a conta, os dados da sua família são apagados; podem permanecer cópias de segurança por período limitado e registros de pagamento exigidos por lei.'],
    ['Os seus direitos (LGPD, art. 18)','Confirmar e acessar os seus dados; corrigir; levar os dados com você (botão "Baixar todos os meus dados"); eliminar (botão "Excluir minha conta e dados"); revogar o consentimento; saber com quem compartilhamos. Para qualquer pedido, use o contato acima.'],
@@ -695,7 +653,7 @@ document.addEventListener('click',async e=>{
   else if(a==='sair'){if(S.rt){sb.removeChannel(S.rt);S.rt=null}await sb.auth.signOut();S.user=null;boot()}
   else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);await q(sb.rpc('criar_familia',{p_nome:n}));await boot()}
   else if(a==='entrarfam'){await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));await boot()}
-  else if(a==='view'){S.view=b.dataset.v;if(S.view==='copiloto')await carregarIA();else if(S.view==='admin')await carregarAdmin();else if(S.view==='plan')await carregarPlan();else render()}
+  else if(a==='view'){S.view=b.dataset.v;if(S.view==='admin')await carregarAdmin();else if(S.view==='plan')await carregarPlan();else render()}
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='add'){
     const total=Number($('#n_valor').value),desc=$('#n_desc').value.trim(),tipo=$('#n_tipo').value;
@@ -763,13 +721,6 @@ document.addEventListener('click',async e=>{
   else if(a==='additem'){const n=$('#p_nome').value.trim(),v=parseFloat($('#p_valor').value);if(!n||!(v>0))return toast('Informe nome e valor',1);
     await q(sb.from('patrimonio_itens').insert({familia_id:S.fam.id,tipo:$('#p_tipo').value,nome:n,valor:v}));await carregarPlan()}
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
-  else if(a==='nova'){S.cid=null;S.chat=[];render()}
-  else if(a==='abrir'){S.cid=b.dataset.id;const m=await q(sb.from('mensagens_ia').select('papel,conteudo').eq('conversa_id',S.cid).order('criado_em'));S.chat=m.map(x=>({r:x.papel==='usuario'?'u':'a',t:x.conteudo}));render()}
-  else if(a==='delconv'){if(!confirm('Excluir esta conversa?'))return;await q(sb.from('conversas_ia').delete().eq('id',b.dataset.id));if(S.cid===b.dataset.id){S.cid=null;S.chat=[]}await carregarIA(false)}
-  else if(a==='plano'){const m=S.chat[b.dataset.i];const t=prompt('Nome do plano:',m.t.replace(/[*#\n]/g,' ').trim().slice(0,50));if(!t)return;
-    await q(sb.from('planos').insert({familia_id:S.fam.id,usuario_id:S.user.id,conversa_id:S.cid,titulo:t.slice(0,80),conteudo:m.t}));toast('Plano salvo');await carregarIA(false)}
-  else if(a==='verplano'){S.pv=S.planos.find(p=>p.id===b.dataset.id);render()}
-  else if(a==='delplano'){await q(sb.from('planos').delete().eq('id',S.pv.id));S.pv=null;await carregarIA(false)}
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
   else if(a==='fecharmodal'){S.pv=null;S.pers=false;S.sino=false;S.hist=null;render()}
   else if(a==='pers'){S.pers=true;render()}
@@ -802,8 +753,6 @@ document.addEventListener('click',async e=>{
   else if(a==='impok')await importar();
   else if(a==='impno'){S.imp=null;render()}
   else if(a==='xlsx')await exportXlsx();
-  else if(a==='ia')await perguntar($('#ia_in').value);
-  else if(a==='perg')await perguntar(b.dataset.q);
   else if(a==='irmes'){S.view='planilha';S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='csv')csv();
   else if(a==='reset'){const em=$('#email').value.trim();if(!em)return aviso('Digite seu e-mail acima.');
@@ -838,8 +787,6 @@ document.addEventListener('change',async e=>{
 document.addEventListener('focusout',()=>{if(S.pend)setTimeout(()=>{const a=document.activeElement;if(!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)))atualizarAoVivo()},250)});
 document.addEventListener('wheel',()=>{const a=document.activeElement;if(a&&a.type==='number')a.blur()},{passive:true});
 document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='ArrowUp'||e.key==='ArrowDown'))e.preventDefault();if(e.target.id==='senha'&&e.key==='Enter')document.querySelector('[data-act=entrar]').click();});
-document.addEventListener('input',e=>{if(e.target.id==='busca_ia'){const v=norm(e.target.value);document.querySelectorAll('.side .conv').forEach(el=>el.style.display=norm(el.textContent).includes(v)?'':'none')}});
-document.addEventListener('keydown',e=>{if(e.target.id==='ia_in'&&e.key==='Enter')perguntar(e.target.value)});
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});</script>
 </body>
