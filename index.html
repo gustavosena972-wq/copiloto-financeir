@@ -177,13 +177,13 @@ async function loadAno(mesNum){
   S.mes=S.meses.find(m=>m.mes===mesNum)||(S.ano.ano===hoje.getFullYear()?S.meses.find(m=>m.mes===hoje.getMonth()+1):null)||S.meses[0];
   await loadMes();
 }
-async function loadMes(){
+async function loadMes(rd=true){
   const[l,s,rs,mc]=await Promise.all([
     q(sb.from('lancamentos').select('*').eq('mes_id',S.mes.id).order('data_vencimento',{nullsFirst:false}).order('criado_em')),
     q(sb.from('sugestoes').select('*').eq('mes_id',S.mes.id).order('criado_em')),
     q(sb.from('v_resumo_anual').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano).order('mes')),
     q(sb.from('v_meta_cartao').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano))]);
-  S.lanc=l;S.sug=s;S.resumo=rs;S.meta=mc;render();
+  S.lanc=l;S.sug=s;S.resumo=rs;S.meta=mc;if(rd)render();
 }
 
 /* ---------- telas de entrada ---------- */
@@ -455,13 +455,52 @@ async function checarServidor(){
   try{const c=new AbortController();setTimeout(()=>c.abort(),7000);const r=await fetch(SB_URL+'/auth/v1/health',{headers:{apikey:SB_KEY},signal:c.signal});if(!r.ok)throw 0}
   catch(e){aviso('⚠ Não consegui falar com o servidor. Se você abriu este arquivo dentro do Claude ou numa pré-visualização, baixe-o e abra no Chrome (duplo clique) ou publique na Netlify/Vercel. Se já está no navegador, verifique a internet.')}
 }
+let rtTimer=null,rtRunning=false,rtAgain=false,rtChannel=null;
 function ligarTempoReal(){
-  if(S.rt)sb.removeChannel(S.rt);let t;const f='familia_id=eq.'+S.fam.id;S.rt=sb.channel('fam-'+S.fam.id);
-  ['lancamentos','sugestoes','metas','dividas','patrimonio_itens','meses'].forEach(tb=>S.rt.on('postgres_changes',{event:'*',schema:'public',table:tb,filter:f},()=>{
-    clearTimeout(t);t=setTimeout(()=>{const a=document.activeElement;if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&$('#app').contains(a))S.pend=true;else atualizarAoVivo()},700)}));
-  S.rt.subscribe();
+  if(S.rt)sb.removeChannel(S.rt);
+  const filtro='familia_id=eq.'+S.fam.id;
+  S.rt=sb.channel('familia-'+S.fam.id);
+  ['lancamentos','sugestoes','metas','dividas','patrimonio_itens','meses'].forEach(tb=>{
+    S.rt.on('postgres_changes',{event:'*',schema:'public',table:tb,filter:filtro},()=>{
+      clearTimeout(rtTimer);
+      rtTimer=setTimeout(()=>solicitarAtualizacaoAoVivo(),900);
+    });
+  });
+  S.rt.subscribe(status=>{
+    S.rtStatus=status;
+    if(status==='SUBSCRIBED'){if(S.rtReconectar){S.rtReconectar=false;solicitarAtualizacaoAoVivo()}}
+    if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED')S.rtReconectar=true;
+  });
 }
-async function atualizarAoVivo(){S.pend=false;if(S.mes)await loadMes();if(S.view==='plan')await carregarPlan()}
+function solicitarAtualizacaoAoVivo(){
+  const a=document.activeElement;
+  if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)&&$('#app').contains(a)){S.pend=true;return}
+  atualizarAoVivo().catch(e=>{console.error('Atualização em tempo real:',e);S.pend=true});
+}
+async function atualizarAoVivo(){
+  if(rtRunning){rtAgain=true;return}
+  rtRunning=true;
+  try{
+    do{
+      rtAgain=false;S.pend=false;
+      if(S.mes)await loadMes(false);
+      if(S.view==='plan')await carregarPlan(false);
+      render();
+    }while(rtAgain);
+  }finally{rtRunning=false}
+}
+document.addEventListener('focusout',e=>{
+  if(!/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
+  setTimeout(()=>{const a=document.activeElement;
+    if(S.pend&&(!a||!/INPUT|SELECT|TEXTAREA/.test(a.tagName)||!$('#app').contains(a)))
+      atualizarAoVivo().catch(err=>console.error(err));
+  },80);
+});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&S.user&&S.fam)solicitarAtualizacaoAoVivo();
+});
+window.addEventListener('online',()=>{if(S.user&&S.fam){S.rtReconectar=true;ligarTempoReal();solicitarAtualizacaoAoVivo()}});
+
 async function carregarPlan(rd=true){
   const[m,d,i,p]=await Promise.all([q(sb.from('metas').select('*').eq('familia_id',S.fam.id).order('atualizado_em')),
     q(sb.from('dividas').select('*').eq('familia_id',S.fam.id).eq('ativa',true)),
