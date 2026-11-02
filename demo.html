@@ -243,6 +243,8 @@ async function q(p){const r=await p;if(r.error){toast(r.error.message,1);throw r
 const canEdit=()=>S.me&&S.me.papel!=='leitor';
 const mesAberto=()=>S.mes&&S.mes.status==='aberto';
 
+const DEMO_MODE=true;
+
 /* ---------- sessão ---------- */
 function mostrarErroInicial(e){
   console.error('Falha ao iniciar o Copiloto Financeiro:',e);
@@ -252,6 +254,7 @@ function mostrarErroInicial(e){
   const btn=document.getElementById('tentar-novamente');
   if(btn)btn.onclick=()=>{app.innerHTML='<div class="auth mu">Carregando…</div>';boot().catch(mostrarErroInicial)};
 }
+if(!DEMO_MODE){
 (async()=>{
   try{
     const{data}=await sb.auth.getSession();
@@ -263,8 +266,7 @@ function mostrarErroInicial(e){
     });
   }catch(e){mostrarErroInicial(e)}
 })();
-
-const DEMO_MODE=true;
+}
 function seedDemo(){
  const id=(x)=>'demo-'+x;
  S.user={id:id('user')};S.me={id:id('m1'),nome:'Mariana Silva',papel:'dono',renda_mensal:5000};
