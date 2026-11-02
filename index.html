@@ -205,7 +205,7 @@ function render(){
   <div class="tabs">${tabs}</div>${meses}${body}${viewImport()}${viewModais()}`;
   afterRender();aposRender();
 }
-const catOpts=(tipo,sel)=>{
+function atualizarParcelamento(){const s=$('#n_parcelas');if(!s)return;const tipo=$('#n_tipo')?.value;const cat=S.cats.find(c=>c.id===$('#n_cat')?.value);const nome=(cat?.nome||'').toLowerCase().replace(/á/g,'a');const agua=nome==='agua';if(agua)s.value='1';s.disabled=tipo==='receita'||agua;s.title=agua?'Conta de água não pode ser parcelada':'Parcelas desta despesa (1x a 30x)';}
   const l=S.cats.filter(c=>c.tipo===tipo);const pais=l.filter(c=>!c.parent_id);
   return '<option value="">—</option>'+pais.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.nome)}</option>`+
     l.filter(c=>c.parent_id===p.id).map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>— ${esc(c.nome)}</option>`).join('')).join('');
@@ -230,7 +230,7 @@ function viewPlanilha(ed){
    <td><select data-f="membro_id" ${d}>${memOpts(l.membro_id)}</select></td>
    <td><button class="red" data-act="del" data-id="${l.id}" ${d}>✕</button></td></tr>`).join('');
   const novo=ed?`<tr class="novo" id="novo"><td><input type="date" id="n_data"></td><td><div class="row" style="gap:6px;align-items:center;min-width:190px"><input id="n_desc" placeholder="Descrição" style="min-width:110px;flex:1"><select id="n_parcelas" title="Número de parcelas" style="width:64px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div></td>
-   <td><select id="n_tipo" onchange="document.getElementById('n_parcelas').disabled=this.value==='receita'">${tpOpts('despesa')}</select></td><td><select id="n_cat">${catOpts('despesa')}</select></td>
+   <td><select id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td><select id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
    <td><input type="number" step="0.01" min="0" id="n_valor" placeholder="0,00"></td><td><select id="n_status">${stOpts('pendente')}</select></td>
    <td><select id="n_mem">${memOpts(S.me.id)}</select></td><td><button data-act="add">+</button></td></tr>
    `:'';
@@ -647,7 +647,7 @@ document.addEventListener('click',async e=>{
   try{
   if(a==='entrar'||a==='cadastrar')await autenticar(a);
   else if(a==='sair'){if(S.rt){sb.removeChannel(S.rt);S.rt=null}await sb.auth.signOut();S.user=null;boot()}
-  else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);await q(sb.rpc('criar_familia',{p_nome:n}));await boot();S.view='família';render()}
+  else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);await q(sb.rpc('criar_familia',{p_nome:n}));await boot()}
   else if(a==='entrarfam'){await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));await boot()}
   else if(a==='view'){S.view=b.dataset.v;if(S.view==='copiloto')await carregarIA();else if(S.view==='admin')await carregarAdmin();else if(S.view==='plan')await carregarPlan();else render()}
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
