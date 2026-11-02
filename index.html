@@ -193,7 +193,10 @@ function renderAuth(){
   <p>Lance as contas do mês e o Copiloto soma tudo, mostra para onde o dinheiro vai e aponta onde dá para economizar.</p>
   <div class="ticks"><span>✔ Cálculo automático do mês e do ano</span><span>✔ Importa a sua planilha do Excel</span><span>✔ Checape: aponta onde dá para economizar</span><span>✔ Acesso por ${brl(PIX.valor)} via Pix</span></div></div></div>
   <div class="login"><h3>Bem-vindo</h3><div class="mu" style="margin-bottom:6px">Entre ou crie sua conta para começar.</div>
-  <input id="nome" placeholder="Seu nome (só para criar conta)"><input id="email" type="email" placeholder="E-mail"><input id="senha" type="password" placeholder="Senha (mín. 8)">
+  <input id="nome" placeholder="Seu nome (para criar conta)">
+  <input id="usuario" autocomplete="username" placeholder="Usuário (obrigatório)">
+  <input id="email" type="email" autocomplete="email" placeholder="Gmail para recuperação (opcional)">
+  <input id="senha" type="password" autocomplete="current-password" placeholder="Senha (mín. 8 caracteres)">
   <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a> (só para criar conta).</span></label>
   <div id="aviso" class="aviso"></div>
   <button data-act="entrar">Entrar</button><button class="sec" data-act="cadastrar">Criar conta</button><button class="sec" data-act="reset">Esqueci minha senha</button></div></div>`;
@@ -416,30 +419,36 @@ const ARTE=`<svg class="arte" viewBox="0 0 340 320" width="290"><defs><radialGra
 const MSG=[['Invalid login','E-mail ou senha incorretos.'],['Email not confirmed','Confirme seu e-mail antes de entrar: abra o e-mail que enviamos (veja também o spam).'],['already registered','Esse e-mail já tem conta. Use "Entrar".'],['rate limit','Muitos e-mails em pouco tempo. Aguarde alguns minutos e tente de novo.'],['Failed to fetch','Sem conexão com o servidor. Se você abriu o arquivo dentro do Claude ou de uma pré-visualização, baixe-o e abra no Chrome (ou publique na Netlify/Vercel).'],['Password should','A senha precisa ter pelo menos 6 caracteres.'],['invalid format','Digite um e-mail válido.']];
 function aviso(t,ok){const a=$('#aviso');if(a){a.textContent=t;a.className='aviso '+(ok?'ok':'err')}}
 async function autenticar(a){
-  const email=$('#email').value.trim(),senha=$('#senha').value;
-  if(!email||!senha)return aviso('Preencha e-mail e senha.');
+  const username=$('#usuario').value.trim().toLowerCase(),senha=$('#senha').value;
+  const recoveryEmail=$('#email').value.trim();
+  if(!username||!senha)return aviso('Preencha usuário e senha.');
+  if(!/^[a-z0-9._-]{3,24}$/.test(username))return aviso('O usuário deve ter 3 a 24 caracteres: letras, números, ponto, hífen ou underline.');
+  if(senha.length<8)return aviso('A senha precisa ter pelo menos 8 caracteres.');
+  if(recoveryEmail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recoveryEmail))return aviso('Informe um Gmail válido ou deixe o campo vazio.');
   if(a==='cadastrar'&&!$('#aceite').checked)return aviso('Para criar a conta, marque que você leu e aceita os Termos de Uso e a Política de Privacidade.');
   const bt=document.querySelectorAll('.login button');bt.forEach(x=>x.disabled=true);aviso(a==='entrar'?'Entrando…':'Criando sua conta…',1);
   try{
-    if(a==='entrar'){const{error}=await sb.auth.signInWithPassword({email,password:senha});if(error)throw error;aviso('Pronto! Carregando…',1)}
-    else{
-      const nome=$('#nome').value.trim();
-      if(!nome){aviso('Informe seu nome para criar a conta.');bt.forEach(x=>x.disabled=false);return}
-      const{data,error}=await sb.auth.signUp({email,password:senha,options:{data:{nome,aceitou_termos:LEGAL.versao}}});
-      if(error)throw error;
-      if(Array.isArray(data.user?.identities)&&data.user.identities.length===0){
-        aviso('Este e-mail já possui cadastro. Use "Entrar".',0);
-      }else{
-        // Com a confirmação de e-mail desativada, o Supabase deve entregar uma sessão.
-        // Consulta a sessão novamente para cobrir atrasos de persistência no navegador.
-        const sessao=data.session||(await sb.auth.getSession()).data.session;
-        if(!sessao)throw new Error('Cadastro criado, mas não recebemos uma sessão de acesso. Confira se a confirmação de e-mail está realmente desativada no Supabase e tente entrar.');
-        aviso('Conta criada! Preparando seu acesso ao Pix…',1);
-        await q(sb.rpc('criar_familia',{p_nome:nome}));
-        await boot();
-      }
+    const payload={action:a==='entrar'?'login':'signup',username,password:senha};
+    if(a==='cadastrar'){
+      payload.name=$('#nome').value.trim();
+      payload.recoveryEmail=recoveryEmail;
+      payload.acceptedTerms=true;
     }
-  }catch(e){const m=String(e.message||e);const h=MSG.find(x=>m.includes(x[0]));aviso(h?h[1]:'Não deu certo: '+m)}
+    const response=await fetch(SB_URL+'/functions/v1/autenticacao-usuario',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY},
+      body:JSON.stringify(payload)
+    });
+    const result=await response.json();
+    if(!response.ok)throw new Error(result.error||'Não foi possível autenticar.');
+    const{error}=await sb.auth.setSession(result.session);
+    if(error)throw error;
+    if(a==='cadastrar'){
+      aviso('Conta criada! Preparando seu acesso…',1);
+      await q(sb.rpc('criar_familia',{p_nome:$('#nome').value.trim()}));
+      await boot();
+    }else aviso('Pronto! Carregando…',1);
+  }catch(e){aviso('Não deu certo: '+String(e.message||e))}
   bt.forEach(x=>x.disabled=false);
 }
 async function checarServidor(){
@@ -748,7 +757,7 @@ document.addEventListener('click',async e=>{
   else if(a==='xlsx')await exportXlsx();
   else if(a==='irmes'){S.view='planilha';S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='csv')csv();
-  else if(a==='reset'){const em=$('#email').value.trim();if(!em)return aviso('Digite seu e-mail acima.');
+  else if(a==='reset'){const em=$('#email').value.trim();if(!em)return aviso('A recuperação exige o Gmail opcional cadastrado na conta.');
     const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.href.split('#')[0]});aviso(error?'Não consegui enviar: '+error.message:'Enviamos um link para redefinir a senha no seu e-mail.',!error)}
   else if(a==='convite'){const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
   }catch(err){}finally{S.busy=false}
