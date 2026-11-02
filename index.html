@@ -55,10 +55,6 @@ tfoot td{font-weight:700;border-top:2px solid var(--bd)}
 @keyframes dot{0%,80%,100%{opacity:.25}40%{opacity:1}}
 .anim .card,.anim .sug,.anim .scroll{animation:up .5s both}.anim .cards .card:nth-child(2){animation-delay:.06s}.anim .cards .card:nth-child(3){animation-delay:.12s}.anim .cards .card:nth-child(4){animation-delay:.18s}.anim .cards .card:nth-child(n+5){animation-delay:.24s}
 .ring{display:flex;align-items:center;gap:12px}.ring svg{transform:rotate(-90deg);flex:none}
-.chat{display:flex;flex-direction:column;gap:10px}#msgs{display:flex;flex-direction:column;gap:10px;min-height:260px;max-height:55vh;overflow:auto;padding:4px}
-.msg{max-width:86%;padding:10px 14px;border-radius:16px;line-height:1.5}.msg.u{align-self:flex-end;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border-bottom-right-radius:4px}
-.msg.a{align-self:flex-start;background:#1d2236;border:1px solid var(--bd);border-bottom-left-radius:4px}
-.typing i{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--mu);animation:dot 1.2s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
 .chips{display:flex;gap:6px;flex-wrap:wrap}.chip{font-weight:500;padding:6px 10px;font-size:12.5px}
 .modal{position:fixed;inset:0;background:#000a;display:grid;place-items:center;z-index:8;padding:14px}.box{max-width:560px;width:100%}
 textarea{background:#0e1220;border:1px solid var(--bd);border-radius:10px;padding:8px 10px;font:inherit;color:inherit}
@@ -571,7 +567,6 @@ function viewModais(){
   if(S.sino)return `<div class="modal"><div class="card box"><b>🔔 Avisos</b><div style="margin:10px 0;max-height:50vh;overflow:auto">${S.notifs.map(n=>`<div class="item"><b>${esc(n.titulo)}</b><div class="mu">${esc(n.mensagem||'')}</div></div>`).join('')||'<div class="mu">Nenhum aviso.</div>'}</div><div class="row"><button data-act="lerTodos">Marcar todos como lidos</button><button class="sec" data-act="fecharmodal">Fechar</button></div></div></div>`;
   if(S.hist)return `<div class="modal"><div class="card box"><b>↶ Desfazer alterações</b><div class="mu" style="margin:6px 0">Últimas mudanças nos lançamentos. Desfazer volta o item ao que era antes.</div><div style="margin:8px 0;max-height:52vh;overflow:auto">${S.hist.map(h=>{const d=h.dados_depois||h.dados_antes||{};const rot={INSERT:'Criado',UPDATE:'Alterado',DELETE:'Apagado'}[h.acao];return `<div class="item row" style="justify-content:space-between;margin:0"><span><b>${rot}</b> · ${esc(d.descricao||'')} ${brl(d.valor)}<div class="mu">${new Date(h.criado_em).toLocaleString('pt-BR')}</div></span><button class="sec chip" data-act="desfazer" data-id="${h.id}" ${canEdit()?'':'disabled'}>Desfazer</button></div>`}).join('')||'<div class="mu">Nada para desfazer ainda.</div>'}</div><div class="row"><button class="sec" data-act="fecharmodal">Fechar</button></div></div></div>`;
   if(S.pv)return `<div class="modal"><div class="card box"><b>📌 ${esc(S.pv.titulo)}</b><div style="margin:10px 0;max-height:50vh;overflow:auto">${fmt(S.pv.conteudo)}</div><div class="row"><button class="sec" data-act="copiar">Copiar</button><button class="red" data-act="delplano">Excluir</button><button data-act="fecharmodal">Fechar</button></div></div></div>`;
-  if(S.pers)return `<div class="modal"><div class="card box"><b>⚙ Personalizar o Copiloto</b><div class="mu" style="margin:6px 0">Diga como quer ser atendido: tom, nível de detalhe, prioridades da família. Vale para todas as suas conversas.</div><textarea id="pref" maxlength="1500" rows="6" style="width:100%">${esc(S.pref)}</textarea><div class="row" style="margin-top:10px"><button data-act="salvapers">Salvar</button><button class="sec" data-act="fecharmodal">Cancelar</button></div></div></div>`;
   return '';
 }
 const LEGAL={nome:'',cnpj:'',email:'',versao:'1'};
@@ -584,7 +579,7 @@ function legalHtml(t){
   const op=LEGAL.nome||'o responsável pelo aplicativo',ct=LEGAL.email||'o contato disponível no próprio aplicativo',cj=LEGAL.cnpj?', CNPJ '+esc(LEGAL.cnpj):'';
   const T=t==='termos'?[
    ['Quem somos','O Copiloto Financeiro é operado por '+esc(op)+cj+'. Contato: '+esc(ct)+'.'],
-   ['O que o aplicativo faz','Organiza receitas, despesas, metas, dívidas e patrimônio da sua família, calcula totais e aponta sugestões de economia. Não é consultoria, recomendação de investimento nem serviço financeiro regulado. O módulo de IA envia a mensagem digitada e as instruções de personalização do usuário ao fornecedor OpenAI para gerar respostas. Não envia automaticamente lançamentos, saldos ou extratos financeiros. Evite inserir dados pessoais ou bancários sensíveis nas mensagens.'],
+   ['O que o aplicativo faz','Organiza receitas, despesas, metas, dívidas e patrimônio da sua família, calcula totais e aponta sugestões de economia. Não é consultoria, recomendação de investimento nem serviço financeiro regulado. O aplicativo não oferece recursos de inteligência artificial e não envia mensagens à OpenAI. Evite inserir dados pessoais ou bancários sensíveis em campos de texto.'],
    ['Sua conta','Informe dados verdadeiros e proteja a sua senha. É preciso ter 18 anos ou mais. O dono da família responde pelas pessoas que convida.'],
    ['Acesso e pagamento','O acesso é pago: '+brl(PIX.valor)+' por '+PIX.dias+' dias, via Pix. A liberação acontece depois da conferência do pagamento, por isso pode levar algum tempo. Não há renovação automática: ao vencer, o acesso é suspenso e os seus dados continuam guardados até você renovar ou excluir a conta.'],
    ['Arrependimento e reembolso','Você pode desistir em até 7 dias depois de contratar e pedir o reembolso integral (art. 49 do Código de Defesa do Consumidor), pelo contato acima.'],
@@ -723,8 +718,6 @@ document.addEventListener('click',async e=>{
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
   else if(a==='fecharmodal'){S.pv=null;S.pers=false;S.sino=false;S.hist=null;render()}
-  else if(a==='pers'){S.pers=true;render()}
-  else if(a==='salvapers'){const v=$('#pref').value.slice(0,1500);await q(sb.from('perfis').update({instrucoes_ia:v||null}).eq('id',S.user.id));S.pref=v;S.pers=false;toast('Personalização salva');render()}
   else if(a==='paguei'){const n=$('#pg_nome').value.trim();if(n.length<2)return toast('Informe o seu nome como aparece no Pix',1);
     const{error}=await sb.from('pagamentos').insert({familia_id:S.fam.id,usuario_id:S.user.id,valor:PIX.valor,pagador_nome:n,horario_informado:$('#pg_hora').value.trim()||null});
     if(error)return toast(/uq_pagamento|duplicate/.test(error.message)?'Você já tem um aviso de pagamento em análise.':error.message,1);
