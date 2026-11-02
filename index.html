@@ -205,7 +205,7 @@ function render(){
   <div class="tabs">${tabs}</div>${meses}${body}${viewImport()}${viewModais()}`;
   afterRender();aposRender();
 }
-function atualizarParcelamento(){const s=$('#n_parcelas');if(!s)return;const tipo=$('#n_tipo')?.value;const cat=S.cats.find(c=>c.id===$('#n_cat')?.value);const nome=(cat?.nome||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();const agua=nome==='agua';if(agua)s.value='1';s.disabled=tipo==='receita'||agua;s.title=agua?'Conta de água não pode ser parcelada':'Parcelas desta despesa (1x a 30x)';}\nconst catOpts=(tipo,sel)=>{
+function atualizarParcelamento(){const s=$('#n_parcelas');if(!s)return;const tipo=$('#n_tipo')?.value;const cat=S.cats.find(c=>c.id===$('#n_cat')?.value);const nome=(cat?.nome||'').toLowerCase().replace(/á/g,'a');const agua=nome==='agua';if(agua)s.value='1';s.disabled=tipo==='receita'||agua;s.title=agua?'Conta de água não pode ser parcelada':'Parcelas desta despesa (1x a 30x)';}
   const l=S.cats.filter(c=>c.tipo===tipo);const pais=l.filter(c=>!c.parent_id);
   return '<option value="">—</option>'+pais.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.nome)}</option>`+
     l.filter(c=>c.parent_id===p.id).map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>— ${esc(c.nome)}</option>`).join('')).join('');
