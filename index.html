@@ -591,8 +591,8 @@ function legalHtml(t){
    ['Quem é o responsável','O controlador dos seus dados é '+esc(op)+cj+'. Contato para assuntos de privacidade (encarregado): '+esc(ct)+'.'],
    ['Dados que coletamos','Conta: nome, e-mail e senha (protegida). Dados financeiros que você registra ou importa: lançamentos, categorias, metas, dívidas, patrimônio, membros da família e rendas informadas. Pagamento: nome informado, horário e valor. Uso técnico: registros de acesso e segurança.'],
    ['Para que usamos e por quê','Para prestar o serviço contratado (execução de contrato); para conferir pagamentos e cumprir obrigações legais; e para manter a segurança e evitar fraudes (legítimo interesse). Não vendemos os seus dados e não os usamos para publicidade de terceiros.'],
-   ['Com quem compartilhamos','Supabase: hospedagem e banco de dados. O aplicativo não oferece recursos de inteligência artificial nem envia mensagens financeiras à OpenAI. O aplicativo não envia automaticamente lançamentos, saldos ou extratos financeiros. Evite incluir dados pessoais ou bancários sensíveis nas mensagens. O histórico de conversas permanece armazenado no Supabase.'],
-   ['Transferência internacional','No momento, o módulo de IA está desativado. Caso um recurso futuro envolva transferência internacional de dados, a política será atualizada com as informações aplicáveis antes de sua ativação.'],
+   ['Com quem compartilhamos','Supabase: hospedagem e banco de dados. O aplicativo não oferece recursos de inteligência artificial e não envia mensagens a fornecedores de IA.'],
+   ['Transferência internacional','O aplicativo utiliza fornecedores de hospedagem e infraestrutura descritos nesta política.'],
    ['Por quanto tempo guardamos','Enquanto a sua conta existir. Ao excluir a conta, os dados da sua família são apagados; podem permanecer cópias de segurança por período limitado e registros de pagamento exigidos por lei.'],
    ['Os seus direitos (LGPD, art. 18)','Confirmar e acessar os seus dados; corrigir; levar os dados com você (botão "Baixar todos os meus dados"); eliminar (botão "Excluir minha conta e dados"); revogar o consentimento; saber com quem compartilhamos. Para qualquer pedido, use o contato acima.'],
    ['Segurança','Criptografia em trânsito, acesso separado por família, registro de alterações e senha protegida. Nenhum sistema é 100% seguro; em caso de incidente relevante avisaremos você e a ANPD, como a lei exige.'],
@@ -717,7 +717,7 @@ document.addEventListener('click',async e=>{
     await q(sb.from('patrimonio_itens').insert({familia_id:S.fam.id,tipo:$('#p_tipo').value,nome:n,valor:v}));await carregarPlan()}
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
-  else if(a==='fecharmodal'){S.pv=null;S.pers=false;S.sino=false;S.hist=null;render()}
+  else if(a==='fecharmodal'){S.pv=null;S.sino=false;S.hist=null;render()}
   else if(a==='paguei'){const n=$('#pg_nome').value.trim();if(n.length<2)return toast('Informe o seu nome como aparece no Pix',1);
     const{error}=await sb.from('pagamentos').insert({familia_id:S.fam.id,usuario_id:S.user.id,valor:PIX.valor,pagador_nome:n,horario_informado:$('#pg_hora').value.trim()||null});
     if(error)return toast(/uq_pagamento|duplicate/.test(error.message)?'Você já tem um aviso de pagamento em análise.':error.message,1);
