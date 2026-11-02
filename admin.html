@@ -16,7 +16,7 @@ const SUPABASE_URL='https://jlufubazlnrelrbsvsal.supabase.co';
 const SUPABASE_KEY='sb_publishable__CjlaAIa2w5F_7HhOhJKkA_HeDFWxNS';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const app=document.getElementById('app');
-let resumo=null,pagamentos=[];
+let resumo=null,pagamentos=[],familias=[];
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function verifyAdmin(){
@@ -59,6 +59,7 @@ function dashboard(){
  <article class="card"><small>Receita total</small><strong>${money(resumo.receita_total)}</strong></article>
  <article class="card"><small>Últimos 30 dias</small><strong>${money(resumo.receita_30d)}</strong></article>
  <article class="card"><small>Vencem em 7 dias</small><strong>${resumo.vencem_7d??0}</strong></article></section>
+ <section class="section"><h2>Famílias e assinaturas</h2><p class="muted">Consulte as contas cadastradas e libere acesso manualmente quando necessário. Toda liberação exige confirmação administrativa.</p><div class="tablewrap"><table><thead><tr><th>Família</th><th>Responsável</th><th>Criada em</th><th>Acesso até</th><th>Liberar</th></tr></thead><tbody>${familias.map(f=>`<tr><td>${safe(f.familia)}</td><td>${safe(f.email||'—')}</td><td>${safe(new Date(f.criado_em).toLocaleDateString('pt-BR'))}</td><td>${f.acesso_ate?safe(new Date(f.acesso_ate).toLocaleDateString('pt-BR')):'Sem acesso'}</td><td><div class="actions"><input type="number" min="1" max="3650" value="30" id="famdays_${safe(f.id)}" aria-label="Dias para liberar"><button data-action="release" data-id="${safe(f.id)}">Liberar dias</button></div></td></tr>`).join('')||'<tr><td colspan="5">Nenhuma família cadastrada.</td></tr>'}</tbody></table></div></section>
  <section class="section"><h2>Conferência de pagamentos Pix</h2><p class="muted">Confira o recebimento no banco antes de aprovar. A aprovação libera o acesso conforme a regra já existente.</p><div class="tablewrap"><table><thead><tr><th>Data</th><th>Família / e-mail</th><th>Pagador</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${rows}</tbody></table></div></section>
  <p class="muted" style="font-size:13px">Esta área usa a mesma autenticação do Supabase, mas não carrega a interface financeira dos clientes.</p></div>`;
  document.getElementById('refresh').onclick=()=>dashboardReload();
@@ -70,7 +71,11 @@ document.addEventListener('click',async e=>{
  const id=b.dataset.id;
  try{
   b.disabled=true;
-  if(b.dataset.action==='approve'){
+  if(b.dataset.action==='release'){
+   const days=Math.max(1,Math.min(3650,parseInt(document.getElementById('famdays_'+id).value,10)||30));
+   if(!confirm('Liberar mais '+days+' dias para esta família?')){b.disabled=false;return}
+   const {error}=await sb.rpc('admin_liberar_familia',{p_familia:id,p_dias:days});if(error)throw error;
+  }else if(b.dataset.action==='approve'){
    const days=Math.max(1,Math.min(3650,parseInt(document.getElementById('days_'+id).value,10)||30));
    const {error}=await sb.rpc('aprovar_pagamento',{p_id:id,p_dias:days});if(error)throw error;
   }else if(b.dataset.action==='reject'){
