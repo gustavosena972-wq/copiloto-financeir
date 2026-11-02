@@ -132,8 +132,25 @@ const canEdit=()=>S.me&&S.me.papel!=='leitor';
 const mesAberto=()=>S.mes&&S.mes.status==='aberto';
 
 /* ---------- sessão ---------- */
-(async()=>{const{data}=await sb.auth.getSession();S.user=data.session?.user||null;boot();
-sb.auth.onAuthStateChange((ev,s)=>{const u=s?.user||null;if((u?.id)!==(S.user?.id)){S.user=u;boot()}})})();
+function mostrarErroInicial(e){
+  console.error('Falha ao iniciar o Copiloto Financeiro:',e);
+  const app=document.getElementById('app');
+  if(!app)return;
+  app.innerHTML='<div class="auth"><h1>Não foi possível abrir o aplicativo</h1><p class="mu">Ocorreu uma falha ao carregar sua conta. Seus lançamentos não foram alterados. Confira sua conexão e tente novamente.</p><button id="tentar-novamente">Tentar novamente</button><p class="mu" style="font-size:12px">Se continuar, envie uma captura do Console do navegador para o suporte.</p></div>';
+  const btn=document.getElementById('tentar-novamente');
+  if(btn)btn.onclick=()=>{app.innerHTML='<div class="auth mu">Carregando…</div>';boot().catch(mostrarErroInicial)};
+}
+(async()=>{
+  try{
+    const{data}=await sb.auth.getSession();
+    S.user=data.session?.user||null;
+    await boot();
+    sb.auth.onAuthStateChange((ev,s)=>{
+      const u=s?.user||null;
+      if((u?.id)!==(S.user?.id)){S.user=u;boot().catch(mostrarErroInicial)}
+    });
+  }catch(e){mostrarErroInicial(e)}
+})();
 
 async function boot(){
   await carregarConfig();
@@ -154,10 +171,12 @@ async function boot(){
     q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'))]);
   S.cats=c;S.contas=ct;S.membros=m;S.anos=a;
   S.ano=a.find(x=>x.ano===new Date().getFullYear())||a[a.length-1];
+  if(!S.ano){$('#app').innerHTML='<div class="auth"><h1>Preparando seu financeiro</h1><p class="mu">Ainda não existe um ano financeiro cadastrado para esta família. Seus dados estão preservados. Entre em contato com o suporte para concluir a configuração.</p></div>';return}
   await loadAno();
 }
 async function loadAno(mesNum){
   S.meses=await q(sb.from('meses').select('*').eq('ano_id',S.ano.id).order('mes'));
+  if(!S.meses.length){$('#app').innerHTML='<div class="auth"><h1>Preparando seu financeiro</h1><p class="mu">Ainda não existem meses cadastrados neste ano. Seus dados estão preservados. Entre em contato com o suporte para concluir a configuração.</p></div>';return}
   const hoje=new Date();
   S.mes=S.meses.find(m=>m.mes===mesNum)||(S.ano.ano===hoje.getFullYear()?S.meses.find(m=>m.mes===hoje.getMonth()+1):null)||S.meses[0];
   await loadMes();
