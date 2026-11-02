@@ -546,6 +546,8 @@ async function fecharAno(){
 const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button><button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>`;
 /*PIX*/
 const PIX={chave:'+5531999758385',nome:'COPILOTO FINANCEIRO',cidade:'CONTAGEM',valor:20,dias:30};
+const PLANOS={pro:{nome:'Pro',valor:20,limite:2},max:{nome:'Max',valor:30,limite:6}};
+const planoAtual=()=>PLANOS[S.planoEscolhido||S.fam?.plano||'pro']||PLANOS.pro;
 function crc16(t){let c=0xFFFF;for(let i=0;i<t.length;i++){c^=t.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,'0')}
 const tlv=(id,v)=>id+String(v.length).padStart(2,'0')+v;
 function pixPayload(p){
@@ -558,14 +560,14 @@ function qrSvg(t){const q=qrcode(0,'M');q.addData(t);q.make();return q.createSvg
 async function renderPaywall(){
   const dono=S.me.papel==='dono',venc=S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date();
   let ult=null;if(dono){const r=await q(sb.from('pagamentos').select('*').eq('familia_id',S.fam.id).order('informado_em',{ascending:false}).limit(1));ult=r[0]||null}
-  const code=pixPayload(PIX);S.pixcode=code;const pend=ult&&ult.status==='pendente',rec=ult&&ult.status==='recusado';
+  const plano=planoAtual();PIX.valor=plano.valor;const code=pixPayload(PIX);S.pixcode=code;const pend=ult&&ult.status==='pendente',rec=ult&&ult.status==='recusado';
   const pagar=`<div class="qrbox">${qrSvg(code)}</div>
   <ol class="passos"><li>No app do seu banco, escolha <b>Pix → Ler QR Code</b> (ou <b>Pix copia e cola</b>).</li><li>Confira o valor de <b>${brl(PIX.valor)}</b> e o nome do recebedor e pague.</li><li>Volte aqui, escreva seu nome como aparece no comprovante e toque em <b>Já paguei</b>.</li></ol>
   <input readonly value="${code}" onclick="this.select()" style="font-size:11px"><button class="sec" data-act="copiarpix">Copiar código Pix (copia e cola)</button>
   <input id="pg_nome" placeholder="Seu nome como aparece no Pix"><input id="pg_hora" placeholder="Horário do pagamento (opcional)"><button data-act="paguei">Já paguei</button>`;
   const miolo=!dono?`<h3>Aguardando o responsável</h3><div class="mu">O acesso desta família ainda não foi ativado. Peça para o dono da família concluir o pagamento.</div>`
    :`<h3>${venc?'Seu acesso venceu':'Ative seu acesso'}</h3><div class="mu">${venc?'Seus dados estão guardados. Renove para continuar de onde parou.':'Falta só um passo para começar a usar o Copiloto Financeiro.'}</div>
-   <div class="preco">${brl(PIX.valor)} <small>· ${PIX.dias} dias de acesso</small></div>
+   <div class="card" style="margin:10px 0"><b>Escolha seu plano</b><div class="row" style="margin-top:10px"><button class="${S.planoEscolhido==='pro'?'':'sec'}" data-act="plano" data-plano="pro">Pro · R$ 20</button><button class="${S.planoEscolhido==='max'?'':'sec'}" data-act="plano" data-plano="max">Max · R$ 30</button></div><div class="mu">Pro: até 2 pessoas. Max: até 6 pessoas. O responsável está incluído; familiares não pagam individualmente.</div></div><div class="preco">${brl(PIX.valor)} <small>· ${PIX.dias} dias de acesso</small></div>
    ${rec?'<div class="aviso err">Não conseguimos conferir o seu último aviso de pagamento'+(ult.nota?': '+esc(ult.nota):'')+'. Confira o comprovante e envie de novo.</div>':''}
    ${pend?'<div class="aviso ok">✅ Recebemos o seu aviso de pagamento. Assim que o Pix for conferido, o acesso é liberado e esta tela atualiza sozinha. Pode fechar e voltar depois.</div>':pagar}`;
   $('#app').innerHTML=`<div class="hero pwall"><div class="art"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
@@ -733,7 +735,7 @@ document.addEventListener('click',async e=>{
   else if(a==='checape'){const n=await q(sb.rpc('gerar_checape',{p_mes:S.mes.id}));toast(n+' sugestão(ões) gerada(s)');await loadMes()}
   else if(a==='aceitar'){await q(sb.rpc('aceitar_sugestao',{p_sug:b.dataset.id}));await loadMes()}
   else if(a==='ignorar'){await q(sb.from('sugestoes').update({status:'ignorada'}).eq('id',b.dataset.id));await loadMes()}
-  else if(a==='addmem'){const n=$('#mnome').value.trim();if(!n)return toast('Informe o nome',1);
+  else if(a==='addmem'){const limite=(PLANOS[S.fam.plano||'pro']||PLANOS.pro).limite;if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas contando o responsável.',1);const n=$('#mnome').value.trim();if(!n)return toast('Informe o nome',1);
     await q(sb.from('membros').insert({familia_id:S.fam.id,nome:n,papel:'editor',renda_mensal:parseFloat($('#mrenda').value)||null}));
     S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
   else if(a==='delmem'){await q(sb.from('membros').delete().eq('id',b.dataset.id));S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
@@ -751,8 +753,9 @@ document.addEventListener('click',async e=>{
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
   else if(a==='fecharmodal'){S.pv=null;S.sino=false;S.hist=null;render()}
+  else if(a==='plano'){const p=b.dataset.plano;if(!PLANOS[p])return;S.planoEscolhido=p;PIX.valor=PLANOS[p].valor;await q(sb.from('familias').update({plano:p}).eq('id',S.fam.id));S.fam.plano=p;renderPaywall();return}
   else if(a==='paguei'){const n=$('#pg_nome').value.trim();if(n.length<2)return toast('Informe o seu nome como aparece no Pix',1);
-    const{error}=await sb.from('pagamentos').insert({familia_id:S.fam.id,usuario_id:S.user.id,valor:PIX.valor,pagador_nome:n,horario_informado:$('#pg_hora').value.trim()||null});
+    const plano=planoAtual();const{error}=await sb.from('pagamentos').insert({familia_id:S.fam.id,usuario_id:S.user.id,valor:plano.valor,plano:S.planoEscolhido,pagador_nome:n,horario_informado:$('#pg_hora').value.trim()||null});
     if(error)return toast(/uq_pagamento|duplicate/.test(error.message)?'Você já tem um aviso de pagamento em análise.':error.message,1);
     toast('Aviso enviado! Assim que o Pix for conferido, o acesso é liberado.');await boot()}
   else if(a==='copiarpix'){try{await navigator.clipboard.writeText(S.pixcode);toast('Código Pix copiado')}catch(e){toast('Não consegui copiar: selecione o código acima e copie.',1)}}
@@ -782,7 +785,7 @@ document.addEventListener('click',async e=>{
   else if(a==='irmes'){S.view='planilha';S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='csv')csv();
   else if(a==='reset'){const area=$('#recuperacao');if(area.hidden){area.hidden=false;$('#email').focus();aviso('Informe o Gmail já associado e verificado na sua conta.');return}const em=$('#email').value.trim();if(!em)return aviso('Informe o Gmail cadastrado.');const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.href.split('#')[0]});aviso(error?'Não consegui enviar: '+error.message:'Se esse e-mail estiver associado a uma conta, enviaremos um link de redefinição.',!error)}
-  else if(a==='convite'){const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
+  else if(a==='convite'){const limite=(PLANOS[S.fam.plano||'pro']||PLANOS.pro).limite;if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
   }catch(err){}finally{S.busy=false}
 });
 document.addEventListener('change',async e=>{
