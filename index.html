@@ -219,7 +219,7 @@ a{color:#b9b3ff}.aceite{display:flex;gap:8px;align-items:flex-start;font-size:13
 .art-caption{color:#d8d5ff}
 .coin-stack i{background:linear-gradient(90deg,#8c5c18,#ffdb73 35%,#b77b24 70%,#f8cf62)}
 
-</style>
+\n.demo-link{display:block;text-align:center;margin-top:13px;color:#c4b5fd;font-weight:700;text-decoration:none;padding:10px;border:1px solid #6654b8;border-radius:11px;background:#211b4d88}.demo-link:hover{background:#33256d}\n</style>
 </head>
 <body>
 <div id="app" class="wrap"></div>
@@ -326,7 +326,7 @@ function renderAuth(){
   <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
   <div id="recuperacao" hidden><div class="mu">Informe o Gmail já associado e verificado na sua conta.</div><input id="email" type="email" autocomplete="email" placeholder="Gmail cadastrado"></div>
   <div id="aviso" class="aviso"></div>
-  <button data-act="entrar">Entrar</button><button class="sec" data-act="cadastrar">Criar conta</button><button class="sec" data-act="reset">Esqueci minha senha</button></div></div>`;
+  <button data-act="entrar">Entrar</button><button class="sec" data-act="cadastrar">Criar conta</button><button class="sec" data-act="reset">Esqueci minha senha</button><a class="demo-link" href="demo.html">▶ Ver demonstração do aplicativo</a></div></div>`;
 }
 function renderSemFamilia(){
   $('#app').innerHTML=`<div class="auth"><h1>Sua família</h1><div class="mu">Crie a família para começar ou entre com um código de convite.</div>
