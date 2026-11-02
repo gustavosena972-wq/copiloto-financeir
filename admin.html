@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090d18"><title>Administração · Copiloto Financeiro</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
+<style>
+:root{color-scheme:dark;--bg:#090d18;--panel:#131b2c;--line:#26334b;--text:#edf2ff;--muted:#98a7c2;--accent:#7c83ff;--green:#34d399;--red:#fb7185}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 10% -10%,#22275b 0,transparent 60%),var(--bg);color:var(--text);font:15px/1.5 system-ui,Segoe UI,sans-serif;min-height:100vh}
+button,input{font:inherit}input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#0c1322;color:var(--text)}button{border:0;border-radius:10px;padding:11px 16px;background:var(--accent);color:white;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.secondary{background:#26334b}.danger{background:#542536}
+.wrap{width:min(1100px,94%);margin:36px auto}.login{max-width:430px;margin:9vh auto;background:var(--panel);border:1px solid var(--line);padding:30px;border-radius:20px;box-shadow:0 24px 70px #0008}.login h1{margin:0 0 5px}.muted{color:var(--muted)}.field{display:grid;gap:7px;margin:14px 0}.notice{min-height:24px;color:var(--red);font-size:13px}.top{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:24px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.card{background:var(--panel);border:1px solid var(--line);padding:18px;border-radius:15px}.card small{display:block;color:var(--muted)}.card strong{font-size:25px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}table{border-collapse:collapse;width:100%;min-width:750px}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line)}th{font-size:12px;text-transform:uppercase;color:var(--muted)}td input{width:78px;padding:7px}.actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.section{margin:24px 0}.section h2{font-size:18px}.status{font-size:12px;color:var(--muted)}a{color:#b6bbff}
+</style></head>
+<body><main id="app"><div class="login muted">Carregando área administrativa…</div></main>
+<script>
+const SUPABASE_URL='https://jlufubazlnrelrbsvsal.supabase.co';
+const SUPABASE_KEY='sb_publishable__CjlaAIa2w5F_7HhOhJKkA_HeDFWxNS';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const app=document.getElementById('app');
+let resumo=null,pagamentos=[];
+const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function verifyAdmin(){
+ const {data:{session},error}=await sb.auth.getSession();
+ if(error)throw error;
+ if(!session){login();return false}
+ const {data,error:roleError}=await sb.rpc('eh_admin');
+ if(roleError)throw roleError;
+ if(data!==true){await sb.auth.signOut();login('Esta conta não tem permissão administrativa.');return false}
+ return true;
+}
+function login(message=''){
+ app.innerHTML=`<section class="login"><div class="muted">COPILOTO FINANCEIRO · CONTROLE INTERNO</div><h1>Área administrativa</h1><p class="muted">Acesso exclusivo para administradores autorizados.</p>
+ <form id="loginForm"><div class="field"><label for="email">E-mail administrativo</label><input id="email" type="email" autocomplete="username" required></div>
+ <div class="field"><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" required></div>
+ <div class="notice" id="notice">${safe(message)}</div><button id="submit" type="submit" style="width:100%">Entrar no painel</button></form>
+ <p class="muted" style="font-size:13px;margin-top:20px">Acesso de clientes: <a href="./index.html">ir para a área do cliente</a>.</p></section>`;
+ document.getElementById('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();const btn=document.getElementById('submit'),notice=document.getElementById('notice');btn.disabled=true;notice.textContent='Verificando acesso…';
+  try{const {error}=await sb.auth.signInWithPassword({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value});if(error)throw error;
+   const ok=await verifyAdmin();if(ok)await dashboard();
+  }catch(err){notice.textContent=err.message||'Não foi possível entrar.'}finally{btn.disabled=false}
+ });
+}
+async function loadData(){
+ const [r,p]=await Promise.all([
+  sb.rpc('admin_resumo'),
+  sb.rpc('admin_listar_pagamentos',{p_status:'todos'})
+ ]);
+ if(r.error)throw r.error;if(p.error)throw p.error;
+ resumo=r.data||{};pagamentos=p.data||[];
+}
+function dashboard(){
+ const rows=pagamentos.map(x=>`<tr><td>${safe(new Date(x.informado_em).toLocaleString('pt-BR'))}</td><td>${safe(x.familia)}<div class="status">${safe(x.email||'')}</div></td><td>${safe(x.pagador_nome)}<div class="status">${safe(x.horario_informado||'')}</div></td><td>${money(x.valor)}</td><td>${x.status==='pendente'?`<div class="actions"><input aria-label="Dias de acesso" id="days_${safe(x.id)}" type="number" min="1" value="30"><button data-action="approve" data-id="${safe(x.id)}">Aprovar</button><button class="danger" data-action="reject" data-id="${safe(x.id)}">Recusar</button></div>`:safe(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5">Nenhum pagamento informado.</td></tr>';
+ app.innerHTML=`<div class="wrap"><header class="top"><div><div class="muted">COPILOTO FINANCEIRO</div><h1 style="margin:2px 0">Painel administrativo</h1><div class="muted">Gestão interna de clientes e pagamentos</div></div><div class="actions"><button class="secondary" id="refresh">Atualizar</button><button class="secondary" id="logout">Sair</button></div></header>
+ <section class="grid">
+ <article class="card"><small>Contas criadas</small><strong>${resumo.contas??0}</strong></article>
+ <article class="card"><small>Assinaturas ativas</small><strong>${resumo.ativas??0}</strong></article>
+ <article class="card"><small>Pedidos pendentes</small><strong>${resumo.pendentes??0}</strong></article>
+ <article class="card"><small>Receita total</small><strong>${money(resumo.receita_total)}</strong></article>
+ <article class="card"><small>Últimos 30 dias</small><strong>${money(resumo.receita_30d)}</strong></article>
+ <article class="card"><small>Vencem em 7 dias</small><strong>${resumo.vencem_7d??0}</strong></article></section>
+ <section class="section"><h2>Conferência de pagamentos Pix</h2><p class="muted">Confira o recebimento no banco antes de aprovar. A aprovação libera o acesso conforme a regra já existente.</p><div class="tablewrap"><table><thead><tr><th>Data</th><th>Família / e-mail</th><th>Pagador</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${rows}</tbody></table></div></section>
+ <p class="muted" style="font-size:13px">Esta área usa a mesma autenticação do Supabase, mas não carrega a interface financeira dos clientes.</p></div>`;
+ document.getElementById('refresh').onclick=()=>dashboardReload();
+ document.getElementById('logout').onclick=async()=>{await sb.auth.signOut();login()};
+}
+async function dashboardReload(){try{await loadData();dashboard()}catch(e){app.innerHTML='<div class="login">Erro ao atualizar: '+safe(e.message)+'</div>'}}
+document.addEventListener('click',async e=>{
+ const b=e.target.closest('[data-action]');if(!b)return;
+ const id=b.dataset.id;
+ try{
+  b.disabled=true;
+  if(b.dataset.action==='approve'){
+   const days=Math.max(1,Math.min(3650,parseInt(document.getElementById('days_'+id).value,10)||30));
+   const {error}=await sb.rpc('aprovar_pagamento',{p_id:id,p_dias:days});if(error)throw error;
+  }else if(b.dataset.action==='reject'){
+   const note=prompt('Motivo da recusa (visível ao cliente):','Não encontramos o Pix com esse valor/nome.');if(note===null){b.disabled=false;return}
+   const {error}=await sb.rpc('recusar_pagamento',{p_id:id,p_nota:note});if(error)throw error;
+  }
+  await dashboardReload();
+ }catch(err){alert(err.message||'Não foi possível concluir a ação.');b.disabled=false}
+});
+(async()=>{try{if(await verifyAdmin()){await loadData();dashboard()}}catch(e){login('Falha ao verificar o acesso: '+e.message)}})();
+sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')login()});
+</script></body></html>
