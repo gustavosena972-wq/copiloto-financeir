@@ -428,7 +428,7 @@ async function autenticar(a){
     if(a==='entrar'){const{error}=await sb.auth.signInWithPassword({email,password:senha});if(error)throw error;aviso('Pronto! Carregando…',1)}
     else{
       const nome=$('#nome').value.trim();
-      if(!nome)return aviso('Informe seu nome para criar a conta.');
+      if(!nome){aviso('Informe seu nome para criar a conta.');bt.forEach(x=>x.disabled=false);return}
       const{data,error}=await sb.auth.signUp({email,password:senha,options:{data:{nome,aceitou_termos:LEGAL.versao}}});
       if(error)throw error;
       if(Array.isArray(data.user?.identities)&&data.user.identities.length===0){
