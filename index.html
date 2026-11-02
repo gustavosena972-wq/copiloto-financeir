@@ -193,11 +193,10 @@ function renderAuth(){
   <p>Lance as contas do mês e o Copiloto soma tudo, mostra para onde o dinheiro vai e aponta onde dá para economizar.</p>
   <div class="ticks"><span>✔ Cálculo automático do mês e do ano</span><span>✔ Importa a sua planilha do Excel</span><span>✔ Checape: aponta onde dá para economizar</span><span>✔ Acesso por ${brl(PIX.valor)} via Pix</span></div></div></div>
   <div class="login"><h3>Bem-vindo</h3><div class="mu" style="margin-bottom:6px">Entre ou crie sua conta para começar.</div>
-  <input id="nome" placeholder="Seu nome (para criar conta)">
-  <input id="usuario" autocomplete="username" placeholder="Usuário (obrigatório)">
-  <input id="email" type="email" autocomplete="email" placeholder="Gmail para recuperação (opcional)">
+  <input id="nome" autocomplete="username" placeholder="Seu nome">
   <input id="senha" type="password" autocomplete="current-password" placeholder="Senha (mín. 8 caracteres)">
-  <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a> (só para criar conta).</span></label>
+  <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
+  <div id="recuperacao" hidden><div class="mu">Informe o Gmail já associado e verificado na sua conta.</div><input id="email" type="email" autocomplete="email" placeholder="Gmail cadastrado"></div>
   <div id="aviso" class="aviso"></div>
   <button data-act="entrar">Entrar</button><button class="sec" data-act="cadastrar">Criar conta</button><button class="sec" data-act="reset">Esqueci minha senha</button></div></div>`;
 }
@@ -419,35 +418,20 @@ const ARTE=`<svg class="arte" viewBox="0 0 340 320" width="290"><defs><radialGra
 const MSG=[['Invalid login','E-mail ou senha incorretos.'],['Email not confirmed','Confirme seu e-mail antes de entrar: abra o e-mail que enviamos (veja também o spam).'],['already registered','Esse e-mail já tem conta. Use "Entrar".'],['rate limit','Muitos e-mails em pouco tempo. Aguarde alguns minutos e tente de novo.'],['Failed to fetch','Sem conexão com o servidor. Se você abriu o arquivo dentro do Claude ou de uma pré-visualização, baixe-o e abra no Chrome (ou publique na Netlify/Vercel).'],['Password should','A senha precisa ter pelo menos 6 caracteres.'],['invalid format','Digite um e-mail válido.']];
 function aviso(t,ok){const a=$('#aviso');if(a){a.textContent=t;a.className='aviso '+(ok?'ok':'err')}}
 async function autenticar(a){
-  const username=$('#usuario').value.trim().toLowerCase(),senha=$('#senha').value;
-  const recoveryEmail=$('#email').value.trim();
-  if(!username||!senha)return aviso('Preencha usuário e senha.');
-  if(!/^[a-z0-9._-]{3,24}$/.test(username))return aviso('O usuário deve ter 3 a 24 caracteres: letras, números, ponto, hífen ou underline.');
+  const nome=$('#nome').value.trim(),username=nome.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9._-]+/g,'-').replace(/^[._-]+|[._-]+$/g,'').slice(0,24),senha=$('#senha').value;
+  if(!nome||!senha)return aviso('Preencha seu nome e sua senha.');
+  if(username.length<3)return aviso('Digite um nome com pelo menos 3 caracteres.');
   if(senha.length<8)return aviso('A senha precisa ter pelo menos 8 caracteres.');
-  if(recoveryEmail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recoveryEmail))return aviso('Informe um Gmail válido ou deixe o campo vazio.');
   if(a==='cadastrar'&&!$('#aceite').checked)return aviso('Para criar a conta, marque que você leu e aceita os Termos de Uso e a Política de Privacidade.');
   const bt=document.querySelectorAll('.login button');bt.forEach(x=>x.disabled=true);aviso(a==='entrar'?'Entrando…':'Criando sua conta…',1);
   try{
     const payload={action:a==='entrar'?'login':'signup',username,password:senha};
-    if(a==='cadastrar'){
-      payload.name=$('#nome').value.trim();
-      payload.recoveryEmail=recoveryEmail;
-      payload.acceptedTerms=true;
-    }
-    const response=await fetch(SB_URL+'/functions/v1/autenticacao-usuario',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY},
-      body:JSON.stringify(payload)
-    });
-    const result=await response.json();
-    if(!response.ok)throw new Error(result.error||'Não foi possível autenticar.');
-    const{error}=await sb.auth.setSession(result.session);
-    if(error)throw error;
-    if(a==='cadastrar'){
-      aviso('Conta criada! Preparando seu acesso…',1);
-      await q(sb.rpc('criar_familia',{p_nome:$('#nome').value.trim()}));
-      await boot();
-    }else aviso('Pronto! Carregando…',1);
+    if(a==='cadastrar'){payload.name=nome;payload.acceptedTerms=true;}
+    const response=await fetch(SB_URL+'/functions/v1/autenticacao-usuario',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify(payload)});
+    const result=await response.json();if(!response.ok)throw new Error(result.error||'Não foi possível autenticar.');
+    const{error}=await sb.auth.setSession(result.session);if(error)throw error;
+    if(a==='cadastrar'){aviso('Conta criada! Preparando seu acesso…',1);await q(sb.rpc('criar_familia',{p_nome:nome}));await boot();}
+    else aviso('Pronto! Carregando…',1);
   }catch(e){aviso('Não deu certo: '+String(e.message||e))}
   bt.forEach(x=>x.disabled=false);
 }
@@ -797,8 +781,7 @@ document.addEventListener('click',async e=>{
   else if(a==='xlsx')await exportXlsx();
   else if(a==='irmes'){S.view='planilha';S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='csv')csv();
-  else if(a==='reset'){const em=$('#email').value.trim();if(!em)return aviso('A recuperação exige o Gmail opcional cadastrado na conta.');
-    const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.href.split('#')[0]});aviso(error?'Não consegui enviar: '+error.message:'Enviamos um link para redefinir a senha no seu e-mail.',!error)}
+  else if(a==='reset'){const area=$('#recuperacao');if(area.hidden){area.hidden=false;$('#email').focus();aviso('Informe o Gmail já associado e verificado na sua conta.');return}const em=$('#email').value.trim();if(!em)return aviso('Informe o Gmail cadastrado.');const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.href.split('#')[0]});aviso(error?'Não consegui enviar: '+error.message:'Se esse e-mail estiver associado a uma conta, enviaremos um link de redefinição.',!error)}
   else if(a==='convite'){const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
   }catch(err){}finally{S.busy=false}
 });
