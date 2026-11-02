@@ -427,17 +427,20 @@ async function autenticar(a){
   try{
     if(a==='entrar'){const{error}=await sb.auth.signInWithPassword({email,password:senha});if(error)throw error;aviso('Pronto! Carregando…',1)}
     else{
-      const{data,error}=await sb.auth.signUp({email,password:senha,options:{data:{nome:$('#nome').value.trim(),aceitou_termos:LEGAL.versao}}});
+      const nome=$('#nome').value.trim();
+      if(!nome){aviso('Informe seu nome para criar a conta.');bt.forEach(x=>x.disabled=false);return}
+      const{data,error}=await sb.auth.signUp({email,password:senha,options:{data:{nome,aceitou_termos:LEGAL.versao}}});
       if(error)throw error;
       if(Array.isArray(data.user?.identities)&&data.user.identities.length===0){
-        aviso('Este e-mail já possui cadastro. Use "Entrar" ou recupere sua senha.',0);
-      }else if(data.session){
+        aviso('Este e-mail já possui cadastro. Use "Entrar".',0);
+      }else{
+        // Com a confirmação de e-mail desativada, o Supabase deve entregar uma sessão.
+        // Consulta a sessão novamente para cobrir atrasos de persistência no navegador.
+        const sessao=data.session||(await sb.auth.getSession()).data.session;
+        if(!sessao)throw new Error('Cadastro criado, mas não recebemos uma sessão de acesso. Confira se a confirmação de e-mail está realmente desativada no Supabase e tente entrar.');
         aviso('Conta criada! Preparando seu acesso ao Pix…',1);
-        const nome=$('#nome').value.trim()||'Minha família';
         await q(sb.rpc('criar_familia',{p_nome:nome}));
         await boot();
-      }else{
-        aviso('A conta foi criada, mas o Supabase ainda exige confirmação por e-mail. Para entrar direto na área do Pix, a opção de confirmação precisa estar desativada no painel de autenticação.',0);
       }
     }
   }catch(e){const m=String(e.message||e);const h=MSG.find(x=>m.includes(x[0]));aviso(h?h[1]:'Não deu certo: '+m)}
