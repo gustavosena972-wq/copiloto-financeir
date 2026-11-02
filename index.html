@@ -229,11 +229,11 @@ function viewPlanilha(ed){
    <td><select data-f="status" ${d}>${stOpts(l.status)}</select></td>
    <td><select data-f="membro_id" ${d}>${memOpts(l.membro_id)}</select></td>
    <td><button class="red" data-act="del" data-id="${l.id}" ${d}>✕</button></td></tr>`).join('');
-  const novo=ed?`<tr class="novo" id="novo"><td><input type="date" id="n_data"></td><td><input id="n_desc" placeholder="Descrição"></td>
+  const novo=ed?`<tr class="novo" id="novo"><td><input type="date" id="n_data"></td><td><div class="row" style="gap:6px;align-items:center;min-width:190px"><input id="n_desc" placeholder="Descrição" style="min-width:110px;flex:1"><select id="n_parcelas" title="Número de parcelas" style="width:64px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div></td>
    <td><select id="n_tipo" onchange="document.getElementById('n_parcelas').disabled=this.value==='receita'">${tpOpts('despesa')}</select></td><td><select id="n_cat">${catOpts('despesa')}</select></td>
    <td><input type="number" step="0.01" min="0" id="n_valor" placeholder="0,00"></td><td><select id="n_status">${stOpts('pendente')}</select></td>
    <td><select id="n_mem">${memOpts(S.me.id)}</select></td><td><button data-act="add">+</button></td></tr>
-   <tr class="novo"><td colspan="8"><div class="row" style="gap:10px;align-items:center"><label>Parcelar compra? <select id="n_parcelas" style="width:100px">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></label><small class="mu">De 1 a 30 vezes. O valor informado é o total da compra; o sistema divide automaticamente.</small></div></td></tr>`:'';
+   `:'';
   const fe=S.mes.status==='fechado';
   return `${viewStatus()}<div class="cards"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b></div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b></div>
