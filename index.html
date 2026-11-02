@@ -426,8 +426,15 @@ async function autenticar(a){
   const bt=document.querySelectorAll('.login button');bt.forEach(x=>x.disabled=true);aviso(a==='entrar'?'Entrando…':'Criando sua conta…',1);
   try{
     if(a==='entrar'){const{error}=await sb.auth.signInWithPassword({email,password:senha});if(error)throw error;aviso('Pronto! Carregando…',1)}
-    else{const{data,error}=await sb.auth.signUp({email,password:senha,options:{data:{nome:$('#nome').value.trim(),aceitou_termos:LEGAL.versao}}});if(error)throw error;
-      if(!data.session)aviso('Conta criada! Enviamos um e-mail de confirmação para '+email+'. Clique no link e volte aqui para entrar. Se a página do link der erro, a confirmação já foi feita.',1)}
+    else{
+      const{data,error}=await sb.auth.signUp({email,password:senha,options:{data:{nome:$('#nome').value.trim(),aceitou_termos:LEGAL.versao}}});
+      if(error)throw error;
+      if(Array.isArray(data.user?.identities)&&data.user.identities.length===0){
+        aviso('Este e-mail já possui cadastro. Não enviamos uma nova confirmação. Tente entrar com sua senha ou use a recuperação de acesso.',0);
+      }else if(!data.session){
+        aviso('Cadastro recebido, mas a confirmação depende do envio do e-mail. Se ele não chegar, não tente cadastrar repetidamente: o serviço pode estar no limite de envios. Aguarde ou entre em contato com o suporte.',1);
+      }
+    }
   }catch(e){const m=String(e.message||e);const h=MSG.find(x=>m.includes(x[0]));aviso(h?h[1]:'Não deu certo: '+m)}
   bt.forEach(x=>x.disabled=false);
 }
