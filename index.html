@@ -422,6 +422,149 @@ body:has(.app-shell){background:#edf1f6;color:#1d2939}
   .app-main .cards{grid-template-columns:minmax(0,1fr)}
 }
 
+
+/* Página institucional: apresentação clara e planos comparáveis */
+body:has(.landing-page){background:#eef2f6;color:#1f2d3d}
+#app:has(.landing-page){max-width:1320px;width:100%;padding:20px}
+.landing-page{max-width:1240px;margin:0 auto;color:#1e2d40}
+.landing-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:2px 4px 18px;border-bottom:1px solid #dbe3eb}
+.landing-brand{display:flex;align-items:center;gap:11px}
+.landing-brand svg{width:38px;height:38px;filter:none}
+.landing-brand strong{display:block;color:#1c3046;font-size:17px;letter-spacing:-.025em}
+.landing-brand small{display:block;margin-top:3px;color:#738398;font-size:9px;font-weight:800;letter-spacing:.15em}
+.landing-header-note{padding:8px 11px;border:1px solid #dce4ec;border-radius:7px;background:#fff;color:#6a7b8f;font-size:10px;font-weight:650}
+.landing-hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:32px;align-items:center;padding:34px 4px 32px}
+.landing-intro{padding:8px 0}
+.landing-kicker,.landing-login-head>span,.landing-section-heading>div>span{color:#527895;font-size:9px;font-weight:850;letter-spacing:.15em}
+.landing-intro h1{max-width:650px;margin:12px 0 13px;color:#1a3048;font-size:clamp(32px,4.1vw,49px);line-height:1.08;letter-spacing:-.05em}
+.landing-intro>p{max-width:650px;margin:0;color:#617187;font-size:15px;line-height:1.7}
+.landing-highlights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:26px}
+.landing-highlights>div{display:grid;align-content:start;gap:5px;min-width:0;padding:13px;border:1px solid #dce4ec;border-radius:9px;background:#fff}
+.landing-highlights>div>span{color:#57819f;font-size:10px;font-weight:850;letter-spacing:.08em}
+.landing-highlights b{color:#2b4056;font-size:12px}
+.landing-highlights small{color:#77879a;font-size:10px;line-height:1.5}
+.landing-login{display:grid;gap:11px;align-content:start;padding:24px;background:#fff;border:1px solid #dce4ec;border-radius:12px;box-shadow:0 12px 32px rgba(29,48,69,.07)}
+.landing-login-head{margin-bottom:4px}
+.landing-login-head h2{margin:6px 0 4px;color:#1f3349;font-size:23px;letter-spacing:-.035em}
+.landing-login-head p{margin:0;color:#738398;font-size:12px}
+.landing-login input:not([type=checkbox]){width:100%;min-height:42px;padding:10px 12px;border:1px solid #d1dbe5;border-radius:7px;background:#fbfcfd;color:#25384d;font-size:12.5px}
+.landing-login input:focus{border-color:#6e9bb8;box-shadow:0 0 0 3px #6e9bb81c}
+.landing-login .aceite{color:#738398;font-size:10.5px;line-height:1.55}
+.landing-login .aceite a{color:#315f82}
+.landing-login button{min-height:40px;border-radius:7px;box-shadow:none;font-size:12px}
+.landing-login .landing-primary{background:#244f70;color:#fff}
+.landing-login .landing-secondary{background:#eef3f7;border:1px solid #d9e2eb;color:#2c526f}
+.landing-login .landing-link-button{min-height:30px;padding:5px;background:transparent;color:#55758f;text-decoration:underline}
+.landing-login .demo-link{margin-top:0;padding:9px;border:1px solid #e0e7ee;border-radius:7px;background:#fff;color:#61778b;font-size:10.5px}
+.landing-login #recuperacao{display:grid;gap:8px;padding:10px;border:1px solid #e1e8ef;border-radius:8px;background:#f8fafc}
+.landing-plans-section{padding:25px 4px 12px;border-top:1px solid #dbe3eb}
+.landing-section-heading{display:flex;align-items:end;justify-content:space-between;gap:22px;margin-bottom:17px}
+.landing-section-heading h2{margin:7px 0 0;color:#1d3249;font-size:clamp(22px,2.6vw,30px);letter-spacing:-.035em}
+.landing-section-heading>p{max-width:310px;margin:0 0 3px;color:#738398;font-size:11px;line-height:1.6}
+.landing-plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;align-items:stretch}
+.landing-plan-card{position:relative;display:flex;flex-direction:column;min-width:0;padding:19px 18px 15px;border:1px solid #dce4ec;border-radius:10px;background:#fff;box-shadow:0 5px 16px rgba(29,48,69,.035)}
+.landing-plan-card.recommended{border:1.5px solid #6e91ac;box-shadow:0 9px 22px rgba(40,81,111,.09)}
+.landing-plan-card.ultra{background:#f9fbfd}
+.landing-ribbon{position:absolute;top:-10px;right:14px;padding:4px 8px;border-radius:5px;background:#315f80;color:#fff;font-size:8px;font-weight:850;letter-spacing:.08em}
+.landing-plan-label{color:#71859a;font-size:8.5px;font-weight:850;letter-spacing:.13em}
+.landing-plan-top h3{margin:7px 0 3px;color:#1e344b;font-size:24px;letter-spacing:-.035em}
+.landing-plan-top p{min-height:35px;margin:0;color:#748398;font-size:10.5px;line-height:1.55}
+.landing-price{display:flex;align-items:baseline;gap:5px;margin:13px 0 9px}
+.landing-price strong{color:#204967;font-size:26px;letter-spacing:-.045em}
+.landing-price>span{color:#75869a;font-size:10px}
+.landing-price-soon strong{font-size:16px;letter-spacing:0}
+.landing-limit{padding:8px 9px;border-radius:6px;background:#f0f4f7;color:#47637b;font-size:10.5px;font-weight:750}
+.landing-feature-heading{margin:16px 0 7px;color:#71849a;font-size:8px;font-weight:850;letter-spacing:.12em}
+.landing-feature-list{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+.landing-feature-list li{display:flex;align-items:flex-start;gap:7px;color:#52647a;font-size:10.5px;line-height:1.45}
+.landing-feature-check{flex:none;color:#287d60;font-weight:900}
+.landing-feature-list li small{flex:none;padding:2px 4px;border-radius:4px;background:#f2f4f7;color:#8290a0;font-size:7.5px;font-weight:750}
+.landing-plan-status{margin-top:auto;padding-top:14px;color:#247151;font-size:9px;font-weight:800}
+.landing-plan-status.roadmap{color:#7b8796}
+.landing-plans-footnote{margin:13px 0 0;color:#78879a;font-size:9.5px;line-height:1.6}
+.landing-footer{padding:17px 4px 4px;border-top:1px solid #dbe3eb;color:#8a97a6;font-size:9px;text-align:center}
+/* Checkout e página Pix: identidade profissional, mantendo campos e ações existentes */
+body:has(.pix-page){background:#edf1f5;color:#203248}
+#app:has(.pix-page){max-width:1100px;width:100%;padding:24px}
+.pix-page{max-width:990px;margin:1vh auto;padding:0 0 28px;color:#203248}
+.pix-brand{justify-content:flex-start;gap:11px;margin:0 0 18px;color:#203248;animation:none}
+.pix-brand-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid #d7e1e9;border-radius:9px;background:#fff}
+.pix-brand-mark svg{width:31px;height:31px;filter:none}
+.pix-brand strong{display:block;color:#1c3046;font-size:16px;letter-spacing:-.02em}
+.pix-brand small{display:block;margin-top:3px;color:#728397;font-size:8px;font-weight:850;letter-spacing:.14em}
+.pix-layout{display:grid;grid-template-columns:minmax(0,1fr) 245px;gap:16px;align-items:start}
+.pix-card{padding:clamp(20px,3vw,30px);overflow:hidden;background:#fff;border:1px solid #dce4ec;border-radius:12px;box-shadow:0 12px 34px rgba(29,48,69,.07);animation:none}
+.pix-card:before,.pix-card:after{display:none}
+.pix-heading{padding:0 0 8px;text-align:left;animation:none}
+.pix-kicker{padding:0;border:0;border-radius:0;background:transparent;color:#5b7892;font-size:8px;font-weight:850;letter-spacing:.14em}
+.pix-heading h1{margin:7px 0 5px;color:#1d3249;font-size:25px;letter-spacing:-.035em}
+.pix-heading p,.pix-muted{max-width:620px;margin:0 0 17px;color:#718196;font-size:11.5px;line-height:1.6;text-align:left}
+.pix-plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:13px 0}
+.pix-plan{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;min-height:145px;padding:13px;border:1px solid #d9e2eb;border-radius:8px;background:#fbfcfd;color:#30465c;text-align:left;box-shadow:none;white-space:normal}
+.pix-plan:hover{transform:none;border-color:#97aec1;filter:none}
+.pix-plan.selected{border:1.5px solid #4c7899;background:#f1f6fa;box-shadow:0 0 0 2px rgba(76,120,153,.08)}
+.pix-plan-head{display:flex;flex-direction:column;gap:2px}
+.pix-plan-head b{color:#213e58;font-size:13px}
+.pix-plan-head small{color:#7d8da0;font-size:7px;font-weight:850;letter-spacing:.1em}
+.pix-plan strong{color:#244f70;font-size:20px;letter-spacing:-.035em}
+.pix-plan strong small{margin-left:3px;color:#728397;font-size:9px;font-weight:500;letter-spacing:0}
+.pix-plan-cap{color:#486b86;font-size:9px;font-weight:800}
+.pix-plan-detail{color:#748398;font-size:9px;font-weight:450;line-height:1.5}
+.pix-plan-disabled{cursor:default;background:#f6f8fa;border-style:dashed;box-shadow:none;opacity:.88}
+.pix-plan-disabled strong{color:#748398;font-size:13px;letter-spacing:0}
+.pix-total{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:13px 0;padding:13px 15px;border:1px solid #dce5ec;border-radius:8px;background:#f6f9fb;animation:none}
+.pix-total>div:first-child{display:grid;gap:4px}
+.pix-total>div:first-child>span{color:#7b8b9d;font-size:7.5px;font-weight:850;letter-spacing:.12em}
+.pix-total>div:first-child>b{color:#27435d;font-size:13px}
+.pix-total-value{display:grid;gap:1px;text-align:right}
+.pix-total-value small{color:#718398;font-size:9px}
+.pix-total-value strong{color:#1f5278;font-size:23px;letter-spacing:-.04em}
+.pix-total p{grid-column:1/-1;margin:0;color:#77879a;font-size:8.5px}
+.pix-checkout-disclaimer{margin:0 0 14px;color:#7a899a;font-size:9px;line-height:1.55}
+.pix-payment{padding-top:15px;border-top:1px solid #e3e9ef;animation:none}
+.pix-payment-title{display:flex;align-items:center;gap:9px;margin:0 0 9px}
+.pix-section-number{display:grid;place-items:center;width:25px;height:25px;flex:none;border-radius:6px;background:#eaf1f6;color:#3f6785;font-size:9px;font-weight:850}
+.pix-payment-title div{display:grid;gap:2px}
+.pix-payment-title b{color:#2b4056;font-size:11.5px}
+.pix-payment-title small{color:#78889b;font-size:9px}
+.pix-payment .qrbox{width:215px;margin:10px auto 9px;padding:11px;border:1px solid #e0e6ec;border-radius:9px;background:#fff;box-shadow:none;animation:none}
+.pix-copy{width:100%;max-width:340px;margin:0 auto 14px;border:1px solid #d7e1e9!important;border-radius:7px!important;background:#f4f7f9!important;color:#3f5e77!important;font-size:10px!important}
+.pix-copy:hover{background:#eaf0f4!important}
+.pix-confirm-title{margin-top:4px}
+.pix-label{display:block;margin:11px 0 5px;color:#5e7186;font-size:9.5px;font-weight:700}
+.pix-payment input{width:100%;min-height:39px;padding:9px 11px;border:1px solid #ccd7e1;border-radius:7px;background:#fff;color:#24374c;font-size:11px}
+.pix-extra{margin:9px 0;color:#60778d;font-size:9.5px}
+.pix-extra input{margin-top:7px}
+.pix-submit{width:100%;min-height:41px;margin-top:11px;border:1px solid #244f70;border-radius:7px;background:#244f70;color:#fff;font-size:11px;box-shadow:none}
+.pix-submit:hover{transform:none;filter:brightness(.96)}
+.pix-security-note{margin:8px 0 0;color:#7a899a;font-size:8.5px;line-height:1.5;text-align:center}
+.pix-pending{padding:13px;border:1px solid #cfe5d9;border-radius:8px;background:#f0f8f3;color:#286648;animation:none}
+.pix-pending p{margin:5px 0 0;color:#577b68;font-size:10px}
+.pix-aside{display:grid;gap:10px}
+.pix-aside-card,.pix-aside-help{padding:15px;border:1px solid #dce4ec;border-radius:9px;background:#fff;box-shadow:0 4px 12px rgba(29,48,69,.035)}
+.pix-aside-icon{display:grid;place-items:center;width:27px;height:27px;margin-bottom:8px;border-radius:7px;background:#edf6f1;color:#2e805e;font-size:13px;font-weight:850}
+.pix-aside-number{display:block;margin-bottom:4px;color:#2b607f;font-size:24px;font-weight:800}
+.pix-aside-card b,.pix-aside-help b{display:block;color:#30465d;font-size:10.5px}
+.pix-aside-card p,.pix-aside-help span{display:block;margin:5px 0 0;color:#77879a;font-size:9px;line-height:1.55}
+.pix-aside-help div{margin-top:8px;color:#547894;font-size:9px}
+.pix-aside-help a{color:#456d8a}
+.pix-join{margin-top:16px;padding-top:12px;border-top:1px solid #e3e9ef}
+.pix-join summary{padding:6px 0;color:#426783;font-size:10px;text-align:left}
+.pix-join summary:after{color:#426783}
+.pix-join-panel{gap:8px;padding:8px 0 0}
+.pix-join-panel p{color:#7a899a;font-size:9px;text-align:left;line-height:1.5}
+.pix-join-panel input{width:100%;min-height:39px;border:1px solid #ccd7e1;border-radius:7px;background:#fff;color:#25384d;font-size:11px}
+.pix-join-panel button{min-height:39px;border:1px solid #426e8c;border-radius:7px;background:#426e8c;color:#fff;box-shadow:none;font-size:10px}
+.pix-footer{justify-content:flex-start;margin-top:14px;animation:none}
+.pix-footer button{border:1px solid #d5dfe8;border-radius:7px;background:#fff;color:#50677c;font-size:9px}
+.pix-footer a{color:#557994}
+.pix-footer>div{color:#8290a0}
+.pix-page .aviso.err{padding:10px;border:1px solid #edcccc;border-radius:7px;background:#fff5f5;color:#a94b4b;font-size:10px}
+@media(max-width:900px){#app:has(.landing-page){padding:13px}.landing-hero{grid-template-columns:1fr;gap:17px}.landing-highlights{grid-template-columns:repeat(3,minmax(0,1fr))}.pix-layout{grid-template-columns:1fr}.pix-aside{grid-template-columns:repeat(2,minmax(0,1fr))}.pix-aside-help{grid-column:1/-1}}
+@media(max-width:700px){#app:has(.landing-page){padding:8px}.landing-header{padding-bottom:13px}.landing-header-note{display:none}.landing-intro h1{font-size:34px}.landing-highlights{gap:6px;margin-top:17px}.landing-highlights>div{display:flex;flex-direction:column;align-items:flex-start;padding:9px 7px}.landing-login{padding:18px}.landing-section-heading{display:block}.landing-section-heading>p{margin-top:8px}.landing-plan-grid{grid-template-columns:1fr;gap:12px}.landing-plan-card{padding:17px}.landing-plan-top p{min-height:0}.landing-plan-card .landing-plan-status{margin-top:12px}}
+@media(max-width:520px){#app:has(.pix-page){padding:12px}.pix-page{margin:0 auto;padding:0 0 20px}.pix-card{padding:19px 14px;border-radius:9px}.pix-plan-grid{grid-template-columns:1fr}.pix-plan{min-height:0;padding:12px}.pix-plan.selected:after{position:static;display:inline-block;width:max-content;margin:0;font-size:8px}.pix-total{align-items:flex-start;padding:11px}.pix-total-value strong{font-size:20px}.pix-aside{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.landing-page *,.pix-page *,.landing-page *:before,.pix-page *:before,.landing-page *:after,.pix-page *:after{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -508,34 +651,97 @@ async function loadMes(rd=true){
 
 /* ---------- telas de entrada ---------- */
 function renderAuth(){
-  $('#app').innerHTML=`<div class="hero"><div class="art"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
-  <div class="finance-stage" aria-label="Relógio e painel financeiro ilustrativos">
-    <div class="clock-face" aria-label="Relógio animado"><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-mark"></i><i class="clock-hand"></i><i class="clock-hand minute"></i><div class="clock-logo">⌂</div></div>
-    <div class="coin-float" aria-hidden="true">R$</div>
-    <div class="coin-stack" aria-hidden="true"><i></i><i></i><i></i></div>
-    <div class="phone-card"><div class="phone-brand">⌂ COPILOTO FINANCEIRO</div><div class="phone-label">SALDO DA FAMÍLIA</div><div class="phone-value">R$ 1.250,00</div><div class="phone-chart"></div><div class="phone-line"></div><div class="phone-small"><span>Contas do mês</span><b>03 pendentes</b></div><div class="phone-line"></div><div class="phone-small"><span>Organização</span><b style="color:#4af09b">+12%</b></div></div>
-    <div class="art-caption">Organização financeira em família</div>
-  </div>
-  <div class="pitch">${ARTE}<h2>Copiloto Financeiro</h2><p style="font-size:18px;margin:-4px 0 12px"><b>Um aplicativo brasileiro de finanças para famílias.</b></p>
-  <p>Lance as contas do mês e o Copiloto soma tudo, mostra para onde o dinheiro vai e aponta onde dá para economizar.</p>
-  <div class="ticks"><span>✔ Contas do mês organizadas em um só lugar</span><span>✔ Visão mensal e anual para a família</span><span>✔ Importação de planilhas do Excel</span><span>✔ Checape com sugestões para economizar</span></div>
-  <section class="marketing-plans" aria-label="Planos mensais">
-    <div class="marketing-plan"><div class="marketing-plan-head"><b>Pro</b><strong>R$ 20<small>/mês</small></strong></div><p>Para famílias de até <b>2 pessoas</b>.</p></div>
-    <div class="marketing-plan featured"><div class="marketing-plan-head"><b>Max</b><strong>R$ 30<small>/mês</small></strong></div><p>Para famílias de até <b>6 pessoas</b>.</p><span class="marketing-tag">Mais espaço para a família</span></div>
-  </section>
-  <p class="marketing-note">Uma assinatura mensal por família, paga pelo responsável via Pix. Os demais membros convidados acessam sem pagar outra assinatura. O acesso é liberado após a confirmação do pagamento.</p></div></div>
-  <div class="login"><h3>Bem-vindo</h3><div class="mu" style="margin-bottom:6px">Entre ou crie sua conta para começar.</div>
-  <input id="nome" autocomplete="username" placeholder="Seu nome">
-  <input id="senha" type="password" autocomplete="current-password" placeholder="Senha (mín. 8 caracteres)">
-  <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
-  <div id="recuperacao" hidden>
-  <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
-  <input id="codigo-recuperacao" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de recuperação">
-  <input id="nova-senha" type="password" autocomplete="new-password" placeholder="Nova senha (mín. 8 caracteres)">
-  <button class="sec" data-act="recuperar">Redefinir senha</button>
-  </div>
-  <div id="aviso" class="aviso"></div>
-  <button data-act="entrar">Entrar</button><button class="sec" data-act="cadastrar">Criar conta</button><button class="sec" data-act="reset">Esqueci minha senha</button><a class="demo-link" href="demo.html">▶ Ver demonstração do aplicativo</a></div></div>`;
+  const precoPro=brl(PLANOS.pro.valor),precoMax=brl(PLANOS.max.valor);
+  const feature=(txt,planned=false)=>'<li><span class="landing-feature-check">'+(planned?'◇':'✓')+'</span><span>'+txt+'</span>'+(planned?'<small>Planejado</small>':'')+'</li>';
+  $('#app').innerHTML=`<div class="landing-page">
+    <header class="landing-header">
+      <div class="landing-brand">${LOGO}<div><strong>Copiloto Financeiro</strong><small>GESTÃO FINANCEIRA FAMILIAR</small></div></div>
+      <span class="landing-header-note">Organização · Planejamento · Clareza</span>
+    </header>
+    <section class="landing-hero">
+      <div class="landing-intro">
+        <span class="landing-kicker">FINANÇAS DA FAMÍLIA, COM MAIS CLAREZA</span>
+        <h1>Organize o dinheiro da família em um só lugar.</h1>
+        <p>Registre receitas e despesas, organize categorias, importe planilhas e acompanhe os resultados mês a mês e ao longo do ano.</p>
+        <div class="landing-highlights">
+          <div><span>01</span><b>Controle mensal</b><small>Receitas, despesas e contas em uma planilha organizada.</small></div>
+          <div><span>02</span><b>Visão completa</b><small>Resumo anual, categorias e acompanhamento familiar.</small></div>
+          <div><span>03</span><b>Importação simples</b><small>Trabalhe com arquivos Excel e CSV.</small></div>
+        </div>
+      </div>
+      <section class="landing-login" aria-label="Acesso à conta">
+        <div class="landing-login-head"><span>ÁREA DO CLIENTE</span><h2>Bem-vindo</h2><p>Entre na sua conta ou crie um acesso.</p></div>
+        <input id="nome" autocomplete="username" placeholder="Seu nome">
+        <input id="senha" type="password" autocomplete="current-password" placeholder="Senha (mín. 8 caracteres)">
+        <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
+        <div id="recuperacao" hidden>
+          <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
+          <input id="codigo-recuperacao" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de recuperação">
+          <input id="nova-senha" type="password" autocomplete="new-password" placeholder="Nova senha (mín. 8 caracteres)">
+          <button class="sec" data-act="recuperar">Redefinir senha</button>
+        </div>
+        <div id="aviso" class="aviso"></div>
+        <button class="landing-primary" data-act="entrar">Entrar</button>
+        <button class="landing-secondary" data-act="cadastrar">Criar conta</button>
+        <button class="landing-link-button" data-act="reset">Esqueci minha senha</button>
+        <a class="demo-link" href="demo.html">Ver demonstração do aplicativo</a>
+      </section>
+    </section>
+    <section class="landing-plans-section" aria-labelledby="landing-plans-title">
+      <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Uma assinatura por família. Os membros convidados não precisam contratar outro plano.</p></div>
+      <div class="landing-plan-grid">
+        <article class="landing-plan-card">
+          <div class="landing-plan-top"><span class="landing-plan-label">CONTROLE FINANCEIRO</span><h3>Pro</h3><p>Para organizar as finanças do dia a dia.</p></div>
+          <div class="landing-price"><strong>${precoPro}</strong><span>/ mês</span></div>
+          <div class="landing-limit">Até 2 pessoas na família</div>
+          <div class="landing-feature-heading">RECURSOS INCLUÍDOS</div>
+          <ul class="landing-feature-list">
+            ${feature('Planilha mensal de receitas e despesas')}
+            ${feature('Categorias, histórico e controle de contas')}
+            ${feature('Visão do ano e comparativo mensal')}
+            ${feature('Importação e exportação de Excel e CSV')}
+            ${feature('Checape financeiro e sugestões')}
+            ${feature('Metas, dívidas e cadastro de bens')}
+            ${feature('Acesso familiar e permissões por perfil')}
+          </ul>
+          <div class="landing-plan-status current">Disponível</div>
+        </article>
+        <article class="landing-plan-card recommended">
+          <div class="landing-ribbon">PLANEJAMENTO</div>
+          <div class="landing-plan-top"><span class="landing-plan-label">PLANEJAMENTO FINANCEIRO</span><h3>Max</h3><p>Para famílias que querem planejar antes de decidir.</p></div>
+          <div class="landing-price"><strong>${precoMax}</strong><span>/ mês</span></div>
+          <div class="landing-limit">Até 6 pessoas na família</div>
+          <div class="landing-feature-heading">TUDO DO PRO, MAIS</div>
+          <ul class="landing-feature-list">
+            ${feature('Calendário financeiro',true)}
+            ${feature('Orçamento planejado versus realizado',true)}
+            ${feature('Metas organizadas por etapas',true)}
+            ${feature('Previsão de saldo dos próximos meses',true)}
+            ${feature('Simulador de compras e decisões financeiras',true)}
+            ${feature('Relatórios e comparativos avançados',true)}
+          </ul>
+          <div class="landing-plan-status roadmap">Recursos adicionais em desenvolvimento</div>
+        </article>
+        <article class="landing-plan-card ultra">
+          <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO FINANCEIRA AMPLIADA</span><h3>Ultra</h3><p>Para acompanhar diferentes espaços e a evolução do patrimônio.</p></div>
+          <div class="landing-price landing-price-soon"><strong>Preço em definição</strong></div>
+          <div class="landing-limit">Estrutura em planejamento</div>
+          <div class="landing-feature-heading">TUDO DO PRO E DO MAX, MAIS</div>
+          <ul class="landing-feature-list">
+            ${feature('Central de espaços financeiros',true)}
+            ${feature('Painel consolidado entre espaços',true)}
+            ${feature('Patrimônio líquido e evolução patrimonial',true)}
+            ${feature('Central de relatórios gerenciais',true)}
+            ${feature('Planejamento financeiro de longo prazo',true)}
+            ${feature('Visão avançada de bens e obrigações',true)}
+          </ul>
+          <div class="landing-plan-status roadmap">Em planejamento · não disponível para contratação</div>
+        </article>
+      </div>
+      <p class="landing-plans-footnote">Os valores Pro e Max são os atualmente configurados no checkout. Os itens identificados como “em desenvolvimento” ou “em planejamento” ainda não estão liberados. O Ultra ainda não pode ser contratado.</p>
+    </section>
+    <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar</footer>
+  </div>`;
 }
 function renderSemFamilia(){
   $('#app').innerHTML=`<div class="auth"><h1>Sua família</h1><div class="mu">Crie a família para começar ou entre com um código de convite.</div>
@@ -973,11 +1179,27 @@ async function renderPaywall(){
   const dono=S.me.papel==='dono',venc=S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date();
   let ult=null;if(dono){const r=await q(sb.from('pagamentos').select('*').eq('familia_id',S.fam.id).order('informado_em',{ascending:false}).limit(1));ult=r[0]||null}
   const plano=planoAtual();PIX.valor=plano.valor;const code=pixPayload(PIX);S.pixcode=code;const pend=ult&&ult.status==='pendente',rec=ult&&ult.status==='recusado';
-  const pagar=`<section class="pix-payment"><div class="pix-step"><span>1</span><div><b>Escaneie o QR Code</b><small>Abra o Pix no aplicativo do seu banco.</small></div></div><div class="qrbox">${qrSvg(code)}</div><button class="sec pix-copy" data-act="copiarpix">▣ Copiar código Pix</button><div class="pix-step"><span>2</span><div><b>Confirme o pagamento</b><small>Confira o valor e o recebedor no banco.</small></div></div><label class="pix-label" for="pg_nome">Nome que aparece no comprovante</label><input id="pg_nome" placeholder="Nome do pagador"><details class="pix-extra"><summary>Informar horário do pagamento (opcional)</summary><input id="pg_hora" placeholder="Ex.: 14:35"></details><button class="pix-submit" data-act="paguei">Já fiz o Pix</button></section>`;
-  const miolo=!dono?`<h2>Aguardando ativação</h2><p class="pix-muted">O responsável pela família precisa concluir o pagamento.</p>`:
-   `<div class="pix-heading"><span class="pix-kicker">${venc?'RENOVAÇÃO':'ATIVAÇÃO DO ACESSO'}</span><h1>${venc?'Renove seu acesso':'Escolha seu plano'}</h1><p>Um pagamento para toda a família.</p></div><div class="pix-plans"><button class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span>Pro</span><b>R$ 20<small>/mês</small></b><small>Até 2 pessoas</small></button><button class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span>Max</span><b>R$ 30<small>/mês</small></b><small>Até 6 pessoas</small></button></div><div class="pix-total"><span>Total a pagar</span><b>${brl(PIX.valor)}</b><small>30 dias de acesso · familiares não pagam individualmente</small></div>${rec?'<div class="aviso err">Não conseguimos confirmar o último aviso de pagamento'+(ult.nota?': '+esc(ult.nota):'')+'. Confira os dados e envie novamente.</div>':''}${pend?'<div class="pix-pending"><b>✓ Aviso recebido</b><p>Seu pagamento está em análise. O acesso será liberado após a conferência.</p></div>':pagar}`;
+  const pagar=`<section class="pix-payment"><div class="pix-payment-title"><span class="pix-section-number">01</span><div><b>Realize o pagamento</b><small>Abra o aplicativo do seu banco e escolha Pix.</small></div></div><div class="qrbox">${qrSvg(code)}</div><button class="sec pix-copy" data-act="copiarpix">Copiar código Pix</button><div class="pix-payment-title pix-confirm-title"><span class="pix-section-number">02</span><div><b>Informe o pagamento</b><small>Confira o valor e o nome do recebedor no banco.</small></div></div><label class="pix-label" for="pg_nome">Nome que aparece no comprovante</label><input id="pg_nome" placeholder="Nome do pagador"><details class="pix-extra"><summary>Informar horário do pagamento (opcional)</summary><input id="pg_hora" placeholder="Ex.: 14:35"></details><button class="pix-submit" data-act="paguei">Já fiz o Pix</button><p class="pix-security-note">O acesso será liberado após a conferência do pagamento pelo responsável.</p></section>`;
+  const miolo=!dono?`<div class="pix-heading"><span class="pix-kicker">ACESSO DA FAMÍLIA</span><h1>Aguardando ativação</h1><p>O responsável pela família precisa concluir o pagamento. Você poderá acessar o espaço assim que a ativação for confirmada.</p></div>`:
+    `<div class="pix-heading"><span class="pix-kicker">${venc?'RENOVAÇÃO DO ACESSO':'ASSINATURA FAMILIAR'}</span><h1>${venc?'Renove seu acesso':'Escolha o plano da família'}</h1><p>Um pagamento libera o acesso do responsável e dos membros convidados.</p></div>
+    <div class="pix-plan-grid">
+      <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${brl(PLANOS.pro.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
+      <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${brl(PLANOS.max.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro e ferramentas adicionais de planejamento em desenvolvimento.</span></button>
+      <div class="pix-plan pix-plan-disabled"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>Em planejamento</strong><span class="pix-plan-cap">Ainda não disponível</span><span class="pix-plan-detail">Central de espaços, relatórios avançados e gestão patrimonial ampliada.</span></div>
+    </div>
+    <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Total para 30 dias</small><strong>${brl(PIX.valor)}</strong></div><p>Assinatura por família · não há cobrança individual dos membros convidados.</p></div>
+    <div class="pix-checkout-disclaimer">Os recursos adicionais do Max estão em desenvolvimento. O Ultra ainda não está disponível para contratação.</div>
+    ${rec?'<div class="aviso err">Não conseguimos confirmar o último aviso de pagamento'+(ult.nota?': '+esc(ult.nota):'')+'. Confira os dados e envie novamente.</div>':''}
+    ${pend?'<div class="pix-pending"><b>Aviso de pagamento recebido</b><p>Seu pagamento está em análise. O acesso será liberado após a conferência.</p></div>':pagar}`;
   const entrarComConvite=`<details class="pix-join"><summary>Já tem um convite de família?</summary><div class="pix-join-panel"><p>Digite o código recebido de alguém da família para entrar sem fazer outro Pix.</p><input id="cod-pix" maxlength="32" autocomplete="off" autocapitalize="characters" placeholder="CÓDIGO DO CONVITE"><button data-act="entrarfam-pix">Entrar na família</button></div></details>`;
-  $('#app').innerHTML=`<main class="pix-page"><header class="pix-brand">${LOGO}<span>Copiloto Financeiro</span></header><section class="pix-card">${miolo}${entrarComConvite}</section><div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button><div><a href="#" data-act="legal" data-t="termos">Termos</a> · <a href="#" data-act="legal" data-t="privacidade">Privacidade</a></div></div></main>`;
+  $('#app').innerHTML=`<main class="pix-page">
+    <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>ASSINATURA E ACESSO FAMILIAR</small></div></header>
+    <div class="pix-layout">
+      <section class="pix-card">${miolo}${entrarComConvite}</section>
+      <aside class="pix-aside"><div class="pix-aside-card"><span class="pix-aside-icon">✓</span><b>Pagamento via Pix</b><p>Confira os dados antes de confirmar no aplicativo do seu banco.</p></div><div class="pix-aside-card"><span class="pix-aside-number">30</span><b>Dias de acesso</b><p>O acesso é liberado depois da conferência do pagamento.</p></div><div class="pix-aside-help"><b>Precisa de ajuda?</b><span>Consulte os Termos de Uso e a Política de Privacidade.</span><div><a href="#" data-act="legal" data-t="termos">Termos</a> · <a href="#" data-act="legal" data-t="privacidade">Privacidade</a></div></div></aside>
+    </div>
+    <footer class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></footer>
+  </main>`;
   clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);
 }
 async function carregarAdmin(){
