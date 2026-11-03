@@ -2499,10 +2499,10 @@ function parseMonthCell(raw){
   if(typeof raw==='number'&&Number.isInteger(raw)&&raw>=1&&raw<=12)return raw;
   const v=norm(raw);
   const nomes=['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-  const idx=nomes.findIndex((n,i)=>v===n||v===MES3[i]||v.startsWith(n+' ')||v.startsWith(MES3[i]+' '));
+  const idx=nomes.findIndex((n,i)=>new RegExp('^('+n+'|'+MES3[i]+')(?:$|[\\s/.-])').test(v));
   if(idx>=0)return idx+1;
-  const m=v.match(/^(\d{1,2})(?:[\/.-]\d{4})?$/);
-  if(m&&+m[1]>=1&&+m[1]<=12)return +m[1];
+  const m=v.match(/^(\d{1,2})(?:[\/.-]\d{4})?$/)||v.match(/^\d{4}[\/.-](\d{1,2})$/);
+  if(m){const n=+(m[1]||m[2]);if(n>=1&&n<=12)return n;}
   const d=parseDateCell(raw);return d?+d.slice(5,7):null;
 }
 function parseYearCell(raw){
@@ -2521,7 +2521,7 @@ function parseTabularData(rows,fallbackMonth=null,fallbackYear=null){
     if(!descricao||descricao.length>160||!(valor>0))continue;
     const data=idateV>=0?parseDateCell(r[idateV]):null;
     const mes=(im>=0?parseMonthCell(r[im]):null)||(data?+data.slice(5,7):null)||fallbackMonth;
-    const ano=(iy>=0?parseYearCell(r[iy]):null)||(data?+data.slice(0,4):null)||fallbackYear;
+    const ano=(iy>=0?parseYearCell(r[iy]):null)||(im>=0?parseYearCell(r[im]):null)||(data?+data.slice(0,4):null)||fallbackYear;
     if(!mes)continue;
     const chave=(ano||'sem-ano')+'-'+String(mes).padStart(2,'0');
     if(!grupos.has(chave))grupos.set(chave,{mes,ano,itens:[],receita:0});
