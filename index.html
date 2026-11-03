@@ -2493,35 +2493,56 @@ function parseDateCell(raw){
   if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
   return null;
 }
-function parseTabularRows(rows){
+function parseMonthCell(raw){
+  if(raw==null||raw==='')return null;
+  if(typeof raw==='number'&&Number.isInteger(raw)&&raw>=1&&raw<=12)return raw;
+  const v=norm(raw);
+  const nomes=['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const idx=nomes.findIndex((n,i)=>v===n||v===MES3[i]||v.startsWith(n+' ')||v.startsWith(MES3[i]+' '));
+  if(idx>=0)return idx+1;
+  const m=v.match(/^(\d{1,2})(?:[\/.-]\d{4})?$/);
+  if(m&&+m[1]>=1&&+m[1]<=12)return +m[1];
+  const d=parseDateCell(raw);return d?+d.slice(5,7):null;
+}
+function parseYearCell(raw){
+  const m=String(raw??'').match(/(?:19|20)\d{2}/);return m?+m[0]:null;
+}
+function parseTabularData(rows,fallbackMonth=null,fallbackYear=null){
   const hi=rows.findIndex(r=>r.some(c=>norm(c).startsWith('valor'))&&r.some(c=>norm(c).startsWith('descri')||norm(c)==='item'));
   if(hi<0)return null;
-  const h=rows[hi].map(norm),ix=(...keys)=>h.findIndex(x=>keys.some(k=>x.startsWith(k)));
+  const h=rows[hi].map(norm),ix=(...keys)=>h.findIndex(x=>keys.some(k=>x===k||x.startsWith(k)));
   const iv=ix('valor'),id=ix('descri','item'),it=ix('tipo'),ic=ix('categoria'),is=ix('status','situa');
-  const idateV=h.findIndex(x=>x.startsWith('vencimento')),idate=idateV>=0?idateV:h.findIndex(x=>x.startsWith('data'));
+  const idateV=ix('vencimento','data'),im=ix('mes','competencia','referencia'),iy=ix('ano');
   if(iv<0||id<0)return null;
-  const itens=[];
+  const grupos=new Map();
   for(const r of rows.slice(hi+1)){
     const descricao=String(r[id]??'').trim(),valor=parseMoneyCell(r[iv]);
     if(!descricao||descricao.length>160||!(valor>0))continue;
+    const data=idateV>=0?parseDateCell(r[idateV]):null;
+    const mes=(im>=0?parseMonthCell(r[im]):null)||(data?+data.slice(5,7):null)||fallbackMonth;
+    const ano=(iy>=0?parseYearCell(r[iy]):null)||(data?+data.slice(0,4):null)||fallbackYear;
+    if(!mes)continue;
+    const chave=(ano||'sem-ano')+'-'+String(mes).padStart(2,'0');
+    if(!grupos.has(chave))grupos.set(chave,{mes,ano,itens:[],receita:0});
     const tipo=it>=0&&norm(r[it]).startsWith('receita')?'receita':'despesa';
     const categoriaNome=ic>=0?String(r[ic]??'').trim():'';
     const categoria=S.cats.find(c=>c.tipo===tipo&&norm(c.nome)===norm(categoriaNome));
     const st=is>=0?norm(r[is]):'pendente';
     const status=['pago','atrasado'].includes(st)?st:'pendente';
-    const pm=String(r[3]??'').match(/(\d+)\s*de\s*(\d+)/i);
-    itens.push({grupo:tipo==='receita'?'receita':(categoria?.grupo||'variaveis'),descricao,valor,
-      categoria_id:categoria?.id||null,data_vencimento:idate>=0?parseDateCell(r[idate]):null,status,
+    const pm=String(r.find(v=>/\d+\s*de\s*\d+/i.test(String(v??'')))??'').match(/(\d+)\s*de\s*(\d+)/i);
+    grupos.get(chave).itens.push({grupo:tipo==='receita'?'receita':(categoria?.grupo||'variaveis'),descricao,valor,
+      categoria_id:categoria?.id||null,data_vencimento:data,status,
       parcela_atual:pm?+pm[1]:null,parcelas_total:pm?+pm[2]:null});
   }
-  return itens;
+  return [...grupos.values()];
 }
 function parseSheetRows(name,rows){
   const m=norm(name).match(/^(janeiro|jan|fevereiro|fev|marco|mar|abril|abr|maio|mai|junho|jun|julho|jul|agosto|ago|setembro|set|outubro|out|novembro|nov|dezembro|dez)(?=[\s\d\/_-]|$)\s*[\/_-]?\s*(\d{4})?/);
   if(!m)return null;
-  const out={mes:MES3.indexOf(m[1].slice(0,3))+1,ano:m[2]?+m[2]:null,itens:[],receita:0};
-  const header=rows.find(r=>r.some(c=>norm(c).startsWith('vencimento'))||r.some(c=>norm(c).startsWith('tipo'))||r.some(c=>norm(c).startsWith('status')));
-  if(header){out.itens=parseTabularRows(rows)||[];return out}
+  const mes=MES3.indexOf(m[1].slice(0,3))+1,ano=m[2]?+m[2]:null;
+  const header=rows.some(r=>r.some(c=>norm(c).startsWith('valor'))&&r.some(c=>norm(c).startsWith('descri')||norm(c)==='item'));
+  if(header)return parseTabularData(rows,mes,ano)||[];
+  const out={mes,ano,itens:[],receita:0};
   for(const r of rows){
     const a=norm(r[0]);
     if(a.startsWith('receita prevista')){const v=parseMoneyCell(r[2]);if(v>0)out.receita=v;continue}
@@ -2533,10 +2554,10 @@ function parseSheetRows(name,rows){
   return out;
 }
 function parseGeneric(rows){
-  const itens=parseTabularRows(rows);
-  return itens?.length?{mes:null,ano:null,itens,receita:0}:null;
+  const meses=parseTabularData(rows,null,null);
+  return meses?.length?meses:null;
 }
-/*END*//*END*/
+/*END*/
 const saudacao=()=>{const h=new Date().getHours();return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'};
 function afterRender(){
   const k=S.view+'|'+(S.mes&&S.mes.id)+'|'+(S.ano&&S.ano.id);
@@ -2557,17 +2578,28 @@ function catPara(grupo,desc){
 const lanc=(mid,tipo,desc,valor,grupo,i={})=>({familia_id:S.fam.id,mes_id:mid,tipo,descricao:desc,valor,categoria_id:catPara(grupo,desc),status:'pendente',parcela_atual:i.parcela_atual||null,parcelas_total:i.parcelas_total||null,observacao:i.obs||null,origem:'importacao_arquivo',criado_por:S.user.id});
 async function lerArquivo(file){
   try{
-    const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});const meses=[];let gen=null;
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});const meses=[];
     for(const n of wb.SheetNames){
+      if(norm(n)==='instrucoes')continue;
       const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:null,raw:true});
       const p=parseSheetRows(n,rows);
-      if(p){if(p.itens.length||p.receita)meses.push(p)}
-      else if(!gen&&norm(n)!=='instrucoes'){const g=parseGeneric(rows);if(g&&g.itens.length)gen=g}
+      if(Array.isArray(p))meses.push(...p.filter(m=>m.itens.length||m.receita));
+      else if(p){if(p.itens.length||p.receita)meses.push(p)}
+      else{
+        const g=parseGeneric(rows);
+        if(g)meses.push(...g);
+      }
     }
-    if(!meses.length&&gen){gen.mes=S.mes.mes;gen.ano=S.ano.ano;meses.push(gen)}
-    if(!meses.length)return toast('Não encontrei lançamentos. Confira se a planilha tem colunas Descrição e Valor.',1);
-    meses.forEach(m=>{if(!m.ano)m.ano=S.ano.ano});
-    S.imp=meses;render();
+    if(!meses.length)return toast('Não encontrei lançamentos com mês, descrição e valor. Inclua uma coluna Mês (ou uma data de vencimento) na planilha.',1);
+    const agrupados=new Map();
+    meses.forEach(m=>{
+      if(!m.ano)m.ano=S.ano.ano;
+      const chave=m.ano+'-'+String(m.mes).padStart(2,'0');
+      if(!agrupados.has(chave))agrupados.set(chave,{mes:m.mes,ano:m.ano,itens:[],receita:0});
+      const destino=agrupados.get(chave);
+      destino.itens.push(...(m.itens||[]));destino.receita+=Number(m.receita)||0;
+    });
+    S.imp=[...agrupados.values()].sort((a,b)=>a.ano-b.ano||a.mes-b.mes);render();
   }catch(err){console.error('Falha ao ler planilha:',err);toast('Não consegui ler esse arquivo: '+(err?.message||'formato inválido'),1)}
 }
 function viewImport(){
