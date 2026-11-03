@@ -2257,7 +2257,19 @@ function renderAuth(){
 function scrollLandingRoute(route){
   const page=document.querySelector('.landing-page');
   if(page&&!S.user&&['inicio','recursos','planos'].includes(route))page.dataset.screen=route;
-  requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'smooth'}));
+  requestAnimationFrame(()=>{
+    if(route==='inicio'){
+      window.scrollTo({top:0,behavior:'smooth'});
+      return;
+    }
+    const target=route==='recursos'
+      ?document.querySelector('.landing-page .landing-benefits')
+      :route==='planos'
+        ?document.querySelector('.landing-page .landing-plans-section')
+        :null;
+    if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+    else window.scrollTo({top:0,behavior:'smooth'});
+  });
 }
 if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{const route=(location.hash||'#inicio').slice(1);const page=document.querySelector('.landing-page');const wantsAccess=['login','cadastro'].includes(route);const isAccess=page?.dataset.screen==='acesso';if(!S.user&&(!page||wantsAccess!==isAccess||(wantsAccess&&route==='cadastro'&&document.getElementById('landing-terms')?.style.display!=='flex')||(wantsAccess&&route==='login'&&document.getElementById('landing-terms')?.style.display==='flex')))renderAuth();else if(!S.user&&page&&!wantsAccess&&['inicio','recursos','planos'].includes(route))page.dataset.screen=route;scrollLandingRoute(route);});}
 if(!window.__cfLandingRouteBound){window.__cfLandingRouteBound=true;document.addEventListener('click',e=>{const link=e.target.closest('[data-public-route]');if(!link)return;e.preventDefault();const route=link.dataset.publicRoute;if(!['inicio','recursos','planos','login','cadastro'].includes(route))return;const hash='#'+route;if(location.hash===hash){if(!S.user){const page=document.querySelector('.landing-page');if(!page||(['login','cadastro'].includes(route)!==(page.dataset.screen==='acesso')))renderAuth();}scrollLandingRoute(route);}else{if(!S.user&&['inicio','recursos','planos'].includes(route)){const page=document.querySelector('.landing-page');if(page)page.dataset.screen=route;}location.hash=hash;scrollLandingRoute(route);}});}
