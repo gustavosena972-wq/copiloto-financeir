@@ -1415,6 +1415,22 @@ button:not(:disabled):hover{filter:brightness(1.04)}
 @media(max-width:850px){.cf-section-head{align-items:flex-start;flex-direction:column}.cf-space-row{flex-wrap:wrap}.cf-space-action{margin-left:auto}}
 @media(max-width:560px){.cf-report-line{grid-template-columns:94px minmax(65px,1fr) 86px;gap:7px;font-size:10px}.cf-report-line b{font-size:10px}.cf-chart{gap:3px;height:160px}.cf-chart-pair{height:120px}.cf-chart-month small{font-size:8px}.cf-space-meta{min-width:78px}.cf-space-action{width:100%;text-align:left;margin-left:46px}}
 </style>
+<style id="cf-ultra-finance">
+.cf-history-chart{height:190px;display:flex;align-items:flex-end;gap:9px;padding:13px 0 0;border-bottom:1px solid #dfe4d9;overflow:auto}
+.cf-history-point{min-width:74px;flex:1;max-width:120px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px}
+.cf-history-column{height:105px;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.cf-history-column i{width:35px;max-width:70%;background:linear-gradient(180deg,#8cb798,#2e7652);border-radius:6px 6px 0 0;display:block}
+.cf-history-point b{font-size:10px;color:#405445}.cf-history-point small{font-size:9px;color:#899287;white-space:nowrap}
+.cf-simulator{display:grid;grid-template-columns:repeat(4,minmax(100px,1fr)) auto;gap:10px;align-items:end}
+.cf-simulator label{display:grid;gap:6px;color:#718071;font-size:10px;font-weight:700}
+.cf-simulator input{width:100%;min-height:39px;background:#fff;border:1px solid #d9dfd4;color:#2c3d31;border-radius:9px;padding:8px 10px}
+.cf-simulator button{min-height:39px;white-space:nowrap}
+.cf-projection-result{margin-top:14px;padding:13px 0;border-top:1px solid #e3e7df;display:grid;gap:3px}
+.cf-projection-result span{font-size:10px;color:#8a7955;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.cf-projection-result strong{font-size:26px;color:#286347;letter-spacing:-.03em}.cf-projection-result p{font-size:11px;color:#7b867b;margin:0}
+@media(max-width:850px){.cf-simulator{grid-template-columns:repeat(2,minmax(100px,1fr))}.cf-simulator button{grid-column:1/-1}}
+@media(max-width:560px){.cf-history-point{min-width:66px}.cf-simulator{grid-template-columns:1fr 1fr}}
+</style>
 </head>
 <body>
 <div id="app" class="wrap"></div>
@@ -1945,7 +1961,7 @@ function ligarTempoReal(){
   if(S.rt)sb.removeChannel(S.rt);
   const filtro='familia_id=eq.'+S.fam.id;
   S.rt=sb.channel('familia-'+S.fam.id);
-  ['lancamentos','sugestoes','metas','dividas','patrimonio_itens','meses'].forEach(tb=>{
+  ['lancamentos','sugestoes','metas','dividas','patrimonio_itens','patrimonio_snapshots','meses'].forEach(tb=>{
     S.rt.on('postgres_changes',{event:'*',schema:'public',table:tb,filter:filtro},()=>{
       clearTimeout(rtTimer);
       rtTimer=setTimeout(()=>solicitarAtualizacaoAoVivo(),900);
@@ -1987,11 +2003,12 @@ document.addEventListener('visibilitychange',()=>{
 window.addEventListener('online',()=>{if(S.user&&S.fam){S.rtReconectar=true;ligarTempoReal();solicitarAtualizacaoAoVivo()}});
 
 async function carregarPlan(rd=true){
-  const[m,d,i,p]=await Promise.all([q(sb.from('metas').select('*').eq('familia_id',S.fam.id).order('atualizado_em')),
+  const[m,d,i,p,h]=await Promise.all([q(sb.from('metas').select('*').eq('familia_id',S.fam.id).order('atualizado_em')),
     q(sb.from('dividas').select('*').eq('familia_id',S.fam.id).eq('ativa',true)),
     q(sb.from('patrimonio_itens').select('*').eq('familia_id',S.fam.id).order('atualizado_em')),
-    q(sb.from('v_patrimonio').select('*').eq('familia_id',S.fam.id).maybeSingle())]);
-  S.plan={metas:m,dividas:d,itens:i,pat:p||{}};if(rd)render();
+    q(sb.from('v_patrimonio').select('*').eq('familia_id',S.fam.id).maybeSingle()),
+    q(sb.from('patrimonio_snapshots').select('*').eq('familia_id',S.fam.id).order('data',{ascending:true}))]);
+  S.plan={metas:m,dividas:d,itens:i,pat:p||{},snapshots:h};if(rd)render();
 }
 function viewPlan(){
   const P=S.plan||{metas:[],dividas:[],itens:[],pat:{}},ed=canEdit(),d=ed?'':'disabled',met=S.metodo||'avalanche';
@@ -2013,8 +2030,23 @@ function viewPlan(){
    <div class="row" style="margin-top:10px"><input id="d_nome" placeholder="Dívida" style="flex:1" ${d}><input id="d_saldo" type="number" step="0.01" placeholder="Saldo R$" style="width:100px" ${d}></div>
    <div class="row"><input id="d_juros" type="number" step="0.01" placeholder="Juros %/mês" style="width:110px" ${d}><input id="d_min" type="number" step="0.01" placeholder="Mínimo R$" style="width:100px" ${d}><input id="d_credor" placeholder="Credor" style="flex:1" ${d}><button data-act="adddiv" ${d}>Adicionar</button></div></div></div>
   <div class="card" style="margin-top:12px"><b>🏠 Patrimônio</b><div class="mu" style="margin:4px 0 8px">Soma bens, saldos das contas e dívidas. Cadastre imóveis, veículos, investimentos e financiamentos.</div>${its}
-   <div class="row" style="margin-top:10px"><select id="p_tipo" ${d}><option value="ativo">Ativo (tenho)</option><option value="passivo">Passivo (devo)</option></select><input id="p_nome" placeholder="Nome (ex.: Casa, Carro)" style="flex:1" ${d}><input id="p_valor" type="number" step="0.01" placeholder="Valor R$" style="width:120px" ${d}><button data-act="additem" ${d}>Adicionar</button></div></div>`;
+   <div class="row" style="margin-top:10px"><select id="p_tipo" ${d}><option value="ativo">Ativo (tenho)</option><option value="passivo">Passivo (devo)</option></select><input id="p_nome" placeholder="Nome (ex.: Casa, Carro)" style="flex:1" ${d}><input id="p_valor" type="number" step="0.01" placeholder="Valor R$" style="width:120px" ${d}><button data-act="additem" ${d}>Adicionar</button></div></div>${viewUltraExtras(P,ed)}`;
 }
+
+function viewUltraExtras(P,ed){
+  const hist=P.snapshots||[];
+  const mx=Math.max(1,...hist.map(x=>Number(x.liquido)||0));
+  const bars=hist.slice(-12).map(x=>{
+    const h=Math.max(3,Math.max(0,Number(x.liquido)||0)/mx*100);
+    const dt=new Date(x.data+"T12:00:00").toLocaleDateString("pt-BR");
+    return '<div class="cf-history-point"><div class="cf-history-column"><i style="height:'+h+'%"></i></div><b>'+brl(x.liquido)+'</b><small>'+dt+'</small></div>';
+  }).join("");
+  const history='<section class="cf-section"><h2>Histórico patrimonial</h2><p>Acompanhe a evolução do patrimônio líquido.</p><button data-act="registrarpat" '+(ed?"":"disabled")+'>Registrar posição de hoje</button>'+(hist.length?'<div class="cf-history-chart">'+bars+'</div>':'<p class="cf-note">Registre sua primeira posição patrimonial.</p>')+'</section>';
+  const initial=Math.max(0,Number((P.pat||{}).liquido)||0).toFixed(2);
+  const sim='<section class="cf-section"><span>PLANEJAMENTO DE LONGO PRAZO</span><h2>Simulador de objetivos</h2><div class="cf-simulator"><label>Valor inicial<input id="proj_inicial" type="number" min="0" step="0.01" value="'+initial+'"></label><label>Aporte mensal<input id="proj_aporte" type="number" min="0" step="0.01" value="0"></label><label>Prazo em meses<input id="proj_meses" type="number" min="1" max="360" value="60"></label><label>Taxa mensal hipotética (%)<input id="proj_taxa" type="number" min="0" max="3" step="0.01" value="0"></label><button data-act="simularproj">Calcular</button></div><div id="proj_result" class="cf-projection-result">Informe os dados e calcule o cenário.</div><p class="cf-note-text">Simulação matemática, sem garantia de rendimento ou recomendação de investimento.</p></section>';
+  return history+sim;
+}
+
 function viewStatus(){
   const dt=x=>x?new Date(x).toLocaleDateString('pt-BR'):'';
   if(S.ano.status==='fechado')return `<div class="faixa fech"><span><b>🔒 Ano ${S.ano.ano} FECHADO</b> em ${dt(S.ano.fechado_em)} · todos os meses estão travados e a poupança foi levada para ${S.ano.ano+1}.</span><button class="sec chip" data-act="anoprox">Ir para ${S.ano.ano+1} ▶</button></div>`;
@@ -2262,6 +2294,8 @@ document.addEventListener('click',async e=>{
   else if(a==='additem'){const n=$('#p_nome').value.trim(),v=parseFloat($('#p_valor').value);if(!n||!(v>0))return toast('Informe nome e valor',1);
     await q(sb.from('patrimonio_itens').insert({familia_id:S.fam.id,tipo:$('#p_tipo').value,nome:n,valor:v}));await carregarPlan()}
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
+  else if(a==='registrarpat'){if(!canEdit())return toast('Somente quem edita pode registrar o patrimônio.',1);const p=S.plan?.pat||{},now=new Date(),data=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');await q(sb.from('patrimonio_snapshots').upsert({familia_id:S.fam.id,data,ativos:Number(p.ativos)||0,passivos:Number(p.passivos)||0,liquido:Number(p.liquido)||0},{onConflict:'familia_id,data'}));toast('Posição patrimonial registrada.');await carregarPlan()}
+  else if(a==='simularproj'){const inicial=Number($('#proj_inicial').value),aporte=Number($('#proj_aporte').value),meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;if(![inicial,aporte,meses,taxa].every(Number.isFinite)||inicial<0||aporte<0||meses<1||meses>360||!Number.isInteger(meses)||taxa<0||taxa>0.03)return toast('Confira os valores: prazo de 1 a 360 meses e taxa de 0% a 3% ao mês.',1);const fator=Math.pow(1+taxa,meses),futuro=taxa===0?inicial+aporte*meses:inicial*fator+aporte*((fator-1)/taxa),aportado=inicial+aporte*meses,out=$('#proj_result');if(out)out.innerHTML='<span>Resultado ilustrativo</span><strong>'+brl(futuro)+'</strong><p>Valor total colocado: '+brl(aportado)+' · diferença matemática: '+brl(futuro-aportado)+'</p>';}
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
   else if(a==='fecharmodal'){S.pv=null;S.sino=false;S.hist=null;render()}
   else if(a==='plano'){const p=b.dataset.plano;if(!PLANOS[p])return;S.planoEscolhido=p;PIX.valor=PLANOS[p].valor;renderPaywall();return}
