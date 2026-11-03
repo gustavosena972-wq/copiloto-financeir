@@ -1943,28 +1943,25 @@ function renderAuth(){
           <div class="landing-plan-status current">Disponível</div>
         </article>
         <article class="landing-plan-card recommended">
-          <div class="landing-ribbon">PLANEJAMENTO</div>
-          <div class="landing-plan-top"><span class="landing-plan-label">PLANEJAMENTO FINANCEIRO</span><h3>Max</h3><p>Para famílias que querem planejar antes de decidir.</p></div>
+          <div class="landing-ribbon">FAMÍLIA AMPLIADA</div>
+          <div class="landing-plan-top"><span class="landing-plan-label">MAIS PESSOAS NO MESMO ESPAÇO</span><h3>Max</h3><p>Para famílias que precisam organizar as finanças com mais pessoas.</p></div>
           <div class="landing-price"><strong>${precoMax}</strong><span>/ mês</span></div>
           <div class="landing-limit">Até 6 pessoas na família</div>
-          <div class="landing-feature-heading">TUDO DO PRO, MAIS</div>
+          <div class="landing-feature-heading">TUDO DO PRO, COM MAIS CAPACIDADE</div>
           <ul class="landing-feature-list">
-            ${feature('Calendário financeiro',true)}
-            ${feature('Orçamento planejado versus realizado',true)}
-            ${feature('Metas organizadas por etapas',true)}
-            ${feature('Previsão de saldo dos próximos meses',true)}
-            ${feature('Simulador de compras e decisões financeiras',true)}
-            ${feature('Relatórios e comparativos avançados',true)}
+            ${feature('Até 6 pessoas no mesmo espaço familiar')}
+            ${feature('Um único pagamento para toda a família')}
+            ${feature('Convites e permissões individuais para os membros')}
           </ul>
-          <div class="landing-plan-status roadmap">Recursos adicionais em desenvolvimento</div>
+          <div class="landing-plan-status current">Disponível</div>
         </article>
         <article class="landing-plan-card ultra">
-          <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO FINANCEIRA AMPLIADA</span><h3>Ultra</h3><p>Para acompanhar diferentes espaços e a evolução do patrimônio.</p></div>
+          <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO FINANCEIRA AMPLIADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e espaços familiares já vinculados à sua conta.</p></div>
           <div class="landing-price"><strong>${precoUltra}</strong><span>/ mês</span></div>
           <div class="landing-limit">Ferramentas avançadas de gestão financeira</div>
           <div class="landing-feature-heading">RECURSOS ULTRA DISPONÍVEIS</div>
           <ul class="landing-feature-list">
-            ${feature('Central de espaços com alternância entre famílias vinculadas')}
+            ${feature('Central para alternar entre famílias às quais sua conta já pertence')}
             ${feature('Relatórios anuais e comparativos avançados')}
             ${feature('Histórico da evolução patrimonial')}
             ${feature('Simulador de objetivos de longo prazo')}
@@ -1973,7 +1970,7 @@ function renderAuth(){
           <div class="landing-plan-status current">Disponível para contratação</div>
         </article>
       </div>
-      <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. Os recursos adicionais do Max ainda estão em desenvolvimento. O Ultra libera os módulos descritos acima após a confirmação do pagamento.</p>
+      <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. O Max amplia a capacidade da família para até 6 pessoas. O pagamento é feito por Pix, com conferência manual e sem renovação automática. A assinatura é por família; no Ultra, a central alterna entre espaços familiares aos quais a conta já pertence, cada um com seu próprio acesso.</p>
     </section>
     <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar</footer>
   </div>`;
@@ -2462,6 +2459,7 @@ function pixPayload(p){
 /*END*/
 function qrSvg(t){const q=qrcode(0,'M');q.addData(t);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}
 async function renderPaywall(){
+  if(!PLANOS[S.planoEscolhido])S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';
   const dono=S.me.papel==='dono',venc=S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date();
   let ult=null;if(dono){const r=await q(sb.from('pagamentos').select('*').eq('familia_id',S.fam.id).order('informado_em',{ascending:false}).limit(1));ult=r[0]||null}
   const plano=planoAtual();PIX.valor=plano.valor;const code=pixPayload(PIX);S.pixcode=code;const pend=ult&&ult.status==='pendente',rec=ult&&ult.status==='recusado';
@@ -2470,11 +2468,11 @@ async function renderPaywall(){
     `<div class="pix-heading"><span class="pix-kicker">${venc?'RENOVAÇÃO DO ACESSO':'ASSINATURA FAMILIAR'}</span><h1>${venc?'Renove seu acesso':'Escolha o plano da família'}</h1><p>Um pagamento libera o acesso do responsável e dos membros convidados.</p></div>
     <div class="pix-plan-grid">
       <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${brl(PLANOS.pro.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
-      <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${brl(PLANOS.max.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro e ferramentas adicionais de planejamento em desenvolvimento.</span></button>
-      <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${brl(PLANOS.ultra.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Central de espaços vinculados, relatórios, histórico patrimonial e simulador de objetivos.</span></button>
+      <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${brl(PLANOS.max.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas na mesma família.</span></button>
+      <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${brl(PLANOS.ultra.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial, simulador de objetivos e central para alternar entre espaços familiares já vinculados.</span></button>
     </div>
-    <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Total para 30 dias</small><strong>${brl(PIX.valor)}</strong></div><p>Assinatura por família · não há cobrança individual dos membros convidados.</p></div>
-    <div class="pix-checkout-disclaimer">O pagamento é informado por Pix e liberado após conferência administrativa. Os recursos adicionais do Max permanecem em desenvolvimento; os módulos Ultra descritos estão disponíveis após a ativação.</div>
+    <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Total para ${PIX.dias} dias</small><strong>${brl(PIX.valor)}</strong></div><p>Assinatura por família · não há cobrança individual dos membros convidados.</p></div>
+    <div class="pix-checkout-disclaimer">O pagamento é feito por Pix e liberado após conferência manual. O Max amplia o limite para até 6 pessoas. No Ultra, a central alterna entre famílias às quais sua conta já pertence; cada família mantém sua própria assinatura. Não há renovação automática.</div>
     ${rec?'<div class="aviso err">Não conseguimos confirmar o último aviso de pagamento'+(ult.nota?': '+esc(ult.nota):'')+'. Confira os dados e envie novamente.</div>':''}
     ${pend?'<div class="pix-pending"><b>Aviso de pagamento recebido</b><p>Seu pagamento está em análise. O acesso será liberado após a conferência.</p></div>':pagar}`;
   const entrarComConvite=`<details class="pix-join"><summary>Já tem um convite de família?</summary><div class="pix-join-panel"><p>Digite o código recebido de alguém da família para entrar sem fazer outro Pix.</p><input id="cod-pix" maxlength="32" autocomplete="off" autocapitalize="characters" placeholder="CÓDIGO DO CONVITE"><button data-act="entrarfam-pix">Entrar na família</button></div></details>`;
@@ -2482,7 +2480,7 @@ async function renderPaywall(){
     <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>ASSINATURA E ACESSO FAMILIAR</small></div></header>
     <div class="pix-layout">
       <section class="pix-card">${miolo}${entrarComConvite}</section>
-      <aside class="pix-aside"><div class="pix-aside-card"><span class="pix-aside-icon">✓</span><b>Pagamento via Pix</b><p>Confira os dados antes de confirmar no aplicativo do seu banco.</p></div><div class="pix-aside-card"><span class="pix-aside-number">30</span><b>Dias de acesso</b><p>O acesso é liberado depois da conferência do pagamento.</p></div><div class="pix-aside-help"><b>Precisa de ajuda?</b><span>Consulte os Termos de Uso e a Política de Privacidade.</span><div><a href="#" data-act="legal" data-t="termos">Termos</a> · <a href="#" data-act="legal" data-t="privacidade">Privacidade</a></div></div></aside>
+      <aside class="pix-aside"><div class="pix-aside-card"><span class="pix-aside-icon">✓</span><b>Pagamento via Pix</b><p>Confira os dados antes de confirmar no aplicativo do seu banco.</p></div><div class="pix-aside-card"><span class="pix-aside-number">${PIX.dias}</span><b>Dias de acesso</b><p>O acesso é liberado depois da conferência do pagamento.</p></div><div class="pix-aside-help"><b>Precisa de ajuda?</b><span>Consulte os Termos de Uso e a Política de Privacidade.</span><div><a href="#" data-act="legal" data-t="termos">Termos</a> · <a href="#" data-act="legal" data-t="privacidade">Privacidade</a></div></div></aside>
     </div>
     <footer class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></footer>
   </main>`;
@@ -2497,7 +2495,7 @@ function viewAdmin(){
    <td>${x.status==='pendente'?`<input type="number" id="dias_${x.id}" value="${PIX.dias}" min="1" style="width:70px"> dias <button class="chip" data-act="aprovar" data-id="${x.id}">✔ Aprovar</button> <button class="red chip" data-act="recusar" data-id="${x.id}">Recusar</button>`:esc(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5" class="mu" style="padding:14px">Nenhum pagamento informado ainda.</td></tr>';
   return `<div class="cards"><div class="card"><small>Contas criadas</small><b>${r.contas??0}</b></div><div class="card"><small>Assinaturas ativas</small><b class="pos">${r.ativas??0}</b></div><div class="card"><small>Pedidos a conferir</small><b>${r.pendentes??0}</b></div><div class="card"><small>Receita total</small><b class="pos">${brl(r.receita_total)}</b></div><div class="card"><small>Últimos 30 dias</small><b>${brl(r.receita_30d)}</b></div><div class="card"><small>Vencem em 7 dias</small><b>${r.vencem_7d??0}</b></div></div>
   <div class="card" style="margin-bottom:14px"><b>Pagamentos informados</b><div class="mu" style="margin:4px 0 8px">Confira no app do seu banco se o Pix chegou (valor, nome e horário) e só então aprove.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Informado</th><th>Família</th><th>Pagador</th><th>Valor</th><th>Ação</th></tr></thead><tbody>${linhas}</tbody></table></div></div>
-  <div class="card"><b>Seu QR de cobrança</b><div class="mu" style="margin:4px 0">Escaneie com o app de OUTRO banco para conferir se aparece o seu nome e o valor de ${brl(PIX.valor)}.</div><div class="qrbox">${qrSvg(code)}</div><input readonly value="${code}" onclick="this.select()" style="width:100%;font-size:11px"></div>`;
+  <div class="card"><b>QR de referência do plano Pro</b><div class="mu" style="margin:4px 0">Confira o nome e o valor de ${brl(PLANOS.pro.valor)} em outro banco. No checkout, o QR muda conforme o plano escolhido.</div><div class="qrbox">${qrSvg(code)}</div><input readonly value="${code}" onclick="this.select()" style="width:100%;font-size:11px"></div>`;
 }
 const catGrupos=[['fixas','Fixas / Financiamentos'],['cartoes','Cartões de Crédito'],['retirada','Retirada mensal'],['variaveis','Outras / Variáveis'],['receita','Receita']];
 function viewCats2(){
@@ -2518,7 +2516,7 @@ function viewModais(){
 const LEGAL={nome:'',cnpj:'',email:'',versao:'1'};
 async function carregarConfig(){
   try{const{data}=await sb.from('config_app').select('*');S.cfg={};(data||[]).forEach(r=>{S.cfg[r.chave]=r.valor});const c=S.cfg;
-    if(c.pix_chave)PIX.chave=c.pix_chave;if(c.pix_valor)PIX.valor=parseFloat(c.pix_valor)||PIX.valor;if(c.pix_dias)PIX.dias=parseInt(c.pix_dias)||PIX.dias;
+    if(c.pix_chave)PIX.chave=c.pix_chave;if(c.pix_dias)PIX.dias=parseInt(c.pix_dias)||PIX.dias;
     if(c.pix_nome)PIX.nome=c.pix_nome;if(c.pix_cidade)PIX.cidade=c.pix_cidade;LEGAL.nome=c.operador_nome||'';LEGAL.cnpj=c.operador_cnpj||'';LEGAL.email=c.contato_email||'';LEGAL.versao=c.versao_termos||'1'}catch(e){}
 }
 function legalHtml(t){
@@ -2556,8 +2554,8 @@ function viewConta(){
 function viewConfig(){
   const c=S.cfg||{},f=(k,l,ph)=>`<label class="mu" style="font-size:12px">${l}<input id="cfg_${k}" value="${esc(c[k]||'')}" placeholder="${ph||''}" style="width:100%;margin-top:3px"></label>`;
   const aviso=(!LEGAL.nome||!LEGAL.email)?`<div class="faixa fech" style="margin:8px 0"><span><b>⚠ Antes de vender:</b> preencha o nome do responsável e o e-mail de contato. Eles aparecem nos Termos e na Política. Peça para um advogado revisar os dois textos.</span></div>`:'';
-  return `<div class="card" style="margin-top:14px"><b>⚙ Configurações do negócio</b><div class="mu" style="margin:4px 0 8px">Mude preço, dias e chave Pix sem mexer no código. Depois de salvar, confira o QR acima com outro banco.</div>${aviso}
-  <div class="grid2">${f('pix_chave','Chave Pix (celular com +55, e-mail ou chave aleatória)','+5531999999999')}${f('pix_valor','Valor (R$)','20')}${f('pix_dias','Dias de acesso por pagamento','30')}${f('pix_nome','Nome no QR (até 25 letras)','COPILOTO FINANCEIRO')}${f('pix_cidade','Cidade no QR (até 15 letras)','CONTAGEM')}${f('operador_nome','Nome ou razão social do responsável','')}${f('operador_cnpj','CNPJ (se tiver)','')}${f('contato_email','E-mail de contato e privacidade','')}</div>
+  return `<div class="card" style="margin-top:14px"><b>⚙ Configurações do negócio</b><div class="mu" style="margin:4px 0 8px">Atualize a chave Pix, o prazo de acesso e os dados de atendimento. Os preços dos planos Pro, Max e Ultra são definidos no catálogo do aplicativo.</div>${aviso}
+  <div class="grid2">${f('pix_chave','Chave Pix (celular com +55, e-mail ou chave aleatória)','+5531999999999')}${f('pix_dias','Dias de acesso por pagamento','30')}${f('pix_nome','Nome no QR (até 25 letras)','COPILOTO FINANCEIRO')}${f('pix_cidade','Cidade no QR (até 15 letras)','CONTAGEM')}${f('operador_nome','Nome ou razão social do responsável','')}${f('operador_cnpj','CNPJ (se tiver)','')}${f('contato_email','E-mail de contato e privacidade','')}</div>
   <div class="row" style="margin-top:10px"><button data-act="salvarcfg">Salvar configurações</button></div></div>`;
 }
 function csv(){
@@ -2671,7 +2669,7 @@ document.addEventListener('click',async e=>{
   else if(a==='fecharmodal'){S.pv=null;S.sino=false;S.hist=null;render()}
   else if(a==='plano'){const p=b.dataset.plano;if(!PLANOS[p])return;S.planoEscolhido=p;PIX.valor=PLANOS[p].valor;renderPaywall();return}
   else if(a==='paguei'){const n=$('#pg_nome').value.trim();if(n.length<2)return toast('Informe o seu nome como aparece no Pix',1);
-    const plano=planoAtual();const{error}=await sb.from('pagamentos').insert({familia_id:S.fam.id,usuario_id:S.user.id,valor:plano.valor,plano:S.planoEscolhido,pagador_nome:n,horario_informado:$('#pg_hora').value.trim()||null});
+    const planoKey=PLANOS[S.planoEscolhido]?S.planoEscolhido:(PLANOS[S.fam?.plano]?S.fam.plano:'pro');const plano=PLANOS[planoKey];const{error}=await sb.from('pagamentos').insert({familia_id:S.fam.id,usuario_id:S.user.id,valor:plano.valor,plano:planoKey,pagador_nome:n,horario_informado:$('#pg_hora').value.trim()||null});
     if(error)return toast(/uq_pagamento|duplicate/.test(error.message)?'Você já tem um aviso de pagamento em análise.':error.message,1);
     toast('Aviso enviado! Assim que o Pix for conferido, o acesso é liberado.');await boot()}
   else if(a==='copiarpix'){try{await navigator.clipboard.writeText(S.pixcode);toast('Código Pix copiado')}catch(e){toast('Não consegui copiar: selecione o código acima e copie.',1)}}
@@ -2688,7 +2686,7 @@ document.addEventListener('click',async e=>{
   else if(a==='fecharlegal'){const d=document.getElementById('legalov');if(d)d.remove()}
   else if(a==='expjson'){const d=await q(sb.rpc('exportar_tudo',{p_familia:S.fam.id}));const l=document.createElement('a');l.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));l.download='meus-dados-'+S.fam.nome.replace(/\s+/g,'-')+'.json';l.click();toast('Arquivo com todos os seus dados baixado')}
   else if(a==='delconta'){const t=prompt('Isto apaga a sua conta e os dados da sua família, para sempre. Para confirmar, digite EXCLUIR:');if(t!=='EXCLUIR')return;await q(sb.rpc('excluir_minha_conta'));try{await sb.auth.signOut()}catch(e){}S.user=null;toast('Conta excluída.');boot()}
-  else if(a==='salvarcfg'){const k=['pix_chave','pix_valor','pix_dias','pix_nome','pix_cidade','operador_nome','operador_cnpj','contato_email'],o={};k.forEach(x=>{const v=$('#cfg_'+x).value.trim();if(v!==''||x.startsWith('operador')||x==='contato_email')o[x]=v});
+  else if(a==='salvarcfg'){const k=['pix_chave','pix_dias','pix_nome','pix_cidade','operador_nome','operador_cnpj','contato_email'],o={};k.forEach(x=>{const v=$('#cfg_'+x).value.trim();if(v!==''||x.startsWith('operador')||x==='contato_email')o[x]=v});
     await q(sb.rpc('admin_salvar_config',{p_itens:o}));await carregarConfig();toast('Configurações salvas');render()}
   else if(a==='sino'){S.sino=true;render()}
   else if(a==='lerTodos'){await q(sb.from('notificacoes').update({lida:true}).eq('lida',false));S.notifs=[];S.sino=false;render()}
