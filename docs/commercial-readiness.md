@@ -4,7 +4,7 @@
 - Acesso apresentado por pagamento Pix com conferência manual.
 - A liberação é feita por administrador via função de aprovação; não há confirmação automática por webhook bancário.
 - A proteção Supabase contra senhas vazadas exige plano Pro ou superior e está indisponível no plano atual.
-- O projeto usa Supabase Auth e exige confirmação de e-mail conforme a configuração atual.
+- O cadastro atual usa nome de usuário e senha via Edge Function; não depende de confirmação de e-mail. A recuperação é feita por código exibido no cadastro e guardado pelo usuário, não por link enviado por e-mail.
 - A política de privacidade e os termos exibidos no app precisam de revisão jurídica e operacional antes de cobrar clientes.
 
 ## Antes de aceitar clientes pagantes
@@ -25,3 +25,17 @@ Não prometer integração bancária, confirmação automática de Pix, seguran�
 
 ## Go/no-go
 Só iniciar cobrança pública depois de concluir os testes críticos, revisar os textos legais, testar recuperação de backup e documentar o processo manual de pagamentos.
+
+## Estado observado em 03/11/2026
+
+- A página de entrada e a imagem completa foram publicadas no GitHub Pages. A imagem está marcada como conceitual e identifica explicitamente IA, suporte VIP e análise preditiva como elementos ilustrativos.
+- A sintaxe do JavaScript principal foi validada estaticamente. Não foi feito teste ponta a ponta em navegador, nem teste visual real em desktop e mobile.
+- O plano Max apresenta seus recursos adicionais como em desenvolvimento; não devem ser vendidos como já disponíveis.
+- O Ultra oferece alternância entre espaços familiares aos quais a conta já tem acesso e módulos de relatórios/patrimônio. Isso não equivale a consolidar automaticamente famílias independentes em uma única assinatura.
+- O limite de membros do Ultra ainda não está definido no código. Definir e testar a regra antes de oferecer esse plano publicamente.
+- Os Termos indicam idade mínima de 18 anos, mas o cadastro atual não confirma idade. Antes de cobrar clientes, definir um operador adulto responsável por contratos, recebimentos, suporte e dados pessoais; revisar a estrutura com profissional qualificado.
+- O Pix continua manual: não há webhook bancário nem liberação automática. A chave, o recebedor, o prazo e o fluxo de aprovação ainda precisam de conferência real de ponta a ponta.
+- O Supabase mantém RLS nas tabelas públicas. As tabelas privadas de mapeamento de usuário e recuperação não têm políticas RLS; a auditoria de privilégios confirmou que não concedem acesso direto a `anon` ou `authenticated`, sendo usadas pelo serviço de autenticação. A proteção contra senhas vazadas continua desativada no plano atual.
+- Não foram comprovados teste de restauração de backup, teste de carga, isolamento entre contas em navegador real, processamento Pix real, ou revisão jurídica dos Termos e da Política.
+
+**Situação:** publicado para demonstração e testes controlados; não declarar pronto para cobrança pública até fechar os itens críticos acima.
