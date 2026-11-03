@@ -108,3 +108,25 @@ Referências oficiais:
 - https://developer.android.com/google/play/billing/integrate
 - https://support.google.com/googleplay/android-developer/answer/6112435
 - https://support.google.com/googleplay/android-developer/answer/9867159
+
+
+## Implementação adicionada na branch de preparação
+
+Arquivos adicionados nesta etapa:
+
+- `android-app/`: projeto Android isolado, WebView restrita ao endereço atual do app e ponte nativa Google Play Billing.
+- `android-play-billing.js`: camada isolada que troca o checkout Pix somente quando a ponte Android existe. Em navegador comum, o script não altera o checkout web.
+- `supabase/functions/google-play-purchase/index.ts`: valida a sessão, consulta a família da conta, verifica o token pela Google Play Developer API e cria uma solicitação pendente com token único.
+- `supabase/functions/google-play-admin/index.ts`: ação administrativa autenticada; na aprovação, consome a compra no servidor e concede 30 dias via RPC; na recusa, solicita reembolso com revogação antes de marcar a compra como recusada.
+- `supabase/sql/google_play_compras.sql`: script SQL separado para a tabela isolada e RPCs administrativas. É um script de implantação revisável, ainda não aplicado ao banco.
+- `.github/workflows/android-build.yml`: compilação automática do APK de depuração.
+
+### Limites e segurança desta etapa
+
+- Nenhum deploy foi feito no Supabase e nenhum secret foi criado.
+- Nenhuma compra real pode ser concluída até a criação da tabela/RPCs no projeto, implantação das duas Edge Functions e configuração dos secrets `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` e `GOOGLE_PLAY_PACKAGE_NAME`.
+- A chave privada da conta de serviço Google não deve ser colocada no GitHub nem enviada em conversa.
+- O identificador Android e a origem web configurados no projeto Android são provisórios e precisam de confirmação antes da publicação.
+- A compra fica pendente e sem acesso até decisão manual. A aprovação deve ocorrer dentro do prazo de confirmação da Google Play; a rejeição tenta reembolsar e revogar o pedido na loja.
+- O script SQL está em `supabase/sql/` como implantação separada para revisão. Antes de produção, deve ser convertido em migração formal e testado em ambiente de desenvolvimento, sem alterar as tabelas e RPCs Pix existentes.
+- O build ainda precisa concluir e o APK de depuração não é um AAB assinado para publicação.
