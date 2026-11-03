@@ -2398,9 +2398,16 @@ function atualizarParcelamento(){
   s.title=natureza==='financiamento'?'Prestação/financiamento de 2 a 600 meses':'Compra parcelada de 1 a 30 vezes';
 }
 async function mostrarCompromissos(){
-  const dados=await q(sb.from('lancamentos')
-    .select('id,grupo_parcelas,descricao,valor,status,data_vencimento,parcela_atual,parcelas_total,natureza_compromisso')
-    .eq('familia_id',S.fam.id).not('grupo_parcelas','is',null).order('data_vencimento'));
+  const dados=[];
+  for(let inicio=0;;inicio+=1000){
+    const lote=await q(sb.from('lancamentos')
+      .select('id,grupo_parcelas,descricao,valor,status,data_vencimento,parcela_atual,parcelas_total,natureza_compromisso')
+      .eq('familia_id',S.fam.id).not('grupo_parcelas','is',null)
+      .order('data_vencimento').order('id').range(inicio,inicio+999));
+    if(!lote?.length)break;
+    dados.push(...lote);
+    if(lote.length<1000)break;
+  }
   const grupos=new Map();
   for(const l of dados||[]){
     if(!l.grupo_parcelas||!l.parcelas_total)continue;
