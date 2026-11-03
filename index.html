@@ -2048,7 +2048,7 @@ function renderAuth(){
   const rota=(location.hash||'').slice(1);
   const modoAcesso=rota==='cadastro'?'cadastro':'login';
   const telas=['inicio','recursos','planos','cadastro','login','acesso'];
-  const tela=['cadastro','login','acesso'].includes(rota)?'acesso':'inicio';
+  const tela=['cadastro','login','acesso'].includes(rota)?'acesso':(['recursos','planos'].includes(rota)?rota:'inicio');
   const precoPro=brl(PLANOS.pro.valor),precoMax=brl(PLANOS.max.valor),precoUltra=brl(PLANOS.ultra.valor);
   const feature=(txt,planned=false)=>'<li><span class="landing-feature-check">'+(planned?'◇':'✓')+'</span><span>'+txt+'</span>'+(planned?'<small>Planejado</small>':'')+'</li>';
   $('#app').innerHTML=`<div class="landing-page" data-screen="${tela}">
@@ -2260,7 +2260,7 @@ function scrollLandingRoute(route){
     else window.scrollTo({top:0,behavior:'smooth'});
   }));
 }
-if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{const route=(location.hash||'#inicio').slice(1);const page=document.querySelector('.landing-page');const wantsAccess=['login','cadastro'].includes(route);const isAccess=page?.dataset.screen==='acesso';if(!S.user&&(!page||wantsAccess!==isAccess||(wantsAccess&&route==='cadastro'&&document.getElementById('landing-terms')?.style.display!=='flex')||(wantsAccess&&route==='login'&&document.getElementById('landing-terms')?.style.display==='flex')))renderAuth();scrollLandingRoute(route);});}
+if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{const route=(location.hash||'#inicio').slice(1);const page=document.querySelector('.landing-page');const wantsAccess=['login','cadastro'].includes(route);const isAccess=page?.dataset.screen==='acesso';if(!S.user&&(!page||wantsAccess!==isAccess||(wantsAccess&&route==='cadastro'&&document.getElementById('landing-terms')?.style.display!=='flex')||(wantsAccess&&route==='login'&&document.getElementById('landing-terms')?.style.display==='flex')))renderAuth();else if(!S.user&&page&&!wantsAccess&&['inicio','recursos','planos'].includes(route))page.dataset.screen=route;scrollLandingRoute(route);});}
 if(!window.__cfLandingRouteBound){window.__cfLandingRouteBound=true;document.addEventListener('click',e=>{const link=e.target.closest('[data-public-route]');if(!link)return;e.preventDefault();const route=link.dataset.publicRoute;if(!['inicio','recursos','planos','login','cadastro'].includes(route))return;const hash='#'+route;if(location.hash===hash){if(!S.user){const page=document.querySelector('.landing-page');if(!page||(['login','cadastro'].includes(route)!==(page.dataset.screen==='acesso')))renderAuth();}scrollLandingRoute(route);}else location.hash=hash;});}
 
 function renderSemFamilia(){
