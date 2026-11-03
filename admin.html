@@ -30,13 +30,13 @@ async function verifyAdmin(){
 }
 function login(message=''){
  app.innerHTML=`<section class="login"><div class="muted">COPILOTO FINANCEIRO · CONTROLE INTERNO</div><h1>Área administrativa</h1><p class="muted">Acesso exclusivo para administradores autorizados.</p>
- <form id="loginForm"><div class="field"><label for="email">E-mail administrativo</label><input id="email" type="email" autocomplete="username" required></div>
+ <form id="loginForm"><div class="field"><label for="email">Usuário</label><input id="email" type="text" autocomplete="username" placeholder="Seu nome de usuário" required></div>
  <div class="field"><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" required></div>
  <div class="notice" id="notice">${safe(message)}</div><button id="submit" type="submit" style="width:100%">Entrar no painel</button></form>
  <p class="muted" style="font-size:13px;margin-top:20px">Acesso de clientes: <a href="./index.html">ir para a área do cliente</a>.</p></section>`;
  document.getElementById('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();const btn=document.getElementById('submit'),notice=document.getElementById('notice');btn.disabled=true;notice.textContent='Verificando acesso…';
-  try{const {error}=await sb.auth.signInWithPassword({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value});if(error)throw error;
+  try{const {data,error}=await sb.functions.invoke('autenticacao-usuario',{body:{action:'login',username:document.getElementById('email').value.trim(),password:document.getElementById('password').value}});if(error)throw error;if(data?.error)throw new Error(data.error);if(!data?.session?.access_token||!data?.session?.refresh_token)throw new Error('A autenticação não retornou uma sessão válida.');const {error:sessionError}=await sb.auth.setSession({access_token:data.session.access_token,refresh_token:data.session.refresh_token});if(sessionError)throw sessionError;
    const ok=await verifyAdmin();if(ok)await dashboard();
   }catch(err){notice.textContent=err.message||'Não foi possível entrar.'}finally{btn.disabled=false}
  });
@@ -47,7 +47,7 @@ async function loadData(){
   sb.rpc('admin_listar_pagamentos',{p_status:'todos'})
  ]);
  if(r.error)throw r.error;if(p.error)throw p.error;
- resumo=r.data||{};pagamentos=p.data||[];
+ resumo=(r.data && typeof r.data==='object')?r.data:{};pagamentos=Array.isArray(p.data)?p.data:[];
 }
 function dashboard(){
  const rows=pagamentos.map(x=>`<tr><td>${safe(new Date(x.informado_em).toLocaleString('pt-BR'))}</td><td>${safe(x.familia)}<div class="status">${safe(x.email||'')}</div></td><td>${safe(x.pagador_nome)}<div class="status">${safe(x.horario_informado||'')}</div></td><td>${money(x.valor)}</td><td>${x.status==='pendente'?`<div class="actions"><input aria-label="Dias de acesso" id="days_${safe(x.id)}" type="number" min="1" value="30"><button data-action="approve" data-id="${safe(x.id)}">Aprovar</button><button class="danger" data-action="reject" data-id="${safe(x.id)}">Recusar</button></div>`:safe(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5">Nenhum pagamento informado.</td></tr>';
