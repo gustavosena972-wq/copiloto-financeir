@@ -2982,11 +2982,17 @@ function csv(){
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download=`${S.fam.nome}-${S.ano.ano}-${String(S.mes.mes).padStart(2,'0')}.csv`;a.click();
 }
 function viewChecape(ed){
-  const cards=S.sug.map(s=>`<div class="sug ${s.tipo}"><div><b>${esc(s.titulo)}</b> ${s.economia_estimada?`<span class="pos">· ${brl(s.economia_estimada)}</span>`:''}
-   <div class="mu">${esc(s.explicacao)}</div></div>
-   <div class="row" style="margin:0">${s.status==='nova'&&ed?`<button data-act="aceitar" data-id="${s.id}">Aceitar</button><button class="sec" data-act="ignorar" data-id="${s.id}">Ignorar</button>`:`<span class="mu">${s.status}</span>`}</div></div>`).join('');
-  return `<div class="bar"><button data-act="checape" ${ed?'':'disabled'}>Gerar checape de ${MN[S.mes.mes-1]}</button></div>
-  ${cards||'<div class="mu">Lance as despesas e receitas do mês e gere o checape para ver o que cortar.</div>'}`;
+  const cards=S.sug.map(s=>{
+    const base=s.base_calculo||{};
+    const comparativo=base.gasto_atual!=null&&base.media_historica!=null
+      ?`<div class="mu" style="margin-top:7px;font-size:12px">Gasto neste mês: <b>${brl(base.gasto_atual)}</b> · Média histórica: <b>${brl(base.media_historica)}</b> · ${Number(base.meses_comparados)||0} mês(es) comparado(s)</div>`
+      :'';
+    return `<div class="sug ${s.tipo}"><div><b>${esc(s.titulo)}</b> ${s.economia_estimada?`<span class="pos">· potencial de economia ${brl(s.economia_estimada)}</span>`:''}
+      <div class="mu">${esc(s.explicacao)}</div>${comparativo}</div>
+      <div class="row" style="margin:0">${s.status==='nova'&&ed?`<button data-act="aceitar" data-id="${s.id}">Aceitar</button><button class="sec" data-act="ignorar" data-id="${s.id}">Ignorar</button>`:`<span class="mu">${s.status}</span>`}</div></div>`;
+  }).join('');
+  return `<div class="bar"><button data-act="checape" ${ed?'':'disabled'}>Gerar checape de ${MN[S.mes.mes-1]}</button><span class="mu">A análise considera o mês atual e o histórico disponível.</span></div>
+  ${cards||'<div class="mu">Lance as despesas e receitas do mês e gere o checape para receber uma análise. Quanto mais meses registrados, melhores serão as comparações.</div>'}`;
 }
 function viewFamilia(){
   const ed=canEdit(),dono=S.me?.papel==='dono';
