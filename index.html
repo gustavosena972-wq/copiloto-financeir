@@ -1826,6 +1826,36 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
  .cf-preview-sidebar{padding:9px 5px!important}
 }
 @media(prefers-reduced-motion:reduce){.landing-hero-actions a{transition:none!important}}
+/* Cada área pública funciona como uma página independente */
+.landing-page[data-screen="inicio"] .landing-benefits,.landing-page[data-screen="inicio"] .landing-plans-section,.landing-page[data-screen="inicio"] .landing-login-section{display:none!important}
+.landing-page[data-screen="recursos"] .landing-hero,.landing-page[data-screen="recursos"] .landing-plans-section,.landing-page[data-screen="recursos"] .landing-login-section{display:none!important}
+.landing-page[data-screen="planos"] .landing-hero,.landing-page[data-screen="planos"] .landing-benefits,.landing-page[data-screen="planos"] .landing-login-section{display:none!important}
+.landing-page[data-screen="cadastro"] .landing-hero,.landing-page[data-screen="cadastro"] .landing-benefits,.landing-page[data-screen="cadastro"] .landing-plans-section{display:none!important}
+.landing-page[data-screen="login"] .landing-hero,.landing-page[data-screen="login"] .landing-benefits,.landing-page[data-screen="login"] .landing-plans-section{display:none!important}
+.landing-page[data-screen="recursos"] .landing-benefits,.landing-page[data-screen="planos"] .landing-plans-section,.landing-page[data-screen="cadastro"] .landing-login-section,.landing-page[data-screen="login"] .landing-login-section{display:block!important}
+.landing-page[data-screen="recursos"] .landing-benefits{margin-top:24px;padding:34px 0 40px;border:0}
+.landing-page[data-screen="recursos"] .landing-benefits-heading h2{max-width:680px;font-size:clamp(30px,4vw,44px)}
+.landing-page[data-screen="recursos"] .landing-benefits-heading>p{max-width:560px;color:#788579;font-size:13px;line-height:1.7}
+.landing-page[data-screen="recursos"] .landing-benefits-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 42px}
+.landing-page[data-screen="recursos"] .landing-benefits-grid article{padding:22px 0;border-bottom:1px solid #e3e8df}
+.landing-page[data-screen="recursos"] .landing-benefits-grid b{font-size:14px}
+.landing-page[data-screen="recursos"] .landing-benefits-grid p{font-size:12px}
+.landing-page[data-screen="planos"] .landing-plans-section{margin-top:24px!important;padding:34px 0!important}
+.landing-page[data-screen="planos"] .landing-section-heading h2{max-width:700px}
+.landing-page[data-screen="planos"] .landing-plan-card{min-height:390px}
+.landing-page[data-screen="planos"] .landing-plan-card.recommended{background:linear-gradient(155deg,#f1f7ef,#fff 75%)}
+.landing-page[data-screen="planos"] .landing-plan-card.recommended .landing-limit{background:#e7f1e5;color:#326446}
+.landing-page[data-screen="cadastro"] .landing-login-section,.landing-page[data-screen="login"] .landing-login-section{max-width:850px;margin:35px auto 0;grid-template-columns:minmax(0,1fr) minmax(320px,430px)}
+.landing-page[data-screen="cadastro"] .landing-login-section{background:linear-gradient(125deg,#edf3e9,#fff)}
+.landing-page .landing-secondary{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:10px 14px;border-radius:9px;font-size:11px;font-weight:700}
+.landing-page[data-screen="cadastro"] #landing-back-login,.landing-page[data-screen="login"] #landing-create-row{display:flex}
+.landing-page[data-screen="cadastro"] #landing-create-row,.landing-page[data-screen="login"] #landing-back-login{display:none}
+.landing-page[data-screen="cadastro"] .landing-login .demo-link{display:none}
+.landing-page[data-screen="login"] #landing-terms{display:none!important}
+.landing-page[data-screen="cadastro"] #landing-terms{display:flex!important}
+.landing-page[data-screen="cadastro"] .landing-login [data-act="reset"]{display:none!important}
+.landing-page[data-screen="login"] .landing-login [data-act="reset"]{display:block!important}
+@media(max-width:760px){.landing-nav{flex-wrap:wrap;justify-content:flex-end}.landing-nav>a:first-child{display:inline-flex!important}.landing-page[data-screen="recursos"] .landing-benefits-grid{grid-template-columns:1fr}.landing-page[data-screen="cadastro"] .landing-login-section,.landing-page[data-screen="login"] .landing-login-section{grid-template-columns:1fr;padding:25px 17px}}
 </style>
 </head>
 <body>
@@ -1913,16 +1943,20 @@ async function loadMes(rd=true){
 
 /* ---------- telas de entrada ---------- */
 function renderAuth(){
+  const telas=['inicio','recursos','planos','cadastro','login'];
+  const tela=telas.includes((location.hash||'').slice(1))?(location.hash||'').slice(1):'inicio';
   const precoPro=brl(PLANOS.pro.valor),precoMax=brl(PLANOS.max.valor),precoUltra=brl(PLANOS.ultra.valor);
   const feature=(txt,planned=false)=>'<li><span class="landing-feature-check">'+(planned?'◇':'✓')+'</span><span>'+txt+'</span>'+(planned?'<small>Planejado</small>':'')+'</li>';
-  $('#app').innerHTML=`<div class="landing-page">
+  $('#app').innerHTML=`<div class="landing-page" data-screen="${tela}">
     <header class="landing-header">
-      <a class="landing-brand" href="#" aria-label="Copiloto Financeiro — início">
+      <a class="landing-brand" href="#inicio" aria-label="Copiloto Financeiro — início">
         ${LOGO}<span><strong>Copiloto Financeiro</strong><small>GESTÃO FINANCEIRA FAMILIAR</small></span>
       </a>
       <nav class="landing-nav" aria-label="Navegação principal">
-        <a href="#landing-plans">Conheça os planos</a>
-        <a class="landing-nav-cta" href="#landing-login">Acessar minha conta <span aria-hidden="true">↗</span></a>
+        <a href="#inicio">Início</a>
+        <a href="#recursos">O aplicativo</a>
+        <a href="#planos">Planos</a>
+        <a class="landing-nav-cta" href="#login">Entrar <span aria-hidden="true">↗</span></a>
       </nav>
     </header>
     <section class="landing-hero">
@@ -1931,6 +1965,7 @@ function renderAuth(){
           <span class="landing-kicker"><i></i> FINANÇAS DA FAMÍLIA, COM MAIS CLAREZA</span>
           <h1>Seu dinheiro organizado. Sua família mais tranquila.</h1>
           <p>Reúna receitas, despesas, contas e objetivos em um só lugar. Tenha uma visão clara do mês e acompanhe a evolução financeira da família.</p>
+          <div class="landing-hero-actions"><a class="landing-hero-primary" href="#recursos">Conheça o aplicativo <span>↗</span></a><a class="landing-hero-secondary" href="#planos">Ver planos</a></div>
           <div class="landing-highlights">
             <div><span class="landing-highlight-icon">✓</span><b>Controle mensal</b><small>Receitas, despesas e contas organizadas.</small></div>
             <div><span class="landing-highlight-icon">↗</span><b>Visão do ano</b><small>Acompanhe resultados e compare os meses.</small></div>
@@ -1993,12 +2028,15 @@ function renderAuth(){
         </section>
       </div>
     </section>
-    <section class="landing-benefits" id="landing-benefits" aria-label="O que você organiza com o Copiloto">
-      <div class="landing-benefits-heading"><span>ORGANIZAÇÃO EM UM SÓ LUGAR</span><h2>Mais clareza para decidir o que fazer com seu dinheiro.</h2></div>
+    <section class="landing-benefits" id="landing-features" aria-label="Recursos do Copiloto">
+      <div class="landing-benefits-heading"><span>RECURSOS DO APLICATIVO</span><h2>Ferramentas para acompanhar a vida financeira da família.</h2><p>Conheça as principais áreas do Copiloto e como elas ajudam na organização do dia a dia.</p></div>
       <div class="landing-benefits-grid">
-        <article><span class="landing-benefit-icon">↗</span><div><b>Controle do mês</b><p>Receitas, despesas, contas e categorias em uma visão organizada.</p></div></article>
-        <article><span class="landing-benefit-icon">▥</span><div><b>Acompanhamento do ano</b><p>Compare períodos e acompanhe como a vida financeira evolui.</p></div></article>
-        <article><span class="landing-benefit-icon">⌁</span><div><b>Planejamento familiar</b><p>Compartilhe a organização e acompanhe metas e compromissos.</p></div></article>
+        <article><span class="landing-benefit-icon">▦</span><div><b>Planilha mensal</b><p>Registre receitas, despesas, vencimentos, pagamentos e categorias em um só lugar.</p></div></article>
+        <article><span class="landing-benefit-icon">▥</span><div><b>Visão do ano</b><p>Compare os meses e acompanhe os resultados ao longo do ano.</p></div></article>
+        <article><span class="landing-benefit-icon">◈</span><div><b>Checape financeiro</b><p>Veja sugestões e pontos de atenção com base nos lançamentos registrados.</p></div></article>
+        <article><span class="landing-benefit-icon">◎</span><div><b>Planejamento</b><p>Organize metas, dívidas, bens e simulações de objetivos.</p></div></article>
+        <article><span class="landing-benefit-icon">♧</span><div><b>Organização familiar</b><p>Compartilhe o espaço com membros da família e defina permissões de acesso.</p></div></article>
+        <article><span class="landing-benefit-icon">⇧</span><div><b>Importar e exportar</b><p>Trabalhe com arquivos Excel e CSV para facilitar o controle dos dados.</p></div></article>
       </div>
     </section>
     <section class="landing-plans-section" id="landing-plans" aria-labelledby="landing-plans-title">
@@ -2025,10 +2063,12 @@ function renderAuth(){
           <div class="landing-plan-top"><span class="landing-plan-label">MAIS PESSOAS NO MESMO ESPAÇO</span><h3>Max</h3><p>Para famílias que precisam organizar as finanças com mais pessoas.</p></div>
           <div class="landing-price"><strong>${precoMax}</strong><span>/ mês</span></div>
           <div class="landing-limit">Até 6 pessoas na família</div>
-          <div class="landing-feature-heading">O QUE MUDA NO MAX</div>
+          <div class="landing-feature-heading">TUDO DO PRO, COM MAIS ESPAÇO PARA A FAMÍLIA</div>
           <ul class="landing-feature-list">
-            ${feature('Até 6 pessoas na mesma família, em vez de 2 no Pro')}
-            ${feature('Um único pagamento cobre o acesso da família inteira')}
+            ${feature('Todos os recursos do plano Pro')}
+            ${feature('Até 6 pessoas no mesmo espaço familiar')}
+            ${feature('Um único pagamento mensal para a família inteira')}
+            ${feature('Cada membro acessa com seu próprio usuário e permissões')}
           </ul>
           <div class="landing-plan-status current">Disponível</div>
         </article>
@@ -2049,13 +2089,13 @@ function renderAuth(){
       </div>
       <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. O Max amplia a capacidade da família para até 6 pessoas. O pagamento é feito por Pix, com conferência manual e sem renovação automática. A assinatura é por família; no Ultra, a central alterna entre espaços familiares aos quais a conta já pertence, cada um com seu próprio acesso.</p>
     </section>
-    <section class="landing-login-section" aria-labelledby="landing-login-title">
-      <div class="landing-login-intro"><span>ÁREA DO CLIENTE</span><h2 id="landing-login-title">Acesse seu espaço financeiro.</h2><p>Entre na sua conta ou crie seu acesso para começar a organizar sua família.</p></div>
-      <section class="landing-login" id="landing-login" aria-label="Acesso à conta">
+    <section class="landing-login-section" id="landing-auth" aria-labelledby="landing-login-title">
+      <div class="landing-login-intro"><span>ÁREA DO CLIENTE</span><h2 id="landing-login-title">Seu acesso, em uma área própria.</h2><p>Entre na sua conta ou crie um cadastro para começar a usar o Copiloto Financeiro.</p></div>
+      <section class="landing-login login" id="landing-login" aria-label="Acesso à conta">
         <div class="landing-login-head">
           <span>ÁREA DO CLIENTE</span>
-          <h2>Que bom ter você aqui.</h2>
-          <p>Entre com seus dados para continuar.</p>
+          <h2>${tela==='cadastro' ? 'Crie sua conta.' : 'Que bom ter você aqui.'}</h2>
+          <p>${tela==='cadastro' ? 'Preencha seus dados para criar seu acesso.' : 'Entre com seus dados para continuar.'}</p>
         </div>
         <div class="landing-field-group">
           <label class="landing-field" for="nome">Usuário</label>
@@ -2065,7 +2105,7 @@ function renderAuth(){
           <label class="landing-field" for="senha">Senha</label>
           <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha">
         </div>
-        <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
+        <label class="aceite" id="landing-terms"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
         <div id="recuperacao" hidden>
           <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
           <input id="codigo-recuperacao" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de recuperação">
@@ -2073,8 +2113,9 @@ function renderAuth(){
           <button class="sec" data-act="recuperar">Redefinir senha</button>
         </div>
         <div id="aviso" class="aviso"></div>
-        <button class="landing-primary" data-act="entrar">Entrar na minha conta</button>
-        <div class="landing-create-row"><span>Primeira vez por aqui?</span><button class="landing-secondary" data-act="cadastrar">Criar minha conta</button></div>
+        <button class="landing-primary" data-act="${tela==='cadastro' ? 'cadastrar' : 'entrar'}">${tela==='cadastro' ? 'Criar minha conta' : 'Entrar na minha conta'}</button>
+        <div class="landing-create-row" id="landing-create-row"><span>Primeira vez por aqui?</span><a class="landing-secondary" href="#cadastro">Criar minha conta</a></div>
+        <div class="landing-create-row" id="landing-back-login"><span>Já tem uma conta?</span><a class="landing-secondary" href="#login">Fazer login</a></div>
         <button class="landing-link-button" data-act="reset">Esqueci minha senha</button>
         <a class="demo-link" href="demo.html"><span aria-hidden="true">◉</span> Conhecer a demonstração do aplicativo</a>
       </section>
@@ -2082,7 +2123,15 @@ function renderAuth(){
     </section>
     <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar</footer>
   </div>`;
+  const cadastro=tela==='cadastro';
+  const terms=document.getElementById('landing-terms');if(terms)terms.style.display=cadastro?'flex':'none';
+  const criar=document.getElementById('landing-create-row');if(criar)criar.style.display=cadastro?'none':'flex';
+  const voltar=document.getElementById('landing-back-login');if(voltar)voltar.style.display=cadastro?'flex':'none';
+  const reset=document.querySelector('.landing-login [data-act="reset"]');if(reset)reset.style.display=cadastro?'none':'block';
+  const rec=document.getElementById('recuperacao');if(rec&&cadastro)rec.hidden=true;
 }
+if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{if(!S.user)renderAuth();window.scrollTo({top:0,behavior:'smooth'});});}
+
 function renderSemFamilia(){
   $('#app').innerHTML=`<div class="auth"><h1>Sua família</h1><div class="mu">Crie a família para começar ou entre com um código de convite.</div>
   <input id="fnome" placeholder="Nome da família (ex.: Família Silva)"><button data-act="criarfam">Criar família</button>
