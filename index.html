@@ -2384,7 +2384,44 @@ function viewRelatorios(){
   return '<div class="cards"><div class="card"><small>Receitas do ano</small><b class="pos">'+brl(receita)+'</b></div><div class="card"><small>Despesas do ano</small><b class="neg">'+brl(despesas)+'</b></div><div class="card"><small>Saldo acumulado</small><b class="'+(saldo>=0?'pos':'neg')+'">'+brl(saldo)+'</b></div><div class="card"><small>Média mensal de despesas</small><b>'+brl(media)+'</b></div></div><section class="cf-section"><div class="cf-section-head"><div><span>DESEMPENHO ANUAL</span><h2>Receitas e despesas</h2><p>Comparativo mensal dos valores registrados.</p></div><div class="cf-legend"><span><i class="income"></i> Receitas</span><span><i class="expense"></i> Despesas</span></div></div><div class="cf-chart">'+(barras||'<p class="mu">Ainda não há movimentações neste ano.</p>')+'</div></section><section class="cf-section"><div class="cf-section-head"><div><span>COMPOSIÇÃO DO MÊS</span><h2>Onde estão as despesas</h2><p>Distribuição das despesas do mês selecionado.</p></div><b>'+brl(totalCategorias)+'</b></div>'+linhasCategoria+'</section><section class="cf-section"><div class="cf-section-head"><div><span>HISTÓRICO</span><h2>Resumo mês a mês</h2><p>Clique em um mês para abrir a planilha correspondente.</p></div><button class="sec" data-act="xlsx">Exportar ano (Excel)</button></div><div class="scroll"><table style="min-width:620px"><thead><tr><th>Mês</th><th>Receitas</th><th>Despesas</th><th>Saldo</th><th>Poupança</th></tr></thead><tbody>'+linhas+'</tbody></table></div><p class="cf-note-text">Maior despesa mensal: '+(maior.mes?MN[maior.mes-1]+' · '+brl(maior.total_despesas):'sem dados suficientes')+'. Valores baseados nos lançamentos do aplicativo.</p></section>';
 }
 
-function atualizarParcelamento(){const s=$('#n_parcelas');if(!s)return;const tipo=$('#n_tipo')?.value;s.disabled=tipo==='receita';s.title=tipo==='receita'?'Parcelamento disponível somente para despesas':'Parcelamento individual deste lançamento (1x a 30x)';}
+function atualizarParcelamento(){
+  const s=$('#n_parcelas'),tipo=$('#n_tipo')?.value,natureza=$('#n_natureza')?.value||'compra';
+  if(!s)return;
+  const limite=natureza==='financiamento'?600:30,atual=Number(s.value||1);
+  s.innerHTML=Array.from({length:limite},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'x</option>').join('');
+  s.value=String(Math.min(atual,limite));
+  s.disabled=tipo==='receita';
+  const n=$('#n_natureza');if(n)n.disabled=tipo==='receita';
+  const v=$('#n_valor'),h=$('#n_valor_help');
+  if(v)v.placeholder=natureza==='financiamento'?'Valor mensal (R$)':'Valor total (R$)';
+  if(h)h.textContent=natureza==='financiamento'?'Informe o valor de uma prestação. O sistema projeta esse valor pelos meses escolhidos.':'Informe o valor total da compra. O sistema divide pelas parcelas e ajusta os centavos na última.';
+  s.title=natureza==='financiamento'?'Prestação/financiamento de 2 a 600 meses':'Compra parcelada de 1 a 30 vezes';
+}
+async function mostrarCompromissos(){
+  const dados=await q(sb.from('lancamentos')
+    .select('id,grupo_parcelas,descricao,valor,status,data_vencimento,parcela_atual,parcelas_total,natureza_compromisso')
+    .eq('familia_id',S.fam.id).not('grupo_parcelas','is',null).order('data_vencimento'));
+  const grupos=new Map();
+  for(const l of dados||[]){
+    if(!l.grupo_parcelas||!l.parcelas_total)continue;
+    if(!grupos.has(l.grupo_parcelas))grupos.set(l.grupo_parcelas,[]);
+    grupos.get(l.grupo_parcelas).push(l);
+  }
+  const cards=[...grupos.values()].map(lista=>{
+    lista.sort((a,b)=>(a.parcela_atual||0)-(b.parcela_atual||0));
+    const base=lista[0],totalParcelas=Math.max(...lista.map(x=>Number(x.parcelas_total)||0));
+    const pagas=lista.filter(x=>x.status==='pago'),abertas=lista.filter(x=>x.status!=='pago');
+    const totalRegistrado=lista.reduce((a,x)=>a+Number(x.valor||0),0);
+    const saldo=abertas.reduce((a,x)=>a+Number(x.valor||0),0);
+    const proxima=abertas.slice().sort((a,b)=>String(a.data_vencimento||'').localeCompare(String(b.data_vencimento||'')))[0];
+    const natureza=base.natureza_compromisso==='financiamento'?'Prestação / financiamento':'Compra parcelada';
+    const pct=totalParcelas?Math.min(100,Math.round(pagas.length/totalParcelas*100)):0;
+    const linhas=lista.map(x=>'<tr><td>'+(''+(x.parcela_atual||'—'))+'/'+totalParcelas+'</td><td>'+(x.data_vencimento?new Date(x.data_vencimento+'T12:00:00').toLocaleDateString('pt-BR'):'—')+'</td><td>'+brl(x.valor)+'</td><td><span class="'+(x.status==='pago'?'pos':x.status==='atrasado'?'neg':'mu')+'">'+(x.status==='pago'?'Paga':x.status==='atrasado'?'Atrasada':'Pendente')+'</span></td></tr>').join('');
+    return '<section class="card" style="margin:10px 0;padding:16px"><div class="row" style="justify-content:space-between"><div><small class="mu">'+natureza+'</small><h3 style="margin:3px 0">'+esc(base.descricao)+'</h3></div><b>'+pagas.length+'/'+totalParcelas+' pagas</b></div><div class="track" style="height:8px;margin:10px 0"><i style="width:'+pct+'%"></i></div><div class="grid2"><div><small class="mu">Valor registrado</small><div><b>'+brl(totalRegistrado)+'</b></div></div><div><small class="mu">Saldo das parcelas em aberto</small><div><b class="neg">'+brl(saldo)+'</b></div></div><div><small class="mu">Parcelas cadastradas</small><div><b>'+lista.length+' de '+totalParcelas+'</b></div></div><div><small class="mu">Próximo vencimento</small><div><b>'+(proxima?.data_vencimento?new Date(proxima.data_vencimento+'T12:00:00').toLocaleDateString('pt-BR'):'Nenhum pendente')+'</b></div></div></div><details style="margin-top:12px"><summary style="cursor:pointer;color:#c8c5ff">Ver todas as parcelas</summary><div class="scroll" style="margin-top:8px"><table style="min-width:0"><thead><tr><th>Parcela</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr></thead><tbody>'+linhas+'</tbody></table></div></details></section>';
+  }).join('');
+  const html='<div class="modal cf-compromissos-modal"><div class="card box" style="max-width:900px;max-height:88vh;overflow:auto;padding:20px"><div class="row" style="justify-content:space-between"><div><small class="mu">VISÃO GERAL</small><h2 style="margin:2px 0">Compromissos e parcelas</h2><p class="mu" style="margin:0">Acompanhe o que já foi pago, o que falta e os próximos vencimentos.</p></div><button class="sec" data-act="fecharcompromissos">Fechar</button></div>'+(cards||'<p class="mu" style="padding:20px 0">Ainda não há compras parceladas ou financiamentos cadastrados.</p>')+'<p class="mu" style="font-size:12px">O saldo considera as parcelas cadastradas que ainda não foram marcadas como pagas. Se uma prestação tiver valor variável, ajuste o valor de cada mês na planilha.</p></div></div>';
+  $('#app').insertAdjacentHTML('beforeend',html);
+}
 function catOpts(tipo,sel){
   const l=S.cats.filter(c=>c.tipo===tipo);const pais=l.filter(c=>!c.parent_id);
   return '<option value="">—</option>'+pais.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.nome)}</option>`+
@@ -2402,16 +2439,16 @@ function viewPlanilha(ed){
   const d=ed?'':'disabled';
   const rows=S.lanc.map(l=>`<tr data-id="${l.id}">
    <td><input type="date" data-f="data_vencimento" value="${l.data_vencimento||''}" ${d}></td>
-   <td><input data-f="descricao" value="${esc(l.descricao)}" ${d}>${l.parcelas_total?`<small class="mu" style="display:block">Parcela ${l.parcela_atual||1}/${l.parcelas_total}</small>`:''}</td>
+   <td><input data-f="descricao" value="${esc(l.descricao)}" ${d}>${l.parcelas_total?`<small class="mu" style="display:block">Parcela ${l.parcela_atual||1}/${l.parcelas_total} · ${l.natureza_compromisso==='financiamento'?'Prestação/financiamento':'Compra parcelada'}</small>`:''}</td>
    <td><select data-f="tipo" ${d}>${tpOpts(l.tipo)}</select></td>
    <td><select data-f="categoria_id" ${d}>${catOpts(l.tipo==='receita'?'receita':'despesa',l.categoria_id)}</select></td>
    <td><input type="number" step="0.01" min="0" data-f="valor" value="${l.valor}" ${d}></td>
    <td><select data-f="status" ${d}>${stOpts(l.status)}</select></td>
    <td><select data-f="membro_id" ${d}>${memOpts(l.membro_id)}</select></td>
    <td><button class="red" data-act="del" data-id="${l.id}" ${d}>✕</button></td></tr>`).join('');
-  const novo=ed?`<tr class="novo" id="novo"><td><input type="date" id="n_data"></td><td><div class="row" style="gap:6px;align-items:center;min-width:190px"><input id="n_desc" placeholder="Descrição" style="min-width:110px;flex:1"><select id="n_parcelas" title="Número de parcelas" style="width:64px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div></td>
+  const novo=ed?`<tr class="novo" id="novo"><td><input type="date" id="n_data"></td><td><div style="display:grid;gap:5px;min-width:210px"><input id="n_desc" placeholder="Descrição da compra ou compromisso" style="min-width:110px"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
    <td><select id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td><select id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
-   <td><input type="number" step="0.01" min="0" id="n_valor" placeholder="0,00"></td><td><select id="n_status">${stOpts('pendente')}</select></td>
+   <td><input type="number" step="0.01" min="0" id="n_valor" placeholder="Valor total (R$)"></td><td><select id="n_status">${stOpts('pendente')}</select></td>
    <td><select id="n_mem">${memOpts(S.me.id)}</select></td><td><button data-act="add">+</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
@@ -2421,7 +2458,7 @@ function viewPlanilha(ed){
   <div class="card"><small>A pagar</small><b>${brl(apagar)}</b></div></div>${viewGrupos()}${viewCats()}
   <div class="bar">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
-   <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
+   <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
    <button class="sec" data-act="recorr" ${ed?'':'disabled'}>Gerar recorrentes</button>
    ${fe?`<button class="sec" data-act="reabrir" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>Reabrir mês</button>`:`<button class="sec" data-act="fechar" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ${MN[S.mes.mes-1]}</button>`}
    <button class="sec" data-act="copmes" ${ed?'':'disabled'}>⧉ Copiar mês anterior</button>
@@ -3027,27 +3064,31 @@ document.addEventListener('click',async e=>{
   else if(a==='view'){S.view=b.dataset.v;if(S.view==='admin')await carregarAdmin();else if(S.view==='plan')await carregarPlan();else render()}
   else if(a==='trocarespaco'){const alvo=(S.espacos||[]).find(x=>x.familias?.id===b.dataset.id);if(!alvo)return toast('Este espaço não está mais disponível.',1);try{localStorage.setItem('cf_familia_ativa',alvo.familias.id)}catch(e){}S.view='planilha';toast('Abrindo espaço…');await boot()}
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
+  else if(a==='compromissos'){await mostrarCompromissos()}
+  else if(a==='fecharcompromissos'){document.querySelector('.cf-compromissos-modal')?.remove()}
   else if(a==='add'){
-    const total=Number($('#n_valor').value),desc=$('#n_desc').value.trim(),tipo=$('#n_tipo').value;
-    const parcelas=Number($('#n_parcelas')?.value||1);
-    if(!desc||desc.length>160||!Number.isFinite(total)||total<=0)return toast('Informe uma descrição de até 160 caracteres e um valor maior que zero.',1);
-    if(tipo==='receita'&&parcelas>1)return toast('Parcelamento está disponível somente para despesas.',1);
-    if(!Number.isInteger(parcelas)||parcelas<1||parcelas>30)return toast('Escolha de 1 a 30 parcelas.',1);
+    const valorBase=Number($('#n_valor').value),desc=$('#n_desc').value.trim(),tipo=$('#n_tipo').value;
+    const parcelas=Number($('#n_parcelas')?.value||1),natureza=$('#n_natureza')?.value||'compra';
+    if(!desc||desc.length>160||!Number.isFinite(valorBase)||valorBase<=0)return toast('Informe uma descrição de até 160 caracteres e um valor maior que zero.',1);
+    if(tipo==='receita'&&(parcelas>1||natureza==='financiamento'))return toast('Compromissos parcelados estão disponíveis somente para despesas.',1);
+    const limite=natureza==='financiamento'?600:30;
+    if(!Number.isInteger(parcelas)||parcelas<1||parcelas>limite)return toast('Quantidade de parcelas inválida para o tipo escolhido.',1);
+    if(natureza==='financiamento'&&parcelas<2)return toast('Uma prestação/financiamento precisa ter pelo menos 2 meses.',1);
     const inicio=$('#n_data').value||dataLocalISO();
     const [yy,mm,dd]=inicio.split('-').map(Number);
     if(!yy||!mm||!dd||mm<1||mm>12||dd<1||dd>31)return toast('Data inicial inválida.',1);
     if(parcelas>1){
-      await q(sb.rpc('criar_parcelado_v2',{p_familia:S.fam.id,p_data_inicio:inicio,p_descricao:desc,p_valor_total:total,p_total:parcelas,p_categoria:$('#n_cat').value||null,p_membro:$('#n_mem').value||null}));
+      await q(sb.rpc('criar_compromisso_v3',{p_familia:S.fam.id,p_data_inicio:inicio,p_descricao:desc,p_valor_base:valorBase,p_total:parcelas,p_categoria:$('#n_cat').value||null,p_membro:$('#n_mem').value||null,p_natureza:natureza}));
     }else{
       const mesId=await q(sb.rpc('garantir_mes',{p_fam:S.fam.id,p_ano:yy,p_mes:mm}));
-      await q(sb.from('lancamentos').insert({familia_id:S.fam.id,mes_id:mesId,descricao:desc,valor:Math.round(total*100)/100,tipo,
+      await q(sb.from('lancamentos').insert({familia_id:S.fam.id,mes_id:mesId,descricao:desc,valor:Math.round(valorBase*100)/100,tipo,
         status:$('#n_status').value,data_pagamento:$('#n_status').value==='pago'?dataLocalISO():null,
         categoria_id:$('#n_cat').value||null,membro_id:$('#n_mem').value||null,data_vencimento:inicio,
         criado_por:S.user.id}));
     }
     S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));
     S.ano=S.anos.find(x=>x.ano===yy)||S.ano;
-    toast(parcelas>1?`${parcelas} parcelas criadas de forma integrada. Confira a primeira em ${MN[mm-1]} de ${yy}.`:'Lançamento adicionado.');
+    toast(parcelas>1?(natureza==='financiamento'?`Compromisso criado: ${parcelas} prestações mensais de ${brl(valorBase)}.`:`Compra dividida em ${parcelas} parcelas. Valor total: ${brl(valorBase)}.`):'Lançamento adicionado.');
     await loadAno(mm)}
   else if(a==='del'){
     const lanc=S.lanc.find(x=>x.id===b.dataset.id);
