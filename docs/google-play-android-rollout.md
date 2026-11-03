@@ -92,3 +92,19 @@ O controle efetivo deve continuar no backend/RLS/RPCs; não basta esconder eleme
 A integração só será considerada pronta quando os testes acima passarem, a compra Android for validada no servidor, o painel administrativo continuar sendo o único caminho de liberação, o Pix web permanecer intacto e o AAB passar pela trilha de teste da Play Console.
 
 Nenhum pagamento real, publicação, deploy no Supabase ou merge em `main` é realizado por esta preparação.
+
+
+## Regras adicionais confirmadas na documentação oficial Google Play (03/11/2026)
+
+- Os planos de 30 dias devem ser cadastrados como produtos avulsos consumíveis, pois o cliente precisa poder comprar novamente após o período. Não usar assinatura com renovação automática.
+- O backend deve consultar o estado atual do token pela Google Play Developer API e só tratar a compra como válida quando o estado for `PURCHASED`. Tokens devem ser únicos/idempotentes no banco.
+- Produtos consumíveis precisam ser consumidos para permitir recompra. A confirmação/consumo não pode ocorrer antes da validação no servidor. A Google informa que compras não confirmadas em até três dias podem ser reembolsadas automaticamente.
+- Como o Copiloto mantém aprovação administrativa manual, será necessário um procedimento operacional para analisar as solicitações dentro desse prazo. Se o administrador recusar uma compra já paga, o fluxo deverá prever reembolso/revogação apropriado; não se pode simplesmente reter o pagamento e deixar o cliente sem resposta.
+- O titular da conta Play Console precisa ter pelo menos 18 anos. Como o usuário que está conduzindo este projeto é menor de idade, a conta, os contratos, a identidade e os dados financeiros da publicação precisam ficar sob responsabilidade de um adulto autorizado, sem falsificar idade ou identidade.
+- Antes de distribuir, o responsável precisa conferir as declarações de público-alvo, privacidade e classificação etária. O repositório atual contém um checklist que registra exigência de 18 anos nos Termos; isso precisa ser revisado por um responsável legal e alinhado com o público real do produto, sem declarar uma faixa etária incorreta.
+
+Referências oficiais:
+- https://developer.android.com/google/play/billing/lifecycle/one-time
+- https://developer.android.com/google/play/billing/integrate
+- https://support.google.com/googleplay/android-developer/answer/6112435
+- https://support.google.com/googleplay/android-developer/answer/9867159
