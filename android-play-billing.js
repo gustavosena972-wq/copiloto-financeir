@@ -28,18 +28,21 @@
     pix.hidden = true;
     const asideTitle = page.querySelector(".pix-aside-card b");
     const asideText = page.querySelector(".pix-aside-card p");
-    if (asideTitle) asideTitle.textContent = "Compra pela Google Play";
-    if (asideText) asideText.textContent = "Pagamento processado com segurança pela loja Google Play.";
+    if (asideTitle && asideTitle.textContent !== "Compra pela Google Play") asideTitle.textContent = "Compra pela Google Play";
+    if (asideText && asideText.textContent !== "Pagamento processado com segurança pela loja Google Play.") asideText.textContent = "Pagamento processado com segurança pela loja Google Play.";
 
     grid.querySelectorAll(".pix-plan").forEach((button) => {
       const plan = button.dataset.plano;
       const item = products[ids[plan]];
       const price = button.querySelector("strong");
       if (item && price) {
-        price.replaceChildren(document.createTextNode(item.formattedPrice || ""));
-        const small = document.createElement("small");
-        small.textContent = " · compra única";
-        price.appendChild(small);
+        const desired = (item.formattedPrice || "") + " · compra única";
+        if (price.textContent !== desired) {
+          price.replaceChildren(document.createTextNode(item.formattedPrice || ""));
+          const small = document.createElement("small");
+          small.textContent = " · compra única";
+          price.appendChild(small);
+        }
       }
     });
 
@@ -47,7 +50,7 @@
     const selected = grid.querySelector(".pix-plan.selected") || grid.querySelector(".pix-plan");
     const selectedPlan = selected?.dataset.plano || "pro";
     const selectedProduct = products[ids[selectedPlan]];
-    if (totalPrice && selectedProduct) totalPrice.textContent = selectedProduct.formattedPrice || "";
+    if (totalPrice && selectedProduct && totalPrice.textContent !== (selectedProduct.formattedPrice || "")) totalPrice.textContent = selectedProduct.formattedPrice || "";
 
     let checkout = document.getElementById("cf-play-checkout");
     if (!checkout) {
@@ -88,8 +91,8 @@
     }
 
     const disclaimer = page.querySelector(".pix-checkout-disclaimer");
-    if (disclaimer) disclaimer.textContent =
-      "Compra única de 30 dias pela Google Play. Não há renovação automática. O acesso só é liberado depois da verificação da compra e da aprovação manual do responsável.";
+    const androidDisclaimer = "Compra única de 30 dias pela Google Play. Não há renovação automática. O acesso só é liberado depois da verificação da compra e da aprovação manual do responsável.";
+    if (disclaimer && disclaimer.textContent !== androidDisclaimer) disclaimer.textContent = androidDisclaimer;
   }
 
   window.addEventListener("copiloto:play-products", (event) => {
