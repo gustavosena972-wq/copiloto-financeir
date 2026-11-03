@@ -2390,11 +2390,12 @@ function atualizarParcelamento(){
   const limite=natureza==='financiamento'?600:30,atual=Number(s.value||1);
   s.innerHTML=Array.from({length:limite},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'x</option>').join('');
   s.value=String(Math.min(atual,limite));
+  if(tipo==='receita')s.value='1';
   s.disabled=tipo==='receita';
   const n=$('#n_natureza');if(n)n.disabled=tipo==='receita';
   const v=$('#n_valor'),h=$('#n_valor_help');
   if(v)v.placeholder=natureza==='financiamento'?'Valor mensal (R$)':'Valor total (R$)';
-  if(h)h.textContent=natureza==='financiamento'?'Informe o valor de uma prestação. O sistema projeta esse valor pelos meses escolhidos.':'Informe o valor total da compra. O sistema divide pelas parcelas e ajusta os centavos na última.';
+  if(h)h.textContent=(natureza==='financiamento'?'Informe o valor de uma prestação. O sistema projeta esse valor pelos meses escolhidos.':'Informe o valor total da compra. O sistema divide pelas parcelas e ajusta os centavos na última.')+' O status selecionado será aplicado à primeira parcela; as demais começam pendentes.';
   s.title=natureza==='financiamento'?'Prestação/financiamento de 2 a 600 meses':'Compra parcelada de 1 a 30 vezes';
 }
 async function mostrarCompromissos(){
