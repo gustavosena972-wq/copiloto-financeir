@@ -2416,7 +2416,7 @@ async function mostrarCompromissos(){
       const [ano,mes]=l.data_vencimento.split('-').map(Number);
       const indice=ano*12+(mes-1)-(Number(l.parcela_atual)-1);
       const inicio=Math.floor(indice/12)+'-'+String(indice%12+1).padStart(2,'0');
-      chave='importada:'+norm(l.descricao)+':'+l.parcelas_total+':'+(l.categoria_id||'')+':'+inicio;
+      chave='importada:'+norm(l.descricao)+':'+l.parcelas_total+':'+(l.categoria_id||'')+':'+(l.natureza_compromisso||'compra')+':'+inicio;
     }
     if(!chave)continue;
     if(!grupos.has(chave))grupos.set(chave,[]);
@@ -2565,7 +2565,7 @@ function parseTabularData(rows,fallbackMonth=null,fallbackYear=null){
   if(hi<0)return null;
   const h=rows[hi].map(norm),ix=(...keys)=>h.findIndex(x=>keys.some(k=>x===k||x.startsWith(k)));
   const iv=ix('valor'),id=ix('descri','item'),it=ix('tipo'),ic=ix('categoria'),is=ix('status','situa');
-  const idateV=ix('vencimento','data'),im=ix('mes','competencia','referencia'),iy=ix('ano');
+  const idateV=ix('vencimento','data'),im=ix('mes','competencia','referencia'),iy=ix('ano'),inat=ix('natureza compromisso','tipo de compromisso','tipo compromisso','natureza');
   if(iv<0||id<0)return null;
   const grupos=new Map();
   for(const r of rows.slice(hi+1)){
@@ -2585,9 +2585,12 @@ function parseTabularData(rows,fallbackMonth=null,fallbackYear=null){
     const pm=String(r.find(v=>/\d+\s*(?:de|\/)\s*\d+/i.test(String(v??'')))??'').match(/(\d+)\s*(?:de|\/)\s*(\d+)/i);
     const ipa=ix('parcela atual','numero parcela','número parcela'),ipt=ix('total parcelas','parcelas total','qtd parcelas','quantidade parcelas');
     const pa=ipa>=0?Number(r[ipa]):(pm?+pm[1]:null),pt=ipt>=0?Number(r[ipt]):(pm?+pm[2]:null);
+    const naturezaRaw=inat>=0?norm(r[inat]):'';
+    const naturezaComp=naturezaRaw.startsWith('financi')||naturezaRaw.startsWith('prest')||naturezaRaw.startsWith('emprest')?'financiamento':'compra';
     grupos.get(chave).itens.push({grupo:tipo==='receita'?'receita':(categoria?.grupo||'variaveis'),descricao,valor,
       categoria_id:categoria?.id||null,data_vencimento:data,status,
-      parcela_atual:Number.isInteger(pa)&&pa>0?pa:null,parcelas_total:Number.isInteger(pt)&&pt>0?pt:null});
+      parcela_atual:Number.isInteger(pa)&&pa>0?pa:null,parcelas_total:Number.isInteger(pt)&&pt>0?pt:null,
+      natureza_compromisso:naturezaComp});
   }
   return [...grupos.values()];
 }
@@ -2682,7 +2685,7 @@ async function importar(){
           const tipo=i.grupo==='receita'?'receita':'despesa';
           itens.push({tipo,descricao:i.descricao,valor:i.valor,categoria_id:i.categoria_id||catPara(i.grupo,i.descricao),
             data_vencimento:i.data_vencimento||null,status:i.status||'pendente',
-            parcela_atual:i.parcela_atual,parcelas_total:i.parcelas_total,observacao:i.obs||null});
+            parcela_atual:i.parcela_atual,parcelas_total:i.parcelas_total,natureza_compromisso:i.natureza_compromisso||'compra',observacao:i.obs||null});
         });
         if(!itens.length){pul.push(MN[m.mes-1]+' '+m.ano+': nenhum lançamento reconhecido');continue}
         const{data,error}=await sb.rpc('importar_itens',{p_mes:mid,p_itens:itens,p_modo:modo});
