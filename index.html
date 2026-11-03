@@ -1468,8 +1468,11 @@ body:has(.landing-page){
 .landing-nav{display:flex;align-items:center;gap:24px}
 .landing-nav a{color:#65756a;text-decoration:none;font-size:12px;font-weight:650;transition:color .18s ease,transform .18s ease}
 .landing-nav a:hover{color:#28684d}
-.landing-nav .landing-nav-cta{display:inline-flex;align-items:center;gap:9px;padding:10px 15px;border-radius:999px;background:#e8f0e5;color:#2f6344}
-.landing-nav-cta span{font-size:15px}
+.landing-nav .landing-nav-cta{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:132px;padding:8px 12px;border-radius:999px;background:#e8f0e5;color:#2f6344;white-space:nowrap}
+.landing-nav-cta .landing-cta-copy{display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.05}
+.landing-nav-cta .landing-cta-copy strong{font-size:12px;font-weight:800;letter-spacing:0}
+.landing-nav-cta .landing-cta-copy small{font-size:10px;font-weight:650;letter-spacing:0;opacity:.82}
+.landing-nav-cta>span[aria-hidden="true"]{font-size:14px;flex:0 0 auto}
 #app:has(.landing-page) .landing-hero{
   display:grid!important;grid-template-columns:minmax(0,1.12fr) minmax(340px,.78fr)!important;
   gap:clamp(28px,5vw,76px)!important;align-items:center!important;
@@ -2060,7 +2063,7 @@ function renderAuth(){
         <a href="#inicio" data-public-route="inicio">Início</a>
         <a href="#recursos" data-public-route="recursos">O aplicativo</a>
         <a href="#planos" data-public-route="planos">Planos</a>
-        <a class="landing-nav-cta" href="#login" data-public-route="login">Entrar <span aria-hidden="true">↗</span></a>
+        <a class="landing-nav-cta" href="#login" data-public-route="login"><span class="landing-cta-copy"><strong>Entrar</strong><small>ou criar sua conta</small></span><span aria-hidden="true">↗</span></a>
       </nav>
     </header>
     <section class="landing-hero">
