@@ -19,11 +19,13 @@ import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
+import com.android.billingclient.api.QueryPurchasesParams
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     private lateinit var webView: WebView
     private lateinit var billingClient: BillingClient
     private val allowedHost = "gustavosena972-wq.github.io"
+    private val allowedPathPrefix = "/copiloto-financeir/"
     private val productIds = listOf(
         "copiloto_pro_30d",
         "copiloto_max_30d",
@@ -44,8 +46,6 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             .enableAutoServiceReconnection()
             .build()
 
-        connectBilling()
-
         webView = WebView(this)
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
@@ -59,21 +59,34 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 request: WebResourceRequest?
             ): Boolean {
                 val uri = request?.url ?: return true
-                return uri.scheme != "https" || uri.host != allowedHost
+                return !isTrustedAppUrl(uri.scheme, uri.host, uri.path)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                if (url?.startsWith("https://$allowedHost/") == true) {
+                val parsed = runCatching { android.net.Uri.parse(url) }.getOrNull()
+                if (parsed != null && isTrustedAppUrl(parsed.scheme, parsed.host, parsed.path)) {
                     dispatchToWeb("copiloto:play-bridge-ready", JSONObject().put("ready", true))
                 }
             }
         }
         setContentView(webView)
         webView.loadUrl(BuildConfig.WEB_APP_URL)
+
+        connectBilling()
+    }
+
+    private fun isTrustedAppUrl(scheme: String?, host: String?, path: String?): Boolean {
+        return scheme == "https" && host == allowedHost &&
+            (path == allowedPathPrefix.removeSuffix("/") || path?.startsWith(allowedPathPrefix) == true)
     }
 
     private fun connectBilling() {
+        if (billingClient.isReady) {
+            loadProducts()
+            queryExistingPurchases()
+            return
+        }
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(result: BillingResult) {
                 if (result.responseCode == BillingClient.BillingResponseCode.OK) {
@@ -130,10 +143,15 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     }
 
     private fun queryExistingPurchases() {
-        val params = QueryProductDetailsParams.newBuilder()
-        // Compras existentes serão reconciliadas pelo servidor quando a verificação
-        // da Google Play Developer API estiver configurada.
-        // Não liberar acesso nem consumir/confirmar compras somente pelo cliente.
+        val params = QueryPurchasesParams.newBuilder()
+            .setProductType(BillingClient.ProductType.INAPP)
+            .build()
+
+        billingClient.queryPurchasesAsync(params) { result, purchases ->
+            if (result.responseCode != BillingClient.BillingResponseCode.OK) return@queryPurchasesAsync
+            purchases.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED }
+                .forEach { dispatchPurchaseForServerVerification(it, "copiloto:play-existing-purchase") }
+        }
     }
 
     private fun launchPurchase(productId: String) {
@@ -167,40 +185,41 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             BillingClient.BillingResponseCode.OK -> {
                 purchases.orEmpty().forEach { purchase ->
                     when (purchase.purchaseState) {
-                        Purchase.PurchaseState.PURCHASED -> {
-                            val products = JSONArray()
-                            purchase.products.forEach { products.put(it) }
-                            dispatchToWeb(
-                                "copiloto:play-purchase",
-                                JSONObject()
-                                    .put("purchaseToken", purchase.purchaseToken)
-                                    .put("products", products)
-                                    .put("purchaseState", "PURCHASED")
-                                    .put("isAcknowledged", purchase.isAcknowledged)
-                            )
-                            // IMPORTANTE: não conceder acesso nem consumir/confirmar aqui.
-                            // O backend deve validar o token antes de qualquer ação.
-                        }
-                        Purchase.PurchaseState.PENDING -> {
+                        Purchase.PurchaseState.PURCHASED ->
+                            dispatchPurchaseForServerVerification(purchase, "copiloto:play-purchase")
+                        Purchase.PurchaseState.PENDING ->
                             dispatchToWeb(
                                 "copiloto:play-pending",
                                 JSONObject().put("message", "A compra ainda está pendente na Google Play.")
                             )
-                        }
                     }
                 }
             }
-            BillingClient.BillingResponseCode.USER_CANCELED -> {
+            BillingClient.BillingResponseCode.USER_CANCELED ->
                 dispatchToWeb(
                     "copiloto:play-cancelled",
                     JSONObject().put("message", "Compra cancelada.")
                 )
-            }
             else -> dispatchToWeb(
                 "copiloto:play-error",
                 JSONObject().put("message", result.debugMessage.ifBlank { "Falha na compra Google Play." })
             )
         }
+    }
+
+    private fun dispatchPurchaseForServerVerification(purchase: Purchase, eventName: String) {
+        val products = JSONArray()
+        purchase.products.forEach { products.put(it) }
+        dispatchToWeb(
+            eventName,
+            JSONObject()
+                .put("purchaseToken", purchase.purchaseToken)
+                .put("products", products)
+                .put("purchaseState", "PURCHASED")
+                .put("isAcknowledged", purchase.isAcknowledged)
+        )
+        // Não conceder acesso nem consumir/confirmar no cliente.
+        // O servidor precisa validar o token e aplicar idempotência primeiro.
     }
 
     private fun dispatchToWeb(eventName: String, payload: JSONObject) {
@@ -218,9 +237,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     inner class PlayBillingBridge {
         @JavascriptInterface
         fun queryProducts() {
-            runOnUiThread {
-                if (billingClient.isReady) loadProducts() else connectBilling()
-            }
+            runOnUiThread { connectBilling() }
         }
 
         @JavascriptInterface
@@ -232,7 +249,9 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 )
                 return
             }
-            runOnUiThread { launchPurchase(productId) }
+            runOnUiThread {
+                if (billingClient.isReady) launchPurchase(productId) else connectBilling()
+            }
         }
     }
 
