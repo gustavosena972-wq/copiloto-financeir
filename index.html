@@ -1444,6 +1444,217 @@ button:not(:disabled):hover{filter:brightness(1.04)}
 @media(prefers-reduced-motion:reduce){.landing-feature-visual,.landing-hero,.landing-hero:after{animation:none!important;transition:none!important}}
 </style>
 
+
+<style id="cf-entry-redesign">
+/* Copiloto Financeiro — entrada redesenhada */
+body:has(.landing-page){
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse at 8% 7%,rgba(219,232,213,.72),transparent 32%),
+    radial-gradient(ellipse at 92% 4%,rgba(240,226,196,.5),transparent 28%),
+    #f5f5ef!important;
+  color:#26372d;
+}
+#app:has(.landing-page){width:100%;max-width:1480px;padding:22px clamp(14px,3vw,42px)}
+.landing-page{max-width:1360px;margin:0 auto;padding:0 4px;color:#26372d}
+.landing-header{
+  display:flex;align-items:center;justify-content:space-between;gap:22px;
+  padding:5px 2px 18px;border:0;border-bottom:1px solid #e2e7dc;
+}
+.landing-brand{display:flex;align-items:center;gap:11px;text-decoration:none}
+.landing-brand svg{width:42px;height:42px;filter:drop-shadow(0 5px 8px rgba(36,83,53,.12))}
+.landing-brand strong{display:block;color:#25392d;font-size:17px;font-weight:800;letter-spacing:-.035em}
+.landing-brand small{display:block;margin-top:3px;color:#879186;font-size:8px;font-weight:800;letter-spacing:.16em}
+.landing-nav{display:flex;align-items:center;gap:24px}
+.landing-nav a{color:#65756a;text-decoration:none;font-size:12px;font-weight:650;transition:color .18s ease,transform .18s ease}
+.landing-nav a:hover{color:#28684d}
+.landing-nav .landing-nav-cta{display:inline-flex;align-items:center;gap:9px;padding:10px 15px;border-radius:999px;background:#e8f0e5;color:#2f6344}
+.landing-nav-cta span{font-size:15px}
+#app:has(.landing-page) .landing-hero{
+  display:grid!important;grid-template-columns:minmax(0,1.12fr) minmax(340px,.78fr)!important;
+  gap:clamp(28px,5vw,76px)!important;align-items:center!important;
+  min-height:0!important;margin:38px 0 0!important;padding:0!important;
+  overflow:visible!important;border:0!important;border-radius:0!important;
+  background:none!important;box-shadow:none!important;animation:none!important;
+}
+#app:has(.landing-page) .landing-hero:after{display:none!important}
+.landing-showcase{display:grid;gap:26px;min-width:0}
+.landing-intro{position:static;padding:0;color:#26372d}
+.landing-kicker{
+  display:inline-flex;align-items:center;gap:9px;
+  color:#47785a;font-size:9px;font-weight:850;letter-spacing:.14em;
+}
+.landing-kicker i{width:8px;height:8px;border-radius:50%;background:#5b9b6b;box-shadow:0 0 0 4px #5b9b6b1c}
+.landing-intro h1{
+  max-width:720px;margin:16px 0 15px;color:#263b2e;
+  font-size:clamp(38px,4.4vw,61px);font-weight:760;line-height:1.02;letter-spacing:-.065em;
+}
+.landing-intro>p{max-width:620px;margin:0;color:#728075;font-size:15px;line-height:1.75}
+.landing-highlights{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;
+  margin-top:25px;padding:0;border:0;background:transparent;
+}
+.landing-highlights>div{
+  display:grid;grid-template-columns:24px 1fr;grid-template-rows:auto auto;column-gap:8px;row-gap:4px;
+  min-width:0;margin:0;padding:3px 13px 3px 0;border:0;border-right:1px solid #e0e6dc;
+  border-radius:0;background:transparent;
+}
+.landing-highlights>div+div{padding-left:13px}
+.landing-highlights>div:last-child{border-right:0}
+.landing-highlights .landing-highlight-icon{
+  grid-row:1/3;display:grid;place-items:center;width:23px;height:23px;border-radius:50%;
+  background:#e4efe3;color:#34744d;font-size:12px;font-weight:850;letter-spacing:0;
+}
+.landing-highlights b{align-self:center;color:#354b3a;font-size:11px;font-weight:750}
+.landing-highlights small{grid-column:2;color:#899389;font-size:9px;line-height:1.45}
+.landing-feature-visual{
+  position:relative;margin:0;overflow:hidden;border:1px solid #d8e3d5;border-radius:25px;
+  background:#173c2d;box-shadow:0 18px 44px rgba(38,69,44,.13);
+}
+.landing-feature-visual img{
+  display:block;width:100%;height:auto;aspect-ratio:560/315;object-fit:cover;
+  transition:transform .7s cubic-bezier(.2,.7,.2,1);
+}
+.landing-feature-visual:hover img{transform:scale(1.025)}
+.landing-feature-visual figcaption{
+  padding:9px 14px;background:#173c2d;color:#e6ecdf;
+  font-size:10px;line-height:1.4;text-align:right;
+}
+.landing-login{
+  position:relative;z-index:1;display:grid;gap:13px;align-content:center;align-self:center;
+  width:100%;max-width:465px;justify-self:end;padding:clamp(25px,3vw,36px);
+  border:1px solid #e4e9df;border-radius:25px;background:rgba(255,255,252,.94);
+  color:#293b30;box-shadow:0 18px 54px rgba(45,65,45,.09);
+}
+.landing-login:before{
+  content:"";position:absolute;top:0;left:34px;width:54px;height:4px;border-radius:0 0 5px 5px;
+  background:linear-gradient(90deg,#397d52,#b99a5c);
+}
+.landing-login-head{margin:0 0 3px}
+.landing-login-head>span{color:#65846b;font-size:9px;font-weight:850;letter-spacing:.16em}
+.landing-login-head h2{margin:9px 0 5px;color:#293d30;font-size:27px;font-weight:760;letter-spacing:-.05em}
+.landing-login-head p{margin:0;color:#829084;font-size:12px;line-height:1.55}
+.landing-field-group{display:grid;gap:6px}
+.landing-field{color:#526557;font-size:10px;font-weight:750;letter-spacing:.025em}
+.landing-login input:not([type=checkbox]){
+  width:100%;min-height:48px;padding:12px 14px;border:1px solid #e0e6dc;border-radius:12px;
+  background:#f8faf6;color:#293b30;font-size:12px;transition:border-color .18s,box-shadow .18s,background .18s;
+}
+.landing-login input:not([type=checkbox])::placeholder{color:#a0aaa0}
+.landing-login input:not([type=checkbox]):focus{border-color:#72a17a;background:#fff;box-shadow:0 0 0 4px rgba(67,135,81,.11)}
+.landing-login .aceite{display:flex;align-items:flex-start;gap:8px;margin:1px 0;color:#859085;font-size:9px;line-height:1.55}
+.landing-login .aceite input{width:14px;height:14px;flex:none;margin:1px 0 0;accent-color:#34784e}
+.landing-login .aceite a{color:#36734c;text-decoration:underline;text-underline-offset:2px}
+.landing-login #recuperacao{display:grid;gap:9px;padding:13px;border:1px solid #e2e9df;border-radius:13px;background:#f7f9f4}
+.landing-login #recuperacao .mu{color:#788579;font-size:10px;line-height:1.5}
+.landing-login #recuperacao button{min-height:40px}
+.landing-login .aviso{min-height:0;margin:0;color:#a74e48;font-size:10px}
+.landing-login button{min-height:47px;border-radius:12px;font-size:12px;font-weight:750;box-shadow:none}
+.landing-login button.landing-primary{
+  background:linear-gradient(110deg,#286648,#438a59);color:#fff;box-shadow:0 8px 18px rgba(44,112,68,.16);
+}
+.landing-login button.landing-primary:hover{background:linear-gradient(110deg,#22583d,#367a4c);transform:translateY(-1px)}
+.landing-create-row{display:grid;grid-template-columns:1fr 1.05fr;align-items:center;gap:10px;margin-top:-2px}
+.landing-create-row>span{color:#899389;font-size:10px}
+.landing-login button.landing-secondary{min-height:42px;padding:9px 12px;background:#edf3ea;border:1px solid #dce8d9;color:#356447}
+.landing-login button.landing-secondary:hover{background:#e3eee0}
+.landing-login .landing-link-button{min-height:28px;padding:4px;background:transparent;color:#728274;text-decoration:none;font-size:10px}
+.landing-login .landing-link-button:hover{color:#28684d;text-decoration:underline}
+.landing-login .demo-link{
+  display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:10px 8px;
+  border:0;border-top:1px solid #edf0e9;border-radius:0;background:transparent;
+  color:#55745b;font-size:10px;font-weight:650;text-decoration:none;
+}
+.landing-login .demo-link:hover{color:#28684d}
+.landing-plans-section{margin-top:48px;padding:32px 0 15px;border:0;border-top:1px solid #e1e6dc}
+.landing-section-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:21px}
+.landing-section-heading>div>span{color:#9a8050;font-size:9px;font-weight:850;letter-spacing:.16em}
+.landing-section-heading h2{max-width:680px;margin:8px 0 0;color:#2a3b30;font-size:clamp(24px,2.8vw,34px);line-height:1.12;letter-spacing:-.05em}
+.landing-section-heading>p{max-width:340px;margin:0;color:#839084;font-size:11px;line-height:1.65}
+.landing-plan-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;
+  overflow:visible;border:0;border-radius:0;background:transparent;box-shadow:none;
+}
+.landing-plan-card{
+  position:relative;display:flex;flex-direction:column;min-width:0;padding:24px 23px 20px;
+  border:1px solid #e7ebe3;border-radius:20px;background:rgba(255,255,252,.88);
+  box-shadow:0 7px 24px rgba(43,61,44,.035);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+}
+.landing-plan-card:last-child{border:1px solid #e7ebe3}
+.landing-plan-card:hover{transform:translateY(-3px);border-color:#d2dfd0;background:#fff;box-shadow:0 13px 30px rgba(43,75,48,.07)}
+.landing-plan-card.recommended{border:1px solid #bcd4bd;background:linear-gradient(155deg,#f0f6ed,#fff 75%);box-shadow:0 12px 32px rgba(50,103,61,.08)}
+.landing-plan-card.ultra{background:linear-gradient(155deg,#fbfaf4,#fff 74%)}
+.landing-ribbon{top:16px;right:16px;padding:6px 10px;border-radius:999px;background:#e0eddf;color:#356a46;font-size:8px;letter-spacing:.08em}
+.landing-plan-label{color:#819083;font-size:8px;font-weight:850;letter-spacing:.14em}
+.landing-plan-top h3{margin:8px 0 4px;color:#2e4033;font-size:29px;letter-spacing:-.045em}
+.landing-plan-top p{min-height:36px;margin:0;color:#819083;font-size:11px;line-height:1.55}
+.landing-price{display:flex;align-items:baseline;gap:6px;margin:17px 0 11px}
+.landing-price strong{color:#2b7049;font-size:31px;font-weight:800;letter-spacing:-.05em}
+.landing-price>span{color:#90998e;font-size:10px}
+.landing-limit{display:inline-flex;align-self:flex-start;padding:7px 10px;border-radius:999px;background:#eef3e9;color:#557052;font-size:10px;font-weight:750}
+.landing-feature-heading{margin:19px 0 9px;color:#929a8f;font-size:8px;font-weight:850;letter-spacing:.13em}
+.landing-feature-list{display:grid;gap:9px;margin:0;padding:0;list-style:none}
+.landing-feature-list li{display:flex;align-items:flex-start;gap:8px;color:#536258;font-size:10.5px;line-height:1.5}
+.landing-feature-check{display:grid;place-items:center;width:16px;height:16px;flex:none;border-radius:50%;background:#e8f2e6;color:#398053;font-size:9px}
+.landing-feature-list li small{padding:3px 6px;border-radius:999px;background:#f5f0e5;color:#8b754c;font-size:8px;font-weight:750}
+.landing-plan-status{margin-top:auto;padding-top:19px;color:#35734b;font-size:10px;font-weight:800}
+.landing-plan-status.current{display:inline-flex;align-items:center;gap:7px}
+.landing-plan-status.current:before{content:"";width:7px;height:7px;border-radius:50%;background:#5b9b68}
+.landing-plan-status.roadmap{color:#91784b}
+.landing-plans-footnote{margin:18px 0 0;color:#8d978b;font-size:9.5px;line-height:1.6}
+.landing-footer{margin-top:28px;padding:20px 0 7px;border-top:1px solid #e1e6dc;color:#919a8f;font-size:10px;text-align:center}
+@media(max-width:980px){
+  #app:has(.landing-page){padding:16px}
+  #app:has(.landing-page) .landing-hero{grid-template-columns:minmax(0,1fr) minmax(300px,.82fr)!important;gap:26px!important}
+  .landing-intro h1{font-size:clamp(36px,5vw,49px)}
+  .landing-highlights{grid-template-columns:1fr;gap:9px}
+  .landing-highlights>div,.landing-highlights>div+div{grid-template-columns:24px 1fr;padding:2px 0;border:0}
+  .landing-highlights small{grid-column:2}
+}
+@media(max-width:760px){
+  #app:has(.landing-page){padding:11px}
+  .landing-header{padding-bottom:13px}
+  .landing-nav{gap:10px}
+  .landing-nav>a:first-child{display:none}
+  #app:has(.landing-page) .landing-hero{grid-template-columns:1fr!important;gap:23px!important;margin-top:27px!important}
+  .landing-showcase{gap:19px}
+  .landing-intro h1{max-width:650px;font-size:clamp(34px,8vw,45px)}
+  .landing-highlights{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .landing-highlights>div,.landing-highlights>div+div{display:grid;grid-template-columns:22px 1fr;padding:3px 7px 3px 0;border-right:1px solid #e0e6dc}
+  .landing-highlights>div:last-child{border-right:0}
+  .landing-highlights .landing-highlight-icon{width:21px;height:21px}
+  .landing-highlights small{grid-column:2}
+  .landing-login{max-width:none;justify-self:stretch;padding:24px}
+  .landing-plans-section{margin-top:34px;padding-top:25px}
+  .landing-section-heading{display:block}
+  .landing-section-heading>p{margin-top:9px}
+  .landing-plan-grid{grid-template-columns:1fr;gap:12px}
+  .landing-plan-card{padding:22px 20px}
+  .landing-plan-top p{min-height:0}
+}
+@media(max-width:480px){
+  #app:has(.landing-page){padding:8px}
+  .landing-brand svg{width:36px;height:36px}
+  .landing-brand strong{font-size:15px}
+  .landing-brand small{font-size:7px}
+  .landing-nav .landing-nav-cta{padding:9px 11px;font-size:10px}
+  .landing-intro h1{font-size:34px}
+  .landing-intro>p{font-size:13px}
+  .landing-highlights{grid-template-columns:1fr;gap:9px}
+  .landing-highlights>div,.landing-highlights>div+div{grid-template-columns:23px 1fr;padding:0;border:0}
+  .landing-highlights small{grid-column:2}
+  .landing-feature-visual{border-radius:17px}
+  .landing-login{padding:21px 17px;border-radius:19px}
+  .landing-login-head h2{font-size:24px}
+  .landing-create-row{grid-template-columns:1fr}
+  .landing-create-row>span{display:none}
+  .landing-section-heading h2{font-size:25px}
+  .landing-plan-card{padding:20px 17px;border-radius:17px}
+}
+@media(prefers-reduced-motion:reduce){
+  .landing-page *,.landing-page *:before,.landing-page *:after{animation:none!important;transition:none!important}
+}
+</style>
 </head>
 <body>
 <div id="app" class="wrap"></div>
@@ -1534,28 +1745,45 @@ function renderAuth(){
   const feature=(txt,planned=false)=>'<li><span class="landing-feature-check">'+(planned?'◇':'✓')+'</span><span>'+txt+'</span>'+(planned?'<small>Planejado</small>':'')+'</li>';
   $('#app').innerHTML=`<div class="landing-page">
     <header class="landing-header">
-      <div class="landing-brand">${LOGO}<div><strong>Copiloto Financeiro</strong><small>GESTÃO FINANCEIRA FAMILIAR</small></div></div>
-      <span class="landing-header-note">Organização · Planejamento · Clareza</span>
+      <a class="landing-brand" href="#" aria-label="Copiloto Financeiro — início">
+        ${LOGO}<span><strong>Copiloto Financeiro</strong><small>GESTÃO FINANCEIRA FAMILIAR</small></span>
+      </a>
+      <nav class="landing-nav" aria-label="Navegação principal">
+        <a href="#landing-plans">Conheça os planos</a>
+        <a class="landing-nav-cta" href="#landing-login">Acessar minha conta <span aria-hidden="true">↗</span></a>
+      </nav>
     </header>
-    <figure class="landing-feature-visual">
-      <img src="assets/copiloto-dashboard-premium.webp" alt="Imagem ilustrativa do Copiloto Financeiro: painel completo em verde-escuro e dourado, relógio clássico, cédula de cem reais e moedas" width="560" height="315" fetchpriority="high">
-      <figcaption>Imagem conceitual de apresentação do Copiloto Financeiro.</figcaption>
-    </figure>
     <section class="landing-hero">
-      <div class="landing-intro">
-        <span class="landing-kicker">FINANÇAS DA FAMÍLIA, COM MAIS CLAREZA</span>
-        <h1>Organize o dinheiro da família em um só lugar.</h1>
-        <p>Registre receitas e despesas, organize categorias, importe planilhas e acompanhe os resultados mês a mês e ao longo do ano.</p>
-        <div class="landing-highlights">
-          <div><span>01</span><b>Controle mensal</b><small>Receitas, despesas e contas em uma planilha organizada.</small></div>
-          <div><span>02</span><b>Visão completa</b><small>Resumo anual, categorias e acompanhamento familiar.</small></div>
-          <div><span>03</span><b>Importação simples</b><small>Trabalhe com arquivos Excel e CSV.</small></div>
+      <div class="landing-showcase">
+        <div class="landing-intro">
+          <span class="landing-kicker"><i></i> FINANÇAS DA FAMÍLIA, COM MAIS CLAREZA</span>
+          <h1>Seu dinheiro organizado. Sua família mais tranquila.</h1>
+          <p>Reúna receitas, despesas, contas e objetivos em um só lugar. Tenha uma visão clara do mês e acompanhe a evolução financeira da família.</p>
+          <div class="landing-highlights">
+            <div><span class="landing-highlight-icon">✓</span><b>Controle mensal</b><small>Receitas, despesas e contas organizadas.</small></div>
+            <div><span class="landing-highlight-icon">↗</span><b>Visão do ano</b><small>Acompanhe resultados e compare os meses.</small></div>
+            <div><span class="landing-highlight-icon">⇧</span><b>Importação simples</b><small>Use arquivos Excel e CSV.</small></div>
+          </div>
         </div>
+        <figure class="landing-feature-visual">
+          <img src="assets/copiloto-dashboard-premium.webp" alt="Apresentação visual do Copiloto Financeiro em verde e dourado, com relógio clássico e elementos financeiros" width="560" height="315" fetchpriority="high">
+          <figcaption>Imagem conceitual de apresentação do Copiloto Financeiro.</figcaption>
+        </figure>
       </div>
-      <section class="landing-login" aria-label="Acesso à conta">
-        <div class="landing-login-head"><span>ÁREA DO CLIENTE</span><h2>Bem-vindo</h2><p>Entre na sua conta ou crie um acesso.</p></div>
-        <input id="nome" autocomplete="username" placeholder="Seu nome">
-        <input id="senha" type="password" autocomplete="current-password" placeholder="Senha (mín. 8 caracteres)">
+      <section class="landing-login" id="landing-login" aria-label="Acesso à conta">
+        <div class="landing-login-head">
+          <span>ÁREA DO CLIENTE</span>
+          <h2>Que bom ter você aqui.</h2>
+          <p>Entre com seus dados para continuar.</p>
+        </div>
+        <div class="landing-field-group">
+          <label class="landing-field" for="nome">Usuário</label>
+          <input id="nome" autocomplete="username" placeholder="Digite seu usuário">
+        </div>
+        <div class="landing-field-group">
+          <label class="landing-field" for="senha">Senha</label>
+          <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha">
+        </div>
         <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
         <div id="recuperacao" hidden>
           <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
@@ -1564,13 +1792,13 @@ function renderAuth(){
           <button class="sec" data-act="recuperar">Redefinir senha</button>
         </div>
         <div id="aviso" class="aviso"></div>
-        <button class="landing-primary" data-act="entrar">Entrar</button>
-        <button class="landing-secondary" data-act="cadastrar">Criar conta</button>
+        <button class="landing-primary" data-act="entrar">Entrar na minha conta</button>
+        <div class="landing-create-row"><span>Primeira vez por aqui?</span><button class="landing-secondary" data-act="cadastrar">Criar minha conta</button></div>
         <button class="landing-link-button" data-act="reset">Esqueci minha senha</button>
-        <a class="demo-link" href="demo.html">Ver demonstração do aplicativo</a>
+        <a class="demo-link" href="demo.html"><span aria-hidden="true">◉</span> Conhecer a demonstração do aplicativo</a>
       </section>
     </section>
-    <section class="landing-plans-section" aria-labelledby="landing-plans-title">
+    <section class="landing-plans-section" id="landing-plans" aria-labelledby="landing-plans-title">
       <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Uma assinatura por família. Os membros convidados não precisam contratar outro plano.</p></div>
       <div class="landing-plan-grid">
         <article class="landing-plan-card">
