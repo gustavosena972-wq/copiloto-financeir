@@ -50,7 +50,7 @@ Esta preparação é isolada em branch própria. Não publicar no GitHub Pages, 
 - Configurar notificações de compra/reembolso/cancelamento e reconciliação do estado de compra, para que reembolsos e revogações não deixem acesso indevido.
 - Segredos de conta de serviço Google ficam somente em secrets do backend; nunca no HTML, app Android ou repositório.
 
-**Atenção:** ainda não há schema ou função de servidor de Google Play Billing neste repositório. Não se deve inventar o schema nem implantar alterações no Supabase sem validar as tabelas/RPCs atuais e preparar migração reversível.
+**Atenção:** a branch agora contém um script SQL separado e duas Edge Functions de referência para o fluxo Google Play. Eles ainda não foram aplicados nem implantados. O SQL precisa ser convertido em migração formal, revisado e testado em ambiente de desenvolvimento antes de qualquer implantação.
 
 ## Bloqueio de acesso
 
