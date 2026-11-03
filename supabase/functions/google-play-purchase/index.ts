@@ -82,19 +82,6 @@ async function verifyPurchase(accessToken: string, packageName: string, productI
   return data;
 }
 
-async function acknowledgePurchase(accessToken: string, packageName: string, productId: string, purchaseToken: string) {
-  const url = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/"
-    + encodeURIComponent(packageName) + "/purchases/products/"
-    + encodeURIComponent(productId) + "/tokens/" + encodeURIComponent(purchaseToken)
-    + ":acknowledge";
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
-    body: JSON.stringify({ developerPayload: "copiloto-compra-pendente-aprovacao-manual" }),
-  });
-  // Google returns success for an already acknowledged purchase too.
-  if (!response.ok) throw new Error("A Google Play não confirmou a compra. Atualize o status antes de tentar novamente.");
-}
 
 async function sha256(value: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
@@ -150,11 +137,9 @@ Deno.serve(async (req: Request) => {
       if (existing.usuario_id !== userData.user.id || existing.familia_id !== membership.familia_id) {
         return json({ error: "Esta compra já está vinculada a outra conta." }, 409);
       }
-      // Repetições também garantem a confirmação caso a primeira chamada tenha falhado
-      // depois de gravar a solicitação no banco.
-      if (existing.status === "pendente" && Number(purchase.acknowledgementState) !== 1) {
-        await acknowledgePurchase(googleToken, packageName, productId, purchaseToken);
-      }
+      // O produto é consumível: não confirmar nem consumir enquanto aguarda
+      // aprovação manual. O consumo no fluxo administrativo confirma a compra
+      // somente quando o acesso de 30 dias é efetivamente concedido.
       return json({ ok: true, status: existing.status, duplicate: true });
     }
 
@@ -179,10 +164,10 @@ Deno.serve(async (req: Request) => {
       throw insertError;
     }
 
-    // Confirmar a compra dentro do prazo exigido pela Google Play, sem consumi-la.
-    // O produto permanece não consumido e a solicitação continua pendente até a decisão
-    // manual. A aprovação consome o produto; a recusa solicita reembolso/revogação.
-    await acknowledgePurchase(googleToken, packageName, productId, purchaseToken);
+    // A compra permanece pendente e sem consumo até a decisão do administrador.
+    // Para estes passes consumíveis, o consumo na aprovação também confirma à
+    // Google Play que o acesso foi concedido. A fila deve ser decidida em até 3 dias;
+    // compras não confirmadas nesse prazo podem ser reembolsadas automaticamente.
     return json({ ok: true, status: "pendente", message: "Compra verificada e enviada para aprovação manual." });
   } catch (error) {
     console.error("google-play-purchase", error);
