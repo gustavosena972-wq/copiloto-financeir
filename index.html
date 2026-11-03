@@ -1827,7 +1827,7 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 }
 @media(prefers-reduced-motion:reduce){.landing-hero-actions a{transition:none!important}}
 /* Cada área pública funciona como uma página independente */
-.landing-page[data-screen="inicio"] .landing-benefits,.landing-page[data-screen="inicio"] .landing-plans-section,.landing-page[data-screen="inicio"] .landing-login-section{display:none!important}
+.landing-page[data-screen="inicio"] .landing-plans-section,.landing-page[data-screen="inicio"] .landing-login-section{display:none!important}
 .landing-page[data-screen="recursos"] .landing-hero,.landing-page[data-screen="recursos"] .landing-plans-section,.landing-page[data-screen="recursos"] .landing-login-section{display:none!important}
 .landing-page[data-screen="planos"] .landing-hero,.landing-page[data-screen="planos"] .landing-benefits,.landing-page[data-screen="planos"] .landing-login-section{display:none!important}
 .landing-page[data-screen="cadastro"] .landing-hero,.landing-page[data-screen="cadastro"] .landing-benefits,.landing-page[data-screen="cadastro"] .landing-plans-section{display:none!important}
@@ -1865,6 +1865,20 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 .landing-page[data-screen="acesso"] #landing-terms[style*="display: none"],.landing-page[data-screen="acesso"] #landing-create-row[style*="display: none"],.landing-page[data-screen="acesso"] #landing-back-login[style*="display: none"]{display:none!important}
 .landing-page[data-screen="acesso"] .landing-login .demo-link{display:block}
 @media(max-width:760px){.landing-page[data-screen="acesso"] .landing-login-section{grid-template-columns:1fr;padding:25px 17px}}
+
+/* Fluxo público: apresentação completa, planos isolados e acesso após a escolha */
+.landing-page[data-screen="inicio"] .landing-benefits{display:grid!important}
+.landing-page[data-screen="inicio"] .landing-hero{display:block!important}
+.landing-page[data-screen="planos"] .landing-plans-section{display:block!important}
+.landing-page[data-screen="planos"] .landing-hero,.landing-page[data-screen="planos"] .landing-benefits,.landing-page[data-screen="planos"] .landing-login-section{display:none!important}
+.landing-page[data-screen="acesso"] .landing-hero,.landing-page[data-screen="acesso"] .landing-benefits,.landing-page[data-screen="acesso"] .landing-plans-section{display:none!important}
+.landing-features-cta{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:30px;padding:22px 0;border-top:1px solid #e1e7dd}
+.landing-features-cta p{margin:0;color:#657568;font-size:13px}
+.landing-features-cta a,.landing-plan-cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;border-radius:999px;padding:12px 18px;font-size:11px;font-weight:800}
+.landing-plan-cta{margin-top:18px;background:#285b3d;color:#fff;min-height:42px}
+.landing-plan-cta:hover{background:#1e4930;transform:translateY(-2px)}
+.landing-plan-card{min-height:100%}
+@media(max-width:640px){.landing-features-cta{align-items:flex-start;flex-direction:column}.landing-plan-cta{width:100%}}
 </style>
 </head>
 <body>
@@ -2048,8 +2062,8 @@ function renderAuth(){
         <article><span class="landing-benefit-icon">◎</span><div><b>Planejamento</b><p>Organize metas, dívidas, bens e simulações de objetivos.</p></div></article>
         <article><span class="landing-benefit-icon">♧</span><div><b>Organização familiar</b><p>Compartilhe o espaço com membros da família e defina permissões de acesso.</p></div></article>
         <article><span class="landing-benefit-icon">⇧</span><div><b>Importar e exportar</b><p>Trabalhe com arquivos Excel e CSV para facilitar o controle dos dados.</p></div></article>
-      </div>
-    </section>
+      <div class="landing-features-cta"><p>Veja qual plano combina com a organização financeira da sua família.</p><a href="#planos" class="landing-hero-primary">Ver planos e valores <span>↗</span></a></div>
+    </div>
     <section class="landing-plans-section" id="landing-plans" aria-labelledby="landing-plans-title">
       <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Uma assinatura por família. Os membros convidados não precisam contratar outro plano.</p></div>
       <div class="landing-plan-grid">
@@ -2068,6 +2082,7 @@ function renderAuth(){
             ${feature('Acesso familiar e permissões por perfil')}
           </ul>
           <div class="landing-plan-status current">Disponível</div>
+          <a class="landing-plan-cta" href="#acesso">Criar conta e continuar <span>↗</span></a>
         </article>
         <article class="landing-plan-card recommended">
           <div class="landing-ribbon">FAMÍLIA AMPLIADA</div>
@@ -2082,6 +2097,7 @@ function renderAuth(){
             ${feature('Cada membro acessa com seu próprio usuário e permissões')}
           </ul>
           <div class="landing-plan-status current">Disponível</div>
+          <a class="landing-plan-cta" href="#acesso">Criar conta e continuar <span>↗</span></a>
         </article>
         <article class="landing-plan-card ultra">
           <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO FINANCEIRA AMPLIADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e espaços familiares já vinculados à sua conta.</p></div>
@@ -2096,6 +2112,7 @@ function renderAuth(){
             ${feature('Cadastro e acompanhamento de bens e obrigações')}
           </ul>
           <div class="landing-plan-status current">Disponível para contratação</div>
+          <a class="landing-plan-cta" href="#acesso">Criar conta e continuar <span>↗</span></a>
         </article>
       </div>
       <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. O Max amplia a capacidade da família para até 6 pessoas. O pagamento é feito por Pix, com conferência manual e sem renovação automática. A assinatura é por família; no Ultra, a central alterna entre espaços familiares aos quais a conta já pertence, cada um com seu próprio acesso.</p>
