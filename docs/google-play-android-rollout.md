@@ -116,7 +116,7 @@ Arquivos adicionados nesta etapa:
 
 - `android-app/`: projeto Android isolado, WebView restrita ao endereço atual do app e ponte nativa Google Play Billing.
 - `android-play-billing.js`: camada isolada que troca o checkout Pix somente quando a ponte Android existe. Em navegador comum, o script não altera o checkout web.
-- `supabase/functions/google-play-purchase/index.ts`: valida a sessão, consulta a família da conta, verifica o token pela Google Play Developer API e cria uma solicitação pendente com token único.
+- `supabase/functions/google-play-purchase/index.ts`: valida a sessão, consulta a família da conta, verifica o token pela Google Play Developer API, cria uma solicitação pendente com token único e confirma a compra sem consumi-la.
 - `supabase/functions/google-play-admin/index.ts`: ação administrativa autenticada; na aprovação, consome a compra no servidor e concede 30 dias via RPC; na recusa, solicita reembolso com revogação antes de marcar a compra como recusada.
 - `supabase/sql/google_play_compras.sql`: script SQL separado para a tabela isolada e RPCs administrativas. É um script de implantação revisável, ainda não aplicado ao banco.
 - `.github/workflows/android-build.yml`: compilação automática do APK de depuração.
@@ -127,7 +127,7 @@ Arquivos adicionados nesta etapa:
 - Nenhuma compra real pode ser concluída até a criação da tabela/RPCs no projeto, implantação das duas Edge Functions e configuração dos secrets `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` e `GOOGLE_PLAY_PACKAGE_NAME`.
 - A chave privada da conta de serviço Google não deve ser colocada no GitHub nem enviada em conversa.
 - O identificador Android e a origem web configurados no projeto Android são provisórios e precisam de confirmação antes da publicação.
-- A compra fica pendente e sem acesso até decisão manual. A aprovação deve ocorrer dentro do prazo de confirmação da Google Play; a rejeição tenta reembolsar e revogar o pedido na loja.
+- A compra fica pendente e sem acesso até decisão manual. O backend confirma (acknowledge) a compra assim que ela é verificada e registrada, dentro do prazo de três dias da Google Play, mas não consome o produto nesse momento. A aprovação manual consome o produto e libera 30 dias; a rejeição solicita reembolso e revogação. A fila ainda precisa ser acompanhada para evitar demora excessiva e resolver exceções.
 - O script SQL está em `supabase/sql/` como implantação separada para revisão. Antes de produção, deve ser convertido em migração formal e testado em ambiente de desenvolvimento, sem alterar as tabelas e RPCs Pix existentes.
 - O build ainda precisa concluir e o APK de depuração não é um AAB assinado para publicação.
 
@@ -150,7 +150,7 @@ Arquivos adicionados nesta etapa:
 
 ### Risco operacional obrigatório
 
-A aprovação manual não pode ficar sem acompanhamento: compras avulsas `PURCHASED` precisam ser consumidas/confirmadas em até três dias. O backend atual só consome na aprovação. Se a fila ficar sem decisão, o Google pode reembolsar automaticamente. Antes de abrir compras reais, o responsável deve assumir monitoramento diário e prazo operacional curto, além de testar reembolso e revogação. Não se deve aprovar uma compra depois de o Google já a ter reembolsado.
+Compras avulsas `PURCHASED` precisam ser confirmadas (acknowledged) em até três dias. O backend agora confirma a compra após validar e gravar a solicitação pendente, sem consumir o produto antes da decisão administrativa. Na aprovação, o servidor consome o produto e libera 30 dias. Na recusa, solicita reembolso e revogação. Antes de abrir compras reais, ainda é obrigatório testar esses três caminhos e tratar falhas/repetições; não se deve aprovar uma compra que já tenha sido reembolsada.
 
 ### Estado de implantação
 
