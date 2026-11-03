@@ -1006,7 +1006,7 @@ document.addEventListener('click',async e=>{
   else if(a==='copiarcodigo'){if(!S.codigoRecuperacao)return;try{await navigator.clipboard.writeText(S.codigoRecuperacao);toast('Código copiado. Guarde-o em local seguro.')}catch(e){const i=$('#codigo-recuperacao-exibido');if(i){i.select();toast('Selecione e copie o código manualmente.')}}}
   else if(a==='fecharcodigo'){const o=document.getElementById('codigo-recuperacao-modal');if(o)o.remove();S.codigoRecuperacao=null}
   else if(a==='convite'){const limite=(PLANOS[S.fam.plano||'pro']||PLANOS.pro).limite;if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
-  }catch(err){}finally{S.busy=false}
+  }catch(err){console.error('Falha em ação do aplicativo:',a,err);if(a==='entrarfam-pix'||a==='entrarfam')toast('Não foi possível concluir o convite: '+(err?.message||'erro inesperado'),1)}finally{S.busy=false}
 });
 document.addEventListener('change',async e=>{
   const t=e.target;
