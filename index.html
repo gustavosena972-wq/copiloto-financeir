@@ -1856,6 +1856,15 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 .landing-page[data-screen="cadastro"] .landing-login [data-act="reset"]{display:none!important}
 .landing-page[data-screen="login"] .landing-login [data-act="reset"]{display:block!important}
 @media(max-width:760px){.landing-nav{flex-wrap:wrap;justify-content:flex-end}.landing-nav>a:first-child{display:inline-flex!important}.landing-page[data-screen="recursos"] .landing-benefits-grid{grid-template-columns:1fr}.landing-page[data-screen="cadastro"] .landing-login-section,.landing-page[data-screen="login"] .landing-login-section{grid-template-columns:1fr;padding:25px 17px}}
+/* Cadastro e login compartilham a mesma tela e alternam no próprio formulário */
+.landing-page[data-screen="acesso"] .landing-hero,.landing-page[data-screen="acesso"] .landing-benefits,.landing-page[data-screen="acesso"] .landing-plans-section{display:none!important}
+.landing-page[data-screen="acesso"] .landing-login-section{display:grid!important;max-width:850px;margin:35px auto 0;grid-template-columns:minmax(0,1fr) minmax(320px,430px)}
+.landing-page[data-screen="acesso"] .landing-login-section{background:linear-gradient(125deg,#edf3e9,#fff)}
+.landing-page[data-screen="acesso"] #landing-terms{display:flex}
+.landing-page[data-screen="acesso"] #landing-create-row,.landing-page[data-screen="acesso"] #landing-back-login{display:flex}
+.landing-page[data-screen="acesso"] #landing-terms[style*="display: none"],.landing-page[data-screen="acesso"] #landing-create-row[style*="display: none"],.landing-page[data-screen="acesso"] #landing-back-login[style*="display: none"]{display:none!important}
+.landing-page[data-screen="acesso"] .landing-login .demo-link{display:block}
+@media(max-width:760px){.landing-page[data-screen="acesso"] .landing-login-section{grid-template-columns:1fr;padding:25px 17px}}
 </style>
 </head>
 <body>
@@ -1943,8 +1952,10 @@ async function loadMes(rd=true){
 
 /* ---------- telas de entrada ---------- */
 function renderAuth(){
-  const telas=['inicio','recursos','planos','cadastro','login'];
-  const tela=telas.includes((location.hash||'').slice(1))?(location.hash||'').slice(1):'inicio';
+  const rota=(location.hash||'').slice(1);
+  const modoAcesso=rota==='cadastro'?'cadastro':'login';
+  const telas=['inicio','recursos','planos','cadastro','login','acesso'];
+  const tela=['cadastro','login','acesso'].includes(rota)?'acesso':(telas.includes(rota)?rota:'inicio');
   const precoPro=brl(PLANOS.pro.valor),precoMax=brl(PLANOS.max.valor),precoUltra=brl(PLANOS.ultra.valor);
   const feature=(txt,planned=false)=>'<li><span class="landing-feature-check">'+(planned?'◇':'✓')+'</span><span>'+txt+'</span>'+(planned?'<small>Planejado</small>':'')+'</li>';
   $('#app').innerHTML=`<div class="landing-page" data-screen="${tela}">
@@ -2094,8 +2105,8 @@ function renderAuth(){
       <section class="landing-login login" id="landing-login" aria-label="Acesso à conta">
         <div class="landing-login-head">
           <span>ÁREA DO CLIENTE</span>
-          <h2>${tela==='cadastro' ? 'Crie sua conta.' : 'Que bom ter você aqui.'}</h2>
-          <p>${tela==='cadastro' ? 'Preencha seus dados para criar seu acesso.' : 'Entre com seus dados para continuar.'}</p>
+          <h2>${modoAcesso==='cadastro' ? 'Crie sua conta.' : 'Que bom ter você aqui.'}</h2>
+          <p>${modoAcesso==='cadastro' ? 'Preencha seus dados para criar seu acesso.' : 'Entre com seus dados para continuar.'}</p>
         </div>
         <div class="landing-field-group">
           <label class="landing-field" for="nome">Usuário</label>
@@ -2113,7 +2124,7 @@ function renderAuth(){
           <button class="sec" data-act="recuperar">Redefinir senha</button>
         </div>
         <div id="aviso" class="aviso"></div>
-        <button class="landing-primary" data-act="${tela==='cadastro' ? 'cadastrar' : 'entrar'}">${tela==='cadastro' ? 'Criar minha conta' : 'Entrar na minha conta'}</button>
+        <button class="landing-primary" data-act="${modoAcesso==='cadastro' ? 'cadastrar' : 'entrar'}">${modoAcesso==='cadastro' ? 'Criar minha conta' : 'Entrar na minha conta'}</button>
         <div class="landing-create-row" id="landing-create-row"><span>Primeira vez por aqui?</span><a class="landing-secondary" href="#cadastro">Criar minha conta</a></div>
         <div class="landing-create-row" id="landing-back-login"><span>Já tem uma conta?</span><a class="landing-secondary" href="#login">Fazer login</a></div>
         <button class="landing-link-button" data-act="reset">Esqueci minha senha</button>
@@ -2123,7 +2134,7 @@ function renderAuth(){
     </section>
     <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar</footer>
   </div>`;
-  const cadastro=tela==='cadastro';
+  const cadastro=modoAcesso==='cadastro';
   const terms=document.getElementById('landing-terms');if(terms)terms.style.display=cadastro?'flex':'none';
   const criar=document.getElementById('landing-create-row');if(criar)criar.style.display=cadastro?'none':'flex';
   const voltar=document.getElementById('landing-back-login');if(voltar)voltar.style.display=cadastro?'flex':'none';
