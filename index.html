@@ -1754,7 +1754,11 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 .landing-hero-secondary{border:1px solid rgba(54,91,62,.22);color:#365d40;background:rgba(255,255,255,.35)}
 .cf-preview{position:absolute!important;z-index:0!important;top:42px!important;right:-5.5%!important;width:72%!important;max-width:none!important;opacity:.94!important;pointer-events:none!important;transform:perspective(1500px) rotateY(-10deg) scale(.9)!important;transform-origin:right center!important;filter:drop-shadow(0 22px 30px rgba(36,62,40,.14))!important}
 .cf-preview-window{min-height:390px!important;border-radius:22px!important;box-shadow:0 25px 60px rgba(37,65,42,.17)!important}
-.cf-preview-caption{display:none!important}
+.cf-preview-caption{display:block!important;position:absolute!important;right:8%!important;bottom:-9px!important;margin:0!important;padding:6px 10px!important;border:1px solid rgba(222,231,216,.8)!important;border-radius:999px!important;background:rgba(250,252,247,.88)!important;color:#748275!important;font-size:8px!important;backdrop-filter:blur(8px)!important}
+@keyframes cf-preview-drift{0%,100%{translate:0 0}50%{translate:0 -7px}}
+.cf-preview{animation:cf-preview-drift 9s ease-in-out infinite!important}
+.landing-showcase:hover .cf-preview{opacity:1!important}
+@media(prefers-reduced-motion:reduce){.cf-preview{animation:none!important}}
 .landing-benefits{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,1.5fr);gap:clamp(22px,4vw,60px);align-items:center;margin:42px 2px 0;padding:22px 0 35px;border-bottom:1px solid #e1e7dd}
 .landing-benefits-heading>span,.landing-login-intro>span{color:#9a8050;font-size:9px;font-weight:850;letter-spacing:.16em}
 .landing-benefits-heading h2{max-width:340px;margin:9px 0 0;color:#2b3d30;font-size:clamp(23px,2.6vw,31px);line-height:1.12;letter-spacing:-.045em}
