@@ -2497,7 +2497,8 @@ function parseTabularRows(rows){
   const hi=rows.findIndex(r=>r.some(c=>norm(c).startsWith('valor'))&&r.some(c=>norm(c).startsWith('descri')||norm(c)==='item'));
   if(hi<0)return null;
   const h=rows[hi].map(norm),ix=(...keys)=>h.findIndex(x=>keys.some(k=>x.startsWith(k)));
-  const iv=ix('valor'),id=ix('descri','item'),it=ix('tipo'),ic=ix('categoria'),is=ix('status','situa'),idate=ix('vencimento','data');
+  const iv=ix('valor'),id=ix('descri','item'),it=ix('tipo'),ic=ix('categoria'),is=ix('status','situa');
+  const idateV=h.findIndex(x=>x.startsWith('vencimento')),idate=idateV>=0?idateV:h.findIndex(x=>x.startsWith('data'));
   if(iv<0||id<0)return null;
   const itens=[];
   for(const r of rows.slice(hi+1)){
@@ -2601,7 +2602,7 @@ async function importar(){
         if(error){pul.push(MN[m.mes-1]+' '+m.ano+': '+error.message);continue}
         const resultado=Array.isArray(data)?data[0]:data;
         ins+=Number(resultado?.inseridos)||0;ja+=Number(resultado?.ja_existiam)||0;
-        if(!primeiroImportado&&Number(resultado?.inseridos)>0)primeiroImportado={ano:m.ano,mes:m.mes};
+        if(!primeiroImportado)primeiroImportado={ano:m.ano,mes:m.mes};
       }catch(err){pul.push(MN[m.mes-1]+' '+m.ano+': '+(err?.message||'falha ao gravar'))}
     }
     S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));
