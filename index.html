@@ -2965,14 +2965,21 @@ async function renderPaywall(){
   clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);
 }
 async function carregarAdmin(){
-  const[r,l]=await Promise.all([q(sb.rpc('admin_resumo')),q(sb.rpc('admin_listar_pagamentos',{p_status:'todos'}))]);S.adm={r,l};S.admPend=r.pendentes;render();
+  const[r,l,g]=await Promise.all([
+    q(sb.rpc('admin_resumo')),
+    q(sb.rpc('admin_listar_pagamentos',{p_status:'todos'})),
+    q(sb.rpc('admin_listar_compras_google_play',{p_status:'todos'}))
+  ]);
+  S.adm={r,l,g};S.admPend=r.pendentes;render();
 }
 function viewAdmin(){
-  const A=S.adm||{r:{},l:[]},r=A.r,code=pixPayload(PIX);
+  const A=S.adm||{r:{},l:[],g:[]},r=A.r,code=pixPayload(PIX);
   const linhas=A.l.map(x=>`<tr><td>${new Date(x.informado_em).toLocaleString('pt-BR')}</td><td>${esc(x.familia)}<div class="mu">${esc(x.email||'')}</div></td><td>${esc(x.pagador_nome)}<div class="mu">${esc(x.horario_informado||'')}</div></td><td>${brl(x.valor)}</td>
    <td>${x.status==='pendente'?`<input type="number" id="dias_${x.id}" value="${PIX.dias}" min="1" style="width:70px"> dias <button class="chip" data-act="aprovar" data-id="${x.id}">✔ Aprovar</button> <button class="red chip" data-act="recusar" data-id="${x.id}">Recusar</button>`:esc(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5" class="mu" style="padding:14px">Nenhum pagamento informado ainda.</td></tr>';
+  const linhasPlay=(A.g||[]).map(x=>`<tr><td>${new Date(x.criado_em).toLocaleString('pt-BR')}</td><td>${esc(x.familia)}<div class="mu">${esc(x.email||'')}</div></td><td>${esc(x.plano.toUpperCase())}<div class="mu">${esc(x.produto_id)}</div></td><td>${brl(x.valor)}</td><td>${x.status==='pendente'?'<button class="chip" data-act="aprovarplay" data-id="'+x.id+'">✔ Aprovar 30 dias</button> <button class="red chip" data-act="recusarplay" data-id="'+x.id+'">Reembolsar e recusar</button>':esc(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5" class="mu" style="padding:14px">Nenhuma compra Google Play.</td></tr>';
   return `<div class="cards"><div class="card"><small>Contas criadas</small><b>${r.contas??0}</b></div><div class="card"><small>Assinaturas ativas</small><b class="pos">${r.ativas??0}</b></div><div class="card"><small>Pedidos a conferir</small><b>${r.pendentes??0}</b></div><div class="card"><small>Receita total</small><b class="pos">${brl(r.receita_total)}</b></div><div class="card"><small>Últimos 30 dias</small><b>${brl(r.receita_30d)}</b></div><div class="card"><small>Vencem em 7 dias</small><b>${r.vencem_7d??0}</b></div></div>
   <div class="card" style="margin-bottom:14px"><b>Pagamentos informados</b><div class="mu" style="margin:4px 0 8px">Confira no app do seu banco se o Pix chegou (valor, nome e horário) e só então aprove.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Informado</th><th>Família</th><th>Pagador</th><th>Valor</th><th>Ação</th></tr></thead><tbody>${linhas}</tbody></table></div></div>
+  <div class="card" style="margin-bottom:14px"><b>Compras Google Play</b><div class="mu" style="margin:4px 0 8px">A compra só libera 30 dias após a aprovação. A recusa solicita reembolso e revogação pela Google Play.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Compra</th><th>Família</th><th>Plano / produto</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${linhasPlay}</tbody></table></div></div>
   <div class="card"><b>QR de referência do plano Pro</b><div class="mu" style="margin:4px 0">Confira o nome e o valor de ${brl(PLANOS.pro.valor)} em outro banco. No checkout, o QR muda conforme o plano escolhido.</div><div class="qrbox">${qrSvg(code)}</div><input readonly value="${code}" onclick="this.select()" style="width:100%;font-size:11px"></div>`;
 }
 const catGrupos=[['fixas','Fixas / Financiamentos'],['cartoes','Cartões de Crédito'],['retirada','Retirada mensal'],['variaveis','Outras / Variáveis'],['receita','Receita']];
@@ -3174,6 +3181,13 @@ document.addEventListener('click',async e=>{
   else if(a==='verstatus')await boot();
   else if(a==='aprovar'){const dias=parseInt(document.getElementById('dias_'+b.dataset.id).value)||PIX.dias;await q(sb.rpc('aprovar_pagamento',{p_id:b.dataset.id,p_dias:dias}));toast('✔ Acesso liberado por '+dias+' dias');await carregarAdmin()}
   else if(a==='recusar'){const nota=prompt('Motivo (o cliente vai ver):','Não encontramos o Pix com esse valor/nome.');if(nota===null)return;await q(sb.rpc('recusar_pagamento',{p_id:b.dataset.id,p_nota:nota}));toast('Pedido recusado');await carregarAdmin()}
+  else if(a==='aprovarplay'||a==='recusarplay'){
+    if(a==='recusarplay'&&!confirm('Solicitar reembolso e revogação desta compra na Google Play?'))return;
+    const{data,error}=await sb.functions.invoke('google-play-admin',{body:{id:b.dataset.id,action:a==='aprovarplay'?'approve':'reject'}});
+    if(error)throw error;if(data?.error)throw new Error(data.error);
+    toast(a==='aprovarplay'?'Compra aprovada: 30 dias liberados para a família.':'Compra reembolsada e recusada.');
+    await carregarAdmin();
+  }
   else if(a==='addcat'){const n=$('#c_nome').value.trim();if(!n)return toast('Informe o nome da categoria',1);
     const pai=S.cats.find(c=>c.id===$('#c_pai').value),g=pai?pai.grupo:$('#c_grupo').value;
     await q(sb.from('categorias').insert({familia_id:S.fam.id,nome:n,tipo:pai?pai.tipo:(g==='receita'?'receita':'despesa'),grupo:g,parent_id:pai?pai.id:null,essencial:pai?pai.essencial:false}));
