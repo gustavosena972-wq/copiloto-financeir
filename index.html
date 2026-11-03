@@ -325,7 +325,12 @@ function renderAuth(){
   <input id="nome" autocomplete="username" placeholder="Seu nome">
   <input id="senha" type="password" autocomplete="current-password" placeholder="Senha (mín. 8 caracteres)">
   <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
-  <div id="recuperacao" hidden><div class="mu">Informe o Gmail já associado e verificado na sua conta.</div><input id="email" type="email" autocomplete="email" placeholder="Gmail cadastrado"></div>
+  <div id="recuperacao" hidden>
+  <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
+  <input id="codigo-recuperacao" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de recuperação">
+  <input id="nova-senha" type="password" autocomplete="new-password" placeholder="Nova senha (mín. 8 caracteres)">
+  <button class="sec" data-act="recuperar">Redefinir senha</button>
+  </div>
   <div id="aviso" class="aviso"></div>
   <button data-act="entrar">Entrar</button><button class="sec" data-act="cadastrar">Criar conta</button><button class="sec" data-act="reset">Esqueci minha senha</button><a class="demo-link" href="demo.html">▶ Ver demonstração do aplicativo</a></div></div>`;
 }
@@ -546,10 +551,21 @@ const ARTE=`<svg class="arte" viewBox="0 0 340 320" width="290"><defs><radialGra
 <line class="hand hand2" x1="230" y1="215" x2="230" y2="190" stroke="#ff6b6b" stroke-width="5" stroke-linecap="round"/><line class="hand" x1="230" y1="215" x2="230" y2="173" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><circle cx="230" cy="215" r="5" fill="#ffc83d"/></svg>`;
 const MSG=[['Invalid login','E-mail ou senha incorretos.'],['Email not confirmed','Confirme seu e-mail antes de entrar: abra o e-mail que enviamos (veja também o spam).'],['already registered','Esse e-mail já tem conta. Use "Entrar".'],['rate limit','Muitos e-mails em pouco tempo. Aguarde alguns minutos e tente de novo.'],['Failed to fetch','Sem conexão com o servidor. Se você abriu o arquivo dentro do Claude ou de uma pré-visualização, baixe-o e abra no Chrome (ou publique na Netlify/Vercel).'],['Password should','A senha precisa ter pelo menos 6 caracteres.'],['invalid format','Digite um e-mail válido.']];
 function aviso(t,ok){const a=$('#aviso');if(a){a.textContent=t;a.className='aviso '+(ok?'ok':'err')}}
+function normalizarUsuario(nome){
+  return nome.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9._-]+/g,'-').replace(/^[._-]+|[._-]+$/g,'').slice(0,24);
+}
+function mostrarCodigoRecuperacao(code,mensagem){
+  if(!code)return;
+  S.codigoRecuperacao=code;
+  const anterior=document.getElementById('codigo-recuperacao-modal');if(anterior)anterior.remove();
+  const o=document.createElement('div');o.id='codigo-recuperacao-modal';o.className='modal';
+  o.innerHTML='<div class="card box legal" role="dialog" aria-modal="true"><h3>Guarde seu código de recuperação</h3><p class="mu">'+esc(mensagem||'Este código permite redefinir sua senha sem depender de e-mail. Ele será mostrado apenas agora.')+'</p><input id="codigo-recuperacao-exibido" readonly value="'+esc(code)+'" style="width:100%;font-size:18px;font-weight:800;letter-spacing:2px;text-align:center;margin:10px 0"><p class="mu">Anote e guarde em local seguro. Não envie esse código a ninguém. Se perder o código, não será possível recuperar a conta por esse método.</p><div class="row"><button class="sec" data-act="copiarcodigo">Copiar código</button><button data-act="fecharcodigo">Já guardei</button></div></div>';
+  document.body.appendChild(o);
+}
 async function autenticar(a){
-  const nome=$('#nome').value.trim(),username=nome.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9._-]+/g,'-').replace(/^[._-]+|[._-]+$/g,'').slice(0,24),senha=$('#senha').value;
-  if(!nome||!senha)return aviso('Preencha seu nome e sua senha.');
-  if(username.length<3)return aviso('Digite um nome com pelo menos 3 caracteres.');
+  const nome=$('#nome').value.trim(),username=normalizarUsuario(nome),senha=$('#senha').value;
+  if(!nome||!senha)return aviso('Preencha seu usuário e sua senha.');
+  if(username.length<3)return aviso('Digite um usuário com pelo menos 3 caracteres.');
   if(senha.length<8)return aviso('A senha precisa ter pelo menos 8 caracteres.');
   if(a==='cadastrar'&&!$('#aceite').checked)return aviso('Para criar a conta, marque que você leu e aceita os Termos de Uso e a Política de Privacidade.');
   const bt=document.querySelectorAll('.login button');bt.forEach(x=>x.disabled=true);aviso(a==='entrar'?'Entrando…':'Criando sua conta…',1);
@@ -561,8 +577,28 @@ async function autenticar(a){
     const{error}=await sb.auth.setSession(result.session);if(error)throw error;
     if(a==='cadastrar'){aviso('Conta criada! Preparando seu acesso…',1);await q(sb.rpc('criar_familia',{p_nome:nome}));await boot();}
     else aviso('Pronto! Carregando…',1);
+    if(result.recoveryCode)mostrarCodigoRecuperacao(result.recoveryCode,'Código criado para sua conta. Ele é a única forma de recuperar sua senha sem e-mail e será mostrado apenas uma vez.');
+    if(result.recoveryUnavailable)toast('Você entrou, mas não conseguimos preparar seu código de recuperação. Avise o suporte.',1);
   }catch(e){aviso('Não deu certo: '+String(e.message||e))}
   bt.forEach(x=>x.disabled=false);
+}
+async function recuperarConta(){
+  const username=normalizarUsuario($('#nome').value.trim());
+  const recoveryCode=$('#codigo-recuperacao').value.trim();
+  const newPassword=$('#nova-senha').value;
+  if(username.length<3)return aviso('Informe seu usuário no campo acima.');
+  if(!recoveryCode)return aviso('Informe seu código de recuperação.');
+  if(newPassword.length<8||newPassword.length>128)return aviso('A nova senha precisa ter entre 8 e 128 caracteres.');
+  const btn=document.querySelector('#recuperacao button[data-act="recuperar"]');if(btn)btn.disabled=true;
+  aviso('Validando o código e redefinindo sua senha…',1);
+  try{
+    const response=await fetch(SB_URL+'/functions/v1/autenticacao-usuario',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({action:'recover',username,recoveryCode,newPassword})});
+    const result=await response.json();if(!response.ok)throw new Error(result.error||'Não foi possível redefinir a senha.');
+    $('#senha').value='';$('#nova-senha').value='';$('#codigo-recuperacao').value='';
+    aviso('Senha redefinida. Entre com a nova senha.',1);
+    mostrarCodigoRecuperacao(result.recoveryCode,result.message||'Sua senha foi alterada. Guarde o novo código de recuperação.');
+  }catch(e){aviso(String(e.message||'Não foi possível redefinir a senha.'))}
+  finally{if(btn)btn.disabled=false}
 }
 async function checarServidor(){
   try{const c=new AbortController();setTimeout(()=>c.abort(),7000);const r=await fetch(SB_URL+'/auth/v1/health',{headers:{apikey:SB_KEY},signal:c.signal});if(!r.ok)throw 0}
@@ -743,13 +779,13 @@ function legalHtml(t){
    ['Mudanças e foro','Podemos atualizar estes termos; mudanças relevantes serão avisadas e pedirão novo aceite. Vale a lei brasileira, e o foro é o do domicílio do consumidor.']
   ]:[
    ['Quem é o responsável','O controlador dos seus dados é '+esc(op)+cj+'. Contato para assuntos de privacidade (encarregado): '+esc(ct)+'.'],
-   ['Dados que coletamos','Conta: nome, e-mail e senha (protegida). Dados financeiros que você registra ou importa: lançamentos, categorias, metas, dívidas, patrimônio, membros da família e rendas informadas. Pagamento: nome informado, horário e valor. Uso técnico: registros de acesso e segurança.'],
+   ['Dados que coletamos','Conta: nome de usuário, nome informado, identificador interno e senha protegida. Para recuperação, geramos um código secreto; armazenamos somente seu resumo criptográfico, não o código em texto. Dados financeiros que você registra ou importa: lançamentos, categorias, metas, dívidas, patrimônio, membros da família e rendas informadas. Pagamento: nome informado, horário e valor. Uso técnico: registros de acesso e segurança.'],
    ['Para que usamos e por quê','Para prestar o serviço contratado (execução de contrato); para conferir pagamentos e cumprir obrigações legais; e para manter a segurança e evitar fraudes (legítimo interesse). Não vendemos os seus dados e não os usamos para publicidade de terceiros.'],
    ['Com quem compartilhamos','Supabase: hospedagem e banco de dados. O aplicativo não oferece recursos de inteligência artificial e não envia mensagens a fornecedores de IA.'],
    ['Transferência internacional','O aplicativo utiliza fornecedores de hospedagem e infraestrutura descritos nesta política.'],
    ['Por quanto tempo guardamos','Enquanto a sua conta existir. Ao excluir a conta, os dados da sua família são apagados; podem permanecer cópias de segurança por período limitado e registros de pagamento exigidos por lei.'],
    ['Os seus direitos (LGPD, art. 18)','Confirmar e acessar os seus dados; corrigir; levar os dados com você (botão "Baixar todos os meus dados"); eliminar (botão "Excluir minha conta e dados"); revogar o consentimento; saber com quem compartilhamos. Para qualquer pedido, use o contato acima.'],
-   ['Recuperação de acesso','O e-mail de recuperação é opcional e só poderá ser usado depois de associado e verificado na sua conta por um procedimento seguro. Ao solicitar a redefinição da senha, pediremos o nome da conta e o e-mail previamente cadastrado. Enviaremos o link de redefinição somente para esse endereço. Informar um novo e-mail na tela “Esqueci minha senha” não o associa à conta nem autoriza a alteração do endereço cadastrado. Se nenhum e-mail verificado estiver associado, a recuperação por e-mail não estará disponível; será necessário utilizar o procedimento alternativo de suporte que o aplicativo disponibilizar. Não exibiremos se uma conta existe em resposta a pedidos de recuperação.'],
+   ['Recuperação de acesso','A conta não exige confirmação de e-mail. Ao criar a conta, o aplicativo mostra um código de recuperação secreto, exibido uma única vez. Guarde-o em local seguro e não o compartilhe. Para redefinir a senha, informe o nome de usuário, o código e uma nova senha. Após a redefinição, o código anterior é invalidado e um novo código é exibido. Se perder o código, a recuperação automática não estará disponível; entre em contato com o responsável pelo serviço.'],
    ['Segurança','Criptografia em trânsito, acesso separado por família, registro de alterações e senha protegida. Nenhum sistema é 100% seguro; em caso de incidente relevante avisaremos você e a ANPD, como a lei exige.'],
    ['Crianças e mudanças','O aplicativo não é destinado a menores de 18 anos sem responsável. Esta política pode mudar; avisaremos mudanças relevantes.']
   ];
@@ -759,7 +795,7 @@ function showLegal(t){const d=document.getElementById('legalov');if(d)d.remove()
 function viewConta(){
   return `<div class="card" style="margin-top:12px"><b>🔒 Conta e privacidade</b><div class="mu" style="margin:4px 0 10px">Seus direitos pela LGPD: ver, levar e apagar os seus dados.</div>
   <div class="row"><button class="sec" data-act="legal" data-t="termos">Termos de Uso</button><button class="sec" data-act="legal" data-t="privacidade">Política de Privacidade</button><button class="sec" data-act="expjson">⬇ Baixar todos os meus dados (JSON)</button><button class="red" data-act="delconta">Excluir minha conta e dados</button></div>
-  <small class="mu">Dúvidas de privacidade: ${LEGAL.email?esc(LEGAL.email):'fale com o administrador do aplicativo'}.</small></div>`;
+  <small class="mu">Dúvidas de privacidade: ${LEGAL.email?esc(LEGAL.email):'fale com o administrador do aplicativo'}.</small><p class="mu" style="font-size:12px;margin-top:8px">O código de recuperação é mostrado uma única vez no cadastro ou no primeiro acesso após a atualização. Guarde-o fora do aplicativo. A recuperação de senha não depende de Gmail.</p></div>`;
 }
 function viewConfig(){
   const c=S.cfg||{},f=(k,l,ph)=>`<label class="mu" style="font-size:12px">${l}<input id="cfg_${k}" value="${esc(c[k]||'')}" placeholder="${ph||''}" style="width:100%;margin-top:3px"></label>`;
@@ -904,7 +940,10 @@ document.addEventListener('click',async e=>{
   else if(a==='xlsx')await exportXlsx();
   else if(a==='irmes'){S.view='planilha';S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='csv')csv();
-  else if(a==='reset'){const area=$('#recuperacao');if(area.hidden){area.hidden=false;$('#email').focus();aviso('Informe o Gmail já associado e verificado na sua conta.');return}const em=$('#email').value.trim();if(!em)return aviso('Informe o Gmail cadastrado.');const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.href.split('#')[0]});aviso(error?'Não consegui enviar: '+error.message:'Se esse e-mail estiver associado a uma conta, enviaremos um link de redefinição.',!error)}
+  else if(a==='reset'){const area=$('#recuperacao');area.hidden=!area.hidden;if(!area.hidden){$('#codigo-recuperacao').focus();aviso('Informe seu usuário, o código de recuperação e a nova senha. Não é necessário e-mail.')}}
+  else if(a==='recuperar')await recuperarConta();
+  else if(a==='copiarcodigo'){if(!S.codigoRecuperacao)return;try{await navigator.clipboard.writeText(S.codigoRecuperacao);toast('Código copiado. Guarde-o em local seguro.')}catch(e){const i=$('#codigo-recuperacao-exibido');if(i){i.select();toast('Selecione e copie o código manualmente.')}}}
+  else if(a==='fecharcodigo'){const o=document.getElementById('codigo-recuperacao-modal');if(o)o.remove();S.codigoRecuperacao=null}
   else if(a==='convite'){const limite=(PLANOS[S.fam.plano||'pro']||PLANOS.pro).limite;if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
   }catch(err){}finally{S.busy=false}
 });
