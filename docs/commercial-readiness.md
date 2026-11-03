@@ -30,9 +30,8 @@ Só iniciar cobrança pública depois de concluir os testes críticos aplicávei
 
 - A página de entrada e a imagem completa foram publicadas no GitHub Pages. A imagem está marcada como conceitual e identifica explicitamente IA, suporte VIP e análise preditiva como elementos ilustrativos.
 - A sintaxe do JavaScript principal foi validada estaticamente. Não foi feito teste ponta a ponta em navegador, nem teste visual real em desktop e mobile.
-- O plano Max apresenta seus recursos adicionais como em desenvolvimento; não devem ser vendidos como já disponíveis.
-- O Ultra oferece alternância entre espaços familiares aos quais a conta já tem acesso e módulos de relatórios/patrimônio. Isso não equivale a consolidar automaticamente famílias independentes em uma única assinatura.
-- O limite de membros do Ultra ainda não está definido no código. Definir e testar a regra antes de oferecer esse plano publicamente.
+- Cada conta fica vinculada a uma única família; não anunciar alternância entre famílias como recurso do Ultra.
+- O plano Ultra não apresenta limite de membros definido no código; não anunciar quantidade ilimitada sem definir e testar essa regra.
 - Os Termos indicam idade mínima de 18 anos, mas o cadastro atual não confirma idade. Antes de cobrar clientes, definir um operador adulto responsável por contratos, recebimentos, suporte e dados pessoais; revisar a estrutura com profissional qualificado.
 - O Pix é manual por decisão operacional: a pessoa responsável pelo atendimento confere o recebimento e autoriza ou recusa a entrada do cliente; a aprovação é registrada no painel administrativo. A ausência de webhook ou liberação automática é intencional no fluxo definido.
 - O Supabase mantém RLS nas tabelas públicas. As tabelas privadas de mapeamento de usuário e recuperação não têm políticas RLS; a auditoria de privilégios confirmou que não concedem acesso direto a `anon` ou `authenticated`, sendo usadas pelo serviço de autenticação. A proteção contra senhas vazadas continua desativada no plano atual.
