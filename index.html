@@ -1828,7 +1828,7 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 @media(prefers-reduced-motion:reduce){.landing-hero-actions a{transition:none!important}}
 /* Cada área pública funciona como uma página independente */
 .landing-page[data-screen="inicio"] .landing-login-section{display:none!important}
-.landing-page[data-screen="inicio"] .landing-plans-section{display:block!important}
+.landing-page[data-screen="inicio"] .landing-plans-section{display:none!important}
 .landing-page[data-screen="inicio"] .landing-benefits,.landing-page[data-screen="inicio"] .landing-plans-section{scroll-margin-top:24px}
 .landing-page[data-screen="recursos"] .landing-hero,.landing-page[data-screen="recursos"] .landing-plans-section,.landing-page[data-screen="recursos"] .landing-login-section{display:none!important}
 .landing-page[data-screen="planos"] .landing-hero,.landing-page[data-screen="planos"] .landing-benefits,.landing-page[data-screen="planos"] .landing-login-section{display:none!important}
@@ -2142,6 +2142,7 @@ function renderAuth(){
         <article><span>♧</span><div><small>05 · EM FAMÍLIA</small><h3>Um espaço compartilhado</h3><p>Convide as pessoas da família para participar da organização, cada uma com seu próprio acesso e permissões.</p></div></article>
         <article><span>⇧</span><div><small>06 · PRATICIDADE</small><h3>Importação e exportação</h3><p>Use arquivos Excel e CSV para trazer informações e facilitar o trabalho com seus dados financeiros.</p></div></article>
       </div>
+    </section>
     <section class="landing-plans-section" id="landing-plans" aria-labelledby="landing-plans-title">
       <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Uma assinatura por família. Os membros convidados não precisam contratar outro plano.</p></div>
       <div class="landing-plan-grid">
