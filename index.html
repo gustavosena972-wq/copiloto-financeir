@@ -1571,7 +1571,7 @@ async function loadMes(rd=true){
 
 /* ---------- telas de entrada ---------- */
 function renderAuth(){
-  const precoPro=brl(PLANOS.pro.valor),precoMax=brl(PLANOS.max.valor);
+  const precoPro=brl(PLANOS.pro.valor),precoMax=brl(PLANOS.max.valor),precoUltra=brl(PLANOS.ultra.valor);
   const feature=(txt,planned=false)=>'<li><span class="landing-feature-check">'+(planned?'◇':'✓')+'</span><span>'+txt+'</span>'+(planned?'<small>Planejado</small>':'')+'</li>';
   $('#app').innerHTML=`<div class="landing-page">
     <header class="landing-header">
@@ -1650,20 +1650,20 @@ function renderAuth(){
         <article class="landing-plan-card ultra">
           <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO FINANCEIRA AMPLIADA</span><h3>Ultra</h3><p>Para acompanhar diferentes espaços e a evolução do patrimônio.</p></div>
           <div class="landing-price"><strong>R$ 50,00</strong><span>/ mês</span></div>
-          <div class="landing-limit">Estrutura em planejamento</div>
-          <div class="landing-feature-heading">TUDO DO PRO E DO MAX, MAIS</div>
+          <div class="landing-price"><strong>${precoUltra}</strong><span>/ mês</span></div>
+          <div class="landing-limit">Ferramentas avançadas de gestão financeira</div>
+          <div class="landing-feature-heading">RECURSOS ULTRA DISPONÍVEIS</div>
           <ul class="landing-feature-list">
-            ${feature('Central de espaços financeiros',true)}
-            ${feature('Painel consolidado entre espaços',true)}
-            ${feature('Patrimônio líquido e evolução patrimonial',true)}
-            ${feature('Central de relatórios gerenciais',true)}
-            ${feature('Planejamento financeiro de longo prazo',true)}
-            ${feature('Visão avançada de bens e obrigações',true)}
+            ${feature('Central de espaços com alternância entre famílias vinculadas')}
+            ${feature('Relatórios anuais e comparativos avançados')}
+            ${feature('Histórico da evolução patrimonial')}
+            ${feature('Simulador de objetivos de longo prazo')}
+            ${feature('Cadastro e acompanhamento de bens e obrigações')}
           </ul>
-          <div class="landing-plan-status roadmap">Em planejamento · não disponível para contratação</div>
+          <div class="landing-plan-status current">Disponível para contratação</div>
         </article>
       </div>
-      <p class="landing-plans-footnote">Os valores Pro e Max são os atualmente configurados no checkout. Os itens identificados como “em desenvolvimento” ou “em planejamento” ainda não estão liberados. O Ultra ainda não pode ser contratado.</p>
+      <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. Os recursos adicionais do Max ainda estão em desenvolvimento. O Ultra libera os módulos descritos acima após a confirmação do pagamento.</p>
     </section>
     <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar</footer>
   </div>`;
@@ -2140,7 +2140,7 @@ async function fecharAno(){
 const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button><button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>`;
 /*PIX*/
 const PIX={chave:'+5531999758385',nome:'COPILOTO FINANCEIRO',cidade:'CONTAGEM',valor:20,dias:30};
-const PLANOS={pro:{nome:'Pro',valor:20,limite:2},max:{nome:'Max',valor:30,limite:6}};
+const PLANOS={pro:{nome:'Pro',valor:20,limite:2},max:{nome:'Max',valor:30,limite:6},ultra:{nome:'Ultra',valor:50}};
 const planoAtual=()=>PLANOS[S.planoEscolhido||S.fam?.plano||'pro']||PLANOS.pro;
 function crc16(t){let c=0xFFFF;for(let i=0;i<t.length;i++){c^=t.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,'0')}
 const tlv=(id,v)=>id+String(v.length).padStart(2,'0')+v;
@@ -2161,10 +2161,10 @@ async function renderPaywall(){
     <div class="pix-plan-grid">
       <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${brl(PLANOS.pro.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
       <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${brl(PLANOS.max.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro e ferramentas adicionais de planejamento em desenvolvimento.</span></button>
-      <div class="pix-plan pix-plan-disabled"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>R$ 50,00<small>/mês</small></strong><span class="pix-plan-cap">Ainda não disponível</span><span class="pix-plan-detail">Central de espaços, relatórios avançados e gestão patrimonial ampliada.</span></div>
+      <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${brl(PLANOS.ultra.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Central de espaços vinculados, relatórios, histórico patrimonial e simulador de objetivos.</span></button>
     </div>
     <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Total para 30 dias</small><strong>${brl(PIX.valor)}</strong></div><p>Assinatura por família · não há cobrança individual dos membros convidados.</p></div>
-    <div class="pix-checkout-disclaimer">Os recursos adicionais do Max estão em desenvolvimento. O Ultra ainda não está disponível para contratação.</div>
+    <div class="pix-checkout-disclaimer">O pagamento é informado por Pix e liberado após conferência administrativa. Os recursos adicionais do Max permanecem em desenvolvimento; os módulos Ultra descritos estão disponíveis após a ativação.</div>
     ${rec?'<div class="aviso err">Não conseguimos confirmar o último aviso de pagamento'+(ult.nota?': '+esc(ult.nota):'')+'. Confira os dados e envie novamente.</div>':''}
     ${pend?'<div class="pix-pending"><b>Aviso de pagamento recebido</b><p>Seu pagamento está em análise. O acesso será liberado após a conferência.</p></div>':pagar}`;
   const entrarComConvite=`<details class="pix-join"><summary>Já tem um convite de família?</summary><div class="pix-join-panel"><p>Digite o código recebido de alguém da família para entrar sem fazer outro Pix.</p><input id="cod-pix" maxlength="32" autocomplete="off" autocapitalize="characters" placeholder="CÓDIGO DO CONVITE"><button data-act="entrarfam-pix">Entrar na família</button></div></details>`;
