@@ -1431,6 +1431,60 @@ button:not(:disabled):hover{filter:brightness(1.04)}
 @media(max-width:850px){.cf-simulator{grid-template-columns:repeat(2,minmax(100px,1fr))}.cf-simulator button{grid-column:1/-1}}
 @media(max-width:560px){.cf-history-point{min-width:66px}.cf-simulator{grid-template-columns:1fr 1fr}}
 </style>
+
+<style id="cf-hero-visual-interaction">
+.landing-hero{
+  grid-template-columns:minmax(280px,1.05fr) minmax(250px,.9fr) minmax(280px,.82fr)!important;
+  gap:18px!important;min-height:470px!important;padding:28px!important;
+  background:radial-gradient(ellipse at 45% 20%,#123a29 0,transparent 52%),linear-gradient(145deg,#07150f,#0b2117 65%,#08130e)!important;
+  animation:none!important;
+}
+.landing-hero:after{pointer-events:none;z-index:0}
+.landing-intro{align-self:center}
+.landing-art{
+  position:relative;isolation:isolate;overflow:hidden;align-self:stretch;min-width:0;min-height:340px;
+  display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:14px;
+  padding:24px;text-align:left;color:#fff;border:1px solid #b58c4c88;border-radius:20px;
+  background-color:#0b1b13;
+  background-image:linear-gradient(180deg,rgba(4,15,10,.04) 18%,rgba(4,15,10,.15) 45%,rgba(4,15,10,.94) 100%),var(--cf-scene);
+  background-repeat:no-repeat;background-size:cover,cover;background-position:center,center;
+  box-shadow:0 22px 52px #0007;cursor:pointer;transition:transform .35s,border-color .35s,box-shadow .35s;
+}
+.landing-art:hover{transform:translateY(-5px) scale(1.012);border-color:#f0cb7b;box-shadow:0 28px 65px #0009,0 0 28px #c69b4a26}
+.landing-art:focus-visible{outline:3px solid #55db93;outline-offset:4px}
+.landing-art-shine{position:absolute;inset:-40% -80%;z-index:-1;pointer-events:none;transform:translateX(-70%) rotate(18deg);background:linear-gradient(90deg,transparent 40%,#ffffff20 50%,transparent 60%)}
+.landing-art-caption{display:grid;gap:7px;max-width:250px;text-shadow:0 2px 16px #000}
+.landing-art-caption small{color:#edce8d;font-size:9px;font-weight:800;letter-spacing:.16em}
+.landing-art-caption strong{font-size:clamp(22px,2.2vw,31px);line-height:1.05;letter-spacing:-.035em}
+.landing-art-caption>span{color:#dbe9de;font-size:12px;line-height:1.45}
+.landing-art-hint{position:absolute;top:15px;left:16px;padding:7px 10px;border:1px solid #f4e2b044;border-radius:99px;background:#07150dbb;color:#f8e8c2;font-size:10px;backdrop-filter:blur(8px)}
+.landing-art-hint b{margin-left:5px;color:#59e39a}
+.landing-art.is-active{border-color:#e9c779;box-shadow:0 0 0 1px #e9c77955,0 22px 65px #000a,0 0 38px #e9c77933}
+.landing-art.is-active .landing-art-shine{animation:cf-art-shine 1.35s ease-out}
+.landing-art.is-active{animation:cf-art-lift .8s ease}
+@keyframes cf-art-shine{from{transform:translateX(-70%) rotate(18deg)}to{transform:translateX(70%) rotate(18deg)}}
+@keyframes cf-art-lift{50%{transform:translateY(-7px) scale(1.018)}}
+.landing-login{align-self:center;width:100%;max-width:none}
+@media(max-width:1080px){
+ .landing-hero{grid-template-columns:minmax(0,1fr) minmax(245px,.85fr)!important}
+ .landing-art{grid-column:1;min-height:220px;grid-row:2;background-position:center,center}
+ .landing-intro{grid-column:1;grid-row:1}
+ .landing-login{grid-column:2;grid-row:1 / span 2}
+}
+@media(max-width:760px){
+ .landing-hero{grid-template-columns:1fr!important;padding:18px!important;gap:16px!important}
+ .landing-intro,.landing-art,.landing-login{grid-column:1;grid-row:auto}
+ .landing-art{min-height:230px;background-position:center,center}
+ .landing-intro h1{font-size:32px}
+ .landing-highlights{grid-template-columns:1fr;gap:7px}
+ .landing-highlights>div{border:0;border-bottom:1px solid #ffffff2a;padding:7px 0;margin:0}
+ .landing-login{padding:20px}
+}
+@media(prefers-reduced-motion:reduce){
+ .landing-art,.landing-art.is-active,.landing-art-shine{animation:none!important;transition:none!important}
+}
+</style>
+
 </head>
 <body>
 <div id="app" class="wrap"></div>
@@ -1535,6 +1589,11 @@ function renderAuth(){
           <div><span>03</span><b>Importação simples</b><small>Trabalhe com arquivos Excel e CSV.</small></div>
         </div>
       </div>
+      <button type="button" class="landing-art" data-act="hero-motion" aria-pressed="false" aria-label="Interagir com o cenário do relógio, cédulas e moedas">
+        <span class="landing-art-shine"></span>
+        <span class="landing-art-caption"><small>PLANEJAMENTO COM VISÃO</small><strong>Seu tempo.<br>Seu patrimônio.</strong><span>Organização para decisões mais claras.</span></span>
+        <span class="landing-art-hint">Toque para interagir <b>↗</b></span>
+      </button>
       <section class="landing-login" aria-label="Acesso à conta">
         <div class="landing-login-head"><span>ÁREA DO CLIENTE</span><h2>Bem-vindo</h2><p>Entre na sua conta ou crie um acesso.</p></div>
         <input id="nome" autocomplete="username" placeholder="Seu nome">
@@ -2218,11 +2277,12 @@ function viewFamilia(){
 /* ---------- ações ---------- */
 document.addEventListener('click',async e=>{
   const b=e.target.closest('[data-act]');if(!b)return;if(b.tagName==='A')e.preventDefault();const a=b.dataset.act;
-  const LIVRE=['legal','fecharlegal','view','mes','irmes','metodo','fecharmodal','pers','verplano','impno'];
+  const LIVRE=['legal','fecharlegal','view','mes','irmes','metodo','fecharmodal','pers','verplano','impno','hero-motion'];
   if(S.busy&&!LIVRE.includes(a))return toast('Aguarde, ainda estou processando…');
   if(!LIVRE.includes(a))S.busy=true;
   try{
-  if(a==='entrar'||a==='cadastrar')await autenticar(a);
+  if(a==='hero-motion'){const art=document.querySelector('.landing-art');if(art){const active=art.classList.toggle('is-active');b.setAttribute('aria-pressed',String(active));}}
+  else if(a==='entrar'||a==='cadastrar')await autenticar(a);
   else if(a==='sair'){if(S.rt){sb.removeChannel(S.rt);S.rt=null}await sb.auth.signOut();S.user=null;boot()}
   else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
