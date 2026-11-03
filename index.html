@@ -1930,6 +1930,22 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 .landing-plan-cta{margin-top:18px;background:#285b3d;color:#fff;min-height:42px}
 .landing-plan-cta:hover{background:#1e4930;transform:translateY(-2px)}
 .landing-plan-card{min-height:100%}
+
+/* Apresentação enxuta: somente recursos e planos */
+.landing-page[data-screen="inicio"] .landing-benefits{display:block!important;padding:30px 0 36px!important;margin:24px 2px 0!important;border-bottom:1px solid #e1e7dd}
+.landing-page[data-screen="inicio"] .app-page-section-heading{max-width:760px;margin:0 auto 24px;text-align:center}
+.landing-page[data-screen="inicio"] .app-page-section-heading>span{display:none}
+.landing-page[data-screen="inicio"] .app-page-section-heading h2{max-width:720px;margin:0 auto;color:#293d30;font-size:clamp(25px,3.2vw,36px);line-height:1.15;letter-spacing:-.04em}
+.landing-page[data-screen="inicio"] .app-page-section-heading p{margin:10px auto 0;color:#788579;font-size:13px;line-height:1.6}
+.landing-page[data-screen="inicio"] .app-feature-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 28px}
+.landing-page[data-screen="inicio"] .app-feature-cards article{display:flex;align-items:flex-start;gap:12px;min-height:0;padding:17px 0;border:0;border-bottom:1px solid #e8ece5;border-radius:0;background:transparent;box-shadow:none}
+.landing-page[data-screen="inicio"] .app-feature-cards article>span{width:34px;height:34px;border-radius:10px;font-size:17px}
+.landing-page[data-screen="inicio"] .app-feature-cards small{font-size:8px}
+.landing-page[data-screen="inicio"] .app-feature-cards h3{margin:4px 0;font-size:15px}
+.landing-page[data-screen="inicio"] .app-feature-cards p{font-size:11px;line-height:1.55}
+@media(max-width:760px){.landing-page[data-screen="inicio"] .app-feature-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}}
+@media(max-width:520px){.landing-page[data-screen="inicio"] .app-feature-cards{grid-template-columns:1fr}.landing-page[data-screen="inicio"] .app-feature-cards article{padding:13px 0}}
+
 @media(max-width:640px){.landing-features-cta{align-items:flex-start;flex-direction:column}.landing-plan-cta{width:100%}}
 
 /* Cadastro: vínculo com família existente ou criação de nova assinatura */
@@ -2117,25 +2133,6 @@ function renderAuth(){
       </div>
     </section>
     <section class="landing-benefits" id="recursos" aria-label="Conheça o aplicativo">
-      <div class="app-page-hero">
-        <div class="app-page-copy">
-          <span class="app-page-eyebrow">CONHEÇA O COPILOTO FINANCEIRO</span>
-          <h1>Mais clareza para cuidar do dinheiro. <em>Mais tranquilidade para a família.</em></h1>
-          <p>O Copiloto Financeiro reúne a rotina financeira da casa em um só lugar. Você acompanha o mês, entende para onde o dinheiro está indo e planeja os próximos passos junto com sua família.</p>
-          <div class="app-page-actions">
-            <a class="landing-hero-primary" href="#planos" data-public-route="planos">Ver planos e valores <span>↗</span></a>
-            <a class="app-page-back" href="#inicio" data-public-route="inicio">Voltar ao início</a>
-          </div>
-        </div>
-        <div class="app-page-visual" aria-label="Ilustração de resumo financeiro">
-          <div class="app-visual-top"><span>VISÃO DA FAMÍLIA</span><i>● ● ●</i></div>
-          <div class="app-visual-label">Resumo do mês</div>
-          <div class="app-visual-balance">Seu mês em perspectiva</div>
-          <div class="app-visual-stats"><div><small>Receitas</small><b>Entradas organizadas</b><span>↗</span></div><div><small>Despesas</small><b>Gastos acompanhados</b><span>↘</span></div></div>
-          <div class="app-visual-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          <div class="app-visual-foot"><span>CONTROLE MENSAL</span><b>Organização em um só lugar</b></div>
-        </div>
-      </div>
       <div class="app-page-section-heading"><span>O QUE VOCÊ ENCONTRA</span><h2>Tudo conectado à vida financeira da sua família.</h2><p>Recursos para sair das anotações espalhadas e ter uma visão mais completa das finanças.</p></div>
       <div class="app-feature-cards">
         <article><span>▦</span><div><small>01 · DIA A DIA</small><h3>Controle do mês</h3><p>Registre receitas, despesas, contas, vencimentos e pagamentos. Saiba o que entrou, o que saiu e o que ainda precisa ser pago.</p></div></article>
@@ -2145,12 +2142,6 @@ function renderAuth(){
         <article><span>♧</span><div><small>05 · EM FAMÍLIA</small><h3>Um espaço compartilhado</h3><p>Convide as pessoas da família para participar da organização, cada uma com seu próprio acesso e permissões.</p></div></article>
         <article><span>⇧</span><div><small>06 · PRATICIDADE</small><h3>Importação e exportação</h3><p>Use arquivos Excel e CSV para trazer informações e facilitar o trabalho com seus dados financeiros.</p></div></article>
       </div>
-      <div class="app-page-flow">
-        <div><span>É SIMPLES COMEÇAR</span><h2>Organize hoje. Acompanhe a evolução todos os meses.</h2></div>
-        <div class="app-flow-steps"><article><b>1</b><h3>Reúna</h3><p>Coloque receitas, despesas e contas no mesmo lugar.</p></article><article><b>2</b><h3>Entenda</h3><p>Visualize o mês e acompanhe os resultados.</p></article><article><b>3</b><h3>Planeje</h3><p>Defina objetivos e avance em família.</p></article></div>
-      </div>
-      <div class="app-page-end"><h2>Uma visão mais clara começa com organização.</h2><a class="landing-hero-primary" href="#planos" data-public-route="planos">Conhecer os planos <span>↗</span></a></div>
-    </section>
     <section class="landing-plans-section" id="landing-plans" aria-labelledby="landing-plans-title">
       <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Uma assinatura por família. Os membros convidados não precisam contratar outro plano.</p></div>
       <div class="landing-plan-grid">
