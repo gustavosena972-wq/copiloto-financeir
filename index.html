@@ -1827,7 +1827,9 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 }
 @media(prefers-reduced-motion:reduce){.landing-hero-actions a{transition:none!important}}
 /* Cada área pública funciona como uma página independente */
-.landing-page[data-screen="inicio"] .landing-plans-section,.landing-page[data-screen="inicio"] .landing-login-section{display:none!important}
+.landing-page[data-screen="inicio"] .landing-login-section{display:none!important}
+.landing-page[data-screen="inicio"] .landing-plans-section{display:block!important}
+.landing-page[data-screen="inicio"] .landing-benefits,.landing-page[data-screen="inicio"] .landing-plans-section{scroll-margin-top:24px}
 .landing-page[data-screen="recursos"] .landing-hero,.landing-page[data-screen="recursos"] .landing-plans-section,.landing-page[data-screen="recursos"] .landing-login-section{display:none!important}
 .landing-page[data-screen="planos"] .landing-hero,.landing-page[data-screen="planos"] .landing-benefits,.landing-page[data-screen="planos"] .landing-login-section{display:none!important}
 .landing-page[data-screen="cadastro"] .landing-hero,.landing-page[data-screen="cadastro"] .landing-benefits,.landing-page[data-screen="cadastro"] .landing-plans-section{display:none!important}
@@ -2030,7 +2032,7 @@ function renderAuth(){
   const rota=(location.hash||'').slice(1);
   const modoAcesso=rota==='cadastro'?'cadastro':'login';
   const telas=['inicio','recursos','planos','cadastro','login','acesso'];
-  const tela=['cadastro','login','acesso'].includes(rota)?'acesso':(telas.includes(rota)?rota:'inicio');
+  const tela=['cadastro','login','acesso'].includes(rota)?'acesso':'inicio';
   const precoPro=brl(PLANOS.pro.valor),precoMax=brl(PLANOS.max.valor),precoUltra=brl(PLANOS.ultra.valor);
   const feature=(txt,planned=false)=>'<li><span class="landing-feature-check">'+(planned?'◇':'✓')+'</span><span>'+txt+'</span>'+(planned?'<small>Planejado</small>':'')+'</li>';
   $('#app').innerHTML=`<div class="landing-page" data-screen="${tela}">
@@ -2267,8 +2269,8 @@ function scrollLandingRoute(route){
     else window.scrollTo({top:0,behavior:'smooth'});
   }));
 }
-if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{const route=(location.hash||'#inicio').slice(1);if(!S.user)renderAuth();scrollLandingRoute(route);});}
-if(!window.__cfLandingRouteBound){window.__cfLandingRouteBound=true;document.addEventListener('click',e=>{const link=e.target.closest('[data-public-route]');if(!link)return;e.preventDefault();const route=link.dataset.publicRoute;if(!['inicio','recursos','planos','login','cadastro'].includes(route))return;const hash='#'+route;if(location.hash===hash){if(!S.user)renderAuth();scrollLandingRoute(route);}else location.hash=hash;});}
+if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{const route=(location.hash||'#inicio').slice(1);const page=document.querySelector('.landing-page');const wantsAccess=['login','cadastro'].includes(route);const isAccess=page?.dataset.screen==='acesso';if(!S.user&&(!page||wantsAccess!==isAccess||(wantsAccess&&route==='cadastro'&&document.getElementById('landing-terms')?.style.display!=='flex')||(wantsAccess&&route==='login'&&document.getElementById('landing-terms')?.style.display==='flex')))renderAuth();scrollLandingRoute(route);});}
+if(!window.__cfLandingRouteBound){window.__cfLandingRouteBound=true;document.addEventListener('click',e=>{const link=e.target.closest('[data-public-route]');if(!link)return;e.preventDefault();const route=link.dataset.publicRoute;if(!['inicio','recursos','planos','login','cadastro'].includes(route))return;const hash='#'+route;if(location.hash===hash){if(!S.user){const page=document.querySelector('.landing-page');if(!page||(['login','cadastro'].includes(route)!==(page.dataset.screen==='acesso')))renderAuth();}scrollLandingRoute(route);}else location.hash=hash;});}
 
 function renderSemFamilia(){
   $('#app').innerHTML=`<div class="auth"><h1>Sua família</h1><div class="mu">Crie a família para começar ou entre com um código de convite.</div>
