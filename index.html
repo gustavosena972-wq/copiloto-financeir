@@ -6,8 +6,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0a0c1f">
 <meta name="description" content="Copiloto Financeiro: um aplicativo brasileiro de finanças para famílias.">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Copiloto Financeiro Familiar</title>
@@ -975,6 +975,6 @@ document.addEventListener('focusout',()=>{if(S.pend)setTimeout(()=>{const a=docu
 document.addEventListener('wheel',()=>{const a=document.activeElement;if(a&&a.type==='number')a.blur()},{passive:true});
 document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='ArrowUp'||e.key==='ArrowDown'))e.preventDefault();if(e.target.id==='senha'&&e.key==='Enter')document.querySelector('[data-act=entrar]').click();});
 </script>
-<script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});</script>
+
 </body>
 </html>
