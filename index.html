@@ -2512,6 +2512,8 @@ async function autenticar(a){
     const response=await fetch(SB_URL+'/functions/v1/autenticacao-usuario',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify(payload)});
     const result=await response.json();if(!response.ok)throw new Error(result.error||'Não foi possível autenticar.');
     const{error}=await sb.auth.setSession(result.session);if(error)throw error;
+    if(result.recoveryCode)mostrarCodigoRecuperacao(result.recoveryCode,'Código criado para sua conta. Ele é a única forma de recuperar sua senha sem e-mail e será mostrado apenas uma vez.');
+    if(result.recoveryUnavailable)toast('Você entrou, mas não conseguimos preparar seu código de recuperação. Avise o suporte.',1);
     if(a==='cadastrar'){
       aviso('Conta criada! Preparando seu acesso…',1);
       let familiaId=null;
@@ -2533,8 +2535,6 @@ async function autenticar(a){
       }
       await boot();
     }else aviso('Pronto! Carregando…',1);
-    if(result.recoveryCode)mostrarCodigoRecuperacao(result.recoveryCode,'Código criado para sua conta. Ele é a única forma de recuperar sua senha sem e-mail e será mostrado apenas uma vez.');
-    if(result.recoveryUnavailable)toast('Você entrou, mas não conseguimos preparar seu código de recuperação. Avise o suporte.',1);
   }catch(e){aviso('Não deu certo: '+String(e.message||e))}
   bt.forEach(x=>x.disabled=false);
 }
