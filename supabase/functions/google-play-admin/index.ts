@@ -117,11 +117,24 @@ Deno.serve(async (req: Request) => {
     if (!purchase.pedido_google) {
       return json({ error: "Esta compra não tem número de pedido para reembolso automático. Não foi recusada; encaminhe para revisão manual no Play Console." }, 409);
     }
-    const refundUrl = base + "/orders/" + encodeURIComponent(purchase.pedido_google) + ":refund?revoke=true";
-    const refundResponse = await fetch(refundUrl, {
-      method: "POST", headers: { Authorization: "Bearer " + googleToken, "Content-Type": "application/json" }, body: "{}",
-    });
-    if (!refundResponse.ok) return json({ error: "A Google Play não confirmou o reembolso e a revogação. A solicitação continua pendente." }, 502);
+    const orderUrl = base + "/orders/" + encodeURIComponent(purchase.pedido_google);
+    const orderResponse = await fetch(orderUrl, { headers: { Authorization: "Bearer " + googleToken } });
+    const order = await orderResponse.json();
+    if (!orderResponse.ok) {
+      return json({ error: "Não foi possível consultar o pedido na Google Play. A solicitação continua pendente." }, 502);
+    }
+    // Permite repetir a ação com segurança se o reembolso já ocorreu, mas a
+    // atualização do banco falhou na tentativa anterior.
+    if (order.state !== "REFUNDED" && order.state !== "PENDING_REFUND") {
+      if (order.state !== "PROCESSED") {
+        return json({ error: "O pedido não está em um estado que permita reembolso. A solicitação continua pendente." }, 409);
+      }
+      const refundUrl = orderUrl + ":refund?revoke=true";
+      const refundResponse = await fetch(refundUrl, {
+        method: "POST", headers: { Authorization: "Bearer " + googleToken, "Content-Type": "application/json" }, body: "{}",
+      });
+      if (!refundResponse.ok) return json({ error: "A Google Play não confirmou o reembolso e a revogação. A solicitação continua pendente." }, 502);
+    }
     const { error } = await userClient.rpc("recusar_compra_google_play", {
       p_id: id, p_nota: "Compra reembolsada e acesso revogado pela Google Play.",
     });
