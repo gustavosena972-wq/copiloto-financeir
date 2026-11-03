@@ -1974,6 +1974,7 @@ const SB_URL='https://jlufubazlnrelrbsvsal.supabase.co';
 const SB_KEY='sb_publishable__CjlaAIa2w5F_7HhOhJKkA_HeDFWxNS';
 if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div class="auth"><h1>Não foi possível carregar</h1><div class="mu">O app precisa de internet para carregar suas bibliotecas. Abra este arquivo no Chrome com internet (não na pré-visualização do Claude).</div></div>';throw new Error('biblioteca supabase ausente')}
 const sb=supabase.createClient(SB_URL,SB_KEY);
+window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null};
 const $=s=>document.querySelector(s);
@@ -3248,5 +3249,6 @@ document.addEventListener('wheel',()=>{const a=document.activeElement;if(a&&a.ty
 document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='ArrowUp'||e.key==='ArrowDown'))e.preventDefault();if(e.target.id==='senha'&&e.key==='Enter')document.querySelector('[data-act=entrar]').click();});
 </script>
 
+<script src="./android-play-billing.js"></script>
 </body>
 </html>
