@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  assemble-debug:
+  android-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,9 +38,15 @@ jobs:
         working-directory: android-app
         run: gradle assembleDebug
 
-      - name: Upload debug APK
+      - name: Build release bundle (unsigned unless release signing is configured)
+        working-directory: android-app
+        run: gradle bundleRelease
+
+      - name: Upload Android build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: copiloto-financeiro-debug
-          path: android-app/app/build/outputs/apk/debug/app-debug.apk
+          name: copiloto-financeiro-android-builds
+          path: |
+            android-app/app/build/outputs/apk/debug/app-debug.apk
+            android-app/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
