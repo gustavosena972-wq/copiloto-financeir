@@ -130,3 +130,40 @@ Arquivos adicionados nesta etapa:
 - A compra fica pendente e sem acesso até decisão manual. A aprovação deve ocorrer dentro do prazo de confirmação da Google Play; a rejeição tenta reembolsar e revogar o pedido na loja.
 - O script SQL está em `supabase/sql/` como implantação separada para revisão. Antes de produção, deve ser convertido em migração formal e testado em ambiente de desenvolvimento, sem alterar as tabelas e RPCs Pix existentes.
 - O build ainda precisa concluir e o APK de depuração não é um AAB assinado para publicação.
+
+
+## Atualização de decisão e estado (03/11/2026)
+
+### Decisão do produto
+
+- O responsável quer que os pagamentos sejam processados pela Google Play, inclusive na experiência Web, e não quer Pix.
+- A implementação Google Play Billing nesta branch atende ao checkout nativo do app Android. Ela não cria checkout Google Play para navegadores comuns.
+- O Brasil aparece na lista oficial de países com programa de faturamento alternativo no app. Esse programa não significa que o Google Play processará o pagamento: o pagamento alternativo é processado pelo desenvolvedor e precisa de integração e declarações próprias. Como a decisão é usar pagamento processado pelo Google, não ativar esse programa como se fosse Google Play Billing.
+- Portanto, o Pix da Web não deve ser removido até existir uma solução Web que realmente processe o pagamento pelo Google e seja permitida para esse caso. A versão Android, quando executada dentro do app nativo, esconde o checkout Pix e usa a ponte Billing.
+
+### Revisão do que já existe
+
+- A ponte nativa não é apenas uma ideia: `android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt` já implementa consulta de produtos, início de compra, restauração e eventos para a WebView.
+- `android-play-billing.js` conecta os eventos ao backend e o painel administrativo chama a Edge Function de aprovação/recusa.
+- A migração formal foi criada em `supabase/migrations/20261103210000_google_play_compras.sql`, com acesso à tabela reservado ao `service_role` e funções administrativas protegidas. Ela continua sem aplicação.
+- O build foi ampliado para compilar APK debug e AAB release não assinado; um AAB sem assinatura não pode ser publicado.
+
+### Risco operacional obrigatório
+
+A aprovação manual não pode ficar sem acompanhamento: compras avulsas `PURCHASED` precisam ser consumidas/confirmadas em até três dias. O backend atual só consome na aprovação. Se a fila ficar sem decisão, o Google pode reembolsar automaticamente. Antes de abrir compras reais, o responsável deve assumir monitoramento diário e prazo operacional curto, além de testar reembolso e revogação. Não se deve aprovar uma compra depois de o Google já a ter reembolsado.
+
+### Estado de implantação
+
+- Código: branch de preparação; PR #25 continua aberto.
+- SQL: migration adicionada ao GitHub, mas não executada.
+- Edge Functions: código no GitHub, não implantado.
+- Secrets Google: não configurados.
+- Produtos Play Console: não criados/verificados.
+- Compras reais: não testadas.
+- Publicação: não feita; nenhum merge em `main`.
+
+Referências oficiais consultadas:
+- https://developer.android.com/google/play/billing/lifecycle/one-time
+- https://developer.android.com/google/play/billing/integrate
+- https://support.google.com/googleplay/answer/11174377
+- https://support.google.com/googleplay/android-developer/answer/14372887
