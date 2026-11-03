@@ -1837,6 +1837,18 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 .landing-page[data-screen="recursos"] .landing-benefits-heading h2{max-width:680px;font-size:clamp(30px,4vw,44px)}
 .landing-page[data-screen="recursos"] .landing-benefits-heading>p{max-width:560px;color:#788579;font-size:13px;line-height:1.7}
 .landing-page[data-screen="recursos"] .landing-benefits-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 42px}
+.landing-how-it-works{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,1.5fr);gap:clamp(22px,4vw,60px);margin-top:38px;padding:30px 0 8px;border-top:1px solid #e3e8df}
+.landing-how-heading>span{color:#9a8050;font-size:9px;font-weight:850;letter-spacing:.16em}
+.landing-how-heading h3{margin:9px 0;color:#2b3d30;font-size:clamp(23px,2.6vw,31px);line-height:1.12;letter-spacing:-.045em}
+.landing-how-heading p{margin:0;color:#788579;font-size:12px;line-height:1.75}
+.landing-how-steps{display:grid;grid-template-columns:1fr 1fr;gap:22px 28px}
+.landing-how-steps article{display:flex;gap:12px;padding:3px 0}
+.landing-how-steps article>span{flex:none;color:#9a8050;font-size:11px;font-weight:850;letter-spacing:.08em}
+.landing-how-steps b{display:block;color:#33483a;font-size:13px;margin-bottom:5px}
+.landing-how-steps p{margin:0;color:#7b897c;font-size:11px;line-height:1.7}
+.landing-page[data-screen="recursos"] .landing-how-it-works{margin-top:42px}
+@media(max-width:760px){.landing-how-it-works{grid-template-columns:1fr;gap:20px}.landing-how-steps{grid-template-columns:1fr;gap:16px}}
+
 .landing-page[data-screen="recursos"] .landing-benefits-grid article{padding:22px 0;border-bottom:1px solid #e3e8df}
 .landing-page[data-screen="recursos"] .landing-benefits-grid b{font-size:14px}
 .landing-page[data-screen="recursos"] .landing-benefits-grid p{font-size:12px}
@@ -1989,10 +2001,10 @@ function renderAuth(){
         ${LOGO}<span><strong>Copiloto Financeiro</strong><small>GESTÃO FINANCEIRA FAMILIAR</small></span>
       </a>
       <nav class="landing-nav" aria-label="Navegação principal">
-        <a href="#inicio">Início</a>
-        <a href="#recursos">O aplicativo</a>
-        <a href="#planos">Planos</a>
-        <a class="landing-nav-cta" href="#login">Entrar <span aria-hidden="true">↗</span></a>
+        <a href="#inicio" data-public-route="inicio">Início</a>
+        <a href="#recursos" data-public-route="recursos">O aplicativo</a>
+        <a href="#planos" data-public-route="planos">Planos</a>
+        <a class="landing-nav-cta" href="#login" data-public-route="login">Entrar <span aria-hidden="true">↗</span></a>
       </nav>
     </header>
     <section class="landing-hero">
@@ -2001,7 +2013,7 @@ function renderAuth(){
           <span class="landing-kicker"><i></i> FINANÇAS DA FAMÍLIA, COM MAIS CLAREZA</span>
           <h1>Seu dinheiro organizado. Sua família mais tranquila.</h1>
           <p>Reúna receitas, despesas, contas e objetivos em um só lugar. Tenha uma visão clara do mês e acompanhe a evolução financeira da família.</p>
-          <div class="landing-hero-actions"><a class="landing-hero-primary" href="#recursos">Conheça o aplicativo <span>↗</span></a><a class="landing-hero-secondary" href="#planos">Ver planos</a></div>
+          <div class="landing-hero-actions"><a class="landing-hero-primary" href="#recursos" data-public-route="recursos">Conheça o aplicativo <span>↗</span></a><a class="landing-hero-secondary" href="#planos" data-public-route="planos">Ver planos</a></div>
           <div class="landing-highlights">
             <div><span class="landing-highlight-icon">✓</span><b>Controle mensal</b><small>Receitas, despesas e contas organizadas.</small></div>
             <div><span class="landing-highlight-icon">↗</span><b>Visão do ano</b><small>Acompanhe resultados e compare os meses.</small></div>
@@ -2074,7 +2086,15 @@ function renderAuth(){
         <article><span class="landing-benefit-icon">♧</span><div><b>Organização familiar</b><p>Compartilhe o espaço com membros da família e defina permissões de acesso.</p></div></article>
         <article><span class="landing-benefit-icon">⇧</span><div><b>Importar e exportar</b><p>Trabalhe com arquivos Excel e CSV para facilitar o controle dos dados.</p></div></article>
       </div>
-      <div class="landing-features-cta"><p>Veja qual plano combina com a organização financeira da sua família.</p><a href="#planos" class="landing-hero-primary">Ver planos e valores <span>↗</span></a></div>
+      <div class="landing-how-it-works">
+        <div class="landing-how-heading"><span>COMO FUNCIONA</span><h3>Da organização do mês ao planejamento da família.</h3><p>O Copiloto reúne as informações financeiras em um espaço compartilhado. Cada pessoa registra o que acontece, e a família acompanha os resultados com mais clareza.</p></div>
+        <div class="landing-how-steps">
+          <article><span>01</span><div><b>Registre</b><p>Cadastre receitas, despesas, contas a pagar, datas, categorias e responsáveis. Também é possível importar dados de planilhas.</p></div></article>
+          <article><span>02</span><div><b>Acompanhe</b><p>Veja o resumo do mês, confira o que já foi pago, o que ainda vence e compare os resultados ao longo do ano.</p></div></article>
+          <article><span>03</span><div><b>Planeje</b><p>Organize objetivos, acompanhe aportes, registre dívidas e bens e consulte simulações para entender cenários futuros.</p></div></article>
+          <article><span>04</span><div><b>Compartilhe</b><p>Convide os membros da família para o mesmo espaço, cada um com seu próprio acesso e permissões definidas.</p></div></article>
+        </div>
+      </div>
     </section>
     <section class="landing-plans-section" id="landing-plans" aria-labelledby="landing-plans-title">
       <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Uma assinatura por família. Os membros convidados não precisam contratar outro plano.</p></div>
@@ -2188,6 +2208,7 @@ function renderAuth(){
   const signupOptions=document.getElementById('landing-signup-options');if(signupOptions)signupOptions.hidden=!cadastro;
 }
 if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{if(!S.user)renderAuth();window.scrollTo({top:0,behavior:'smooth'});});}
+if(!window.__cfLandingRouteBound){window.__cfLandingRouteBound=true;document.addEventListener('click',e=>{const link=e.target.closest('[data-public-route]');if(!link)return;e.preventDefault();const route=link.dataset.publicRoute;if(!['inicio','recursos','planos','login','cadastro'].includes(route))return;const hash='#'+route;if(location.hash===hash){if(!S.user)renderAuth();window.scrollTo({top:0,behavior:'smooth'});}else location.hash=hash;});}
 
 function renderSemFamilia(){
   $('#app').innerHTML=`<div class="auth"><h1>Sua família</h1><div class="mu">Crie a família para começar ou entre com um código de convite.</div>
