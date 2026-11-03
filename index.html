@@ -2401,8 +2401,8 @@ async function mostrarCompromissos(){
   const dados=[];
   for(let inicio=0;;inicio+=1000){
     const lote=await q(sb.from('lancamentos')
-      .select('id,grupo_parcelas,descricao,valor,status,data_vencimento,parcela_atual,parcelas_total,natureza_compromisso')
-      .eq('familia_id',S.fam.id).not('grupo_parcelas','is',null)
+      .select('id,grupo_parcelas,descricao,valor,status,data_vencimento,parcela_atual,parcelas_total,natureza_compromisso,categoria_id')
+      .eq('familia_id',S.fam.id).not('parcelas_total','is',null)
       .order('data_vencimento').order('id').range(inicio,inicio+999));
     if(!lote?.length)break;
     dados.push(...lote);
@@ -2410,9 +2410,17 @@ async function mostrarCompromissos(){
   }
   const grupos=new Map();
   for(const l of dados||[]){
-    if(!l.grupo_parcelas||!l.parcelas_total)continue;
-    if(!grupos.has(l.grupo_parcelas))grupos.set(l.grupo_parcelas,[]);
-    grupos.get(l.grupo_parcelas).push(l);
+    if(!l.parcelas_total||!l.parcela_atual)continue;
+    let chave=l.grupo_parcelas;
+    if(!chave&&l.data_vencimento){
+      const [ano,mes]=l.data_vencimento.split('-').map(Number);
+      const indice=ano*12+(mes-1)-(Number(l.parcela_atual)-1);
+      const inicio=Math.floor(indice/12)+'-'+String(indice%12+1).padStart(2,'0');
+      chave='importada:'+norm(l.descricao)+':'+l.parcelas_total+':'+(l.categoria_id||'')+':'+inicio;
+    }
+    if(!chave)continue;
+    if(!grupos.has(chave))grupos.set(chave,[]);
+    grupos.get(chave).push(l);
   }
   const cards=[...grupos.values()].map(lista=>{
     lista.sort((a,b)=>(a.parcela_atual||0)-(b.parcela_atual||0));
@@ -2574,10 +2582,12 @@ function parseTabularData(rows,fallbackMonth=null,fallbackYear=null){
     const categoria=S.cats.find(c=>c.tipo===tipo&&norm(c.nome)===norm(categoriaNome));
     const st=is>=0?norm(r[is]):'pendente';
     const status=['pago','atrasado'].includes(st)?st:'pendente';
-    const pm=String(r.find(v=>/\d+\s*de\s*\d+/i.test(String(v??'')))??'').match(/(\d+)\s*de\s*(\d+)/i);
+    const pm=String(r.find(v=>/\d+\s*(?:de|\/)\s*\d+/i.test(String(v??'')))??'').match(/(\d+)\s*(?:de|\/)\s*(\d+)/i);
+    const ipa=ix('parcela atual','numero parcela','número parcela'),ipt=ix('total parcelas','parcelas total','qtd parcelas','quantidade parcelas');
+    const pa=ipa>=0?Number(r[ipa]):(pm?+pm[1]:null),pt=ipt>=0?Number(r[ipt]):(pm?+pm[2]:null);
     grupos.get(chave).itens.push({grupo:tipo==='receita'?'receita':(categoria?.grupo||'variaveis'),descricao,valor,
       categoria_id:categoria?.id||null,data_vencimento:data,status,
-      parcela_atual:pm?+pm[1]:null,parcelas_total:pm?+pm[2]:null});
+      parcela_atual:Number.isInteger(pa)&&pa>0?pa:null,parcelas_total:Number.isInteger(pt)&&pt>0?pt:null});
   }
   return [...grupos.values()];
 }
@@ -2593,7 +2603,7 @@ function parseSheetRows(name,rows){
     if(a.startsWith('receita prevista')){const v=parseMoneyCell(r[2]);if(v>0)out.receita=v;continue}
     const g=GRUPOS[a];if(!g)continue;
     const v=parseMoneyCell(r[2]);if(!(v>0))continue;
-    const pm=String(r[3]??'').match(/(\d+)\s*de\s*(\d+)/i);
+    const pm=String(r[3]??'').match(/(\d+)\s*(?:de|\/)\s*(\d+)/i);
     out.itens.push({grupo:g,descricao:String(r[1]??'').trim(),valor:v,parcela_atual:pm?+pm[1]:null,parcelas_total:pm?+pm[2]:null,obs:r[4]?String(r[4]):null});
   }
   return out;
