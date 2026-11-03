@@ -3,13 +3,16 @@
 Use uma conta e família exclusivamente de teste. Não use dados financeiros reais. Registre navegador, horário, resultado e evidência sem expor e-mail, tokens ou valores privados.
 
 ## Autenticação
-- [ ] Cadastro com nome, e-mail válido e senha de pelo menos 8 caracteres.
-- [ ] Cadastro com senha abaixo de 8 caracteres deve ser recusado pelo Supabase.
-- [ ] Confirmar o e-mail e entrar pela primeira vez.
-- [ ] Tentar entrar antes de confirmar o e-mail; validar o comportamento configurado.
-- [ ] Sair e entrar novamente.
-- [ ] Solicitar redefinição de senha e concluir pelo link.
-- [ ] Repetir cadastro com e-mail já existente; mensagem não deve expor dados de outra conta.
+- [ ] Cadastrar com nome, usuário de 3 a 24 caracteres e senha de 8 a 128 caracteres.
+- [ ] Usuário fora do padrão e senha abaixo de 8 ou acima de 128 caracteres devem ser recusados.
+- [ ] Aceitar Termos e Política; sem aceite, o cadastro deve ser recusado.
+- [ ] Confirmar que o cadastro cria a sessão sem exigir confirmação por e-mail.
+- [ ] Guardar o código de recuperação exibido no cadastro; confirmar que ele não é exibido novamente após sair.
+- [ ] Recuperar senha com código válido; código inválido deve ser recusado.
+- [ ] Repetir cadastro com usuário já existente; resposta não deve expor dados de outra conta.
+- [ ] Sair e entrar novamente com usuário e senha.
+- [ ] Testar limite de tentativas e mensagens genéricas para usuário/senha incorretos.
+- [ ] Confirmar que o requisito de 18 anos indicado nos Termos é tratado antes de abrir inscrições públicas; hoje o cadastro não valida idade.
 
 ## Família e permissões
 - [ ] Criar família e confirmar criação do ano, meses e categorias iniciais.
