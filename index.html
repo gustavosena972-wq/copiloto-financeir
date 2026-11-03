@@ -1879,6 +1879,17 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 .landing-plan-cta:hover{background:#1e4930;transform:translateY(-2px)}
 .landing-plan-card{min-height:100%}
 @media(max-width:640px){.landing-features-cta{align-items:flex-start;flex-direction:column}.landing-plan-cta{width:100%}}
+
+/* Cadastro: vínculo com família existente ou criação de nova assinatura */
+.landing-signup-options{display:grid;gap:9px;padding:13px 0;border-top:1px solid #e8eee6;border-bottom:1px solid #e8eee6}
+.landing-signup-options[hidden],.landing-signup-options [hidden]{display:none!important}
+.landing-signup-options select{width:100%;min-height:42px;padding:10px 12px;border:1px solid #d1dbe5;border-radius:7px;background:#fbfcfd;color:#25384d;font-size:12px}
+.landing-signup-options small{display:block;margin-top:6px;color:#758477;font-size:10px;line-height:1.5}
+#landing-selected-plan{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:8px;background:#edf5e9;color:#315f40;font-size:11px}
+#landing-selected-plan strong{font-size:13px}
+#landing-selected-plan small{flex-basis:100%;margin:0}
+.landing-plan-cta{font-family:inherit;border:0;cursor:pointer}
+.landing-plan-cta:focus-visible,.landing-hero-actions a:focus-visible{outline:3px solid #88ad88;outline-offset:3px}
 </style>
 </head>
 <body>
@@ -1893,7 +1904,7 @@ const SB_KEY='sb_publishable__CjlaAIa2w5F_7HhOhJKkA_HeDFWxNS';
 if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div class="auth"><h1>Não foi possível carregar</h1><div class="mu">O app precisa de internet para carregar suas bibliotecas. Abra este arquivo no Chrome com internet (não na pré-visualização do Claude).</div></div>';throw new Error('biblioteca supabase ausente')}
 const sb=supabase.createClient(SB_URL,SB_KEY);
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[]};
+const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -2053,7 +2064,7 @@ function renderAuth(){
         </section>
       </div>
     </section>
-    <section class="landing-benefits" id="landing-features" aria-label="Recursos do Copiloto">
+    <section class="landing-benefits" id="recursos" aria-label="Recursos do Copiloto">
       <div class="landing-benefits-heading"><span>RECURSOS DO APLICATIVO</span><h2>Ferramentas para acompanhar a vida financeira da família.</h2><p>Conheça as principais áreas do Copiloto e como elas ajudam na organização do dia a dia.</p></div>
       <div class="landing-benefits-grid">
         <article><span class="landing-benefit-icon">▦</span><div><b>Planilha mensal</b><p>Registre receitas, despesas, vencimentos, pagamentos e categorias em um só lugar.</p></div></article>
@@ -2083,7 +2094,7 @@ function renderAuth(){
             ${feature('Acesso familiar e permissões por perfil')}
           </ul>
           <div class="landing-plan-status current">Disponível</div>
-          <a class="landing-plan-cta" href="#acesso">Criar conta e continuar <span>↗</span></a>
+          <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="pro">Escolher Pro <span>↗</span></button>
         </article>
         <article class="landing-plan-card recommended">
           <div class="landing-ribbon">FAMÍLIA AMPLIADA</div>
@@ -2098,7 +2109,7 @@ function renderAuth(){
             ${feature('Cada membro acessa com seu próprio usuário e permissões')}
           </ul>
           <div class="landing-plan-status current">Disponível</div>
-          <a class="landing-plan-cta" href="#acesso">Criar conta e continuar <span>↗</span></a>
+          <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="max">Escolher Max <span>↗</span></button>
         </article>
         <article class="landing-plan-card ultra">
           <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO FINANCEIRA AMPLIADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e espaços familiares já vinculados à sua conta.</p></div>
@@ -2113,7 +2124,7 @@ function renderAuth(){
             ${feature('Cadastro e acompanhamento de bens e obrigações')}
           </ul>
           <div class="landing-plan-status current">Disponível para contratação</div>
-          <a class="landing-plan-cta" href="#acesso">Criar conta e continuar <span>↗</span></a>
+          <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="ultra">Escolher Ultra <span>↗</span></button>
         </article>
       </div>
       <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. O Max amplia a capacidade da família para até 6 pessoas. O pagamento é feito por Pix, com conferência manual e sem renovação automática. A assinatura é por família; no Ultra, a central alterna entre espaços familiares aos quais a conta já pertence, cada um com seu próprio acesso.</p>
@@ -2133,6 +2144,22 @@ function renderAuth(){
         <div class="landing-field-group">
           <label class="landing-field" for="senha">Senha</label>
           <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha">
+        </div>
+        <div class="landing-signup-options" id="landing-signup-options" ${modoAcesso==='cadastro'?'':'hidden'}>
+          <label class="landing-field" for="tipo-familia">Como você deseja começar?</label>
+          <select id="tipo-familia">
+            <option value="criar">Criar uma nova família e contratar um plano</option>
+            <option value="entrar">Já tenho um código de convite da família</option>
+          </select>
+          <div id="landing-family-code" hidden>
+            <label class="landing-field" for="codigo-familia">Código de convite da família</label>
+            <input id="codigo-familia" maxlength="32" autocomplete="off" autocapitalize="characters" placeholder="Digite o código recebido">
+            <small>O responsável da família gera esse código no aplicativo. Se a assinatura estiver ativa, você entra sem pagar outra vez.</small>
+          </div>
+          <div id="landing-selected-plan"  ${S.planoPreCadastro?'':'hidden'}>
+            <span>Plano selecionado</span><strong>${S.planoPreCadastro?PLANOS[S.planoPreCadastro]?.nome||'Pro':'—'}</strong>
+            <small>A contratação e o Pix serão concluídos depois da criação da conta.</small>
+          </div>
         </div>
         <label class="aceite" id="landing-terms"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
         <div id="recuperacao" hidden>
@@ -2158,6 +2185,7 @@ function renderAuth(){
   const voltar=document.getElementById('landing-back-login');if(voltar)voltar.style.display=cadastro?'flex':'none';
   const reset=document.querySelector('.landing-login [data-act="reset"]');if(reset)reset.style.display=cadastro?'none':'block';
   const rec=document.getElementById('recuperacao');if(rec&&cadastro)rec.hidden=true;
+  const signupOptions=document.getElementById('landing-signup-options');if(signupOptions)signupOptions.hidden=!cadastro;
 }
 if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{if(!S.user)renderAuth();window.scrollTo({top:0,behavior:'smooth'});});}
 
@@ -2470,10 +2498,13 @@ function mostrarCodigoRecuperacao(code,mensagem){
 }
 async function autenticar(a){
   const nome=$('#nome').value.trim(),username=normalizarUsuario(nome),senha=$('#senha').value;
+  const modoFamilia=$('#tipo-familia')?.value||'criar';
+  const codigoFamilia=$('#codigo-familia')?.value.trim()||'';
   if(!nome||!senha)return aviso('Preencha seu usuário e sua senha.');
   if(username.length<3)return aviso('Digite um usuário com pelo menos 3 caracteres.');
   if(senha.length<8)return aviso('A senha precisa ter pelo menos 8 caracteres.');
   if(a==='cadastrar'&&!$('#aceite').checked)return aviso('Para criar a conta, marque que você leu e aceita os Termos de Uso e a Política de Privacidade.');
+  if(a==='cadastrar'&&modoFamilia==='entrar'&&!codigoFamilia)return aviso('Digite o código de convite enviado pelo responsável da família.');
   const bt=document.querySelectorAll('.login button');bt.forEach(x=>x.disabled=true);aviso(a==='entrar'?'Entrando…':'Criando sua conta…',1);
   try{
     const payload={action:a==='entrar'?'login':'signup',username,password:senha};
@@ -2481,8 +2512,27 @@ async function autenticar(a){
     const response=await fetch(SB_URL+'/functions/v1/autenticacao-usuario',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify(payload)});
     const result=await response.json();if(!response.ok)throw new Error(result.error||'Não foi possível autenticar.');
     const{error}=await sb.auth.setSession(result.session);if(error)throw error;
-    if(a==='cadastrar'){aviso('Conta criada! Preparando seu acesso…',1);await q(sb.rpc('criar_familia',{p_nome:nome}));await boot();}
-    else aviso('Pronto! Carregando…',1);
+    if(a==='cadastrar'){
+      aviso('Conta criada! Preparando seu acesso…',1);
+      let familiaId=null;
+      try{
+        familiaId=modoFamilia==='entrar'
+          ? await q(sb.rpc('aceitar_convite',{p_codigo:codigoFamilia}))
+          : await q(sb.rpc('criar_familia',{p_nome:nome}));
+      }catch(vinculoError){
+        await boot();
+        toast(modoFamilia==='entrar'
+          ? 'Sua conta foi criada, mas o código não foi aceito. Confira o código ou peça um novo ao responsável.'
+          : 'Sua conta foi criada, mas não foi possível preparar a família. Entre novamente para continuar.',1);
+        return;
+      }
+      try{localStorage.setItem('cf_familia_ativa',familiaId)}catch(e){}
+      if(modoFamilia==='criar'){
+        S.planoEscolhido=S.planoPreCadastro||'pro';
+        S.planoEscolhidoFamilia=familiaId;
+      }
+      await boot();
+    }else aviso('Pronto! Carregando…',1);
     if(result.recoveryCode)mostrarCodigoRecuperacao(result.recoveryCode,'Código criado para sua conta. Ele é a única forma de recuperar sua senha sem e-mail e será mostrado apenas uma vez.');
     if(result.recoveryUnavailable)toast('Você entrou, mas não conseguimos preparar seu código de recuperação. Avise o suporte.',1);
   }catch(e){aviso('Não deu certo: '+String(e.message||e))}
@@ -2777,6 +2827,12 @@ document.addEventListener('click',async e=>{
   if(!LIVRE.includes(a))S.busy=true;
   try{
   if(a==='entrar'||a==='cadastrar')await autenticar(a);
+  else if(a==='escolherplano'){
+    const plano=b.dataset.plano;
+    if(!PLANOS[plano])return toast('Plano inválido. Atualize a página e tente novamente.',1);
+    S.planoPreCadastro=plano;
+    location.hash='#cadastro';
+  }
   else if(a==='sair'){if(S.rt){sb.removeChannel(S.rt);S.rt=null}await sb.auth.signOut();S.user=null;boot()}
   else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
@@ -2895,6 +2951,14 @@ document.addEventListener('click',async e=>{
 document.addEventListener('change',async e=>{
   const t=e.target;
   try{
+  if(t.id==='tipo-familia'){
+    const entrar=t.value==='entrar';
+    const campo=document.getElementById('landing-family-code');
+    const plano=document.getElementById('landing-selected-plan');
+    if(campo)campo.hidden=!entrar;
+    if(plano)plano.hidden=entrar||!S.planoPreCadastro;
+    return;
+  }
   if(t.id==='anosel'){S.ano=S.anos.find(a=>a.id===t.value);await loadAno();return}
   if(t.dataset.papelMembro){
     if(S.me?.papel!=='dono')return toast('Somente o responsável pode alterar permissões.',1);
