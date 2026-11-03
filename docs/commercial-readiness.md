@@ -1,16 +1,16 @@
 # Preparação comercial — Copiloto Financeiro
 
 ## Situação atual conhecida
-- Acesso apresentado por pagamento Pix com conferência manual.
-- A liberação é feita por administrador via função de aprovação; não há confirmação automática por webhook bancário.
+- Acesso apresentado por pagamento Pix com conferência manual, como decisão operacional do produto.
+- Uma pessoa responsável pelo atendimento confere o recebimento e aceita ou recusa a solicitação; a liberação é registrada no painel administrativo pela função de aprovação. Não há confirmação automática por webhook bancário, e isso não é requisito do fluxo definido.
 - A proteção Supabase contra senhas vazadas exige plano Pro ou superior e está indisponível no plano atual.
 - O cadastro atual usa nome de usuário e senha via Edge Function; não depende de confirmação de e-mail. A recuperação é feita por código exibido no cadastro e guardado pelo usuário, não por link enviado por e-mail.
 - A política de privacidade e os termos exibidos no app precisam de revisão jurídica e operacional antes de cobrar clientes.
 
 ## Antes de aceitar clientes pagantes
 - [ ] Definir claramente preço, período de acesso, renovação, cancelamento e reembolso.
-- [ ] Informar que o Pix é conferido manualmente e qual o prazo de liberação.
-- [ ] Configurar chave Pix, nome do recebedor e contato de suporte reais; conferir com pagamento de teste.
+- [ ] Definir a escala/canal do atendimento responsável por conferir o Pix e aprovar ou recusar solicitações, incluindo prazo de liberação.
+- [ ] Configurar chave Pix, nome do recebedor e contato de suporte reais; validar o procedimento de conferência manual.
 - [ ] Publicar Termos de Uso e Política de Privacidade completos, com identificação do controlador, finalidade, base legal, retenção, direitos do titular e canal de contato.
 - [ ] Definir procedimento para solicitação de acesso, correção, exportação e exclusão de dados.
 - [ ] Definir rotina de backup, restauração e resposta a incidentes.
@@ -24,7 +24,7 @@
 Não prometer integração bancária, confirmação automática de Pix, segurança absoluta, disponibilidade garantida, suporte 24h ou capacidade para centenas de usuários sem testes e infraestrutura que comprovem isso.
 
 ## Go/no-go
-Só iniciar cobrança pública depois de concluir os testes críticos, revisar os textos legais, testar recuperação de backup e documentar o processo manual de pagamentos.
+Só iniciar cobrança pública depois de concluir os testes críticos aplicáveis, revisar os textos legais, testar recuperação de backup e documentar o processo de atendimento e conferência manual do Pix.
 
 ## Estado observado em 03/11/2026
 
@@ -34,7 +34,7 @@ Só iniciar cobrança pública depois de concluir os testes críticos, revisar o
 - O Ultra oferece alternância entre espaços familiares aos quais a conta já tem acesso e módulos de relatórios/patrimônio. Isso não equivale a consolidar automaticamente famílias independentes em uma única assinatura.
 - O limite de membros do Ultra ainda não está definido no código. Definir e testar a regra antes de oferecer esse plano publicamente.
 - Os Termos indicam idade mínima de 18 anos, mas o cadastro atual não confirma idade. Antes de cobrar clientes, definir um operador adulto responsável por contratos, recebimentos, suporte e dados pessoais; revisar a estrutura com profissional qualificado.
-- O Pix continua manual: não há webhook bancário nem liberação automática. A chave, o recebedor, o prazo e o fluxo de aprovação ainda precisam de conferência real de ponta a ponta.
+- O Pix é manual por decisão operacional: a pessoa responsável pelo atendimento confere o recebimento e autoriza ou recusa a entrada do cliente; a aprovação é registrada no painel administrativo. A ausência de webhook ou liberação automática é intencional no fluxo definido.
 - O Supabase mantém RLS nas tabelas públicas. As tabelas privadas de mapeamento de usuário e recuperação não têm políticas RLS; a auditoria de privilégios confirmou que não concedem acesso direto a `anon` ou `authenticated`, sendo usadas pelo serviço de autenticação. A proteção contra senhas vazadas continua desativada no plano atual.
 - Não foram comprovados teste de restauração de backup, teste de carga, isolamento entre contas em navegador real, processamento Pix real, ou revisão jurídica dos Termos e da Política.
 
