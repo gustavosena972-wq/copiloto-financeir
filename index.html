@@ -1395,6 +1395,26 @@ button:not(:disabled):hover{filter:brightness(1.04)}
 }
 </style>
 </style>
+<style id="cf-ultra-workspace">
+.cf-section{margin:20px 0 24px;padding:0 0 20px;border-bottom:1px solid #dfe4d9}.cf-section:last-child{border-bottom:0}
+.cf-section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:15px}
+.cf-section-head>div>span{font-size:9px;letter-spacing:.14em;color:#927b4d;font-weight:800}
+.cf-section-head h2{margin:5px 0 4px;color:#293c30;font-size:21px;letter-spacing:-.025em}.cf-section-head p{margin:0;color:#788579;font-size:12px}
+.cf-space-count,.cf-current-space{font-size:11px;color:#6a7a6c;font-weight:700;white-space:nowrap}
+.cf-space-list{border-top:1px solid #dfe4d9}.cf-space-row{display:flex;align-items:center;gap:14px;padding:16px 4px;border-bottom:1px solid #e5e8df;transition:background .18s,padding .18s}
+.cf-space-row:hover{background:#f1f5ed;padding-left:10px;padding-right:10px}.cf-space-row.active{background:#f2f6ee}
+.cf-space-mark{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:#e5eee3;color:#2b7652;flex:none}
+.cf-space-main{display:grid;gap:3px;flex:1;min-width:120px}.cf-space-main strong{font-size:14px;color:#2b3c30}.cf-space-main span,.cf-space-meta small{font-size:11px;color:#788579}
+.cf-space-meta{display:grid;gap:3px;min-width:92px}.cf-space-meta b{font-size:12px;color:#385743}.cf-space-action{min-width:105px;text-align:right}.cf-space-action button{font-size:11px;padding:8px 12px}
+.cf-note{margin-top:17px;padding:14px 0;border-top:1px solid #e1e5dc;color:#536456}.cf-note b{font-size:13px}.cf-note p,.cf-note-text{font-size:11px;line-height:1.6;color:#7b867b}
+.cf-legend{display:flex;gap:12px;flex-wrap:wrap;color:#778477;font-size:10px}.cf-legend span{display:flex;align-items:center;gap:5px}.cf-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}.cf-legend .income{background:#38825d}.cf-legend .expense{background:#c27a69}
+.cf-chart{display:flex;gap:8px;align-items:stretch;height:190px;padding:14px 3px 0;border-bottom:1px solid #dfe4d9}.cf-chart-month{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px}
+.cf-chart-pair{height:150px;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:3px}.cf-chart-pair i{display:block;width:min(36%,18px);min-height:2px;border-radius:5px 5px 0 0}.cf-chart-pair .income{background:linear-gradient(180deg,#6da985,#2e7652)}.cf-chart-pair .expense{background:linear-gradient(180deg,#d7a18c,#b76858)}
+.cf-chart-month small{font-size:9px;color:#788579;text-transform:uppercase}.cf-report-line{display:grid;grid-template-columns:minmax(100px,170px) minmax(80px,1fr) 112px;align-items:center;gap:12px;margin:11px 0;font-size:11px;color:#536456}
+.cf-report-line b{text-align:right;color:#3b4c40}.cf-report-track{height:7px;background:#e6ebe2;border-radius:99px;overflow:hidden}.cf-report-track i{height:100%;display:block;background:linear-gradient(90deg,#78a986,#2c7351);border-radius:99px}
+@media(max-width:850px){.cf-section-head{align-items:flex-start;flex-direction:column}.cf-space-row{flex-wrap:wrap}.cf-space-action{margin-left:auto}}
+@media(max-width:560px){.cf-report-line{grid-template-columns:94px minmax(65px,1fr) 86px;gap:7px;font-size:10px}.cf-report-line b{font-size:10px}.cf-chart{gap:3px;height:160px}.cf-chart-pair{height:120px}.cf-chart-month small{font-size:8px}.cf-space-meta{min-width:78px}.cf-space-action{width:100%;text-align:left;margin-left:46px}}
+</style>
 </head>
 <body>
 <div id="app" class="wrap"></div>
@@ -1443,7 +1463,8 @@ async function boot(){
   await carregarConfig();
   if(!S.user){renderAuth();checarServidor();return}
   $('#app').innerHTML='<div class="auth mu">Carregando…</div>';
-  const rows=await q(sb.from('membros').select('id,papel,nome,familias(id,nome,meta_reducao_cartao,acesso_ate)').eq('usuario_id',S.user.id).order('criado_em',{ascending:false}));
+  const rows=await q(sb.from('membros').select('id,papel,nome,familias(id,nome,meta_reducao_cartao,acesso_ate,plano)').eq('usuario_id',S.user.id).order('criado_em',{ascending:false}));
+  S.espacos=rows;
   if(!rows.length)return renderSemFamilia();
   let familiaPreferida=null;try{familiaPreferida=localStorage.getItem('cf_familia_ativa')}catch(e){}
   S.me=rows.find(x=>x.familias?.id===familiaPreferida)||rows[0];S.fam=S.me.familias;
@@ -1586,8 +1607,8 @@ function render(){
   if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
   const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
   const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('planilha','Planilha mensal','▦')}${navItem('ano','Visão do ano','▤')}</section>
-    <section class="nav-section"><span class="nav-section-title">ANÁLISE E PLANEJAMENTO</span>${navItem('checape','Checape','◈')}${navItem('plan','Planejamento','◎')}</section>
-    <section class="nav-section"><span class="nav-section-title">FAMÍLIA</span>${navItem('família','Família e ajustes','♧')}</section>
+    <section class="nav-section"><span class="nav-section-title">ANÁLISE E PLANEJAMENTO</span>${navItem('checape','Checape','◈')}${navItem('plan','Planejamento','◎')}${navItem('relatorios','Relatórios','▥')}</section>
+    <section class="nav-section"><span class="nav-section-title">ESPAÇOS E FAMÍLIA</span>${navItem('espacos','Central de espaços','▧')}${navItem('família','Família e ajustes','♧')}</section>
     ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   const info={
@@ -1596,12 +1617,14 @@ function render(){
     checape:['Checape financeiro','Revise as sugestões geradas a partir dos lançamentos do mês.'],
     plan:['Planejamento financeiro','Organize metas, dívidas e patrimônio em um só lugar.'],
     família:['Família e ajustes','Gerencie membros, convites, categorias e informações da conta.'],
-    admin:['Administração','Acompanhe pagamentos informados e configurações do serviço.']
+    admin:['Administração','Acompanhe pagamentos informados e configurações do serviço.'],
+    relatorios:['Relatórios financeiros','Analise tendências, categorias e resultados do ano.'],
+    espacos:['Central de espaços','Veja e alterne entre os espaços familiares aos quais sua conta tem acesso.']
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
   const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
-  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
-  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
+  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios')body=viewRelatorios();else if(S.view==='espacos')body=viewEspacos();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
+  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='espacos'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
   $('#app').innerHTML=`<div class="app-shell">
     <aside class="app-sidebar" aria-label="Navegação principal">
       <div class="sidebar-head">
@@ -1638,6 +1661,41 @@ function render(){
   </div>`;
   afterRender();
 }
+
+function viewEspacos(){
+  const espacos=Array.isArray(S.espacos)?S.espacos:[];
+  const cards=espacos.map(x=>{
+    const f=x.familias||{},ativo=f.id===S.fam?.id;
+    const liberado=f.acesso_ate&&new Date(f.acesso_ate)>new Date();
+    const nomePlano=({pro:'Pro',max:'Max',ultra:'Ultra'})[f.plano||'pro']||'Pro';
+    const role=x.papel==='dono'?'Responsável':x.papel==='leitor'?'Somente leitura':'Editor';
+    return '<article class="cf-space-row '+(ativo?'active':'')+'"><div class="cf-space-mark">'+(ativo?'●':'◌')+'</div><div class="cf-space-main"><strong>'+esc(f.nome||'Espaço familiar')+'</strong><span>'+esc(x.nome||'Membro')+' · '+role+'</span></div><div class="cf-space-meta"><b>'+nomePlano+'</b><small>'+(liberado?'Acesso ativo':'Acesso não ativo')+'</small></div><div class="cf-space-action">'+(ativo?'<span class="cf-current-space">Espaço atual</span>':'<button class="sec" data-act="trocarespaco" data-id="'+esc(f.id||'')+'">Abrir espaço</button>')+'</div></article>';
+  }).join('');
+  return '<section class="cf-section"><div class="cf-section-head"><div><span>SEUS AMBIENTES</span><h2>Central de espaços</h2><p>Alterne entre as famílias às quais sua conta já pertence.</p></div><div class="cf-space-count">'+espacos.length+' espaço(s)</div></div><div class="cf-space-list">'+(cards||'<p class="mu">Nenhum espaço disponível.</p>')+'</div><div class="cf-note"><b>Sobre os espaços</b><p>Esta central reúne os espaços familiares em que sua conta já entrou por convite. Espaços independentes sob uma única assinatura Ultra precisam de uma ampliação das permissões e da estrutura de assinatura.</p><button class="sec" data-act="view" data-v="família">Ir para convites da família</button></div></section>';
+}
+function viewRelatorios(){
+  const R=S.resumo||[];
+  const soma=k=>R.reduce((a,r)=>a+Number(r[k]||0),0);
+  const receita=soma('receita'),despesas=soma('total_despesas'),saldo=soma('saldo');
+  const ativos=R.filter(r=>Number(r.receita)||Number(r.total_despesas)).length;
+  const media=ativos?despesas/ativos:0;
+  const maior=R.reduce((a,r)=>Number(r.total_despesas||0)>Number(a.total_despesas||0)?r:a,{});
+  const max=Math.max(1,...R.map(r=>Math.max(Number(r.receita||0),Number(r.total_despesas||0))));
+  const barras=R.map(r=>'<div class="cf-chart-month"><div class="cf-chart-pair"><i class="income" style="height:'+Math.max(2,Number(r.receita||0)/max*100)+'%" title="Receitas '+brl(r.receita)+'"></i><i class="expense" style="height:'+Math.max(2,Number(r.total_despesas||0)/max*100)+'%" title="Despesas '+brl(r.total_despesas)+'"></i></div><small>'+MN[r.mes-1].slice(0,3)+'</small></div>').join('');
+  const grupos={};
+  S.lanc.filter(l=>l.tipo==='despesa').forEach(l=>{
+    const c=S.cats.find(x=>x.id===l.categoria_id);
+    const p=c&&c.parent_id?S.cats.find(x=>x.id===c.parent_id):c;
+    const n=p?p.nome:'Sem categoria';
+    grupos[n]=(grupos[n]||0)+Number(l.valor||0);
+  });
+  const categorias=Object.entries(grupos).sort((a,b)=>b[1]-a[1]);
+  const totalCategorias=categorias.reduce((a,x)=>a+x[1],0);
+  const linhasCategoria=categorias.slice(0,8).map(([n,v])=>'<div class="cf-report-line"><span>'+esc(n)+'</span><div class="cf-report-track"><i style="width:'+Math.min(100,v/(totalCategorias||1)*100)+'%"></i></div><b>'+brl(v)+'</b></div>').join('')||'<p class="mu">Sem despesas categorizadas neste mês.</p>';
+  const linhas=R.map(r=>'<tr data-act="irmes" data-m="'+r.mes+'" style="cursor:pointer"><td>'+MN[r.mes-1]+'</td><td class="pos">'+brl(r.receita)+'</td><td class="neg">'+brl(r.total_despesas)+'</td><td class="'+(Number(r.saldo)>=0?'pos':'neg')+'">'+brl(r.saldo)+'</td><td>'+brl(r.poupanca_acumulada)+'</td></tr>').join('');
+  return '<div class="cards"><div class="card"><small>Receitas do ano</small><b class="pos">'+brl(receita)+'</b></div><div class="card"><small>Despesas do ano</small><b class="neg">'+brl(despesas)+'</b></div><div class="card"><small>Saldo acumulado</small><b class="'+(saldo>=0?'pos':'neg')+'">'+brl(saldo)+'</b></div><div class="card"><small>Média mensal de despesas</small><b>'+brl(media)+'</b></div></div><section class="cf-section"><div class="cf-section-head"><div><span>DESEMPENHO ANUAL</span><h2>Receitas e despesas</h2><p>Comparativo mensal dos valores registrados.</p></div><div class="cf-legend"><span><i class="income"></i> Receitas</span><span><i class="expense"></i> Despesas</span></div></div><div class="cf-chart">'+(barras||'<p class="mu">Ainda não há movimentações neste ano.</p>')+'</div></section><section class="cf-section"><div class="cf-section-head"><div><span>COMPOSIÇÃO DO MÊS</span><h2>Onde estão as despesas</h2><p>Distribuição das despesas do mês selecionado.</p></div><b>'+brl(totalCategorias)+'</b></div>'+linhasCategoria+'</section><section class="cf-section"><div class="cf-section-head"><div><span>HISTÓRICO</span><h2>Resumo mês a mês</h2><p>Clique em um mês para abrir a planilha correspondente.</p></div><button class="sec" data-act="xlsx">Exportar ano (Excel)</button></div><div class="scroll"><table style="min-width:620px"><thead><tr><th>Mês</th><th>Receitas</th><th>Despesas</th><th>Saldo</th><th>Poupança</th></tr></thead><tbody>'+linhas+'</tbody></table></div><p class="cf-note-text">Maior despesa mensal: '+(maior.mes?MN[maior.mes-1]+' · '+brl(maior.total_despesas):'sem dados suficientes')+'. Valores baseados nos lançamentos do aplicativo.</p></section>';
+}
+
 function atualizarParcelamento(){const s=$('#n_parcelas');if(!s)return;const tipo=$('#n_tipo')?.value;s.disabled=tipo==='receita';s.title=tipo==='receita'?'Parcelamento disponível somente para despesas':'Parcelamento individual deste lançamento (1x a 30x)';}
 function catOpts(tipo,sel){
   const l=S.cats.filter(c=>c.tipo===tipo);const pais=l.filter(c=>!c.parent_id);
@@ -2136,6 +2194,7 @@ document.addEventListener('click',async e=>{
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}toast('Convite aceito! Abrindo a família…');await boot()}
   else if(a==='view'){S.view=b.dataset.v;if(S.view==='admin')await carregarAdmin();else if(S.view==='plan')await carregarPlan();else render()}
+  else if(a==='trocarespaco'){const alvo=(S.espacos||[]).find(x=>x.familias?.id===b.dataset.id);if(!alvo)return toast('Este espaço não está mais disponível.',1);try{localStorage.setItem('cf_familia_ativa',alvo.familias.id)}catch(e){}S.view='planilha';toast('Abrindo espaço…');await boot()}
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='add'){
     const total=Number($('#n_valor').value),desc=$('#n_desc').value.trim(),tipo=$('#n_tipo').value;
