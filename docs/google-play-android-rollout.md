@@ -167,3 +167,11 @@ Referências oficiais consultadas:
 - https://developer.android.com/google/play/billing/integrate
 - https://support.google.com/googleplay/answer/11174377
 - https://support.google.com/googleplay/android-developer/answer/14372887
+
+
+### Validação de compilação e revisão adicional (03/11/2026)
+
+- GitHub Actions run 16 concluiu com sucesso: APK debug e AAB release **não assinado** foram gerados e enviados como artefato `copiloto-financeiro-android-builds`. Isso comprova a compilação Android do commit executado; não comprova assinatura, instalação em aparelho real, compra Play ou publicação.
+- A rotina de recusa foi reforçada para consultar o estado do pedido antes de solicitar reembolso. Se o pedido já estiver reembolsado ou com reembolso pendente, a repetição pode concluir a atualização interna sem pedir outro reembolso.
+- A revisão de schema no Supabase confirmou que existem `perfis(id)`, `familias(id,nome,plano,acesso_ate)`, `membros(usuario_id,familia_id)` e a função `eh_admin()` esperadas pela migração. As três RPCs Google Play ainda não existem no banco, pois a migração não foi aplicada.
+- O último ajuste de código ainda precisa passar por nova verificação automatizada; o build concluído foi executado antes desse último ajuste de Edge Function.
