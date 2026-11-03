@@ -1837,6 +1837,9 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 .landing-page[data-screen="recursos"] .landing-benefits-heading h2{max-width:680px;font-size:clamp(30px,4vw,44px)}
 .landing-page[data-screen="recursos"] .landing-benefits-heading>p{max-width:560px;color:#788579;font-size:13px;line-height:1.7}
 .landing-page[data-screen="recursos"] .landing-benefits-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 42px}
+.landing-page[data-screen="recursos"] .landing-benefits,.landing-page[data-screen="planos"] .landing-plans-section{scroll-margin-top:22px;animation:landingRouteEnter .55s ease both}
+@keyframes landingRouteEnter{from{opacity:.35;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.landing-page[data-screen="recursos"] .landing-benefits,.landing-page[data-screen="planos"] .landing-plans-section{animation:none!important}}
 /* Página independente de apresentação do aplicativo */
 .landing-page[data-screen="recursos"] .landing-benefits{display:block!important;margin:22px 0 0!important;padding:0 0 38px!important;border:0!important}
 .landing-page[data-screen="recursos"] .landing-hero{display:none!important}
@@ -2257,8 +2260,15 @@ function renderAuth(){
   const rec=document.getElementById('recuperacao');if(rec&&cadastro)rec.hidden=true;
   const signupOptions=document.getElementById('landing-signup-options');if(signupOptions)signupOptions.hidden=!cadastro;
 }
-if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{if(!S.user)renderAuth();window.scrollTo({top:0,behavior:'smooth'});});}
-if(!window.__cfLandingRouteBound){window.__cfLandingRouteBound=true;document.addEventListener('click',e=>{const link=e.target.closest('[data-public-route]');if(!link)return;e.preventDefault();const route=link.dataset.publicRoute;if(!['inicio','recursos','planos','login','cadastro'].includes(route))return;const hash='#'+route;if(location.hash===hash){if(!S.user)renderAuth();window.scrollTo({top:0,behavior:'smooth'});}else location.hash=hash;});}
+function scrollLandingRoute(route){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const target=route==='planos'?document.querySelector('.landing-plans-section'):route==='recursos'?document.querySelector('.landing-benefits'):null;
+    if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+    else window.scrollTo({top:0,behavior:'smooth'});
+  }));
+}
+if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEventListener('hashchange',()=>{const route=(location.hash||'#inicio').slice(1);if(!S.user)renderAuth();scrollLandingRoute(route);});}
+if(!window.__cfLandingRouteBound){window.__cfLandingRouteBound=true;document.addEventListener('click',e=>{const link=e.target.closest('[data-public-route]');if(!link)return;e.preventDefault();const route=link.dataset.publicRoute;if(!['inicio','recursos','planos','login','cadastro'].includes(route))return;const hash='#'+route;if(location.hash===hash){if(!S.user)renderAuth();scrollLandingRoute(route);}else location.hash=hash;});}
 
 function renderSemFamilia(){
   $('#app').innerHTML=`<div class="auth"><h1>Sua família</h1><div class="mu">Crie a família para começar ou entre com um código de convite.</div>
