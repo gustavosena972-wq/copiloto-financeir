@@ -20,9 +20,12 @@ function b64url(bytes: Uint8Array): string {
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
-function pemBytes(pem: string): Uint8Array {
+function pemBytes(pem: string): ArrayBuffer {
   const binary = atob(pem.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, ""));
-  return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  return buffer;
 }
 async function accessToken(): Promise<string> {
   const raw = Deno.env.get("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON");
