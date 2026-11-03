@@ -278,6 +278,150 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
+
+/* Interface interna: organização visual. Preserva IDs, ações e ferramentas existentes. */
+body:has(.app-shell){background:#edf1f6;color:#1d2939}
+#app:has(.app-shell){max-width:1480px;width:100%;padding:14px}
+.app-shell{--ui-text:#1c293b;--ui-muted:#66758a;--ui-line:#dfe5ec;--ui-panel:#fff;display:grid;grid-template-columns:238px minmax(0,1fr);min-height:calc(100dvh - 28px);background:#f5f7fa;color:var(--ui-text);border:1px solid #dce3eb;border-radius:16px;box-shadow:0 10px 34px rgba(24,39,58,.08);overflow:visible}
+.app-sidebar{display:flex;flex-direction:column;gap:24px;min-width:0;padding:22px 15px 16px;background:#172b43;color:#eaf0f6;border-radius:15px 0 0 15px}
+.sidebar-head{display:grid;gap:20px}
+.sidebar-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.sidebar-brand svg{width:34px;height:34px;flex:none}
+.sidebar-brand strong{display:block;font-size:17px;line-height:1.2;letter-spacing:-.02em;color:#fff}
+.sidebar-brand small{display:block;margin-top:3px;font-size:9px;font-weight:800;letter-spacing:.16em;color:#a9bacb}
+.sidebar-family{padding:12px 11px;border:1px solid #ffffff1c;border-radius:9px;background:#ffffff08;min-width:0}
+.sidebar-family small{display:block;font-size:9px;font-weight:800;letter-spacing:.13em;color:#91a7bc}
+.sidebar-family strong{display:block;margin-top:5px;font-size:13px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}
+.sidebar-family span{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;color:#b4c5d5}
+.sidebar-family i{width:6px;height:6px;display:inline-block;border-radius:50%;background:#45bd91}
+.sidebar-nav{display:flex;flex-direction:column;gap:18px}
+.nav-section{display:grid;gap:4px}
+.nav-section-title{padding:0 10px 5px;font-size:9px;font-weight:800;letter-spacing:.13em;color:#8fa5bb}
+.nav-item{display:flex;align-items:center;gap:11px;width:100%;min-height:40px;padding:9px 10px;text-align:left;border:1px solid transparent;border-radius:8px;background:transparent;color:#c6d2df;box-shadow:none;font-size:12.5px;font-weight:550;transition:background .15s,border-color .15s,color .15s}
+.nav-item:hover{transform:none;background:#ffffff10;color:#fff;filter:none}
+.nav-item.on{background:#244967;border-color:#355b7d;color:#fff;box-shadow:inset 3px 0 #7db5d7}
+.nav-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:none;border-radius:5px;background:#ffffff0d;color:#c5d9e9;font-size:15px}
+.nav-item.on .nav-icon{background:#ffffff18;color:#fff}
+.sidebar-footer{display:flex;align-items:center;gap:10px;margin-top:auto;padding:13px 5px 2px;border-top:1px solid #ffffff1b;min-width:0}
+.sidebar-avatar{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:#294c69;color:#fff;font-size:13px;font-weight:750}
+.sidebar-user{display:grid;gap:2px;min-width:0}
+.sidebar-user b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:#fff}
+.sidebar-user small{font-size:10px;color:#a9bacb}
+.app-main{min-width:0;padding:26px 28px 34px;background:#f5f7fa;border-radius:0 15px 15px 0;color:#1c293b}
+.app-topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:22px;margin:0 0 19px;padding:0 0 18px;border-bottom:1px solid #e0e6ed}
+.page-heading{min-width:0}
+.page-eyebrow{margin-bottom:6px;font-size:9px;font-weight:800;letter-spacing:.14em;color:#74849a}
+.page-heading h1{margin:0;color:#1d2d42;font-size:25px;font-weight:750;letter-spacing:-.035em;line-height:1.2}
+.page-heading p{margin:6px 0 4px;max-width:680px;color:#64748b;font-size:12.5px}
+.date-line{margin-top:7px;color:#8491a3;font-size:10.5px;text-transform:capitalize}
+.top-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;flex:none}
+.year-control{display:flex;align-items:center;gap:5px;padding:3px;border:1px solid #dce3eb;border-radius:9px;background:#fff}
+.year-control select{width:auto;min-width:78px;padding:6px 8px;border:0;background:#fff;color:#314158;font-size:12px}
+.utility-button{min-width:34px;min-height:34px;padding:6px 9px;border:1px solid #dce3eb;border-radius:7px;background:#fff;color:#40536a;box-shadow:none;font-size:12px}
+.utility-button:hover,.session-button:hover{transform:none;filter:brightness(.98)}
+.year-arrow{font-size:18px;line-height:1}
+.notification-button span{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:5px;padding:0 4px;border-radius:9px;background:#e8eef5;color:#294967;font-size:10px}
+.session-button{min-height:36px;padding:7px 12px;border:1px solid #dce3eb;border-radius:8px;background:#fff;color:#40536a;box-shadow:none;font-size:11.5px}
+.period-toolbar{min-width:0}
+.app-main .meses{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 17px;padding:0}
+.app-main .meses button{min-height:32px;padding:6px 10px;border:1px solid #dce3eb;border-radius:7px;background:#fff;color:#65748a;box-shadow:none;font-size:11px;font-weight:650}
+.app-main .meses button.on{background:#214f75;border-color:#214f75;color:#fff}
+.app-main .meses button.fech{outline:1px solid #c8953c;outline-offset:1px}
+.app-content{min-width:0}
+.app-main .mu{color:#69788d!important}
+.app-main .pos{color:#177653}
+.app-main .neg{color:#b94952}
+.app-main .card{padding:15px;background:#fff;border:1px solid #e0e6ed;border-radius:10px;box-shadow:0 2px 8px rgba(28,45,66,.035);backdrop-filter:none;color:#26364a}
+.app-main .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin:0 0 15px}
+.app-main .cards .card{min-width:0;margin:0;padding:14px;border:1px solid #e0e6ed;border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(28,45,66,.035)}
+.app-main .cards .card:last-child{border-right:1px solid #e0e6ed}
+.app-main .cards .card small{display:block;margin-bottom:7px;color:#718096;font-size:10.5px;font-weight:650;letter-spacing:.015em}
+.app-main .cards .card b{display:block;color:#1f3045;font-size:clamp(18px,1.8vw,24px);font-weight:750;letter-spacing:-.025em;overflow-wrap:anywhere}
+.app-main .cards .card b.pos{color:#177653}
+.app-main .cards .card b.neg{color:#b94952}
+.app-main .grid2{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.app-main .bar{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 13px}
+.app-main button{min-height:36px;padding:8px 11px;border:1px solid #245b84;border-radius:7px;background:#245b84;color:#fff;box-shadow:none;font-size:11.5px;font-weight:650;transition:background .15s,border-color .15s}
+.app-main button:hover{transform:none;filter:brightness(.97)}
+.app-main button.sec{border-color:#d7e0e9;background:#fff;color:#3e526b;box-shadow:none}
+.app-main button.red{border-color:#efcccf;background:#fff5f5;color:#b34951;box-shadow:none}
+.app-main button:disabled{opacity:.48}
+.app-main input:not([type=checkbox]),.app-main select,.app-main textarea{min-height:35px;border:1px solid #cfd8e2;border-radius:7px;background:#fff;color:#26364a;box-shadow:none;font-size:12px}
+.app-main input:focus,.app-main select:focus,.app-main textarea:focus{border-color:#6d9cbd;outline:0;box-shadow:0 0 0 3px rgba(71,128,169,.12)}
+.app-main .scroll{max-width:100%;overflow-x:auto;border:1px solid #e0e6ed;border-radius:9px;background:#fff;box-shadow:0 2px 8px rgba(28,45,66,.025)}
+.app-main table{background:#fff;border-collapse:collapse}
+.app-main th{padding:11px 9px;border-bottom:1px solid #e0e6ed;background:#f7f9fb;color:#64748b;font-size:9px;font-weight:800;letter-spacing:.07em}
+.app-main td{padding:7px 7px;border-top:1px solid #edf0f4;color:#34445a;font-size:11.5px}
+.app-main td input,.app-main td select{min-height:32px;padding:6px 7px;font-size:11px}
+.app-main tbody tr:hover td{background:#f7f9fc}
+.app-main tfoot td{border-top:2px solid #d6dee7;background:#f8fafc;color:#24364b}
+.app-main .novo td{background:#f4f8fb!important}
+.app-main .faixa{border-radius:8px;font-size:11.5px}
+.app-main .faixa.aberto{background:#edf8f2;border-color:#cce8d8;color:#246847}
+.app-main .faixa.fech{background:#fff8e9;border-color:#ead9ae;color:#87621d}
+.app-main .sug{border:1px solid #e0e6ed;border-left:4px solid #6d9cbd;border-radius:9px;background:#fff;box-shadow:none}
+.app-main .sug.corte{border-left-color:#31916d}
+.app-main .sug.alerta{border-left-color:#c65d62}
+.app-main .sug.dica{border-left-color:#c69a45}
+.app-main .item{border-bottom-color:#e8edf2}
+.app-main .track{background:#edf1f5}
+.app-main .track i{background:#4b83a9}
+.app-main .ring svg circle:first-child{stroke:#e0e6ed}
+.app-main .catrow{color:#30445b}
+.app-main .aviso.err{background:#fff2f2;color:#a83f49;border-color:#eac5c8}
+.app-main .aviso.ok{background:#eef8f2;color:#246847;border-color:#cce8d8}
+.app-main .modal{background:rgba(15,28,43,.55);backdrop-filter:blur(3px)}
+.app-main .modal .card{box-shadow:0 18px 55px rgba(17,31,48,.2)}
+@media(max-width:960px){
+  #app:has(.app-shell){max-width:100%;padding:10px}
+  .app-shell{grid-template-columns:1fr;min-height:calc(100dvh - 20px)}
+  .app-sidebar{gap:13px;padding:13px 14px 10px;border-radius:14px 14px 0 0}
+  .sidebar-head{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .sidebar-family{max-width:44%;padding:8px 10px}
+  .sidebar-nav{display:flex;flex-direction:row;gap:14px;overflow-x:auto;padding-bottom:3px;overscroll-behavior-x:contain}
+  .nav-section{display:flex;align-items:center;gap:5px;flex:none}
+  .nav-section-title{display:none}
+  .nav-item{width:auto;min-height:36px;white-space:nowrap;padding:7px 9px;font-size:11px}
+  .nav-icon{width:17px;height:17px;font-size:12px}
+  .sidebar-footer{display:none}
+  .app-main{padding:20px 18px 28px;border-radius:0 0 14px 14px}
+  .app-topbar{gap:14px}
+}
+@media(max-width:640px){
+  #app:has(.app-shell){padding:7px}
+  .app-shell{min-height:calc(100dvh - 14px);border-radius:12px}
+  .app-sidebar{padding:11px 10px 8px;border-radius:11px 11px 0 0}
+  .sidebar-brand strong{font-size:15px}
+  .sidebar-brand svg{width:30px;height:30px}
+  .sidebar-family{max-width:48%;padding:7px 8px}
+  .sidebar-family small{font-size:8px}
+  .sidebar-family strong{font-size:11px}
+  .sidebar-family span{font-size:9px}
+  .sidebar-nav{gap:10px}
+  .nav-section{gap:4px}
+  .nav-item{gap:6px;padding:7px 8px;font-size:10.5px}
+  .nav-icon{display:none}
+  .app-main{padding:16px 11px 22px}
+  .app-topbar{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-bottom:13px;padding-bottom:13px}
+  .page-heading h1{font-size:21px}
+  .page-heading p{font-size:11.5px}
+  .top-actions{justify-content:flex-start}
+  .app-main .meses{flex-wrap:nowrap;overflow-x:auto;padding:0 1px 5px}
+  .app-main .meses button{flex:none}
+  .app-main .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .app-main .cards .card{padding:11px}
+  .app-main .cards .card b{font-size:17px}
+  .app-main .grid2{grid-template-columns:minmax(0,1fr)}
+  .app-main .bar button{flex:1 1 auto}
+  .year-control{flex:0 0 auto}
+  .session-button{margin-left:auto}
+}
+@media(max-width:380px){
+  .sidebar-family{max-width:43%}
+  .sidebar-family span{display:none}
+  .app-main .cards{grid-template-columns:minmax(0,1fr)}
+}
+
 </style>
 </head>
 <body>
@@ -403,16 +547,60 @@ function renderSemFamilia(){
 /* ---------- app ---------- */
 function render(){
   const ed=canEdit()&&mesAberto();
-  const TL={planilha:'📋 Planilha',ano:'📊 Visão do ano',checape:'💡 Checape',plan:'🎯 Planejamento',família:'👨‍👩‍👧 Família'};
-  if(S.admin)TL.admin='💼 Admin'+(S.admPend?' ('+S.admPend+')':'');
-  const tabs=Object.keys(TL).map(t=>`<button class="${S.view===t?'on':''}" data-act="view" data-v="${t}">${TL[t]}</button>`).join('');
+  const TL={planilha:'Planilha mensal',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
+  if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
+  const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
+  const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('planilha','Planilha mensal','▦')}${navItem('ano','Visão do ano','▤')}</section>
+    <section class="nav-section"><span class="nav-section-title">ANÁLISE E PLANEJAMENTO</span>${navItem('checape','Checape','◈')}${navItem('plan','Planejamento','◎')}</section>
+    <section class="nav-section"><span class="nav-section-title">FAMÍLIA</span>${navItem('família','Família e ajustes','♧')}</section>
+    ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
+  const info={
+    planilha:['Lançamentos do mês','Registre receitas e despesas, organize categorias e acompanhe os pagamentos.'],
+    ano:['Visão do ano','Acompanhe os resultados financeiros e compare os meses do ano.'],
+    checape:['Checape financeiro','Revise as sugestões geradas a partir dos lançamentos do mês.'],
+    plan:['Planejamento financeiro','Organize metas, dívidas e patrimônio em um só lugar.'],
+    família:['Família e ajustes','Gerencie membros, convites, categorias e informações da conta.'],
+    admin:['Administração','Acompanhe pagamentos informados e configurações do serviço.']
+  }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
+  const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
   if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
   const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
-  $('#app').innerHTML=`<div class="top"><div class="brand"><span class="brandlogo">${LOGO} Copiloto <span class="mu" style="font-weight:500">· ${esc(S.fam.nome)}</span> <span class="live">● ao vivo</span></span><div class="mu" style="font-size:13px">${saudacao()}, ${esc(S.me.nome.split(' ')[0])} · ${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</div></div>
-  <div class="row" style="margin:0">${S.notifs&&S.notifs.length?`<button class="sec chip" data-act="sino">🔔 ${S.notifs.length}</button>`:''}<button class="sec chip" data-act="anoant" title="Ano anterior">◀</button><select id="anosel">${anos}</select><button class="sec chip" data-act="anoprox" title="Próximo ano">${S.anos.some(x=>x.ano===S.ano.ano+1)?'▶':'＋ '+(S.ano.ano+1)}</button><button class="sec" data-act="sair">Sair</button></div></div>
-  <div class="tabs">${tabs}</div>${meses}${body}${viewImport()}${viewModais()}`;
+  $('#app').innerHTML=`<div class="app-shell">
+    <aside class="app-sidebar" aria-label="Navegação principal">
+      <div class="sidebar-head">
+        <div class="sidebar-brand">${LOGO}<div><strong>Copiloto</strong><small>FINANCEIRO</small></div></div>
+        <div class="sidebar-family"><small>FAMÍLIA ATIVA</small><strong title="${esc(S.fam.nome)}">${esc(S.fam.nome)}</strong><span><i></i> Sincronização ativa</span></div>
+      </div>
+      <nav class="sidebar-nav">${nav}</nav>
+      <div class="sidebar-footer">
+        <span class="sidebar-avatar">${esc((S.me?.nome||'U').trim().charAt(0).toUpperCase())}</span>
+        <div class="sidebar-user"><b>${esc(S.me.nome)}</b><small>${S.me.papel==='dono'?'Responsável':S.me.papel==='leitor'?'Somente leitura':'Editor'}</small></div>
+      </div>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="page-heading">
+          <div class="page-eyebrow">COPILOTO FINANCEIRO · ${S.view==='admin'?'PAINEL ADMINISTRATIVO':'GESTÃO FAMILIAR'}</div>
+          <h1>${info[0]}</h1>
+          <p>${info[1]}</p>
+          <div class="date-line">${saudacao()} · ${dataHoje}</div>
+        </div>
+        <div class="top-actions">
+          ${S.notifs&&S.notifs.length?`<button type="button" class="utility-button notification-button" data-act="sino" aria-label="Abrir notificações">Avisos <span>${S.notifs.length}</span></button>`:''}
+          <div class="year-control">
+            <button type="button" class="utility-button year-arrow" data-act="anoant" title="Ano anterior" aria-label="Ano anterior">‹</button>
+            <select id="anosel" aria-label="Selecionar ano">${anos}</select>
+            <button type="button" class="utility-button year-arrow" data-act="anoprox" title="Próximo ano" aria-label="Próximo ano">${S.anos.some(x=>x.ano===S.ano.ano+1)?'›':'＋ '+(S.ano.ano+1)}</button>
+          </div>
+          <button type="button" class="session-button" data-act="sair">Sair da conta</button>
+        </div>
+      </header>
+      <div class="period-toolbar">${meses}</div>
+      <section class="app-content">${body}${viewImport()}${viewModais()}</section>
+    </main>
+  </div>`;
   afterRender();
 }
 function atualizarParcelamento(){const s=$('#n_parcelas');if(!s)return;const tipo=$('#n_tipo')?.value;s.disabled=tipo==='receita';s.title=tipo==='receita'?'Parcelamento disponível somente para despesas':'Parcelamento individual deste lançamento (1x a 30x)';}
