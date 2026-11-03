@@ -2197,7 +2197,7 @@ function renderAuth(){
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="ultra">Escolher Ultra <span>↗</span></button>
         </article>
       </div>
-      <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. O Max amplia a capacidade da família para até 6 pessoas. O pagamento é feito por Pix, com conferência manual e sem renovação automática. A assinatura é por família; no Ultra, a central alterna entre espaços familiares aos quais a conta já pertence, cada um com seu próprio acesso.</p>
+      <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. O Max amplia a capacidade da família para até 6 pessoas. O pagamento é feito por Pix, com conferência manual e sem renovação automática. A assinatura é por família. Cada conta fica vinculada a uma única família.</p>
     </section>
     <section class="landing-login-section" id="landing-auth" aria-labelledby="landing-login-title">
       <div class="landing-login-intro"><span>ÁREA DO CLIENTE</span><h2 id="landing-login-title">Seu acesso, em uma área própria.</h2><p>Entre na sua conta ou crie um cadastro para começar a usar o Copiloto Financeiro.</p></div>
@@ -2290,13 +2290,13 @@ function renderSemFamilia(){
 function render(){
   const ed=canEdit()&&mesAberto();
   const ultra=S.fam?.plano==='ultra';
-  if(!ultra&&['relatorios','espacos'].includes(S.view))S.view='planilha';
+  if(S.view==='espacos')S.view='planilha';
   const TL={planilha:'Planilha mensal',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
   if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
   const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
   const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('planilha','Planilha mensal','▦')}${navItem('ano','Visão do ano','▤')}</section>
     <section class="nav-section"><span class="nav-section-title">ANÁLISE E PLANEJAMENTO</span>${navItem('checape','Checape','◈')}${navItem('plan','Planejamento','◎')}${ultra?navItem('relatorios','Relatórios','▥'):''}</section>
-    <section class="nav-section"><span class="nav-section-title">${ultra?'ESPAÇOS E FAMÍLIA':'FAMÍLIA'}</span>${ultra?navItem('espacos','Central de espaços','▧'):''}${navItem('família','Família e ajustes','♧')}</section>
+    <section class="nav-section"><span class="nav-section-title">${ultra?'ESPAÇOS E FAMÍLIA':'FAMÍLIA'}</span>${navItem('família','Família e ajustes','♧')}</section>
     ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   const info={
@@ -2307,12 +2307,12 @@ function render(){
     família:['Família e ajustes','Gerencie membros, convites, categorias e informações da conta.'],
     admin:['Administração','Acompanhe pagamentos informados e configurações do serviço.'],
     relatorios:['Relatórios financeiros','Analise tendências, categorias e resultados do ano.'],
-    espacos:['Central de espaços','Veja e alterne entre os espaços familiares aos quais sua conta tem acesso.']
+    espacos:['Central de espaços','Cada conta pertence a uma única família.']
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
   const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
-  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&ultra)body=viewRelatorios();else if(S.view==='espacos'&&ultra)body=viewEspacos();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
-  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='espacos'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
+  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&ultra)body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
+  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
   $('#app').innerHTML=`<div class="app-shell">
     <aside class="app-sidebar" aria-label="Navegação principal">
       <div class="sidebar-head">
@@ -2447,6 +2447,7 @@ const memOpts=sel=>'<option value="">—</option>'+S.membros.map(m=>`<option val
 const stOpts=sel=>['pendente','pago','atrasado'].map(s=>`<option ${s===sel?'selected':''}>${s}</option>`).join('');
 const tpOpts=sel=>['despesa','receita'].map(s=>`<option ${s===sel?'selected':''}>${s}</option>`).join('');
 
+function quickEditButton(kind){return canEdit()&&mesAberto()?`<button type="button" class="sec chip cf-quick-edit" data-act="quickedit" data-kind="${kind}">Editar valores</button>`:''}
 function viewPlanilha(ed){
   ed=!!ed&&S.mes.status==='aberto';
   const rec=S.lanc.filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor),0);
@@ -2468,10 +2469,10 @@ function viewPlanilha(ed){
    <td><select id="n_mem">${memOpts(S.me.id)}</select></td><td><button data-act="add">+</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
-  return `${viewStatus()}<div class="cards"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b></div>
-  <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b></div>
+  return `${viewStatus()}<div class="cards"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
+  <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
-  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b></div></div>${viewGrupos()}${viewCats()}
+  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>${viewGrupos()}${viewCats()}
   <div class="bar">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
    <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
@@ -2497,8 +2498,8 @@ function viewGrupos(){
   const rec=S.lanc.filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor),0);const tot=Object.values(G).reduce((a,x)=>a+x[1],0);
   const tx=rec>0?Math.max(0,Math.min(1,(rec-tot)/rec)):0;
   const ring=`<div class="card ring"><svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="#252b40" stroke-width="8"/><circle cx="32" cy="32" r="26" fill="none" stroke="${tx>=.1?'#34d399':'#fbbf24'}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(tx*163.4).toFixed(1)} 163.4"/></svg><div><small class="mu">Taxa de poupança</small><br><b style="font-size:21px">${(tx*100).toFixed(0)}%</b></div></div>`;
-  return `<div class="cards">${Object.values(G).map(([n,v])=>`<div class="card"><small>${n}</small><b>${brl(v)}</b></div>`).join('')}
-  <div class="card"><small>Total de despesas</small><b class="neg">${brl(tot)}</b></div>
+  return `<div class="cards">${Object.entries(G).map(([k,[n,v]])=>`<div class="card"><small>${n}</small><b>${brl(v)}</b>${quickEditButton(k)}</div>`).join('')}
+  <div class="card"><small>Total de despesas</small><b class="neg">${brl(tot)}</b>${quickEditButton('despesas')}</div>
   <div class="card"><small>Saldo → vai para a poupança</small><b class="${rec-tot>=0?'pos':'neg'}">${brl(rec-tot)}</b></div>${ring}</div>`;
 }
 function viewAno(){
@@ -2945,10 +2946,10 @@ async function renderPaywall(){
     <div class="pix-plan-grid">
       <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${brl(PLANOS.pro.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
       <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${brl(PLANOS.max.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas na mesma família.</span></button>
-      <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${brl(PLANOS.ultra.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial, simulador de objetivos e central para alternar entre espaços familiares já vinculados.</span></button>
+      <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${brl(PLANOS.ultra.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span></button>
     </div>
     <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Total para ${PIX.dias} dias</small><strong>${brl(PIX.valor)}</strong></div><p>Assinatura por família · não há cobrança individual dos membros convidados.</p></div>
-    <div class="pix-checkout-disclaimer">O pagamento é feito por Pix e liberado após conferência manual. O Max amplia o limite para até 6 pessoas. No Ultra, a central alterna entre famílias às quais sua conta já pertence; cada família mantém sua própria assinatura. Não há renovação automática.</div>
+    <div class="pix-checkout-disclaimer">O pagamento é feito por Pix e liberado após conferência manual. O Max amplia o limite para até 6 pessoas. Cada conta fica vinculada a uma única família, independentemente do plano. Não há renovação automática.</div>
     ${rec?'<div class="aviso err">Não conseguimos confirmar o último aviso de pagamento'+(ult.nota?': '+esc(ult.nota):'')+'. Confira os dados e envie novamente.</div>':''}
     ${pend?'<div class="pix-pending"><b>Aviso de pagamento recebido</b><p>Seu pagamento está em análise. O acesso será liberado após a conferência.</p></div>':pagar}`;
   const entrarComConvite=`<details class="pix-join"><summary>Já tem um convite de família?</summary><div class="pix-join-panel"><p>Digite o código recebido de alguém da família para entrar sem fazer outro Pix.</p><input id="cod-pix" maxlength="32" autocomplete="off" autocapitalize="characters" placeholder="CÓDIGO DO CONVITE"><button data-act="entrarfam-pix">Entrar na família</button></div></details>`;
@@ -2984,6 +2985,7 @@ function viewCats2(){
 }
 
 function viewModais(){
+  if(S.quickEdit){const k=S.quickEdit.kind;const itens=S.lanc.filter(l=>{if(k==='receita')return l.tipo==='receita';if(k==='despesas')return l.tipo==='despesa';if(k==='apagar')return l.tipo==='despesa'&&l.status!=='pago';const c=S.cats.find(x=>x.id===l.categoria_id);return l.tipo==='despesa'&&(c?.grupo||'variaveis')===k;});return `<div class="modal"><div class="card box" role="dialog" aria-modal="true"><b>Editar valores rapidamente</b><p class="mu" style="margin:6px 0 12px">Altere os valores dos lançamentos deste mês. Os totais, saldo e taxa de poupança serão recalculados automaticamente.</p><div style="max-height:52vh;overflow:auto">${itens.map(l=>`<div class="item"><label class="mu" style="display:block;margin-bottom:5px">${esc(l.descricao)} · ${l.tipo==='receita'?'Receita':esc(S.cats.find(c=>c.id===l.categoria_id)?.nome||'Despesa')}</label><input type="number" min="0" step="0.01" data-qv="${l.id}" value="${Number(l.valor).toFixed(2)}" style="width:100%"></div>`).join('')||'<p class="mu">Nenhum lançamento nesta área neste mês.</p>'}</div><div class="row" style="margin-top:12px"><button data-act="savequick" ${itens.length?'':'disabled'}>Salvar alterações</button><button class="sec" data-act="closequick">Cancelar</button></div></div></div>`;}
   if(S.sino)return `<div class="modal"><div class="card box"><b>🔔 Avisos</b><div style="margin:10px 0;max-height:50vh;overflow:auto">${S.notifs.map(n=>`<div class="item"><b>${esc(n.titulo)}</b><div class="mu">${esc(n.mensagem||'')}</div></div>`).join('')||'<div class="mu">Nenhum aviso.</div>'}</div><div class="row"><button data-act="lerTodos">Marcar todos como lidos</button><button class="sec" data-act="fecharmodal">Fechar</button></div></div></div>`;
   if(S.hist)return `<div class="modal"><div class="card box"><b>↶ Desfazer alterações</b><div class="mu" style="margin:6px 0">Últimas mudanças nos lançamentos. Desfazer volta o item ao que era antes.</div><div style="margin:8px 0;max-height:52vh;overflow:auto">${S.hist.map(h=>{const d=h.dados_depois||h.dados_antes||{};const rot={INSERT:'Criado',UPDATE:'Alterado',DELETE:'Apagado'}[h.acao];return `<div class="item row" style="justify-content:space-between;margin:0"><span><b>${rot}</b> · ${esc(d.descricao||'')} ${brl(d.valor)}<div class="mu">${new Date(h.criado_em).toLocaleString('pt-BR')}</div></span><button class="sec chip" data-act="desfazer" data-id="${h.id}" ${canEdit()?'':'disabled'}>Desfazer</button></div>`}).join('')||'<div class="mu">Nada para desfazer ainda.</div>'}</div><div class="row"><button class="sec" data-act="fecharmodal">Fechar</button></div></div></div>`;
   if(S.pv)return `<div class="modal"><div class="card box"><b>📌 ${esc(S.pv.titulo)}</b><div style="margin:10px 0;max-height:50vh;overflow:auto">${fmt(S.pv.conteudo)}</div><div class="row"><button class="sec" data-act="copiar">Copiar</button><button data-act="fecharmodal">Fechar</button></div></div></div>`;
@@ -3083,8 +3085,11 @@ document.addEventListener('click',async e=>{
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}toast('Convite aceito! Abrindo a família…');await boot()}
   else if(a==='view'){S.view=b.dataset.v;if(S.view==='admin')await carregarAdmin();else if(S.view==='plan')await carregarPlan();else render()}
-  else if(a==='trocarespaco'){const alvo=(S.espacos||[]).find(x=>x.familias?.id===b.dataset.id);if(!alvo)return toast('Este espaço não está mais disponível.',1);try{localStorage.setItem('cf_familia_ativa',alvo.familias.id)}catch(e){}S.view='planilha';toast('Abrindo espaço…');await boot()}
+  else if(a==='trocarespaco'){return toast('Cada conta está vinculada a uma única família.')}
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
+  else if(a==='quickedit'){if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);S.quickEdit={kind:b.dataset.kind};render()}
+  else if(a==='closequick'){S.quickEdit=null;render()}
+  else if(a==='savequick'){const campos=[...document.querySelectorAll('[data-qv]')];for(const i of campos){const v=Number(i.value);if(!Number.isFinite(v)||v<0)return toast('Informe valores válidos (zero ou maior).',1)}for(const i of campos){const v=Math.round(Number(i.value)*100)/100;await q(sb.from('lancamentos').update({valor:v}).eq('id',i.dataset.qv).eq('familia_id',S.fam.id).eq('mes_id',S.mes.id))}S.quickEdit=null;await loadMes();toast('Valores atualizados. Os totais foram recalculados.')}
   else if(a==='compromissos'){await mostrarCompromissos()}
   else if(a==='fecharcompromissos'){document.querySelector('.cf-compromissos-modal')?.remove()}
   else if(a==='add'){
