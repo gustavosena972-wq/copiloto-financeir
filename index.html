@@ -877,8 +877,8 @@ function viewChecape(ed){
   ${cards||'<div class="mu">Lance as despesas e receitas do mês e gere o checape para ver o que cortar.</div>'}`;
 }
 function viewFamilia(){
-  const ed=canEdit();
-  const m=S.membros.map(x=>`<tr data-mid="${x.id}"><td>${esc(x.nome)}</td><td class="mu">${x.usuario_id?x.papel:'sem login'}</td>
+  const ed=canEdit(),dono=S.me?.papel==='dono';
+  const m=S.membros.map(x=>`<tr data-mid="${x.id}"><td>${esc(x.nome)}</td><td class="mu">${x.usuario_id?(dono&&x.papel!=='dono'?`<select data-papel-membro="${x.id}" aria-label="Permissão de ${esc(x.nome)}"><option value="editor" ${x.papel==='editor'?'selected':''}>Editora</option><option value="leitor" ${x.papel==='leitor'?'selected':''}>Somente leitura</option></select>`:esc(x.papel)):'sem login'}</td>
    <td><input type="number" step="0.01" min="0" data-rf="renda_mensal" value="${x.renda_mensal??''}" placeholder="Renda" ${ed?'':'disabled'}></td>
    <td>${ed&&!x.usuario_id?`<button class="red" data-act="delmem" data-id="${x.id}">✕</button>`:''}</td></tr>`).join('');
   return `<div class="grid2"><div class="card"><b>Membros da família</b><div class="scroll" style="margin:10px 0"><table style="min-width:0"><tbody>${m}</tbody></table></div>
@@ -1012,6 +1012,15 @@ document.addEventListener('change',async e=>{
   const t=e.target;
   try{
   if(t.id==='anosel'){S.ano=S.anos.find(a=>a.id===t.value);await loadAno();return}
+  if(t.dataset.papelMembro){
+    if(S.me?.papel!=='dono')return toast('Somente o responsável pode alterar permissões.',1);
+    const papel=t.value;
+    if(!['editor','leitor'].includes(papel))return toast('Permissão inválida.',1);
+    await q(sb.from('membros').update({papel}).eq('id',t.dataset.papelMembro).eq('familia_id',S.fam.id));
+    S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));
+    toast(papel==='editor'?'Permissão de edição liberada.':'Permissão alterada para somente leitura.');
+    render();return;
+  }
   if(t.dataset.cf){const id=t.closest('tr').dataset.cid,f=t.dataset.cf,c=S.cats.find(x=>x.id===id),p={};
     if(f==='nome'){const v=t.value.trim();if(!v)return;p.nome=v}else if(f==='grupo'){p.grupo=t.value;p.tipo=t.value==='receita'?'receita':'despesa'}else p.essencial=t.value==='true';
     await q(sb.from('categorias').update(p).eq('id',id));
