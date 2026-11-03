@@ -2474,33 +2474,68 @@ function viewAno(){
 const norm=t=>String(t??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 const MES3=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const GRUPOS={'cartoes de credito':'cartoes','retirada mensal':'retirada','fixas / financiamentos':'fixas','outras / variaveis':'variaveis'};
+function parseMoneyCell(raw){
+  if(typeof raw==='number')return Number.isFinite(raw)?raw:0;
+  let v=String(raw??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+  if(!v)return 0;
+  if(v.includes(','))v=v.replace(/\./g,'').replace(',','.');
+  else if((v.match(/\./g)||[]).length>1)v=v.replace(/\./g,'');
+  const n=Number(v);return Number.isFinite(n)?n:0;
+}
+function parseDateCell(raw){
+  if(raw==null||raw==='')return null;
+  if(typeof raw==='number'&&window.XLSX?.SSF?.parse_date_code){
+    const d=XLSX.SSF.parse_date_code(raw);if(d?.y&&d?.m&&d?.d)return d.y+'-'+String(d.m).padStart(2,'0')+'-'+String(d.d).padStart(2,'0');
+  }
+  const v=String(raw).trim();let m=v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=v.match(/^(\d{1,2})[\/. -](\d{1,2})[\/. -](\d{4})$/);
+  if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  return null;
+}
+function parseTabularRows(rows){
+  const hi=rows.findIndex(r=>r.some(c=>norm(c).startsWith('valor'))&&r.some(c=>norm(c).startsWith('descri')||norm(c)==='item'));
+  if(hi<0)return null;
+  const h=rows[hi].map(norm),ix=(...keys)=>h.findIndex(x=>keys.some(k=>x.startsWith(k)));
+  const iv=ix('valor'),id=ix('descri','item'),it=ix('tipo'),ic=ix('categoria'),is=ix('status','situa'),idate=ix('vencimento','data');
+  if(iv<0||id<0)return null;
+  const itens=[];
+  for(const r of rows.slice(hi+1)){
+    const descricao=String(r[id]??'').trim(),valor=parseMoneyCell(r[iv]);
+    if(!descricao||descricao.length>160||!(valor>0))continue;
+    const tipo=it>=0&&norm(r[it]).startsWith('receita')?'receita':'despesa';
+    const categoriaNome=ic>=0?String(r[ic]??'').trim():'';
+    const categoria=S.cats.find(c=>c.tipo===tipo&&norm(c.nome)===norm(categoriaNome));
+    const st=is>=0?norm(r[is]):'pendente';
+    const status=['pago','atrasado'].includes(st)?st:'pendente';
+    const pm=String(r[3]??'').match(/(\d+)\s*de\s*(\d+)/i);
+    itens.push({grupo:tipo==='receita'?'receita':(categoria?.grupo||'variaveis'),descricao,valor,
+      categoria_id:categoria?.id||null,data_vencimento:idate>=0?parseDateCell(r[idate]):null,status,
+      parcela_atual:pm?+pm[1]:null,parcelas_total:pm?+pm[2]:null});
+  }
+  return itens;
+}
 function parseSheetRows(name,rows){
   const m=norm(name).match(/^(janeiro|jan|fevereiro|fev|marco|mar|abril|abr|maio|mai|junho|jun|julho|jul|agosto|ago|setembro|set|outubro|out|novembro|nov|dezembro|dez)(?=[\s\d\/_-]|$)\s*[\/_-]?\s*(\d{4})?/);
   if(!m)return null;
   const out={mes:MES3.indexOf(m[1].slice(0,3))+1,ano:m[2]?+m[2]:null,itens:[],receita:0};
+  const header=rows.find(r=>r.some(c=>norm(c).startsWith('vencimento'))||r.some(c=>norm(c).startsWith('tipo'))||r.some(c=>norm(c).startsWith('status')));
+  if(header){out.itens=parseTabularRows(rows)||[];return out}
   for(const r of rows){
     const a=norm(r[0]);
-    if(a.startsWith('receita prevista')){const v=Number(r[2]);if(v>0)out.receita=v;continue}
+    if(a.startsWith('receita prevista')){const v=parseMoneyCell(r[2]);if(v>0)out.receita=v;continue}
     const g=GRUPOS[a];if(!g)continue;
-    const v=Number(r[2]);if(!(v>0))continue;
+    const v=parseMoneyCell(r[2]);if(!(v>0))continue;
     const pm=String(r[3]??'').match(/(\d+)\s*de\s*(\d+)/i);
     out.itens.push({grupo:g,descricao:String(r[1]??'').trim(),valor:v,parcela_atual:pm?+pm[1]:null,parcelas_total:pm?+pm[2]:null,obs:r[4]?String(r[4]):null});
   }
   return out;
 }
 function parseGeneric(rows){
-  const hi=rows.findIndex(r=>r.some(c=>norm(c)==='valor'));if(hi<0)return null;
-  const h=rows[hi].map(norm),ix=k=>h.findIndex(x=>x.startsWith(k));
-  const iv=ix('valor'),id=Math.max(ix('descri'),ix('item')),it=ix('tipo');
-  if(id<0)return null;const itens=[];
-  for(const r of rows.slice(hi+1)){
-    const raw=r[iv];const v=typeof raw==='number'?raw:Number(String(raw??'').replace(/[R$\s.]/g,'').replace(',','.'));
-    if(!(v>0)||!r[id])continue;
-    itens.push({grupo:it>=0&&norm(r[it]).startsWith('receita')?'receita':'variaveis',descricao:String(r[id]).trim(),valor:v});
-  }
-  return{mes:null,ano:null,itens,receita:0};
+  const itens=parseTabularRows(rows);
+  return itens?.length?{mes:null,ano:null,itens,receita:0}:null;
 }
-/*END*/
+/*END*//*END*/
 const saudacao=()=>{const h=new Date().getHours();return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'};
 function afterRender(){
   const k=S.view+'|'+(S.mes&&S.mes.id)+'|'+(S.ano&&S.ano.id);
@@ -2520,16 +2555,19 @@ function catPara(grupo,desc){
 }
 const lanc=(mid,tipo,desc,valor,grupo,i={})=>({familia_id:S.fam.id,mes_id:mid,tipo,descricao:desc,valor,categoria_id:catPara(grupo,desc),status:'pendente',parcela_atual:i.parcela_atual||null,parcelas_total:i.parcelas_total||null,observacao:i.obs||null,origem:'importacao_arquivo',criado_por:S.user.id});
 async function lerArquivo(file){
-  const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});const meses=[];let gen=null;
-  for(const n of wb.SheetNames){
-    const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:null,raw:true});
-    const p=parseSheetRows(n,rows);
-    if(p){if(p.itens.length||p.receita)meses.push(p)}
-    else if(!gen&&norm(n)!=='instrucoes'){const g=parseGeneric(rows);if(g&&g.itens.length)gen=g}
-  }
-  if(!meses.length&&gen){gen.mes=S.mes.mes;gen.ano=S.ano.ano;meses.push(gen)}
-  if(!meses.length)return toast('Não encontrei lançamentos nessa planilha',1);
-  meses.forEach(m=>{if(!m.ano)m.ano=S.ano.ano});S.imp=meses;render();
+  try{
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});const meses=[];let gen=null;
+    for(const n of wb.SheetNames){
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:null,raw:true});
+      const p=parseSheetRows(n,rows);
+      if(p){if(p.itens.length||p.receita)meses.push(p)}
+      else if(!gen&&norm(n)!=='instrucoes'){const g=parseGeneric(rows);if(g&&g.itens.length)gen=g}
+    }
+    if(!meses.length&&gen){gen.mes=S.mes.mes;gen.ano=S.ano.ano;meses.push(gen)}
+    if(!meses.length)return toast('Não encontrei lançamentos. Confira se a planilha tem colunas Descrição e Valor.',1);
+    meses.forEach(m=>{if(!m.ano)m.ano=S.ano.ano});
+    S.imp=meses;render();
+  }catch(err){console.error('Falha ao ler planilha:',err);toast('Não consegui ler esse arquivo: '+(err?.message||'formato inválido'),1)}
 }
 function viewImport(){
   if(!S.imp)return '';
@@ -2541,35 +2579,54 @@ function viewImport(){
   <div class="row"><button data-act="impok">Importar</button><button class="sec" data-act="impno">Cancelar</button></div></div></div>`;
 }
 async function importar(){
-  if(S.importando)return;S.importando=true;
+  if(S.importando)return;
+  if(!Array.isArray(S.imp)||!S.imp.length)return toast('Selecione uma planilha válida antes de importar.',1);
+  S.importando=true;
   document.querySelectorAll('.modal button').forEach(x=>x.disabled=true);
-  const modo=$('#imp_modo').value;let ins=0,ja=0;const pul=[];
+  const modo=$('#imp_modo')?.value||'mesclar';let ins=0,ja=0;const pul=[];let primeiroImportado=null;
   try{
     for(const m of S.imp){
-      const mid=await q(sb.rpc('garantir_mes',{p_fam:S.fam.id,p_ano:m.ano,p_mes:m.mes}));
-      const itens=[];if(m.receita)itens.push({tipo:'receita',descricao:'Receita prevista',valor:m.receita,categoria_id:catPara('receita','Receita prevista')});
-      m.itens.forEach(i=>itens.push({tipo:i.grupo==='receita'?'receita':'despesa',descricao:i.descricao,valor:i.valor,categoria_id:catPara(i.grupo,i.descricao),parcela_atual:i.parcela_atual,parcelas_total:i.parcelas_total,observacao:i.obs}));
-      const{data,error}=await sb.rpc('importar_itens',{p_mes:mid,p_itens:itens,p_modo:modo});
-      if(error){pul.push(MN[m.mes-1]+' ('+(/fechado/.test(error.message)?'fechado':'erro')+')');continue}
-      ins+=data.inseridos;ja+=data.ja_existiam;
+      try{
+        const mid=await q(sb.rpc('garantir_mes',{p_fam:S.fam.id,p_ano:m.ano,p_mes:m.mes}));
+        const itens=[];
+        if(m.receita)itens.push({tipo:'receita',descricao:'Receita prevista',valor:m.receita,categoria_id:catPara('receita','Receita prevista'),status:'pendente'});
+        m.itens.forEach(i=>{
+          const tipo=i.grupo==='receita'?'receita':'despesa';
+          itens.push({tipo,descricao:i.descricao,valor:i.valor,categoria_id:i.categoria_id||catPara(i.grupo,i.descricao),
+            data_vencimento:i.data_vencimento||null,status:i.status||'pendente',
+            parcela_atual:i.parcela_atual,parcelas_total:i.parcelas_total,observacao:i.obs||null});
+        });
+        if(!itens.length){pul.push(MN[m.mes-1]+' '+m.ano+': nenhum lançamento reconhecido');continue}
+        const{data,error}=await sb.rpc('importar_itens',{p_mes:mid,p_itens:itens,p_modo:modo});
+        if(error){pul.push(MN[m.mes-1]+' '+m.ano+': '+error.message);continue}
+        const resultado=Array.isArray(data)?data[0]:data;
+        ins+=Number(resultado?.inseridos)||0;ja+=Number(resultado?.ja_existiam)||0;
+        if(!primeiroImportado&&Number(resultado?.inseridos)>0)primeiroImportado={ano:m.ano,mes:m.mes};
+      }catch(err){pul.push(MN[m.mes-1]+' '+m.ano+': '+(err?.message||'falha ao gravar'))}
     }
-    S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));S.ano=S.anos.find(x=>x.id===S.ano.id)||S.ano;
-    toast(ins+' lançamento(s) novo(s)'+(ja?' · '+ja+' já existiam e não foram repetidos':'')+(pul.length?' · pulados: '+pul.join(', '):''));
-  }finally{S.importando=false;S.imp=null}
-  await loadMes();
+    S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));
+    if(primeiroImportado){
+      S.ano=S.anos.find(x=>x.ano===primeiroImportado.ano)||S.ano;
+      await loadAno(primeiroImportado.mes);
+    }else await loadMes();
+    toast(ins+' lançamento(s) novo(s)'+(ja?' · '+ja+' já existiam':'')+(pul.length?' · '+pul.slice(0,3).join(' | '):'')+(pul.length>3?' · e mais '+(pul.length-3)+' erro(s)':''));
+  }catch(err){
+    console.error('Falha na importação:',err);
+    toast('A importação não foi concluída: '+(err?.message||'erro inesperado'),1);
+  }finally{S.importando=false;S.imp=null;render()}
 }
 async function exportXlsx(){
   const L=await q(sb.from('lancamentos').select('*').in('mes_id',S.meses.map(m=>m.id)).order('data_vencimento',{nullsFirst:false}).order('criado_em'));
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Mês','Receita','Fixas','Cartões','Retiradas','Outras','Total despesas','Saldo','Poupança acumulada','% Cartões']].concat((S.resumo||[]).map(r=>[MN[r.mes-1],+r.receita,+r.fixas,+r.cartoes,+r.retiradas,+r.outras,+r.total_despesas,+r.saldo,+r.poupanca_acumulada,+r.pct_cartoes/100]))),'Resumo '+S.ano.ano);
-  const G=[['cartoes','Cartões de Crédito'],['retirada','Retirada mensal'],['fixas','Fixas / Financiamentos'],['variaveis','Outras / Variáveis']];
-  S.meses.forEach(m=>{let tot=0,rec=0;const it=[];
-    L.filter(l=>l.mes_id===m.id).forEach(l=>{if(l.tipo==='receita'){rec+=+l.valor;return}
-      const c=S.cats.find(x=>x.id===l.categoria_id);const gi=Math.max(0,G.findIndex(x=>x[0]===((c&&c.grupo)||'variaveis')));tot+=+l.valor;
-      it.push([gi,[G[gi][1],l.descricao,+l.valor,l.parcelas_total?String(l.parcela_atual||1).padStart(2,'0')+' de '+l.parcelas_total:'',l.observacao||'']])});
-    it.sort((a,b)=>a[0]-b[0]);
-    const rows=[['Categoria','Item','Valor (R$)','Parcela','Comentário / Status']].concat(it.map(x=>x[1]),[[],['TOTAL DE DESPESAS','',tot],['RECEITA PREVISTA','',rec],['SALDO PREVISTO (Receita - Despesas)','',rec-tot]]);
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),MN[m.mes-1].slice(0,3)+' '+S.ano.ano)});
+  S.meses.forEach(m=>{
+    const rows=[['Vencimento','Descrição','Tipo','Categoria','Valor','Status']];
+    L.filter(l=>l.mes_id===m.id).forEach(l=>{
+      const cat=S.cats.find(x=>x.id===l.categoria_id);
+      rows.push([l.data_vencimento||'',l.descricao,l.tipo,cat?.nome||'',+l.valor,l.status||'pendente']);
+    });
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),MN[m.mes-1].slice(0,3)+' '+S.ano.ano);
+  });
   XLSX.writeFile(wb,S.fam.nome+'-'+S.ano.ano+'.xlsx');
 }
 const LOGO='<span class="cf-mark" role="img" aria-label="Copiloto Financeiro">CF</span>';
@@ -3036,7 +3093,7 @@ document.addEventListener('click',async e=>{
   else if(a==='copiarcodigo'){if(!S.codigoRecuperacao)return;try{await navigator.clipboard.writeText(S.codigoRecuperacao);toast('Código copiado. Guarde-o em local seguro.')}catch(e){const i=$('#codigo-recuperacao-exibido');if(i){i.select();toast('Selecione e copie o código manualmente.')}}}
   else if(a==='fecharcodigo'){const o=document.getElementById('codigo-recuperacao-modal');if(o)o.remove();S.codigoRecuperacao=null}
   else if(a==='convite'){const limite=(PLANOS[S.fam.plano||'pro']||PLANOS.pro).limite;if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
-  }catch(err){console.error('Falha em ação do aplicativo:',a,err);if(a==='entrarfam-pix'||a==='entrarfam')toast('Não foi possível concluir o convite: '+(err?.message||'erro inesperado'),1)}finally{S.busy=false}
+  }catch(err){console.error('Falha em ação do aplicativo:',a,err);toast('Não foi possível concluir esta ação: '+(err?.message||'erro inesperado'),1)}finally{S.busy=false}
 });
 document.addEventListener('change',async e=>{
   const t=e.target;
@@ -3077,7 +3134,7 @@ document.addEventListener('change',async e=>{
     if(f==='status')p.data_pagamento=v==='pago'?new Date().toISOString().slice(0,10):null;
     if(f==='tipo')p.categoria_id=null;
     await q(sb.from('lancamentos').update(p).eq('id',id));await loadMes()}
-  }catch(err){}
+  }catch(err){console.error('Falha ao salvar alteração:',err);toast('Não foi possível salvar a alteração: '+(err?.message||'erro inesperado'),1)}
 });
 document.addEventListener('focusout',()=>{if(S.pend)setTimeout(()=>{const a=document.activeElement;if(!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)))atualizarAoVivo()},250)});
 document.addEventListener('wheel',()=>{const a=document.activeElement;if(a&&a.type==='number')a.blur()},{passive:true});
