@@ -149,8 +149,10 @@ Deno.serve(async (req: Request) => {
       }
       // Repetições também garantem a confirmação caso a primeira chamada tenha falhado
       // depois de gravar a solicitação no banco.
-      if (existing.status === "pendente") {
-        await acknowledgePurchase(googleToken, packageName, productId, purchaseToken);
+      if (existing.status === "pendente" && Number(purchase.acknowledgementState) !== 1) {
+        if (Number(purchase.acknowledgementState) !== 1) {
+      await acknowledgePurchase(googleToken, packageName, productId, purchaseToken);
+    }
       }
       return json({ ok: true, status: existing.status, duplicate: true });
     }
