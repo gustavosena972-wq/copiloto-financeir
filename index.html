@@ -3098,7 +3098,7 @@ document.addEventListener('click',async e=>{
     const [yy,mm,dd]=inicio.split('-').map(Number);
     if(!yy||!mm||!dd||mm<1||mm>12||dd<1||dd>31)return toast('Data inicial inválida.',1);
     if(parcelas>1){
-      await q(sb.rpc('criar_compromisso_v3',{p_familia:S.fam.id,p_data_inicio:inicio,p_descricao:desc,p_valor_base:valorBase,p_total:parcelas,p_categoria:$('#n_cat').value||null,p_membro:$('#n_mem').value||null,p_natureza:natureza}));
+      await q(sb.rpc('criar_compromisso_v3',{p_familia:S.fam.id,p_data_inicio:inicio,p_descricao:desc,p_valor_base:valorBase,p_total:parcelas,p_categoria:$('#n_cat').value||null,p_membro:$('#n_mem').value||null,p_natureza:natureza,p_status:$('#n_status').value||'pendente'}));
     }else{
       const mesId=await q(sb.rpc('garantir_mes',{p_fam:S.fam.id,p_ano:yy,p_mes:mm}));
       await q(sb.from('lancamentos').insert({familia_id:S.fam.id,mes_id:mesId,descricao:desc,valor:Math.round(valorBase*100)/100,tipo,
