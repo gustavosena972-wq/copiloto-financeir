@@ -1730,6 +1730,99 @@ body:has(.landing-page){
 @media(max-width:480px){.cf-preview-window{grid-template-columns:78px minmax(0,1fr);border-radius:14px}.cf-preview-sidebar{padding:10px 5px 8px;gap:5px}.cf-preview-brand{gap:4px;margin-bottom:10px;padding:0}.cf-preview-brand-mark{width:21px;height:21px;border-radius:6px;font-size:11px}.cf-preview-brand b{font-size:8px}.cf-preview-brand small{font-size:5px;letter-spacing:.07em}.cf-preview-nav-label{margin-left:2px;font-size:5px;letter-spacing:.04em}.cf-preview-nav-item{gap:3px;padding:7px 3px;font-size:6px;white-space:normal;line-height:1.2}.cf-preview-nav-item i{width:12px;flex:none;font-size:9px}.cf-preview-sidebar-footer{gap:3px;padding:7px 0 0}.cf-preview-avatar{width:18px;height:18px;font-size:7px}.cf-preview-sidebar-footer b{font-size:5px}.cf-preview-sidebar-footer small{font-size:4px}.cf-preview-content{padding:9px 7px}.cf-preview-topbar>div>b{font-size:12px}.cf-preview-period{padding:5px 6px;font-size:6px}.cf-preview-stats{gap:4px}.cf-preview-stat{padding:7px 4px;border-radius:7px}.cf-preview-stat>span{font-size:6px}.cf-preview-stat>b{font-size:10px}.cf-preview-stat>small{font-size:5px}.cf-preview-panel{padding:8px}.cf-preview-caption{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.cf-preview *{transition:none!important;animation:none!important}}
 </style>
+<style id="cf-landing-redesign">
+/* Página de apresentação — banner com prévia real, planos e acesso em áreas distintas */
+body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
+#app:has(.landing-page){max-width:1440px!important;width:100%!important;padding:22px clamp(14px,3vw,42px)!important}
+.landing-page{max-width:1320px!important}
+.landing-header{padding:4px 3px 18px!important;border-color:#e2e8de!important}
+.landing-nav{gap:26px!important}
+.landing-nav a{font-size:12px!important;color:#68776b!important}
+.landing-nav .landing-nav-cta{padding:11px 17px!important;background:#244f38!important;color:#fff!important}
+#app:has(.landing-page) .landing-hero{display:block!important;margin:24px 0 0!important;padding:0!important;min-height:0!important;overflow:visible!important}
+.landing-showcase{position:relative!important;display:block!important;min-height:555px!important;padding:clamp(38px,5vw,68px)!important;overflow:hidden!important;border-radius:28px!important;background:linear-gradient(120deg,#e8efe4 0%,#e8efe4 40%,#e1eadf 100%)!important;box-shadow:0 18px 46px rgba(42,68,46,.08)!important}
+.landing-showcase:after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#e8efe4 0%,rgba(232,239,228,.98) 31%,rgba(232,239,228,.82) 47%,rgba(232,239,228,.08) 78%,rgba(232,239,228,0) 100%)!important}
+.landing-intro{position:relative!important;z-index:2!important;display:flex!important;flex-direction:column!important;justify-content:center!important;min-height:420px!important;width:min(52%,590px)!important;padding:0!important}
+.landing-kicker{color:#477454!important}
+.landing-intro h1{max-width:590px!important;margin:17px 0!important;color:#1e3828!important;font-size:clamp(42px,5.1vw,68px)!important;line-height:1.01!important;letter-spacing:-.065em!important}
+.landing-intro>p{max-width:470px!important;color:#647568!important;font-size:15px!important;line-height:1.75!important}
+.landing-hero-actions{display:flex;align-items:center;gap:13px;margin-top:26px}
+.landing-hero-actions a{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:0 19px;border-radius:999px;text-decoration:none;font-size:12px;font-weight:750;transition:transform .2s,background .2s}
+.landing-hero-actions a:hover{transform:translateY(-2px)}
+.landing-hero-primary{background:#285b3d;color:#fff;box-shadow:0 9px 20px rgba(40,91,61,.17)}
+.landing-hero-primary span{font-size:16px}
+.landing-hero-secondary{border:1px solid rgba(54,91,62,.22);color:#365d40;background:rgba(255,255,255,.35)}
+.cf-preview{position:absolute!important;z-index:0!important;top:42px!important;right:-5.5%!important;width:72%!important;max-width:none!important;opacity:.94!important;pointer-events:none!important;transform:perspective(1500px) rotateY(-10deg) scale(.9)!important;transform-origin:right center!important;filter:drop-shadow(0 22px 30px rgba(36,62,40,.14))!important}
+.cf-preview-window{min-height:390px!important;border-radius:22px!important;box-shadow:0 25px 60px rgba(37,65,42,.17)!important}
+.cf-preview-caption{display:none!important}
+.landing-benefits{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,1.5fr);gap:clamp(22px,4vw,60px);align-items:center;margin:42px 2px 0;padding:22px 0 35px;border-bottom:1px solid #e1e7dd}
+.landing-benefits-heading>span,.landing-login-intro>span{color:#9a8050;font-size:9px;font-weight:850;letter-spacing:.16em}
+.landing-benefits-heading h2{max-width:340px;margin:9px 0 0;color:#2b3d30;font-size:clamp(23px,2.6vw,31px);line-height:1.12;letter-spacing:-.045em}
+.landing-benefits-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.landing-benefits-grid article{display:flex;align-items:flex-start;gap:11px;min-width:0}
+.landing-benefit-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:#e5eee1;color:#3e7650;font-size:15px;font-weight:800}
+.landing-benefits-grid b{display:block;margin:2px 0 5px;color:#33483a;font-size:12px}
+.landing-benefits-grid p{margin:0;color:#7b897c;font-size:10px;line-height:1.6}
+.landing-plans-section{margin-top:0!important;padding:48px 2px 12px!important;border:0!important}
+.landing-section-heading{margin-bottom:24px!important}
+.landing-section-heading h2{color:#273d2e!important;font-size:clamp(27px,3vw,38px)!important}
+.landing-plan-grid{gap:18px!important}
+.landing-plan-card{padding:27px 25px 22px!important;border-radius:19px!important}
+.landing-plan-card.recommended{border-color:#b8d0b8!important;box-shadow:0 13px 34px rgba(45,91,54,.09)!important}
+.landing-plan-card:hover{transform:translateY(-3px)!important}
+.landing-login-section{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,440px);gap:40px;align-items:center;margin:48px 0 0;padding:38px clamp(22px,4vw,55px);border:1px solid #e2e8de;border-radius:24px;background:linear-gradient(125deg,#edf2e9,#f9faf6 72%);scroll-margin-top:25px}
+.landing-login-intro{max-width:480px}
+.landing-login-intro h2{margin:10px 0 9px;color:#293e30;font-size:clamp(27px,3vw,37px);line-height:1.08;letter-spacing:-.05em}
+.landing-login-intro p{max-width:390px;margin:0;color:#778579;font-size:13px;line-height:1.7}
+.landing-login-section .landing-login{max-width:none!important;justify-self:stretch!important;padding:25px!important;border-radius:18px!important;box-shadow:0 12px 30px rgba(45,65,45,.07)!important}
+.landing-footer{margin-top:34px!important}
+@media(max-width:1000px){
+ .landing-showcase{min-height:510px!important;padding:38px!important}
+ .landing-intro{width:58%!important;min-height:420px!important}
+ .cf-preview{right:-13%!important;width:76%!important;opacity:.78!important}
+ .landing-benefits{grid-template-columns:1fr;gap:22px}
+ .landing-benefits-heading h2{max-width:600px}
+ .landing-login-section{grid-template-columns:1fr minmax(300px,420px);gap:24px}
+}
+@media(max-width:720px){
+ #app:has(.landing-page){padding:10px!important}
+ .landing-header{gap:10px!important}
+ .landing-nav{gap:12px!important}
+ .landing-nav>a:first-child{display:none!important}
+ .landing-nav .landing-nav-cta{padding:9px 12px!important}
+ .landing-showcase{min-height:0!important;padding:34px 24px 20px!important;border-radius:22px!important}
+ .landing-showcase:after{background:linear-gradient(180deg,#e8efe4 0%,rgba(232,239,228,.97) 36%,rgba(232,239,228,.32) 72%,rgba(232,239,228,.05) 100%)!important}
+ .landing-intro{width:100%!important;min-height:0!important}
+ .landing-intro h1{max-width:540px!important;font-size:clamp(36px,9vw,49px)!important}
+ .landing-intro>p{max-width:480px!important;font-size:13px!important}
+ .landing-hero-actions{margin-top:19px!important;flex-wrap:wrap}
+ .landing-hero-actions a{min-height:44px;padding:0 15px;font-size:11px}
+ .cf-preview{position:relative!important;top:auto!important;right:auto!important;width:calc(100% + 30px)!important;margin:30px -15px -4px!important;opacity:1!important;transform:none!important;filter:none!important}
+ .cf-preview-window{grid-template-columns:100px minmax(0,1fr)!important;min-height:280px!important;border-radius:14px!important}
+ .cf-preview-sidebar{padding:11px 7px!important}
+ .cf-preview-content{min-width:0!important}
+ .landing-benefits{margin-top:28px!important;padding:15px 0 26px!important}
+ .landing-benefits-grid{grid-template-columns:1fr;gap:16px}
+ .landing-benefits-grid article{align-items:center}
+ .landing-plans-section{padding-top:34px!important}
+ .landing-section-heading{display:block!important}
+ .landing-section-heading>p{margin-top:10px!important}
+ .landing-plan-grid{grid-template-columns:1fr!important;gap:13px!important}
+ .landing-login-section{grid-template-columns:1fr!important;gap:19px!important;margin-top:34px!important;padding:25px 17px!important;border-radius:19px!important}
+ .landing-login-section .landing-login{padding:22px 17px!important}
+}
+@media(max-width:390px){
+ .landing-brand strong{font-size:14px!important}
+ .landing-brand small{font-size:6.5px!important}
+ .landing-nav .landing-nav-cta{font-size:9px!important}
+ .landing-showcase{padding:29px 18px 16px!important}
+ .cf-preview{width:calc(100% + 20px)!important;margin-left:-10px!important}
+ .cf-preview-window{grid-template-columns:82px minmax(0,1fr)!important}
+ .cf-preview-nav-item{font-size:6px!important;gap:4px!important;padding:6px 4px!important}
+ .cf-preview-sidebar{padding:9px 5px!important}
+}
+@media(prefers-reduced-motion:reduce){.landing-hero-actions a{transition:none!important}}
+</style>
 </head>
 <body>
 <div id="app" class="wrap"></div>
@@ -1895,33 +1988,14 @@ function renderAuth(){
           <p class="cf-preview-caption"><span>✦</span> Prévia da interface do Copiloto Financeiro · Dados de exemplo, apenas para demonstração.</p>
         </section>
       </div>
-      <section class="landing-login" id="landing-login" aria-label="Acesso à conta">
-        <div class="landing-login-head">
-          <span>ÁREA DO CLIENTE</span>
-          <h2>Que bom ter você aqui.</h2>
-          <p>Entre com seus dados para continuar.</p>
-        </div>
-        <div class="landing-field-group">
-          <label class="landing-field" for="nome">Usuário</label>
-          <input id="nome" autocomplete="username" placeholder="Digite seu usuário">
-        </div>
-        <div class="landing-field-group">
-          <label class="landing-field" for="senha">Senha</label>
-          <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha">
-        </div>
-        <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
-        <div id="recuperacao" hidden>
-          <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
-          <input id="codigo-recuperacao" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de recuperação">
-          <input id="nova-senha" type="password" autocomplete="new-password" placeholder="Nova senha (mín. 8 caracteres)">
-          <button class="sec" data-act="recuperar">Redefinir senha</button>
-        </div>
-        <div id="aviso" class="aviso"></div>
-        <button class="landing-primary" data-act="entrar">Entrar na minha conta</button>
-        <div class="landing-create-row"><span>Primeira vez por aqui?</span><button class="landing-secondary" data-act="cadastrar">Criar minha conta</button></div>
-        <button class="landing-link-button" data-act="reset">Esqueci minha senha</button>
-        <a class="demo-link" href="demo.html"><span aria-hidden="true">◉</span> Conhecer a demonstração do aplicativo</a>
-      </section>
+    </section>
+    <section class="landing-benefits" id="landing-benefits" aria-label="O que você organiza com o Copiloto">
+      <div class="landing-benefits-heading"><span>ORGANIZAÇÃO EM UM SÓ LUGAR</span><h2>Mais clareza para decidir o que fazer com seu dinheiro.</h2></div>
+      <div class="landing-benefits-grid">
+        <article><span class="landing-benefit-icon">↗</span><div><b>Controle do mês</b><p>Receitas, despesas, contas e categorias em uma visão organizada.</p></div></article>
+        <article><span class="landing-benefit-icon">▥</span><div><b>Acompanhamento do ano</b><p>Compare períodos e acompanhe como a vida financeira evolui.</p></div></article>
+        <article><span class="landing-benefit-icon">⌁</span><div><b>Planejamento familiar</b><p>Compartilhe a organização e acompanhe metas e compromissos.</p></div></article>
+      </div>
     </section>
     <section class="landing-plans-section" id="landing-plans" aria-labelledby="landing-plans-title">
       <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Uma assinatura por família. Os membros convidados não precisam contratar outro plano.</p></div>
@@ -1970,6 +2044,37 @@ function renderAuth(){
         </article>
       </div>
       <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. O Max amplia a capacidade da família para até 6 pessoas. O pagamento é feito por Pix, com conferência manual e sem renovação automática. A assinatura é por família; no Ultra, a central alterna entre espaços familiares aos quais a conta já pertence, cada um com seu próprio acesso.</p>
+    </section>
+    <section class="landing-login-section" aria-labelledby="landing-login-title">
+      <div class="landing-login-intro"><span>ÁREA DO CLIENTE</span><h2 id="landing-login-title">Acesse seu espaço financeiro.</h2><p>Entre na sua conta ou crie seu acesso para começar a organizar sua família.</p></div>
+      <section class="landing-login" id="landing-login" aria-label="Acesso à conta">
+        <div class="landing-login-head">
+          <span>ÁREA DO CLIENTE</span>
+          <h2>Que bom ter você aqui.</h2>
+          <p>Entre com seus dados para continuar.</p>
+        </div>
+        <div class="landing-field-group">
+          <label class="landing-field" for="nome">Usuário</label>
+          <input id="nome" autocomplete="username" placeholder="Digite seu usuário">
+        </div>
+        <div class="landing-field-group">
+          <label class="landing-field" for="senha">Senha</label>
+          <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha">
+        </div>
+        <label class="aceite"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
+        <div id="recuperacao" hidden>
+          <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
+          <input id="codigo-recuperacao" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de recuperação">
+          <input id="nova-senha" type="password" autocomplete="new-password" placeholder="Nova senha (mín. 8 caracteres)">
+          <button class="sec" data-act="recuperar">Redefinir senha</button>
+        </div>
+        <div id="aviso" class="aviso"></div>
+        <button class="landing-primary" data-act="entrar">Entrar na minha conta</button>
+        <div class="landing-create-row"><span>Primeira vez por aqui?</span><button class="landing-secondary" data-act="cadastrar">Criar minha conta</button></div>
+        <button class="landing-link-button" data-act="reset">Esqueci minha senha</button>
+        <a class="demo-link" href="demo.html"><span aria-hidden="true">◉</span> Conhecer a demonstração do aplicativo</a>
+      </section>
+
     </section>
     <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar</footer>
   </div>`;
