@@ -48,7 +48,7 @@ assert.ok(securityMigration.includes("REVOKE SELECT ON TABLE public.config_app F
 assert.ok(securityMigration.includes("REVOKE SELECT (chave, valor) ON TABLE public.config_app FROM anon, authenticated, PUBLIC"), "existing column-level SELECT grants must also be revoked");
 assert.ok(securityMigration.includes("USING (chave = ANY"), "config_app RLS must expose only an explicit public-key allowlist");
 assert.ok(securityMigration.includes("'pix_chave'") && securityMigration.includes("'contato_email'"), "the app allowlist must preserve only required public configuration keys");
-assert.ok(securityMigration.includes("TO authenticated USING (true)"), "authenticated users must retain config needed by the app");
+assert.ok(securityMigration.includes("CREATE POLICY config_ler_authenticated_allowlist") && securityMigration.includes("TO authenticated"), "authenticated users must retain only allowlisted config rows");
 assert.ok(securityMigration.includes("GRANT SELECT (chave, valor) ON TABLE public.config_app TO authenticated"), "authenticated role must retain only the required config columns");
 assert.ok(auth.includes('"https://gustavosena972-wq.github.io"'), "authentication must retain the supported web origin");
 assert.ok(auth.includes(appOrigin), "authentication must allow the canonical Cloudflare origin");
