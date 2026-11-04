@@ -24,8 +24,8 @@ import com.android.billingclient.api.QueryPurchasesParams
 class MainActivity : Activity(), PurchasesUpdatedListener {
     private lateinit var webView: WebView
     private lateinit var billingClient: BillingClient
-    private val allowedHost = "gustavosena972-wq.github.io"
-    private val allowedPathPrefix = "/copiloto-financeir/"
+    private val allowedHost = "copiloto-financeir.gustavosena972.workers.dev"
+    private val allowedPathPrefix = "/"
     private val productIds = listOf(
         "copiloto_pro_30d",
         "copiloto_max_30d",
