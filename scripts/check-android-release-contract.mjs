@@ -5,6 +5,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const gradle = read("../android-app/app/build.gradle.kts");
 const activity = read("../android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt");
 const purchase = read("../supabase/functions/google-play-purchase/index.ts");
+const auth = read("../supabase/functions/autenticacao-usuario/index.ts");
 const admin = read("../supabase/functions/google-play-admin/index.ts");
 const html = read("../index.html");
 
@@ -25,5 +26,8 @@ assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke n
 assert.ok(html.includes("copiloto:play-purchase"), "web app must receive completed purchase events");
 assert.ok(html.includes("google-play-purchase"), "web app must submit purchase tokens for server verification");
 assert.ok(!html.includes("chave:'+5531999758385'"), "personal Pix fallback must not be hardcoded in public HTML");
+assert.ok(html.includes('id="confirmar-idade"'), "signup must require an adult confirmation");
+assert.ok(html.includes("payload.acceptedAdult=true"), "signup must submit adult confirmation to the server");
+assert.ok(auth.includes("body?.acceptedAdult !== true"), "server must enforce adult eligibility, not trust the browser alone");
 
 console.log("Android/Cloudflare/Google Play release contract: OK");
