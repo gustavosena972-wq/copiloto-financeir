@@ -113,3 +113,27 @@ assert.ok(releaseWorkflow.includes("upload-artifact@v4"), "signed AAB must be up
 
 console.log("Android/Cloudflare/Google Play release contract: OK");
 console.log("Signed AAB release gate: OK");
+
+const configLoader = html.match(/async function carregarConfig\\(\\)\\s*\\{([\\s\\S]*?)\\n\\}/)?.[1] || "";
+assert.ok(configLoader.includes(".select('chave,valor')"), "config loader must request only columns granted by the hardened config_app policy");
+assert.ok(!configLoader.includes(".select('*')"), "config loader must not request columns outside its least-privilege grant");
+
+const authListener = html.match(/sb\\.auth\\.onAuthStateChange\\(\\(ev,s\\)=>\\{([\\s\\S]*?)\\}\\);/)?.[1] || "";
+assert.ok(authListener.includes("scheduleBoot()"), "auth state changes must schedule app boot outside the Supabase auth callback");
+assert.ok(!authListener.includes("boot().catch"), "Supabase API calls must not start synchronously inside onAuthStateChange callbacks");
+assert.match(html, /function scheduleBoot\\(\\)[\\s\\S]*?setTimeout\\(\\(\\)=>\\{[\\s\\S]*?boot\\(\\)\\.catch\\(mostrarErroInicial\\)/, "scheduled boot must run after the auth callback unwinds");
+
+const staticActions = new Set([...html.matchAll(/\\bdata-act\\s*=\\s*["']([^"'<>$]+)["']/g)].map((match) => match[1]));
+const handledActions = new Set([...html.matchAll(/(?:if|else\\s+if)\\s*\\(\\s*a\\s*===?\\s*['"]([^'"]+)['"]/g)].map((match) => match[1]));
+const unhandledActions = [...staticActions].filter((action) => !handledActions.has(action));
+assert.deepEqual(unhandledActions, [], "every static data-act UI action must have a delegated handler");
+
+assert.ok(activity.includes("override fun onBackPressed()"), "Android back navigation must be handled explicitly");
+assert.ok(activity.includes("billingClient.endConnection()"), "BillingClient must be released when the Activity is destroyed");
+assert.ok(activity.includes("MIXED_CONTENT_NEVER_ALLOW"), "WebView must block mixed-content requests");
+assert.ok(activity.includes("javaScriptCanOpenWindowsAutomatically = false"), "WebView must not allow scripts to open windows automatically");
+assert.ok(activity.includes("setSupportMultipleWindows(false)"), "WebView must not create uncontrolled secondary windows");
+
+console.log("Web action and auth lifecycle guardrails: OK");
+console.log("Android lifecycle and WebView guardrails: OK");
+
