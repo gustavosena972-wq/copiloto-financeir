@@ -73,10 +73,22 @@ Deno.serve(async (req: Request) => {
 
   try {
     const rawBody = await req.text();
-    if (rawBody.length > 8192) return json({ error: "Solicitação muito grande." }, 413);
-    const body = JSON.parse(rawBody);
-    const action = body?.action;
-    const username = String(body?.username ?? "").trim().toLowerCase();
+    if (new TextEncoder().encode(rawBody).byteLength > 8192) {
+      return json({ error: "Solicitação muito grande." }, 413);
+    }
+
+    let body: unknown;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return json({ error: "Corpo JSON inválido." }, 400);
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return json({ error: "Corpo da solicitação inválido." }, 400);
+    }
+    const payload = body as Record<string, unknown>;
+    const action = payload?.action;
+    const username = String(payload?.username ?? "").trim().toLowerCase();
 
     if (!["login", "signup", "recover"].includes(action)) {
       return json({ error: "Ação inválida." }, 400);
@@ -85,7 +97,7 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Use um usuário de 3 a 24 caracteres: letras, números, ponto, hífen ou underline." }, 400);
     }
 
-    const password = action === "recover" ? body?.newPassword : body?.password;
+    const password = action === "recover" ? payload?.newPassword : payload?.password;
     if (typeof password !== "string" || password.length < 8 || password.length > 128) {
       return json({ error: action === "recover"
         ? "A nova senha precisa ter entre 8 e 128 caracteres."
@@ -93,14 +105,14 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === "signup") {
-      const cleanName = String(body?.name ?? "").trim();
+      const cleanName = String(payload?.name ?? "").trim();
       if (cleanName.length < 2 || cleanName.length > 80) {
         return json({ error: "Informe seu nome (2 a 80 caracteres)." }, 400);
       }
-      if (body?.acceptedTerms !== true) {
+      if (payload?.acceptedTerms !== true) {
         return json({ error: "É necessário aceitar os Termos e a Política de Privacidade." }, 400);
       }
-      if (body?.acceptedAdult !== true) {
+      if (payload?.acceptedAdult !== true) {
         return json({ error: "O Copiloto Financeiro é destinado a pessoas com 18 anos ou mais." }, 400);
       }
     }
@@ -159,7 +171,7 @@ Deno.serve(async (req: Request) => {
         email: authEmail,
         email_confirm: true,
         password,
-        user_metadata: { nome: String(body.name).trim(), aceitou_termos: "v2" },
+        user_metadata: { nome: String(payload.name).trim(), aceitou_termos: "v2" },
       });
 
       if (createError || !created.user) {
@@ -209,7 +221,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === "recover") {
-      const supplied = normalizeRecoveryCode(String(body?.recoveryCode ?? ""));
+      const supplied = normalizeRecoveryCode(String(payload?.recoveryCode ?? ""));
       if (!/^[A-F0-9]{24}$/.test(supplied)) {
         return json({ error: "Usuário ou código de recuperação inválido." }, 401);
       }
