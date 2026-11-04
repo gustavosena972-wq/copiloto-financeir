@@ -20,6 +20,7 @@ DO $test$
 DECLARE
   visible_count integer;
   visible_keys text[];
+  cleanup_definition text;
 BEGIN
   SELECT count(*), array_agg(chave ORDER BY chave)
     INTO visible_count, visible_keys
@@ -45,6 +46,12 @@ BEGIN
       AND qual LIKE '%chave = ANY%'
   ) THEN
     RAISE EXCEPTION 'SECURITY REGRESSION: config_app allowlist policy is missing';
+  END IF;
+
+  cleanup_definition := pg_catalog.pg_get_functiondef('private.excluir_minha_conta()'::regprocedure);
+  IF position('n.nspname = ''public''' IN cleanup_definition) = 0
+     OR position('UPDATE %I.%I' IN cleanup_definition) = 0 THEN
+    RAISE EXCEPTION 'SECURITY REGRESSION: account cleanup dynamic SQL is not schema-restricted and identifier-safe';
   END IF;
 
   IF public.eh_admin() IS DISTINCT FROM false THEN
