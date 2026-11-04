@@ -10,8 +10,26 @@ Este documento registra controles confirmados, alterações aplicadas e tarefas 
 - Aplicada a mesma restrição como privilégio padrão para novas tabelas criadas pelo papel `postgres` no schema `public`.
 - Criados índices para as três chaves estrangeiras de `public.google_play_compras`.
 - Criadas políticas explícitas de negação para os papéis de cliente nas tabelas internas `google_play_compras`, `login_recuperacao` e `login_usuarios`. O acesso administrativo continua reservado às Edge Functions com `service_role`.
+- O papel PostgreSQL `anon` agora possui somente leitura em `public.config_app`; todos os demais privilégios de tabela, view e sequência foram revogados. A mesma regra foi aplicada aos privilégios padrão de novos objetos.
+- Confirmado que as dez views públicas usam `security_invoker=true`, fazendo com que respeitem as permissões e políticas RLS do chamador.
 - A Edge Function `google-play-purchase` recebeu limite de corpo de 8 KiB, validação estrita dos tipos de entrada, limite de tentativas por usuário e IP, verificação do identificador Android esperado e rejeição de origens web não autorizadas.
-- A função de compra continua exigindo JWT válido (`verify_jwt=true)); segredos de serviço não são enviados ao cliente.
+- A função de compra continua exigindo JWT válido (`verify_jwt=true`); segredos de serviço não são enviados ao cliente.
+
+## Acesso do usuário não autenticado
+
+Após a migração `restrict_anon_database_access_to_public_config`, foi feita uma consulta de verificação de privilégios. O único objeto do schema `public` no qual o papel `anon` mantém privilégio é:
+
+| Objeto | Acesso anônimo |
+|---|---|
+| `public.config_app` | `SELECT` (somente leitura) |
+
+Não há privilégios anônimos de `INSERT`, `UPDATE` ou `DELETE` nesse objeto. O papel `anon` não possui privilégios de leitura ou escrita nas demais tabelas, views e sequências do schema `public`.
+
+A tabela `config_app` contém chaves de configuração destinadas à exibição pública do aplicativo, incluindo informações de contato e instruções de pagamento. Não armazene nela segredos, tokens, senhas ou credenciais privadas.
+
+As funções RPC verificadas não concedem execução ao papel `anon`. As tabelas de dados financeiros usam políticas RLS baseadas em `auth.uid()` e nas funções de vínculo à família; o usuário não autenticado não satisfaz essas condições. As tabelas internas `admins`, `google_play_compras`, `login_recuperacao` e `login_usuarios` também possuem políticas explícitas de negação aos papéis de cliente.
+
+Esta verificação cobre os privilégios PostgreSQL do schema `public`; não significa que as páginas estáticas públicas do site deixem de ser acessíveis.
 
 ## Estado dos controles
 
@@ -31,7 +49,7 @@ Este documento registra controles confirmados, alterações aplicadas e tarefas 
 | Logs | Logs Supabase disponíveis; não registrar tokens de compra, senhas ou dados financeiros |
 | Criptografia | TLS em trânsito e criptografia de armazenamento fornecida pela plataforma |
 | Dependências | Executar auditoria periódica e manter versões fixadas |
-| Migrações | As duas migrações desta revisão foram adicionadas em `supabase/migrations`; o histórico anterior do banco ainda precisa ser reconstruído no repositório |
+| Migrações | Três migrações desta revisão estão em `supabase/migrations`; o histórico anterior do banco ainda precisa ser reconstruído no repositório |
 | Rollback | Não executar rollback automático em produção; preferir migração corretiva reversível e backup verificado |
 | PITR | Não habilitado por custo |
 | Backup externo | Workflow criado; depende da configuração de dois secrets do GitHub |
