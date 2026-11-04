@@ -1,17 +1,22 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Vary": "Origin",
-  "Content-Type": "application/json",
-  "Cache-Control": "no-store",
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://gustavosena972-wq.github.io",
+  "https://copiloto-financeir.gustavosena972.workers.dev",
+]);
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: cors });
+function corsHeadersFor(origin: string | null): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
+  };
+  if (origin && ALLOWED_ORIGINS.has(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
+}
 
 const products: Record<string, { plan: string; amount: number }> = {
   copiloto_pro_30d: { plan: "pro", amount: 23.90 },
@@ -90,13 +95,16 @@ async function sha256(value: string): Promise<string> {
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin");
-  if (origin && origin !== "https://gustavosena972-wq.github.io" && origin !== "null") {
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), { status, headers: corsHeadersFor(origin) });
+
+  if (origin && !ALLOWED_ORIGINS.has(origin)) {
     return new Response(JSON.stringify({ error: "Origem não autorizada." }), {
       status: 403,
-      headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "Vary": "Origin" },
+      headers: corsHeadersFor(null),
     });
   }
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeadersFor(origin) });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
 
   try {
@@ -122,9 +130,6 @@ Deno.serve(async (req: Request) => {
     const { data: userData, error: userError } = await userClient.auth.getUser(jwt);
     if (userError || !userData.user) return json({ error: "Sessão inválida." }, 401);
 
-    if (packageName !== "com.gustavosena.copilotofinanceiro") {
-      return json({ error: "Identificador Android não corresponde à configuração do aplicativo." }, 503);
-    }
     const productId = body?.productId;
     const purchaseToken = body?.purchaseToken;
     if (typeof productId !== "string" || !products[productId]
