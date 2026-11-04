@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const bridge = window.CopilotoPlayBilling;
-  if (!bridge) return; // Navegadores comuns continuam usando o checkout Pix da web.
+  if (!bridge) return; // Sem checkout no navegador: compras somente pelo aplicativo Android e Google Play.
 
   const ids = {
     pro: "copiloto_pro_30d",
