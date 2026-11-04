@@ -46,6 +46,9 @@ assert.ok(admin.includes(":refund?revoke=true"), "rejecting a purchase must refu
 assert.ok(admin.includes('purchase.status !== "pendente"'), "admin endpoint must reject already-decided purchases");
 assert.ok(!admin.includes('"Access-Control-Allow-Origin": "*"'), "admin function must not use wildcard CORS");
 assert.ok(admin.includes("parseJsonObjectRequest(req)"), "admin endpoint must use the bounded request parser before JSON parsing");
+assert.ok(admin.indexOf("parseJsonObjectRequest(req)") < admin.indexOf("auth.getUser(jwt)"), "admin endpoint must reject malformed or oversized bodies before external authentication work");
+assert.ok(auth.includes('Não foi possível criar a conta. Confira os dados e tente novamente.'), "authentication endpoint must not expose raw Supabase Auth errors");
+assert.ok(releaseWorkflow.includes("if: github.ref == 'refs/heads/main'"), "production signing workflow must run only from the protected main branch");
 assert.ok(requestParser.includes("maxBytes = 8192"), "admin endpoint must inherit the bounded request size");
 assert.ok(!admin.includes("error: error instanceof Error ? error.message"), "admin endpoint must not disclose raw internal errors to clients");
 assert.ok(!admin.includes("error.message"), "admin endpoint must not return raw database error details");
