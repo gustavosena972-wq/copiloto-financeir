@@ -1,6 +1,6 @@
 # Aplicativo Android — Copiloto Financeiro
 
-Esta pasta contém o invólucro Android isolado. O app web principal não foi redesenhado e o checkout Pix do navegador permanece intacto nesta etapa.
+Esta pasta contém o invólucro Android isolado. A versão web canônica não inicia pagamentos: no navegador, a tela orienta a pessoa a concluir a compra pelo aplicativo Android. Não tratar páginas de demonstração/legadas como checkout de produção.
 
 ## Integração implementada na branch
 
