@@ -18,6 +18,8 @@ assert.ok(activity.includes('allowedPathPrefix = "/"'), "WebView must trust the 
 assert.ok(purchase.includes('Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME")'), "purchase backend must use the configured Play package");
 assert.ok(purchase.includes('if (!url || !anon || !service || !packageName)'), "purchase backend must fail closed without the package secret");
 assert.ok(purchase.includes(appOrigin), "purchase function must allow the canonical app origin");
+assert.ok(purchase.includes("async function consumePurchase"), "consumable Play purchases must be acknowledged within the store deadline");
+assert.ok(purchase.includes("await consumePurchase(googleToken"), "server must consume verified purchases after persisting them");
 assert.ok(admin.includes(appOrigin), "admin function must allow the canonical app origin");
 assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke native Play Billing");
 assert.ok(html.includes("copiloto:play-purchase"), "web app must receive completed purchase events");
