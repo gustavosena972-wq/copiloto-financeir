@@ -52,6 +52,10 @@ jobs:
         working-directory: android-app
         run: gradle assembleDebug
 
+      - name: Run Android JVM unit tests
+        working-directory: android-app
+        run: gradle testDebugUnitTest
+
       - name: Build release bundle (unsigned unless release signing is configured)
         working-directory: android-app
         run: gradle bundleRelease
