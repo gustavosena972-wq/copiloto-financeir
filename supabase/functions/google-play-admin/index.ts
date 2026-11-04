@@ -89,9 +89,24 @@ Deno.serve(async (req: Request) => {
     const { data: isAdmin, error: adminCheckError } = await userClient.rpc("eh_admin");
     if (adminCheckError || isAdmin !== true) return json({ error: "Acesso administrativo necessário." }, 403);
 
-    const body = await req.json();
-    const id = String(body?.id || "");
-    const action = String(body?.action || "");
+    const rawBody = await req.text();
+    if (new TextEncoder().encode(rawBody).byteLength > 8192) {
+      return json({ error: "Solicitação muito grande." }, 413);
+    }
+
+    let body: unknown;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return json({ error: "Corpo JSON inválido." }, 400);
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return json({ error: "Corpo da solicitação inválido." }, 400);
+    }
+
+    const payload = body as Record<string, unknown>;
+    const id = typeof payload.id === "string" ? payload.id : "";
+    const action = typeof payload.action === "string" ? payload.action : "";
     if (!/^[0-9a-f-]{36}$/i.test(id) || !["approve", "reject"].includes(action)) {
       return json({ error: "Ação ou compra inválida." }, 400);
     }
@@ -127,7 +142,10 @@ Deno.serve(async (req: Request) => {
         if (!consumeResponse.ok) return json({ error: "A Google Play não confirmou o processamento da compra. Tente novamente." }, 502);
       }
       const { data, error } = await userClient.rpc("aprovar_compra_google_play", { p_id: id, p_dias: 30 });
-      if (error) return json({ error: "Compra processada na loja, mas a aprovação no sistema falhou. Repita a aprovação para concluir: " + error.message }, 500);
+      if (error) {
+        console.error("google-play-admin approval persistence failed", error.code);
+        return json({ error: "A Google Play processou a compra, mas o acesso não foi atualizado. Atualize o painel e tente concluir a aprovação." }, 500);
+      }
       return json({ ok: true, status: "aprovado", acesso_ate: data });
     }
 
@@ -160,6 +178,6 @@ Deno.serve(async (req: Request) => {
     return json({ ok: true, status: "recusado" });
   } catch (error) {
     console.error("google-play-admin", error);
-    return json({ error: error instanceof Error ? error.message : "Não foi possível concluir a ação." }, 400);
+    return json({ error: "Não foi possível concluir a ação. Tente novamente." }, 500);
   }
 });
