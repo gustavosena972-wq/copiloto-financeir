@@ -6,6 +6,8 @@ on:
       - "supabase/functions/autenticacao-usuario/**"
       - "supabase/functions/google-play-purchase/**"
       - "supabase/functions/google-play-admin/**"
+      - "supabase/functions/_shared/**"
+      - "supabase/tests/**"
       - ".github/workflows/supabase-functions-check.yml"
   push:
     branches:
@@ -27,6 +29,8 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Test shared request security helpers
+        run: deno test supabase/functions/_shared/security.test.ts
       - name: Type-check authentication function
         run: deno check supabase/functions/autenticacao-usuario/index.ts
       - name: Type-check Google Play purchase function
