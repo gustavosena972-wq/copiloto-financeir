@@ -75,6 +75,8 @@ assert.ok(definerRegression.includes("public.config_app") && definerRegression.i
 assert.ok(definerRegression.includes("ROLLBACK"), "database security regression test must leave no persistent changes");
 assert.ok(auth.includes('"https://gustavosena972-wq.github.io"'), "authentication must retain the supported web origin");
 assert.ok(auth.includes(appOrigin), "authentication must allow the canonical Cloudflare origin");
+assert.ok(auth.includes("if (origin && !ALLOWED_ORIGINS.has(origin))"), "authentication must reject disallowed cross-origin requests");
+assert.ok(auth.includes("status: 403"), "authentication must fail closed for disallowed origins");
 assert.ok(gradle.includes("compileSdk = 36") && gradle.includes("targetSdk = 36"), "Android must target the current required API level");
 assert.ok(gradle.includes('com.android.billingclient:billing:9.1.0'), "Android must use the pinned Play Billing dependency");
 assert.ok(activity.includes("Purchase.PurchaseState.PENDING"), "Android must handle pending Play purchases");
