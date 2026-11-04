@@ -2205,7 +2205,7 @@ function renderAuth(){
       <div class="landing-plan-grid">
         <article class="landing-plan-card">
           <div class="landing-plan-top"><span class="landing-plan-label">CONTROLE FINANCEIRO</span><h3>Pro</h3><p>Para organizar as finanças do dia a dia.</p></div>
-          <div class="landing-price"><strong>${precoPro}</strong><span>/ mês</span></div>
+          <div class="landing-price"><strong>${precoPro}</strong><span>/ 30 dias</span></div>
           <div class="landing-limit">Até 2 pessoas na família</div>
           <div class="landing-feature-heading">RECURSOS INCLUÍDOS</div>
           <ul class="landing-feature-list">
@@ -2222,8 +2222,8 @@ function renderAuth(){
         </article>
         <article class="landing-plan-card recommended">
           <div class="landing-ribbon">FAMÍLIA AMPLIADA</div>
-          <div class="landing-plan-top"><span class="landing-plan-label">MAIS PESSOAS NO MESMO ESPAÇO</span><h3>Max</h3><p>Para famílias que precisam organizar as finanças com mais pessoas.</p></div>
-          <div class="landing-price"><strong>${precoMax}</strong><span>/ mês</span></div>
+          <div class="landing-plan-top"><span class="landing-plan-label">FAMÍLIA AMPLIADA</span><h3>Max</h3><p>Para famílias que precisam organizar as finanças com mais pessoas.</p></div>
+          <div class="landing-price"><strong>${precoMax}</strong><span>/ 30 dias</span></div>
           <div class="landing-limit">Até 6 pessoas na família</div>
           <div class="landing-feature-heading">TUDO DO PRO, COM MAIS ESPAÇO PARA A FAMÍLIA</div>
           <ul class="landing-feature-list">
@@ -2236,8 +2236,8 @@ function renderAuth(){
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="max">Escolher Max <span>↗</span></button>
         </article>
         <article class="landing-plan-card ultra">
-          <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO FINANCEIRA AMPLIADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e espaços familiares já vinculados à sua conta.</p></div>
-          <div class="landing-price"><strong>${precoUltra}</strong><span>/ mês</span></div>
+          <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO AVANÇADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e espaços familiares já vinculados à sua conta.</p></div>
+          <div class="landing-price"><strong>${precoUltra}</strong><span>/ 30 dias</span></div>
           <div class="landing-limit">Ferramentas avançadas de gestão financeira</div>
           <div class="landing-feature-heading">RECURSOS ULTRA DISPONÍVEIS</div>
           <ul class="landing-feature-list">
@@ -2251,7 +2251,7 @@ function renderAuth(){
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="ultra">Escolher Ultra <span>↗</span></button>
         </article>
       </div>
-      <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. O Max amplia a capacidade da família para até 6 pessoas. O pagamento é feito por Pix, com conferência manual e sem renovação automática. A assinatura é por família. Cada conta fica vinculada a uma única família.</p>
+      <p class="landing-plans-footnote">Produtos de compra única: 30 dias de acesso após a aprovação. O preço final é exibido pela Google Play no momento da compra. Pro comporta até 2 pessoas, Max até 6 e Ultra libera as ferramentas avançadas. A compra é por família e não há renovação automática.</p>
     </section>
     <section class="landing-login-section" id="landing-auth" aria-labelledby="landing-login-title">
       <div class="landing-login-intro"><span>ÁREA DO CLIENTE</span><h2 id="landing-login-title">Seu acesso, em uma área própria.</h2><p>Entre na sua conta ou crie um cadastro para começar a usar o Copiloto Financeiro.</p></div>
@@ -2345,7 +2345,7 @@ function renderSemFamilia(){
 function render(){
   if(S.view==='admin'&&!S.admin){S.view='planilha';S.adm=null;S.admPend=0;}
   const ed=canEdit()&&mesAberto();
-  const ultra=S.fam?.plano==='ultra';
+  const ultra=planoTemRecurso('relatorios');
   if(S.view==='espacos')S.view='planilha';
   const TL={planilha:'Planilha mensal',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
   if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
@@ -2367,7 +2367,7 @@ function render(){
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
   const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
-  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&ultra)body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
+  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&planoTemRecurso('relatorios'))body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
   const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
   $('#app').innerHTML=`<div class="app-shell">
     <aside class="app-sidebar" aria-label="Navegação principal">
@@ -3004,9 +3004,14 @@ async function fecharAno(){
 }
 const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button><button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>`;
 /*PIX*/
-const PIX={chave:'',nome:'COPILOTO FINANCEIRO',cidade:'CONTAGEM',valor:20,dias:30};
-const PLANOS={pro:{nome:'Pro',valor:20,limite:2},max:{nome:'Max',valor:30,limite:6},ultra:{nome:'Ultra',valor:50}};
+const PLANOS={
+  pro:{nome:'Pro',valor:23.90,limite:2,produto:'copiloto_pro_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
+  max:{nome:'Max',valor:35.90,limite:6,produto:'copiloto_max_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
+  ultra:{nome:'Ultra',valor:59.90,limite:null,produto:'copiloto_ultra_30d',recursos:{relatorios:true,patrimonioHistorico:true,simulador:true}}
+};
 const planoAtual=()=>PLANOS[S.planoEscolhido||S.fam?.plano||'pro']||PLANOS.pro;
+const planoTemRecurso=(recurso)=>Boolean(PLANOS[S.fam?.plano||'pro']?.recursos?.[recurso]);
+const limiteMembros=()=>PLANOS[S.fam?.plano||'pro']?.limite??Infinity;
 function crc16(t){let c=0xFFFF;for(let i=0;i<t.length;i++){c^=t.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,'0')}
 const tlv=(id,v)=>id+String(v.length).padStart(2,'0')+v;
 function pixPayload(p){
@@ -3025,7 +3030,7 @@ async function renderPaywall(){
   if(S.planoEscolhidoFamilia!==S.fam?.id){S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';S.planoEscolhidoFamilia=S.fam?.id;}
   else if(!PLANOS[S.planoEscolhido])S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';
   const plano=planoAtual();
-  const produtoSelecionado=S.planoEscolhido==="max"?"copiloto_max_30d":S.planoEscolhido==="ultra"?"copiloto_ultra_30d":"copiloto_pro_30d";
+  const produtoSelecionado=PLANOS[S.planoEscolhido]?.produto||PLANOS.pro.produto;
   const precoSelecionado = S.playProducts?.[produtoSelecionado]?.formattedPrice || "Preço na Google Play";
   $('#app').innerHTML=`<main class="pix-page">
     <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>COMPRA E ACESSO FAMILIAR</small></div></header>
@@ -3287,7 +3292,7 @@ document.addEventListener('click',async e=>{
   else if(a==='checape'){const n=await q(sb.rpc('gerar_checape',{p_mes:S.mes.id}));toast(n+' sugestão(ões) gerada(s)');await loadMes()}
   else if(a==='aceitar'){await q(sb.rpc('aceitar_sugestao',{p_sug:b.dataset.id}));await loadMes()}
   else if(a==='ignorar'){await q(sb.from('sugestoes').update({status:'ignorada'}).eq('id',b.dataset.id));await loadMes()}
-  else if(a==='addmem'){const limite=(PLANOS[S.fam.plano||'pro']||PLANOS.pro).limite;if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas contando o responsável.',1);const n=$('#mnome').value.trim();if(!n)return toast('Informe o nome',1);
+  else if(a==='addmem'){const limite=limiteMembros();if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas contando o responsável.',1);const n=$('#mnome').value.trim();if(!n)return toast('Informe o nome',1);
     await q(sb.from('membros').insert({familia_id:S.fam.id,nome:n,papel:'editor',renda_mensal:parseFloat($('#mrenda').value)||null}));
     S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
   else if(a==='delmem'){await q(sb.from('membros').delete().eq('id',b.dataset.id));S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
@@ -3303,8 +3308,8 @@ document.addEventListener('click',async e=>{
   else if(a==='additem'){const n=$('#p_nome').value.trim(),v=parseFloat($('#p_valor').value);if(!n||!(v>0))return toast('Informe nome e valor',1);
     await q(sb.from('patrimonio_itens').insert({familia_id:S.fam.id,tipo:$('#p_tipo').value,nome:n,valor:v}));await carregarPlan()}
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
-  else if(a==='registrarpat'){if(!canEdit())return toast('Somente quem edita pode registrar o patrimônio.',1);const p=S.plan?.pat||{},now=new Date(),data=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');await q(sb.from('patrimonio_snapshots').upsert({familia_id:S.fam.id,data,ativos:Number(p.ativos)||0,passivos:Number(p.passivos)||0,liquido:Number(p.liquido)||0},{onConflict:'familia_id,data'}));toast('Posição patrimonial registrada.');await carregarPlan()}
-  else if(a==='simularproj'){const inicial=Number($('#proj_inicial').value),aporte=Number($('#proj_aporte').value),meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;if(![inicial,aporte,meses,taxa].every(Number.isFinite)||inicial<0||aporte<0||meses<1||meses>360||!Number.isInteger(meses)||taxa<0||taxa>0.03)return toast('Confira os valores: prazo de 1 a 360 meses e taxa de 0% a 3% ao mês.',1);const fator=Math.pow(1+taxa,meses),futuro=taxa===0?inicial+aporte*meses:inicial*fator+aporte*((fator-1)/taxa),aportado=inicial+aporte*meses,out=$('#proj_result');if(out)out.innerHTML='<span>Resultado ilustrativo</span><strong>'+brl(futuro)+'</strong><p>Valor total colocado: '+brl(aportado)+' · diferença matemática: '+brl(futuro-aportado)+'</p>';}
+  else if(a==='registrarpat'){if(!planoTemRecurso('patrimonioHistorico'))return toast('O histórico patrimonial é um recurso do plano Ultra.',1);if(!canEdit())return toast('Somente quem edita pode registrar o patrimônio.',1);const p=S.plan?.pat||{},now=new Date(),data=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');await q(sb.from('patrimonio_snapshots').upsert({familia_id:S.fam.id,data,ativos:Number(p.ativos)||0,passivos:Number(p.passivos)||0,liquido:Number(p.liquido)||0},{onConflict:'familia_id,data'}));toast('Posição patrimonial registrada.');await carregarPlan()}
+  else if(a==='simularproj'){if(!planoTemRecurso('simulador'))return toast('O simulador de objetivos é um recurso do plano Ultra.',1);const inicial=Number($('#proj_inicial').value),aporte=Number($('#proj_aporte').value),meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;if(![inicial,aporte,meses,taxa].every(Number.isFinite)||inicial<0||aporte<0||meses<1||meses>360||!Number.isInteger(meses)||taxa<0||taxa>0.03)return toast('Confira os valores: prazo de 1 a 360 meses e taxa de 0% a 3% ao mês.',1);const fator=Math.pow(1+taxa,meses),futuro=taxa===0?inicial+aporte*meses:inicial*fator+aporte*((fator-1)/taxa),aportado=inicial+aporte*meses,out=$('#proj_result');if(out)out.innerHTML='<span>Resultado ilustrativo</span><strong>'+brl(futuro)+'</strong><p>Valor total colocado: '+brl(aportado)+' · diferença matemática: '+brl(futuro-aportado)+'</p>';}
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
   else if(a==='fecharmodal'){S.pv=null;S.sino=false;S.hist=null;render()}
   else if(a==='plano'){const p=b.dataset.plano;if(!PLANOS[p])return;S.planoEscolhido=p;PIX.valor=PLANOS[p].valor;renderPaywall();return}
@@ -3359,7 +3364,7 @@ document.addEventListener('click',async e=>{
   else if(a==='recuperar')await recuperarConta();
   else if(a==='copiarcodigo'){if(!S.codigoRecuperacao)return;try{await navigator.clipboard.writeText(S.codigoRecuperacao);toast('Código copiado. Guarde-o em local seguro.')}catch(e){const i=$('#codigo-recuperacao-exibido');if(i){i.select();toast('Selecione e copie o código manualmente.')}}}
   else if(a==='fecharcodigo'){const o=document.getElementById('codigo-recuperacao-modal');if(o)o.remove();S.codigoRecuperacao=null}
-  else if(a==='convite'){const limite=(PLANOS[S.fam.plano||'pro']||PLANOS.pro).limite;if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
+  else if(a==='convite'){const limite=limiteMembros();if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
   }catch(err){console.error('Falha em ação do aplicativo:',a,err);toast('Não foi possível concluir esta ação: '+(err?.message||'erro inesperado'),1)}finally{S.busy=false}
 });
 document.addEventListener('change',async e=>{
