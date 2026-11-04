@@ -71,6 +71,12 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeadersFor(origin) });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
   try {
+    const parsedRequest = await parseJsonObjectRequest(req);
+    if (!parsedRequest.ok) {
+      return json({ error: parsedRequest.error }, parsedRequest.status);
+    }
+    const payload = parsedRequest.value;
+
     const authorization = req.headers.get("Authorization") || "";
     const jwt = authorization.replace(/^Bearer\s+/i, "");
     if (!jwt || jwt === authorization) return json({ error: "Sessão não encontrada." }, 401);
@@ -90,11 +96,6 @@ Deno.serve(async (req: Request) => {
     const { data: isAdmin, error: adminCheckError } = await userClient.rpc("eh_admin");
     if (adminCheckError || isAdmin !== true) return json({ error: "Acesso administrativo necessário." }, 403);
 
-    const parsedRequest = await parseJsonObjectRequest(req);
-    if (!parsedRequest.ok) {
-      return json({ error: parsedRequest.error }, parsedRequest.status);
-    }
-    const payload = parsedRequest.value;
     const id = typeof payload.id === "string" ? payload.id : "";
     const action = typeof payload.action === "string" ? payload.action : "";
     if (!/^[0-9a-f-]{36}$/i.test(id) || !["approve", "reject"].includes(action)) {
