@@ -2276,6 +2276,7 @@ function renderAuth(){
           </div>
         </div>
         <label class="aceite" id="landing-terms"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
+        <label class="aceite" id="landing-adult-confirmation" hidden><input type="checkbox" id="confirmar-idade"><span>Confirmo que tenho 18 anos ou mais.</span></label>
         <div id="recuperacao" hidden>
           <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
           <input id="codigo-recuperacao" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de recuperação">
@@ -2294,7 +2295,7 @@ function renderAuth(){
     <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar<br><a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a> · <a href="termos.html" target="_blank" rel="noopener">Termos</a> · <a href="excluir-conta.html" target="_blank" rel="noopener">Exclusão de conta</a> · contato: gustavosena972@gmail.com</footer>
   </div>`;
   const cadastro=modoAcesso==='cadastro';
-  const terms=document.getElementById('landing-terms');if(terms)terms.style.display=cadastro?'flex':'none';
+  const terms=document.getElementById('landing-terms');if(terms)terms.style.display=cadastro?'flex':'none';const age=document.getElementById('landing-adult-confirmation');if(age)age.hidden=!cadastro;
   const criar=document.getElementById('landing-create-row');if(criar)criar.style.display=cadastro?'none':'flex';
   const voltar=document.getElementById('landing-back-login');if(voltar)voltar.style.display=cadastro?'flex':'none';
   const reset=document.querySelector('.landing-login [data-act="reset"]');if(reset)reset.style.display=cadastro?'none':'block';
@@ -2789,11 +2790,12 @@ async function autenticar(a){
   if(username.length<3)return aviso('Digite um usuário com pelo menos 3 caracteres.');
   if(senha.length<8)return aviso('A senha precisa ter pelo menos 8 caracteres.');
   if(a==='cadastrar'&&!$('#aceite').checked)return aviso('Para criar a conta, marque que você leu e aceita os Termos de Uso e a Política de Privacidade.');
+  if(a==='cadastrar'&&!$('#confirmar-idade')?.checked)return aviso('O Copiloto Financeiro é destinado a pessoas com 18 anos ou mais.');
   if(a==='cadastrar'&&modoFamilia==='entrar'&&!codigoFamilia)return aviso('Digite o código de convite enviado pelo responsável da família.');
   const bt=document.querySelectorAll('.login button');bt.forEach(x=>x.disabled=true);aviso(a==='entrar'?'Entrando…':'Criando sua conta…',1);
   try{
     const payload={action:a==='entrar'?'login':'signup',username,password:senha};
-    if(a==='cadastrar'){payload.name=nome;payload.acceptedTerms=true;}
+    if(a==='cadastrar'){payload.name=nome;payload.acceptedTerms=true;payload.acceptedAdult=true;}
     const response=await fetch(SB_URL+'/functions/v1/autenticacao-usuario',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify(payload)});
     const result=await response.json();if(!response.ok)throw new Error(result.error||'Não foi possível autenticar.');
     const{error}=await sb.auth.setSession(result.session);if(error)throw error;
