@@ -2045,9 +2045,9 @@ async function boot(){
   // Isola permissões e dados entre sessões diferentes.
   S.admin=false;S.adm=null;S.admPend=0;S.me=null;S.fam=null;
   if(S.rt){try{sb.removeChannel(S.rt)}catch(e){}S.rt=null}
+  await carregarConfig();
   if(!S.user){renderAuth();checarServidor();return}
   $('#app').innerHTML='<div class="auth mu">Carregando…</div>';
-  await carregarConfig();
   const adminCheck=await sb.rpc('eh_admin');
   if(adminCheck.error)throw adminCheck.error;
   S.admin=adminCheck.data===true;
@@ -3017,14 +3017,11 @@ async function carregarAdmin(){
   ]);
   S.adm={r,g};S.admPend=r.pendentes;render();}
 function viewAdmin(){
-  const A=S.adm||{r:{},l:[],g:[]},r=A.r,code=pixPayload(PIX);
-  const linhas=A.l.map(x=>`<tr><td>${new Date(x.informado_em).toLocaleString('pt-BR')}</td><td>${esc(x.familia)}<div class="mu">${esc(x.email||'')}</div></td><td>${esc(x.pagador_nome)}<div class="mu">${esc(x.horario_informado||'')}</div></td><td>${brl(x.valor)}</td>
-   <td>${x.status==='pendente'?`<input type="number" id="dias_${x.id}" value="${PIX.dias}" min="1" style="width:70px"> dias <button class="chip" data-act="aprovar" data-id="${x.id}">✔ Aprovar</button> <button class="red chip" data-act="recusar" data-id="${x.id}">Recusar</button>`:esc(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5" class="mu" style="padding:14px">Nenhum pagamento informado ainda.</td></tr>';
+  if(!S.admin)throw new Error('Acesso administrativo não autorizado.');
+  const A=S.adm||{r:{},g:[]},r=A.r;
   const linhasPlay=(A.g||[]).map(x=>`<tr><td>${new Date(x.criado_em).toLocaleString('pt-BR')}</td><td>${esc(x.familia)}<div class="mu">${esc(x.email||'')}</div></td><td>${esc(x.plano.toUpperCase())}<div class="mu">${esc(x.produto_id)}</div></td><td>${brl(x.valor)}</td><td>${x.status==='pendente'?'<button class="chip" data-act="aprovarplay" data-id="'+x.id+'">✔ Aprovar 30 dias</button> <button class="red chip" data-act="recusarplay" data-id="'+x.id+'">Reembolsar e recusar</button>':esc(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5" class="mu" style="padding:14px">Nenhuma compra Google Play.</td></tr>';
-  return `<div class="cards"><div class="card"><small>Contas criadas</small><b>${r.contas??0}</b></div><div class="card"><small>Assinaturas ativas</small><b class="pos">${r.ativas??0}</b></div><div class="card"><small>Pedidos a conferir</small><b>${r.pendentes??0}</b></div><div class="card"><small>Receita total</small><b class="pos">${brl(r.receita_total)}</b></div><div class="card"><small>Últimos 30 dias</small><b>${brl(r.receita_30d)}</b></div><div class="card"><small>Vencem em 7 dias</small><b>${r.vencem_7d??0}</b></div></div>
-  <div class="card" style="margin-bottom:14px"><b>Pagamentos informados</b><div class="mu" style="margin:4px 0 8px">Confira no app do seu banco se o Pix chegou (valor, nome e horário) e só então aprove.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Informado</th><th>Família</th><th>Pagador</th><th>Valor</th><th>Ação</th></tr></thead><tbody>${linhas}</tbody></table></div></div>
-  <div class="card" style="margin-bottom:14px"><b>Compras Google Play</b><div class="mu" style="margin:4px 0 8px">A compra só libera 30 dias após a aprovação. A recusa solicita reembolso e revogação pela Google Play.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Compra</th><th>Família</th><th>Plano / produto</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${linhasPlay}</tbody></table></div></div>
-  <div class="card"><b>QR de referência do plano Pro</b><div class="mu" style="margin:4px 0">Confira o nome e o valor de ${brl(PLANOS.pro.valor)} em outro banco. No checkout, o QR muda conforme o plano escolhido.</div><div class="qrbox">${qrSvg(code)}</div><input readonly value="${code}" onclick="this.select()" style="width:100%;font-size:11px"></div>`;
+  return `<div class="cards"><div class="card"><small>Contas criadas</small><b>${r.contas??0}</b></div><div class="card"><small>Assinaturas ativas</small><b class="pos">${r.ativas??0}</b></div><div class="card"><small>Compras pendentes</small><b>${r.pendentes??0}</b></div><div class="card"><small>Receita total</small><b class="pos">${brl(r.receita_total)}</b></div><div class="card"><small>Últimos 30 dias</small><b>${brl(r.receita_30d)}</b></div><div class="card"><small>Vencem em 7 dias</small><b>${r.vencem_7d??0}</b></div></div>
+  <div class="card" style="margin-bottom:14px"><b>Compras Google Play</b><div class="mu" style="margin:4px 0 8px">A compra só libera 30 dias após a aprovação. A recusa solicita reembolso e revogação pela Google Play.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Compra</th><th>Família</th><th>Plano / produto</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${linhasPlay}</tbody></table></div></div>`;
 }
 const catGrupos=[['fixas','Fixas / Financiamentos'],['cartoes','Cartões de Crédito'],['retirada','Retirada mensal'],['variaveis','Outras / Variáveis'],['receita','Receita']];
 function viewCats2(){
