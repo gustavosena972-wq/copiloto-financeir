@@ -32,6 +32,9 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         "copiloto_ultra_30d"
     )
     private val productDetails = mutableMapOf<String, ProductDetails>()
+    private var pendingPurchaseProductId: String? = null
+    private var isConnectingBilling = false
+    private var isLoadingProductDetails = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,12 +90,17 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             queryExistingPurchases()
             return
         }
+        if (isConnectingBilling) return
+
+        isConnectingBilling = true
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(result: BillingResult) {
+                isConnectingBilling = false
                 if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                     loadProducts()
                     queryExistingPurchases()
                 } else {
+                    pendingPurchaseProductId = null
                     dispatchToWeb(
                         "copiloto:play-error",
                         JSONObject().put("message", "Não foi possível conectar à Google Play.")
@@ -101,12 +109,15 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             }
 
             override fun onBillingServiceDisconnected() {
+                isConnectingBilling = false
                 // A reconexão automática está habilitada no BillingClient.
             }
         })
     }
 
     private fun loadProducts() {
+        if (isLoadingProductDetails || !billingClient.isReady) return
+        isLoadingProductDetails = true
         val products = productIds.map { id ->
             QueryProductDetailsParams.Product.newBuilder()
                 .setProductId(id)
@@ -118,7 +129,9 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             .build()
 
         billingClient.queryProductDetailsAsync(params) { result, queryResult ->
+            isLoadingProductDetails = false
             if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+                pendingPurchaseProductId = null
                 dispatchToWeb(
                     "copiloto:play-error",
                     JSONObject().put("message", "Não foi possível carregar os planos da Google Play.")
@@ -139,7 +152,25 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 )
             }
             dispatchToWeb("copiloto:play-products", JSONObject().put("products", items))
+            launchPendingPurchaseIfReady()
         }
+    }
+
+    private fun launchPendingPurchaseIfReady() {
+        val productId = pendingPurchaseProductId ?: return
+        if (!billingClient.isReady || isLoadingProductDetails) return
+
+        if (productDetails[productId] == null) {
+            pendingPurchaseProductId = null
+            dispatchToWeb(
+                "copiloto:play-error",
+                JSONObject().put("message", "Este plano não está disponível na Google Play.")
+            )
+            return
+        }
+
+        pendingPurchaseProductId = null
+        launchPurchase(productId)
     }
 
     private fun queryExistingPurchases() {
@@ -250,7 +281,16 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 return
             }
             runOnUiThread {
-                if (billingClient.isReady) launchPurchase(productId) else connectBilling()
+                pendingPurchaseProductId = productId
+                if (billingClient.isReady) {
+                    if (productDetails[productId] != null) {
+                        launchPendingPurchaseIfReady()
+                    } else {
+                        loadProducts()
+                    }
+                } else {
+                    connectBilling()
+                }
             }
         }
     }
