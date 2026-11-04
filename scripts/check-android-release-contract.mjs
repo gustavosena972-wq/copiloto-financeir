@@ -33,3 +33,6 @@ assert.ok(html.includes("payload.acceptedAdult=true"), "signup must submit adult
 assert.ok(auth.includes("body?.acceptedAdult !== true"), "server must enforce adult eligibility, not trust the browser alone");
 
 console.log("Android/Cloudflare/Google Play release contract: OK");
+
+assert.ok(html.includes("const precoSelecionado = S.playProducts?.[produtoSelecionado]?.formattedPrice"), "selected plan summary must display the actual Google Play price");
+assert.ok(!html.includes("${brl(plano.valor)}"), "paywall must not display stale web/Pix prices as the Google Play checkout price");
