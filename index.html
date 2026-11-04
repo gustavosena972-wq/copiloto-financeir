@@ -1962,6 +1962,40 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 .landing-plan-cta{font-family:inherit;border:0;cursor:pointer}
 .landing-plan-cta:focus-visible,.landing-hero-actions a:focus-visible{outline:3px solid #88ad88;outline-offset:3px}
 </style>
+<style id="mobile-app-fit">
+/* Ajustes de uso em celular e WebView Android */
+html{min-height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior-y:contain}
+body{min-height:100vh;min-height:100dvh;overflow-x:hidden}
+button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+button,[role="button"]{touch-action:manipulation}
+#toast{bottom:max(16px,env(safe-area-inset-bottom))}
+@media(max-width:640px){
+  body{min-height:100dvh;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  .wrap{width:100%;max-width:100%;padding:14px 12px max(18px,env(safe-area-inset-bottom))}
+  .top{gap:8px;align-items:flex-start}
+  .tabs{width:100%;max-width:100%;display:flex;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:1 0 auto;min-height:42px;white-space:nowrap}
+  .bar,.row{gap:7px}
+  button{min-height:42px}
+  input,select,textarea{font-size:16px;max-width:100%}
+  .grid2,.iagrid{grid-template-columns:minmax(0,1fr)}
+  .auth{width:calc(100% - 24px);max-width:430px;margin: max(24px,5vh) auto;padding:22px 18px}
+  .hero{min-height:0;border-radius:20px}
+  .art,.login{min-width:0;padding:22px 18px}
+  .finance-stage{min-height:340px;transform:scale(.86);transform-origin:top center;margin-bottom:-42px}
+  .scroll{max-width:100%;overscroll-behavior-x:contain}
+  table{min-width:760px}
+  .modal{padding:10px;align-items:center}
+  .box,.legal{max-height:calc(100dvh - 20px);overflow:auto}
+}
+@media(max-width:380px){
+  .wrap{padding-left:10px;padding-right:10px}
+  .cards{grid-template-columns:1fr 1fr;gap:12px 8px}
+  .pix-plans,.marketing-plans{grid-template-columns:1fr 1fr}
+}
+@supports(height:100dvh){body{min-height:100dvh}}
+</style>
 </head>
 <body>
 <div id="app" class="wrap"></div>
