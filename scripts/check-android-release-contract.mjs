@@ -11,6 +11,10 @@ const html = read("../index.html");
 const releaseWorkflow = read("../.github/workflows/android-release.yml");
 const securityMigrationPath = new URL("../supabase/migrations/20261104190000_restrict_config_app_anon_read.sql", import.meta.url);
 const securityMigration = existsSync(securityMigrationPath) ? readFileSync(securityMigrationPath, "utf8") : "";
+const definerMigrationPath = new URL("../supabase/migrations/20261104193000_harden_security_definer_search_path.sql", import.meta.url);
+const definerMigration = existsSync(definerMigrationPath) ? readFileSync(definerMigrationPath, "utf8") : "";
+const definerRegressionPath = new URL("../supabase/tests/security_definer_search_path.sql", import.meta.url);
+const definerRegression = existsSync(definerRegressionPath) ? readFileSync(definerRegressionPath, "utf8") : "";
 
 const packageName = "br.com.copiloto.financeiro";
 const appOrigin = "https://copiloto-financeir.gustavosena972.workers.dev";
@@ -50,6 +54,12 @@ assert.ok(securityMigration.includes("USING (chave = ANY"), "config_app RLS must
 assert.ok(securityMigration.includes("'pix_chave'") && securityMigration.includes("'contato_email'"), "the app allowlist must preserve only required public configuration keys");
 assert.ok(securityMigration.includes("CREATE POLICY config_ler_authenticated_allowlist") && securityMigration.includes("TO authenticated"), "authenticated users must retain only allowlisted config rows");
 assert.ok(securityMigration.includes("GRANT SELECT (chave, valor) ON TABLE public.config_app TO authenticated"), "authenticated role must retain only the required config columns");
+assert.ok(existsSync(definerMigrationPath), "SECURITY DEFINER search_path hardening migration must exist");
+assert.ok(definerMigration.includes("p.prosecdef") && definerMigration.includes("pg_get_function_identity_arguments"), "hardening migration must cover every existing SECURITY DEFINER function");
+assert.ok(definerMigration.includes("SET search_path TO pg_catalog, public, private, pg_temp"), "SECURITY DEFINER functions must put pg_temp last");
+assert.ok(existsSync(definerRegressionPath), "temporary-object privilege-escalation regression test must exist");
+assert.ok(definerRegression.includes("CREATE TEMP TABLE admins") && definerRegression.includes("public.eh_admin()"), "regression test must verify temp-table shadowing cannot grant admin");
+assert.ok(definerRegression.includes("ROLLBACK"), "database security regression test must leave no persistent changes");
 assert.ok(auth.includes('"https://gustavosena972-wq.github.io"'), "authentication must retain the supported web origin");
 assert.ok(auth.includes(appOrigin), "authentication must allow the canonical Cloudflare origin");
 assert.ok(gradle.includes("compileSdk = 36") && gradle.includes("targetSdk = 36"), "Android must target the current required API level");
