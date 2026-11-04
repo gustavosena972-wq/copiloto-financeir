@@ -195,9 +195,10 @@ Deno.serve(async (req: Request) => {
     const purchase = await verifyPurchase(googleToken, packageName, productId, purchaseToken);
     const tokenHash = await sha256(purchaseToken);
 
-    const { data: existing } = await admin.from("google_play_compras")
+    const { data: existing, error: existingError } = await admin.from("google_play_compras")
       .select("id,status,usuario_id,familia_id")
       .eq("token_hash", tokenHash).maybeSingle();
+    if (existingError) throw existingError;
     if (existing) {
       if (existing.usuario_id !== userData.user.id || existing.familia_id !== membership.familia_id) {
         return json({ error: "Esta compra já está vinculada a outra conta." }, 409);
@@ -226,8 +227,18 @@ Deno.serve(async (req: Request) => {
     });
     if (insertError) {
       if (insertError.code === "23505") {
+        // Another request may have inserted this token after the initial lookup.
+        // Re-read ownership before returning an idempotent success response.
+        const { data: racedPurchase, error: racedLookupError } = await admin.from("google_play_compras")
+          .select("id,status,usuario_id,familia_id")
+          .eq("token_hash", tokenHash).maybeSingle();
+        if (racedLookupError) throw racedLookupError;
+        if (!racedPurchase) throw insertError;
+        if (racedPurchase.usuario_id !== userData.user.id || racedPurchase.familia_id !== membership.familia_id) {
+          return json({ error: "Esta compra já está vinculada a outra conta." }, 409);
+        }
         await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
-        return json({ ok: true, status: "pendente", duplicate: true });
+        return json({ ok: true, status: racedPurchase.status, duplicate: true });
       }
       throw insertError;
     }
