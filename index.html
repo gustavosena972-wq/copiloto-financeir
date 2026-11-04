@@ -2548,15 +2548,40 @@ function viewCats(){
   const a=Object.entries(g).sort((x,y)=>y[1]-x[1]);if(!a.length)return '';const t=a.reduce((s,x)=>s+x[1],0);
   return `<div class="card" style="margin-bottom:14px"><b>Para onde vai o dinheiro</b>${a.slice(0,8).map(([n,v])=>`<div class="catrow"><span>${esc(n)}</span><div class="track"><i style="width:${v/t*100}%"></i></div><span class="mu">${brl(v)} · ${(v/t*100).toFixed(0)}%</span></div>`).join('')}</div>`;
 }
+function calcularOrganizacaoFinanceira(receita, despesas, atrasadas, totalLancamentos, cartoes, dividas){
+  const r=Math.max(0,Number(receita)||0),d=Math.max(0,Number(despesas)||0);
+  if(r<=0)return {score:0,nivel:'Sem dados',motivos:['Cadastre pelo menos uma receita para calcular o indicador.']};
+  const poupanca=Math.max(-1,Math.min(1,(r-d)/r));
+  const atraso=totalLancamentos>0?Math.max(0,Math.min(1,(Number(atrasadas)||0)/totalLancamentos)):0;
+  const cartao=r>0?Math.max(0,Math.min(1,(Number(cartoes)||0)/r)):0;
+  const dividaPeso=r>0?Math.max(0,Math.min(1,(Number(dividas)||0)/r)):0;
+  let score=50+poupanca*30-atraso*20-cartao*10-dividaPeso*10;
+  score=Math.max(0,Math.min(100,Math.round(score)));
+  const motivos=[];
+  if(poupanca>=0.2)motivos.push('Boa margem entre receitas e despesas.');
+  else if(poupanca<0)motivos.push('As despesas estão acima das receitas neste mês.');
+  else motivos.push('A margem disponível para poupança está apertada.');
+  if(atraso>0)motivos.push('Existem contas atrasadas que merecem atenção.');
+  if(cartao>0.3)motivos.push('Os gastos classificados em cartão representam uma parcela relevante da receita.');
+  if(dividaPeso>0.5)motivos.push('As dívidas cadastradas têm peso elevado em relação à receita.');
+  if(!motivos.length)motivos.push('Os lançamentos deste mês estão relativamente equilibrados.');
+  return {score,nivel:score>=80?'Boa organização':score>=60?'Organização em atenção':'Organização precisa de atenção',motivos};
+}
+
 function viewGrupos(){
   const G={fixas:['Fixas / Financiamentos',0],cartoes:['Cartões de Crédito',0],retirada:['Retirada mensal',0],variaveis:['Outras / Variáveis',0]};
   S.lanc.filter(l=>l.tipo==='despesa').forEach(l=>{const c=S.cats.find(x=>x.id===l.categoria_id);const g=(c&&G[c.grupo])?c.grupo:'variaveis';G[g][1]+=Number(l.valor)});
   const rec=S.lanc.filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor),0);const tot=Object.values(G).reduce((a,x)=>a+x[1],0);
   const tx=rec>0?Math.max(0,Math.min(1,(rec-tot)/rec)):0;
+  const atrasadas=S.lanc.filter(l=>l.tipo==='despesa'&&l.status==='atrasado').length;
+  const cartoes=G.cartoes[1];
+  const dividas=(S.plan?.dividas||[]).reduce((a,d)=>a+Math.max(0,Number(d.saldo_devedor)||0),0);
+  const indicador=calcularOrganizacaoFinanceira(rec,tot,atrasadas,S.lanc.length,cartoes,dividas);
   const ring=`<div class="card ring"><svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="#252b40" stroke-width="8"/><circle cx="32" cy="32" r="26" fill="none" stroke="${tx>=.1?'#34d399':'#fbbf24'}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(tx*163.4).toFixed(1)} 163.4"/></svg><div><small class="mu">Taxa de poupança</small><br><b style="font-size:21px">${(tx*100).toFixed(0)}%</b></div></div>`;
+  const indicadorCard=`<div class="card"><small>Indicador de organização</small><b class="${indicador.score>=60?'pos':'neg'}">${indicador.score}/100</b><span class="mu" style="display:block;margin-top:4px">${indicador.nivel}</span><details style="margin-top:7px"><summary style="cursor:pointer">Ver leitura</summary><ul class="mu" style="margin:7px 0 0;padding-left:18px">${indicador.motivos.map(esc).map(x=>'<li>'+x+'</li>').join('')}</ul></details></div>`;
   return `<div class="cards">${Object.entries(G).map(([k,[n,v]])=>`<div class="card"><small>${n}</small><b>${brl(v)}</b>${quickEditButton(k)}</div>`).join('')}
   <div class="card"><small>Total de despesas</small><b class="neg">${brl(tot)}</b>${quickEditButton('despesas')}</div>
-  <div class="card"><small>Saldo → vai para a poupança</small><b class="${rec-tot>=0?'pos':'neg'}">${brl(rec-tot)}</b></div>${ring}</div>`;
+  <div class="card"><small>Saldo → vai para a poupança</small><b class="${rec-tot>=0?'pos':'neg'}">${brl(rec-tot)}</b></div>${ring}${indicadorCard}</div>`;
 }
 function viewAno(){
   const R=S.resumo||[];const MC=Object.fromEntries((S.meta||[]).map(m=>[m.mes,m]));const T=k=>R.reduce((a,r)=>a+Number(r[k]),0);
