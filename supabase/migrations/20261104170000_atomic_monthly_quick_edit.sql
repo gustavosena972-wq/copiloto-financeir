@@ -46,7 +46,7 @@ begin
 
   if exists (
     select 1
-      from jsonb_array_elements(p_itens) as item
+      from jsonb_array_elements(p_itens) as entries(item)
      where jsonb_typeof(item) <> 'object'
         or jsonb_typeof(item->'id') <> 'string'
         or jsonb_typeof(item->'valor') <> 'number'
