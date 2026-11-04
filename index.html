@@ -2010,7 +2010,7 @@ if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div
 const sb=supabase.createClient(SB_URL,SB_KEY);
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null};
+const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set()};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -2967,7 +2967,7 @@ async function fecharAno(){
 }
 const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button><button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>`;
 /*PIX*/
-const PIX={chave:'+5531999758385',nome:'COPILOTO FINANCEIRO',cidade:'CONTAGEM',valor:20,dias:30};
+const PIX={chave:'',nome:'COPILOTO FINANCEIRO',cidade:'CONTAGEM',valor:20,dias:30};
 const PLANOS={pro:{nome:'Pro',valor:20,limite:2},max:{nome:'Max',valor:30,limite:6},ultra:{nome:'Ultra',valor:50}};
 const planoAtual=()=>PLANOS[S.planoEscolhido||S.fam?.plano||'pro']||PLANOS.pro;
 function crc16(t){let c=0xFFFF;for(let i=0;i<t.length;i++){c^=t.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,'0')}
@@ -2993,19 +2993,60 @@ async function renderPaywall(){
     <div class="pix-layout"><section class="pix-card">
       <div class="pix-heading"><span class="pix-kicker">COMPRA PELA GOOGLE PLAY</span><h1>${S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date()?'Renove o acesso':'Escolha o plano da família'}</h1><p>Selecione um plano. A compra é única, concede 30 dias após a aprovação manual e não tem renovação automática.</p></div>
       <div class="pix-plan-grid">
-        <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${brl(PLANOS.pro.valor)}</strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
-        <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${brl(PLANOS.max.valor)}</strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas.</span></button>
-        <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${brl(PLANOS.ultra.valor)}</strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span></button>
+        <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${S.playProducts?.copiloto_pro_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
+        <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${S.playProducts?.copiloto_max_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas.</span></button>
+        <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${S.playProducts?.copiloto_ultra_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span></button>
       </div>
       <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${brl(plano.valor)}</strong></div>
         <div class="pix-payment" hidden><b>Pagamento processado pela Google Play</b></div>
-        <p class="pix-checkout-disclaimer">A compra é feita exclusivamente pela Google Play no aplicativo Android. Depois da verificação, o pedido fica aguardando aprovação do administrador. Não há pagamento por Pix neste aplicativo.</p>
+        <p class="pix-checkout-disclaimer">A compra é processada pela Google Play. O preço final é exibido pela loja antes da confirmação. Após a validação do servidor, o pedido aguarda aprovação do administrador.</p>
+        <button type="button" class="pix-submit" data-act="comprarplay" data-product-id="${S.planoEscolhido==="max"?"copiloto_max_30d":S.planoEscolhido==="ultra"?"copiloto_ultra_30d":"copiloto_pro_30d"}" ${window.CopilotoPlayBilling?"":"disabled"}>${window.CopilotoPlayBilling?"Comprar pela Google Play":"Disponível no aplicativo Android"}</button>
       </div>
       <div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div>
-    </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a aprovação do administrador.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Abra o aplicativo Android para concluir a compra pela Google Play.</span></div></aside></div>
+    </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a aprovação do administrador.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Para comprar, utilize o aplicativo Android oficial. O navegador não inicia pagamentos Google Play.</span></div></aside></div>
   </main>`;
   clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);
 }
+
+async function enviarCompraGooglePlay(detail){
+  const productId=detail?.products?.find(id=>["copiloto_pro_30d","copiloto_max_30d","copiloto_ultra_30d"].includes(id));
+  const purchaseToken=detail?.purchaseToken;
+  if(!productId||typeof purchaseToken!=="string"||purchaseToken.length<20){
+    toast("A Google Play retornou dados incompletos da compra.",1);return;
+  }
+  if(S.playTokensProcessing.has(purchaseToken))return;
+  S.playTokensProcessing.add(purchaseToken);
+  try{
+    const{data,error}=await sb.functions.invoke("google-play-purchase",{body:{productId,purchaseToken}});
+    if(error)throw new Error("Não foi possível validar a compra no servidor.");
+    if(data?.error)throw new Error(data.error);
+    toast(data?.status==="pendente"?"Compra validada e enviada para aprovação.":"Compra já registrada. Atualizando o acesso.");
+    await boot();
+  }catch(error){
+    toast(error?.message||"Falha ao validar a compra. Abra novamente o aplicativo para tentar de novo.",1);
+  }finally{
+    S.playTokensProcessing.delete(purchaseToken);
+  }
+}
+
+window.addEventListener("copiloto:play-bridge-ready",()=>{
+  if(window.CopilotoPlayBilling){
+    window.CopilotoPlayBilling.queryProducts();
+    if(document.querySelector(".pix-page"))renderPaywall();
+  }
+});
+window.addEventListener("copiloto:play-products",event=>{
+  const products=event.detail?.products;
+  if(!Array.isArray(products))return;
+  S.playProducts=Object.fromEntries(products.filter(p=>p?.productId).map(p=>[p.productId,p]));
+  if(document.querySelector(".pix-page"))renderPaywall();
+});
+window.addEventListener("copiloto:play-purchase",event=>{void enviarCompraGooglePlay(event.detail)});
+window.addEventListener("copiloto:play-existing-purchase",event=>{void enviarCompraGooglePlay(event.detail)});
+window.addEventListener("copiloto:play-pending",event=>toast(event.detail?.message||"Compra pendente na Google Play.",1));
+window.addEventListener("copiloto:play-cancelled",event=>toast(event.detail?.message||"Compra cancelada."));
+window.addEventListener("copiloto:play-error",event=>toast(event.detail?.message||"Falha na Google Play.",1));
+
 async function confirmarAdmin(){
   const {data,error}=await sb.rpc('eh_admin');
   if(error||data!==true){S.admin=false;S.adm=null;S.admPend=0;if(S.view==='admin')S.view='planilha';throw new Error('Acesso administrativo não autorizado.');}
@@ -3233,7 +3274,14 @@ document.addEventListener('click',async e=>{
     if(error)return toast(/uq_pagamento|duplicate/.test(error.message)?'Você já tem um aviso de pagamento em análise.':error.message,1);
     toast('Aviso enviado! Assim que o Pix for conferido, o acesso é liberado.');await boot()}
   else if(a==='copiarpix'){try{await navigator.clipboard.writeText(S.pixcode);toast('Código Pix copiado')}catch(e){toast('Não consegui copiar: selecione o código acima e copie.',1)}}
-  else if(a==='verstatus')await boot();
+  else if(a==='comprarplay'){
+     const productId=b.dataset.productId;
+     if(!window.CopilotoPlayBilling)return toast('Abra o aplicativo Android para comprar pela Google Play.',1);
+     if(!['copiloto_pro_30d','copiloto_max_30d','copiloto_ultra_30d'].includes(productId))return toast('Produto inválido. Atualize o aplicativo.',1);
+     window.CopilotoPlayBilling.purchase(productId);
+     toast('Abrindo a tela segura de pagamento da Google Play…');
+   }
+   else if(a==='verstatus')await boot();
   else if(a==='aprovar'){const dias=parseInt(document.getElementById('dias_'+b.dataset.id).value)||PIX.dias;await q(sb.rpc('aprovar_pagamento',{p_id:b.dataset.id,p_dias:dias}));toast('✔ Acesso liberado por '+dias+' dias');await carregarAdmin()}
   else if(a==='recusar'){const nota=prompt('Motivo (o cliente vai ver):','Não encontramos o Pix com esse valor/nome.');if(nota===null)return;await q(sb.rpc('recusar_pagamento',{p_id:b.dataset.id,p_nota:nota}));toast('Pedido recusado');await carregarAdmin()}
   else if(a==='aprovarplay'||a==='recusarplay'){
