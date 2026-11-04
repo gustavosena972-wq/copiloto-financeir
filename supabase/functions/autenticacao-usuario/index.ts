@@ -100,6 +100,9 @@ Deno.serve(async (req: Request) => {
       if (body?.acceptedTerms !== true) {
         return json({ error: "É necessário aceitar os Termos e a Política de Privacidade." }, 400);
       }
+      if (body?.acceptedAdult !== true) {
+        return json({ error: "O Copiloto Financeiro é destinado a pessoas com 18 anos ou mais." }, 400);
+      }
     }
 
     const url = Deno.env.get("SUPABASE_URL");
