@@ -17,6 +17,8 @@ on:
       - "supabase/functions/autenticacao-usuario/**"
       - "supabase/functions/google-play-purchase/**"
       - "supabase/functions/google-play-admin/**"
+      - "supabase/functions/_shared/**"
+      - "supabase/tests/**"
       - ".github/workflows/supabase-functions-check.yml"
 
 jobs:
