@@ -13,7 +13,7 @@ const releaseWorkflow = read("../.github/workflows/android-release.yml");
 const packageName = "br.com.copiloto.financeiro";
 const appOrigin = "https://copiloto-financeir.gustavosena972.workers.dev";
 
-assert.match(gradle, new RegExp('applicationId\\s*=\\s*"' + packageName.replaceAll(".", "\\\\.") + '"'));
+assert.ok(gradle.includes('applicationId = "' + packageName + '"'), "Android applicationId must match the registered Play package");
 assert.ok(gradle.includes(appOrigin + "/"), "Android must load the canonical Cloudflare origin");
 assert.ok(activity.includes('allowedHost = "copiloto-financeir.gustavosena972.workers.dev"'));
 assert.ok(activity.includes('allowedPathPrefix = "/"'), "WebView must trust the app root on the canonical host");
