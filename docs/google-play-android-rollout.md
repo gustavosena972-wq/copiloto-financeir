@@ -12,7 +12,7 @@ Esta preparação é isolada em branch própria. Não publicar no GitHub Pages, 
 
 ## Comportamento aprovado
 
-1. A versão web continua com Pix e preços atuais: Pro R$ 20, Max R$ 30, Ultra R$ 50 por 30 dias.
+1. A contratação oficial desta versão usa Google Play Billing no Android. A interface pública não deve apresentar Pix como checkout ativo; preços e disponibilidade exibidos no Android vêm da Google Play.
 2. A versão Android distribuída pela Play Store não apresenta chave, QR Code, botão ou instrução para pagamento Pix externo dentro do app.
 3. A compra Android usa Google Play Billing e os preços de planejamento são Pro R$ 23,90, Max R$ 35,90 e Ultra R$ 59,90. Os preços só devem ser publicados depois de cadastrados e conferidos no Play Console.
 4. A compra é avulsa, com validade de 30 dias e renovação manual pelo cliente; não é assinatura com renovação automática.
