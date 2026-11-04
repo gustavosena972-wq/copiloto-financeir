@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const gradle = read("../android-app/app/build.gradle.kts");
@@ -9,6 +9,8 @@ const auth = read("../supabase/functions/autenticacao-usuario/index.ts");
 const admin = read("../supabase/functions/google-play-admin/index.ts");
 const html = read("../index.html");
 const releaseWorkflow = read("../.github/workflows/android-release.yml");
+const securityMigrationPath = new URL("../supabase/migrations/20261104190000_restrict_config_app_anon_read.sql", import.meta.url);
+const securityMigration = existsSync(securityMigrationPath) ? readFileSync(securityMigrationPath, "utf8") : "";
 
 const packageName = "br.com.copiloto.financeiro";
 const appOrigin = "https://copiloto-financeir.gustavosena972.workers.dev";
@@ -35,6 +37,14 @@ assert.ok(admin.includes('userClient.rpc("eh_admin")'), "admin endpoint must ver
 assert.ok(admin.includes(":refund?revoke=true"), "rejecting a purchase must refund and revoke it through Google Play");
 assert.ok(admin.includes('purchase.status !== "pendente"'), "admin endpoint must reject already-decided purchases");
 assert.ok(!admin.includes('"Access-Control-Allow-Origin": "*"'), "admin function must not use wildcard CORS");
+assert.ok(admin.includes("const rawBody = await req.text()"), "admin endpoint must cap request body size before JSON parsing");
+assert.ok(admin.includes("rawBody.length > 8192"), "admin endpoint must reject oversized request bodies");
+assert.ok(!admin.includes("error: error instanceof Error ? error.message"), "admin endpoint must not disclose raw internal errors to clients");
+assert.ok(!admin.includes("error.message"), "admin endpoint must not return raw database error details");
+assert.ok(existsSync(securityMigrationPath), "config_app anonymous-read hardening migration must exist");
+assert.ok(securityMigration.includes("REVOKE SELECT ON TABLE public.config_app FROM anon, PUBLIC"), "config_app must not be readable by anonymous or PUBLIC roles");
+assert.ok(securityMigration.includes("TO authenticated USING (true)"), "authenticated users must retain config needed by the app");
+assert.ok(securityMigration.includes("GRANT SELECT ON TABLE public.config_app TO authenticated"), "authenticated role must retain explicit config read access");
 assert.ok(auth.includes('"https://gustavosena972-wq.github.io"'), "authentication must retain the supported web origin");
 assert.ok(auth.includes(appOrigin), "authentication must allow the canonical Cloudflare origin");
 assert.ok(gradle.includes("compileSdk = 36") && gradle.includes("targetSdk = 36"), "Android must target the current required API level");
