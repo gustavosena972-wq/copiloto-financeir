@@ -18,6 +18,24 @@ VALUES ('11111111-1111-4111-8111-111111111111');
 
 DO $test$
 BEGIN
+  IF has_table_privilege('anon', 'public.config_app', 'SELECT')
+     OR has_column_privilege('anon', 'public.config_app', 'chave', 'SELECT')
+     OR has_table_privilege('authenticated', 'public.config_app', 'SELECT')
+     OR NOT has_column_privilege('authenticated', 'public.config_app', 'chave', 'SELECT') THEN
+    RAISE EXCEPTION 'SECURITY REGRESSION: config_app client privileges are not restricted as expected';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'config_app'
+      AND policyname = 'config_ler_authenticated_allowlist'
+      AND 'authenticated' = ANY(roles)
+      AND qual LIKE '%chave = ANY%'
+  ) THEN
+    RAISE EXCEPTION 'SECURITY REGRESSION: config_app allowlist policy is missing';
+  END IF;
+
   IF public.eh_admin() IS DISTINCT FROM false THEN
     RAISE EXCEPTION 'SECURITY REGRESSION: a temporary admins table changed the admin authorization result';
   END IF;
