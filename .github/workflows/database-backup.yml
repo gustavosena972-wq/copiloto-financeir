@@ -83,12 +83,19 @@ jobs:
           pg_isready -h 127.0.0.1 -p 54329 -U supabase_admin
           DUMP_FILE="$(find "$RUNNER_TEMP/copiloto-backup" -maxdepth 1 -name '*.dump' -print -quit)"
           test -n "$DUMP_FILE"
+          # Use a fresh database so pre-created Supabase schemas do not conflict.
+          docker run --rm \
+            --network host \
+            -e PGPASSWORD=restore-test-only \
+            postgres:17-alpine \
+            createdb -h 127.0.0.1 -p 54329 -U supabase_admin restore_validation
+
           docker run --rm \
             --network host \
             -v "$RUNNER_TEMP/copiloto-backup:/backup" \
             postgres:17-alpine \
             pg_restore --exit-on-error --no-owner --no-acl \
-              --dbname="postgresql://supabase_admin:restore-test-only@127.0.0.1:54329/postgres" \
+              --dbname="postgresql://supabase_admin:restore-test-only@127.0.0.1:54329/restore_validation" \
               "/backup/$(basename "$DUMP_FILE")"
           echo "Full restore completed in the isolated temporary Supabase PostgreSQL service."
 
