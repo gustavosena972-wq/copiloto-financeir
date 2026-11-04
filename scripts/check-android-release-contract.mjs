@@ -45,6 +45,8 @@ assert.ok(!purchase.includes('"Access-Control-Allow-Origin": "*"'), "purchase fu
 assert.ok(admin.includes('"https://gustavosena972-wq.github.io"'), "admin function must retain the supported web origin");
 assert.ok(admin.includes('userClient.rpc("eh_admin")'), "admin endpoint must verify the caller's administrator role");
 assert.ok(admin.includes(":refund?revoke=true"), "rejecting a purchase must refund and revoke it through Google Play");
+assert.ok(admin.includes("refundStatus"), "admin rejection must distinguish completed refunds from refund requests");
+assert.ok(html.includes("data?.refundStatus === \"completed\""), "admin UI must not claim a refund completed while it is still pending");
 assert.ok(admin.includes('purchase.status !== "pendente"'), "admin endpoint must reject already-decided purchases");
 assert.ok(!admin.includes('"Access-Control-Allow-Origin": "*"'), "admin function must not use wildcard CORS");
 assert.ok(admin.includes("parseJsonObjectRequest(req)"), "admin endpoint must use the bounded request parser before JSON parsing");
