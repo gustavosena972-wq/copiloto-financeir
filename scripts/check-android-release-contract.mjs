@@ -59,6 +59,7 @@ assert.ok(securityMigration.includes("GRANT SELECT (chave, valor) ON TABLE publi
 assert.ok(existsSync(definerMigrationPath), "SECURITY DEFINER search_path hardening migration must exist");
 assert.ok(definerMigration.includes("p.prosecdef") && definerMigration.includes("pg_get_function_identity_arguments"), "hardening migration must cover every existing SECURITY DEFINER function");
 assert.ok(definerMigration.includes("SET search_path TO pg_catalog, public, private, pg_temp"), "SECURITY DEFINER functions must put pg_temp last");
+assert.ok(definerMigration.includes("AND n.nspname = 'public'") && definerMigration.includes("UPDATE %I.%I"), "account cleanup dynamic SQL must be limited to trusted public tables and quoted identifiers");
 assert.ok(existsSync(definerRegressionPath), "temporary-object privilege-escalation regression test must exist");
 assert.ok(definerRegression.includes("CREATE TEMP TABLE admins") && definerRegression.includes("public.eh_admin()"), "regression test must verify temp-table shadowing cannot grant admin");
 assert.ok(definerRegression.includes("public.config_app") && definerRegression.includes("config_ler_authenticated_allowlist"), "regression test must verify anonymous config access is revoked");
