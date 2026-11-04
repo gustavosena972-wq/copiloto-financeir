@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { parseJsonObjectRequest } from "../_shared/security.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://gustavosena972-wq.github.io",
@@ -127,21 +128,11 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
 
   try {
-    const rawBody = await req.text();
-    if (new TextEncoder().encode(rawBody).byteLength > 8192) {
-      return json({ error: "Solicitação muito grande." }, 413);
+    const parsedRequest = await parseJsonObjectRequest(req);
+    if (!parsedRequest.ok) {
+      return json({ error: parsedRequest.error }, parsedRequest.status);
     }
-
-    let body: unknown;
-    try {
-      body = JSON.parse(rawBody);
-    } catch {
-      return json({ error: "Corpo JSON inválido." }, 400);
-    }
-    if (!body || typeof body !== "object" || Array.isArray(body)) {
-      return json({ error: "Corpo da solicitação inválido." }, 400);
-    }
-    const payload = body as Record<string, unknown>;
+    const payload = parsedRequest.value;
     const authorization = req.headers.get("Authorization") || "";
     const jwt = authorization.replace(/^Bearer\s+/i, "");
     if (!jwt || jwt === authorization) return json({ error: "Sessão não encontrada." }, 401);
