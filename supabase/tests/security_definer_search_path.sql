@@ -1,4 +1,5 @@
--- Run with: supabase test db
+-- Execute in the Supabase SQL Editor after applying the hardening migration.
+-- The transaction is rolled back; no persistent test data is created.
 -- The fake identity is deliberately not an administrator. A temporary table with
 -- the same name as public.admins must never turn this authenticated session into admin.
 BEGIN;
