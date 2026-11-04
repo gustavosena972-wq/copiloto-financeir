@@ -166,7 +166,7 @@ Deno.serve(async (req: Request) => {
       });
 
       if (createError || !created.user) {
-        return json({ error: createError?.message ?? "Não foi possível criar a conta." }, 400);
+        return json({ error: "Não foi possível criar a conta. Confira os dados e tente novamente." }, 400);
       }
 
       const { error: mapError } = await admin.from("login_usuarios").insert({
