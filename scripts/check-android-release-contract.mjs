@@ -115,17 +115,17 @@ assert.ok(releaseWorkflow.includes("upload-artifact@v4"), "signed AAB must be up
 console.log("Android/Cloudflare/Google Play release contract: OK");
 console.log("Signed AAB release gate: OK");
 
-const configLoader = html.match(/async function carregarConfig\\(\\)\\s*\\{([\\s\\S]*?)\\n\\}/)?.[1] || "";
+const configLoader = html.match(/async function carregarConfig\(\)\s*\{([\s\S]*?)\n\}/)?.[1] || "";
 assert.ok(configLoader.includes(".select('chave,valor')"), "config loader must request only columns granted by the hardened config_app policy");
 assert.ok(!configLoader.includes(".select('*')"), "config loader must not request columns outside its least-privilege grant");
 
-const authListener = html.match(/sb\\.auth\\.onAuthStateChange\\(\\(ev,s\\)=>\\{([\\s\\S]*?)\\}\\);/)?.[1] || "";
+const authListener = html.match(/sb\.auth\.onAuthStateChange\(\(ev,s\)=>\{([\s\S]*?)\}\);/)?.[1] || "";
 assert.ok(authListener.includes("scheduleBoot()"), "auth state changes must schedule app boot outside the Supabase auth callback");
 assert.ok(!authListener.includes("boot().catch"), "Supabase API calls must not start synchronously inside onAuthStateChange callbacks");
-assert.match(html, /function scheduleBoot\\(\\)[\\s\\S]*?setTimeout\\(\\(\\)=>\\{[\\s\\S]*?boot\\(\\)\\.catch\\(mostrarErroInicial\\)/, "scheduled boot must run after the auth callback unwinds");
+assert.match(html, /function scheduleBoot\(\)[\s\S]*?setTimeout\(\(\)=>\{[\s\S]*?boot\(\)\.catch\(mostrarErroInicial\)/, "scheduled boot must run after the auth callback unwinds");
 
-const staticActions = new Set([...html.matchAll(/\\bdata-act\\s*=\\s*["']([^"'<>$]+)["']/g)].map((match) => match[1]));
-const handledActions = new Set([...html.matchAll(/(?:if|else\\s+if)\\s*\\(\\s*a\\s*===?\\s*['"]([^'"]+)['"]/g)].map((match) => match[1]));
+const staticActions = new Set([...html.matchAll(/\bdata-act\s*=\s*["']([^"'<>$]+)["']/g)].map((match) => match[1]));
+const handledActions = new Set([...html.matchAll(/(?:if|else\s+if)\s*\(\s*a\s*===?\s*['"]([^'"]+)['"]/g)].map((match) => match[1]));
 const unhandledActions = [...staticActions].filter((action) => !handledActions.has(action));
 assert.deepEqual(unhandledActions, [], "every static data-act UI action must have a delegated handler");
 
@@ -138,11 +138,11 @@ assert.ok(activity.includes("setSupportMultipleWindows(false)"), "WebView must n
 console.log("Web action and auth lifecycle guardrails: OK");
 console.log("Android lifecycle and WebView guardrails: OK");
 
-const csp = html.match(/<meta\\s+http-equiv=["']Content-Security-Policy["']\\s+content=["']([^"']+)["']/i)?.[1] || "";
+const csp = html.match(/<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/i)?.[1] || "";
 assert.ok(csp.includes("default-src 'self'"), "web app must declare a restrictive default Content Security Policy");
 assert.ok(csp.includes("object-src 'none'") && csp.includes("frame-src 'none'"), "web CSP must block plugins and embedded frames");
 assert.ok(csp.includes("https://jlufubazlnrelrbsvsal.supabase.co") && csp.includes("wss://jlufubazlnrelrbsvsal.supabase.co"), "web CSP must allow only the configured Supabase API and realtime origins");
-assert.ok(!/\\beval\\s*\\(/.test(html) && !/new\\s+Function\\s*\\(/.test(html), "web app must not use dynamic code evaluation");
+assert.ok(!/\beval\s*\(/.test(html) && !/new\s+Function\s*\(/.test(html), "web app must not use dynamic code evaluation");
 assert.ok(html.includes("const esc="), "web app must retain a central HTML output-encoding helper");
 assert.ok(!/service_role|-----BEGIN (?:RSA )?PRIVATE KEY-----/.test(html), "web app must not contain server credentials");
 assert.ok(manifest.includes('android:allowBackup="false"') && manifest.includes('android:usesCleartextTraffic="false"'), "Android manifest must disable backup and cleartext traffic");
