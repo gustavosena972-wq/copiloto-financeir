@@ -27,8 +27,8 @@ const appOrigin = "https://copiloto-financeir.gustavosena972.workers.dev";
 
 assert.ok(gradle.includes('applicationId = "' + packageName + '"'), "Android applicationId must match the registered Play package");
 assert.ok(gradle.includes(appOrigin + "/"), "Android must load the canonical Cloudflare origin");
-assert.ok(activity.includes('allowedHost = "copiloto-financeir.gustavosena972.workers.dev"'));
-assert.ok(activity.includes('allowedPathPrefix = "/"'), "WebView must trust the app root on the canonical host");
+assert.ok(trustedUrl.includes('ALLOWED_HOST = "copiloto-financeir.gustavosena972.workers.dev"'), "WebView URL validator must pin the canonical host");
+assert.ok(activity.includes("TrustedAppUrl.isAllowed(uri.toString())"), "WebView navigation must use the strict URL validator");
 assert.ok(purchase.includes('Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME")'), "purchase backend must use the configured Play package");
 assert.ok(purchase.includes('if (!url || !anon || !service || !packageName)'), "purchase backend must fail closed without the package secret");
 assert.ok(purchase.includes(appOrigin), "purchase function must allow the canonical app origin");
