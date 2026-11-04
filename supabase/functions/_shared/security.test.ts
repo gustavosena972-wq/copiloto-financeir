@@ -42,7 +42,7 @@ Deno.test("rejects oversized Content-Length before reading the body", async () =
 });
 
 Deno.test("enforces the byte limit for multibyte UTF-8 payloads", async () => {
-  const encoded = new TextEncoder().encode(JSON.stringify({ value: "é".repeat(4090) }));
+  const encoded = new TextEncoder().encode(JSON.stringify({ value: "é".repeat(4100) }));
   assert(encoded.byteLength > 8192, "test fixture must exceed the byte limit");
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
