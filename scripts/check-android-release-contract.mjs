@@ -79,6 +79,8 @@ assert.ok(activity.includes("private fun launchPendingPurchaseIfReady()"), "queu
 assert.ok(activity.includes("BillingClient.BillingResponseCode.USER_CANCELED"), "Android must handle user-cancelled purchases");
 
 assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke native Play Billing");
+assert.ok(!html.includes('src="./android-play-billing.js"'), "legacy Android billing script must not register duplicate purchase handlers");
+assert.ok(!html.includes('src="./native-play-billing-bridge.js"'), "obsolete bridge shim must not be loaded alongside the native interface");
 assert.ok(html.includes("copiloto:play-purchase"), "web app must receive completed purchase events");
 assert.ok(html.includes("google-play-purchase"), "web app must submit purchase tokens for server verification");
 assert.ok(html.includes("salvar_valores_lancamentos"), "monthly quick edit must use the atomic database RPC");
