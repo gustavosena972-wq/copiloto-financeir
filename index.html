@@ -2990,6 +2990,8 @@ async function renderPaywall(){
   if(S.planoEscolhidoFamilia!==S.fam?.id){S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';S.planoEscolhidoFamilia=S.fam?.id;}
   else if(!PLANOS[S.planoEscolhido])S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';
   const plano=planoAtual();
+  const produtoSelecionado=S.planoEscolhido==="max"?"copiloto_max_30d":S.planoEscolhido==="ultra"?"copiloto_ultra_30d":"copiloto_pro_30d";
+  const precoSelecionado = S.playProducts?.[produtoSelecionado]?.formattedPrice || "Preço na Google Play";
   $('#app').innerHTML=`<main class="pix-page">
     <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>COMPRA E ACESSO FAMILIAR</small></div></header>
     <div class="pix-layout"><section class="pix-card">
@@ -2999,10 +3001,10 @@ async function renderPaywall(){
         <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${S.playProducts?.copiloto_max_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas.</span></button>
         <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${S.playProducts?.copiloto_ultra_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span></button>
       </div>
-      <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${brl(plano.valor)}</strong></div>
+      <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${precoSelecionado}</strong></div>
         <div class="pix-payment" hidden><b>Pagamento processado pela Google Play</b></div>
         <p class="pix-checkout-disclaimer">A compra é processada pela Google Play. O preço final é exibido pela loja antes da confirmação. Após a validação do servidor, o pedido aguarda aprovação do administrador.</p>
-        <button type="button" class="pix-submit" data-act="comprarplay" data-product-id="${S.planoEscolhido==="max"?"copiloto_max_30d":S.planoEscolhido==="ultra"?"copiloto_ultra_30d":"copiloto_pro_30d"}" ${window.CopilotoPlayBilling?"":"disabled"}>${window.CopilotoPlayBilling?"Comprar pela Google Play":"Disponível no aplicativo Android"}</button>
+        <button type="button" class="pix-submit" data-act="comprarplay" data-product-id="${produtoSelecionado}" ${window.CopilotoPlayBilling?"":"disabled"}>${window.CopilotoPlayBilling?"Comprar pela Google Play":"Disponível no aplicativo Android"}</button>
       </div>
       <div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div>
     </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a aprovação do administrador.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Para comprar, utilize o aplicativo Android oficial. O navegador não inicia pagamentos Google Play.</span></div></aside></div>
