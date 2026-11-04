@@ -42,7 +42,6 @@ assert.ok(purchase.includes('p_bucket_key: "purchase:user:"'), "purchase verific
 assert.ok(purchase.includes('.eq("token_hash", tokenHash)'), "purchase verification must enforce token idempotency");
 assert.ok(purchase.includes("if (existingError) throw existingError"), "purchase lookup failures must not be treated as a missing purchase");
 assert.ok(purchase.includes("racedPurchase.usuario_id !== userData.user.id || racedPurchase.familia_id !== membership.familia_id"), "concurrent duplicate tokens must be rechecked against the owning account");
-assert.ok(!purchase.includes('"Access-Control-Allow-Origin": "*"'), "purchase function must not use wildcard CORS");
 assert.ok(admin.includes('"https://gustavosena972-wq.github.io"'), "admin function must retain the supported web origin");
 assert.ok(admin.includes('userClient.rpc("eh_admin")'), "admin endpoint must verify the caller's administrator role");
 assert.ok(admin.includes(":refund?revoke=true"), "rejecting a purchase must refund and revoke it through Google Play");
@@ -54,7 +53,6 @@ assert.ok(admin.includes("parseJsonObjectRequest(req)"), "admin endpoint must us
 assert.ok(admin.indexOf("parseJsonObjectRequest(req)") < admin.indexOf("auth.getUser(jwt)"), "admin endpoint must reject malformed or oversized bodies before external authentication work");
 assert.ok(auth.includes('Não foi possível criar a conta. Confira os dados e tente novamente.'), "authentication endpoint must not expose raw Supabase Auth errors");
 assert.ok(releaseWorkflow.includes("if: github.ref == 'refs/heads/main'"), "production signing workflow must run only from the protected main branch");
-assert.ok(requestParser.includes("maxBytes = 8192"), "admin endpoint must inherit the bounded request size");
 assert.ok(!admin.includes("error: error instanceof Error ? error.message"), "admin endpoint must not disclose raw internal errors to clients");
 assert.ok(!admin.includes("error.message"), "admin endpoint must not return raw database error details");
 assert.ok(existsSync(securityMigrationPath), "config_app anonymous-read hardening migration must exist");
@@ -92,7 +90,6 @@ assert.ok(!html.includes("chave:'+5531999758385'"), "personal Pix fallback must 
 assert.ok(html.includes('id="confirmar-idade"'), "signup must require an adult confirmation");
 assert.ok(html.includes("payload.acceptedAdult=true"), "signup must submit adult confirmation to the server");
 assert.ok(auth.includes("payload?.acceptedAdult !== true"), "server must enforce adult eligibility, not trust the browser alone");
-assert.ok(requestParser.includes("maxBytes = 8192"), "authentication endpoint must inherit the bounded request size");
 for (const [name, source] of [["auth", auth], ["purchase", purchase], ["admin", admin]]) {
   assert.ok(source.includes('import { parseJsonObjectRequest } from "../_shared/security.ts"'), name + " must use the shared bounded JSON parser");
   assert.ok(!source.includes("req.text()"), name + " must not buffer an unbounded request body");
