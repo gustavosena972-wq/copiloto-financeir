@@ -8,7 +8,7 @@ on:
       - "index.html"
       - "privacidade.html"
       - "scripts/**"
-      - "supabase/functions/google-play-*/**"
+      - "supabase/functions/**"
       - "supabase/migrations/**"
       - ".github/workflows/android-build.yml"
   workflow_dispatch:
