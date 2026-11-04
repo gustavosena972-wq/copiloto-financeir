@@ -87,7 +87,7 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Corpo da solicitação inválido." }, 400);
     }
     const payload = body as Record<string, unknown>;
-    const action = payload?.action;
+    const action = typeof payload.action === "string" ? payload.action : "";
     const username = String(payload?.username ?? "").trim().toLowerCase();
 
     if (!["login", "signup", "recover"].includes(action)) {
