@@ -72,6 +72,8 @@ assert.ok(auth.includes(appOrigin), "authentication must allow the canonical Clo
 assert.ok(gradle.includes("compileSdk = 36") && gradle.includes("targetSdk = 36"), "Android must target the current required API level");
 assert.ok(gradle.includes('com.android.billingclient:billing:9.1.0'), "Android must use the pinned Play Billing dependency");
 assert.ok(activity.includes("Purchase.PurchaseState.PENDING"), "Android must handle pending Play purchases");
+assert.ok(activity.includes("private var pendingPurchaseProductId: String? = null"), "purchase requests must survive BillingClient connection startup");
+assert.ok(activity.includes("private fun launchPendingPurchaseIfReady()"), "queued purchases must launch after product details are loaded");
 assert.ok(activity.includes("BillingClient.BillingResponseCode.USER_CANCELED"), "Android must handle user-cancelled purchases");
 
 assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke native Play Billing");
