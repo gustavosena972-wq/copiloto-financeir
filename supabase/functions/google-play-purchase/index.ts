@@ -88,6 +88,25 @@ async function verifyPurchase(accessToken: string, packageName: string, productI
 }
 
 
+async function consumePurchase(
+  accessToken: string,
+  packageName: string,
+  productId: string,
+  purchaseToken: string,
+  consumptionState: unknown,
+): Promise<void> {
+  if (Number(consumptionState) === 1) return;
+  const url = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/"
+    + encodeURIComponent(packageName) + "/purchases/products/"
+    + encodeURIComponent(productId) + "/tokens/" + encodeURIComponent(purchaseToken) + ":consume";
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
+    body: "{}",
+  });
+  if (!response.ok) throw new Error("A Google Play não confirmou o processamento da compra.");
+}
+
 async function sha256(value: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -180,9 +199,9 @@ Deno.serve(async (req: Request) => {
       if (existing.usuario_id !== userData.user.id || existing.familia_id !== membership.familia_id) {
         return json({ error: "Esta compra já está vinculada a outra conta." }, 409);
       }
-      // O produto é consumível: não confirmar nem consumir enquanto aguarda
-      // aprovação manual. O consumo no fluxo administrativo confirma a compra
-      // somente quando o acesso de 30 dias é efetivamente concedido.
+      // Consumir imediatamente após a validação para confirmar a compra à Google Play
+      // dentro do prazo de 3 dias. A liberação do acesso continua sob aprovação administrativa.
+      await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
       return json({ ok: true, status: existing.status, duplicate: true });
     }
 
@@ -203,14 +222,16 @@ Deno.serve(async (req: Request) => {
       status: "pendente",
     });
     if (insertError) {
-      if (insertError.code === "23505") return json({ ok: true, status: "pendente", duplicate: true });
+      if (insertError.code === "23505") {
+        await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
+        return json({ ok: true, status: "pendente", duplicate: true });
+      }
       throw insertError;
     }
 
-    // A compra permanece pendente e sem consumo até a decisão do administrador.
-    // Para estes passes consumíveis, o consumo na aprovação também confirma à
-    // Google Play que o acesso foi concedido. A fila deve ser decidida em até 3 dias;
-    // compras não confirmadas nesse prazo podem ser reembolsadas automaticamente.
+    // A compra é consumida após a persistência do token para cumprir o prazo de confirmação
+    // da Google Play. O acesso de 30 dias só é concedido após aprovação administrativa.
+    await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
     return json({ ok: true, status: "pendente", message: "Compra verificada e enviada para aprovação manual." });
   } catch (error) {
     console.error("google-play-purchase", error);
