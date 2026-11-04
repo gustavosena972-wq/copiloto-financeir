@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const cors = {
-  "Access-Control-Allow-Origin": "https://gustavosena972-wq.github.io",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
@@ -89,10 +89,20 @@ async function sha256(value: string): Promise<string> {
 }
 
 Deno.serve(async (req: Request) => {
+  const origin = req.headers.get("Origin");
+  if (origin && origin !== "https://gustavosena972-wq.github.io" && origin !== "null") {
+    return new Response(JSON.stringify({ error: "Origem não autorizada." }), {
+      status: 403,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "Vary": "Origin" },
+    });
+  }
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
 
   try {
+    const rawBody = await req.text();
+    if (rawBody.length > 8192) return json({ error: "Solicitação muito grande." }, 413);
+    const body = JSON.parse(rawBody);
     const authorization = req.headers.get("Authorization") || "";
     const jwt = authorization.replace(/^Bearer\s+/i, "");
     if (!jwt || jwt === authorization) return json({ error: "Sessão não encontrada." }, 401);
@@ -112,10 +122,14 @@ Deno.serve(async (req: Request) => {
     const { data: userData, error: userError } = await userClient.auth.getUser(jwt);
     if (userError || !userData.user) return json({ error: "Sessão inválida." }, 401);
 
-    const body = await req.json();
-    const productId = String(body?.productId || "");
-    const purchaseToken = String(body?.purchaseToken || "");
-    if (!products[productId] || purchaseToken.length < 20 || purchaseToken.length > 4096) {
+    if (packageName !== "com.gustavosena.copilotofinanceiro") {
+      return json({ error: "Identificador Android não corresponde à configuração do aplicativo." }, 503);
+    }
+    const productId = body?.productId;
+    const purchaseToken = body?.purchaseToken;
+    if (typeof productId !== "string" || !products[productId]
+        || typeof purchaseToken !== "string"
+        || purchaseToken.length < 20 || purchaseToken.length > 4096) {
       return json({ error: "Dados da compra inválidos." }, 400);
     }
 
@@ -124,6 +138,30 @@ Deno.serve(async (req: Request) => {
       .from("membros").select("familia_id").eq("usuario_id", userData.user.id).maybeSingle();
     if (memberError || !membership?.familia_id) {
       return json({ error: "Não encontramos a família vinculada a esta conta." }, 403);
+    }
+
+    const ip = req.headers.get("cf-connecting-ip")
+      || req.headers.get("x-real-ip")
+      || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || "";
+    const rateChecks = await Promise.all([
+      admin.rpc("consume_auth_rate_limit", {
+        p_bucket_key: "purchase:user:" + await sha256(userData.user.id),
+        p_max_attempts: 10,
+        p_window_seconds: 600,
+      }),
+      ...(ip ? [admin.rpc("consume_auth_rate_limit", {
+        p_bucket_key: "purchase:ip:" + await sha256(ip),
+        p_max_attempts: 60,
+        p_window_seconds: 600,
+      })] : []),
+    ]);
+    if (rateChecks.some((check) => check.error)) {
+      console.error("google-play-purchase rate-limit unavailable");
+      return json({ error: "Validação temporariamente indisponível. Tente novamente." }, 503);
+    }
+    if (rateChecks.some((check) => check.data !== true)) {
+      return json({ error: "Muitas tentativas de compra. Aguarde alguns minutos." }, 429);
     }
 
     const googleToken = await googleAccessToken();
@@ -171,6 +209,6 @@ Deno.serve(async (req: Request) => {
     return json({ ok: true, status: "pendente", message: "Compra verificada e enviada para aprovação manual." });
   } catch (error) {
     console.error("google-play-purchase", error);
-    return json({ error: error instanceof Error ? error.message : "Não foi possível validar a compra." }, 400);
+    return json({ error: "Não foi possível validar a compra. Tente novamente." }, 500);
   }
 });
