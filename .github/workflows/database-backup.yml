@@ -11,6 +11,18 @@ permissions:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    services:
+      restore-db:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: restore-test-only
+        ports:
+          - 54329:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     steps:
       - name: Validate required secrets
         env:
@@ -39,6 +51,49 @@ jobs:
             --output "$RUNNER_TEMP/copiloto-backup/$FILE.gpg" \
             "$RUNNER_TEMP/copiloto-backup/$FILE"
           rm -f "$RUNNER_TEMP/copiloto-backup/$FILE"
+
+      - name: Decrypt and validate backup archive
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          ENCRYPTED_FILE="$(find "$RUNNER_TEMP/copiloto-backup" -maxdepth 1 -name '*.dump.gpg' -print -quit)"
+          test -n "$ENCRYPTED_FILE"
+          DUMP_FILE="${ENCRYPTED_FILE%.gpg}"
+          gpg --batch --yes --pinentry-mode loopback \
+            --passphrase "$BACKUP_PASSPHRASE" \
+            --output "$DUMP_FILE" --decrypt "$ENCRYPTED_FILE"
+          docker run --rm \
+            -v "$RUNNER_TEMP/copiloto-backup:/backup" \
+            postgres:17-alpine \
+            pg_restore --list "/backup/$(basename "$DUMP_FILE")" > "$RUNNER_TEMP/restore-contents.txt"
+          test -s "$RUNNER_TEMP/restore-contents.txt"
+          echo "Encrypted archive decrypted and PostgreSQL TOC validated."
+
+      - name: Restore backup into isolated temporary PostgreSQL
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            if pg_isready -h 127.0.0.1 -p 54329 -U postgres; then
+              break
+            fi
+            sleep 2
+          done
+          pg_isready -h 127.0.0.1 -p 54329 -U postgres
+          DUMP_FILE="$(find "$RUNNER_TEMP/copiloto-backup" -maxdepth 1 -name '*.dump' -print -quit)"
+          test -n "$DUMP_FILE"
+          docker run --rm \
+            --network host \
+            -v "$RUNNER_TEMP/copiloto-backup:/backup" \
+            postgres:17-alpine \
+            pg_restore --exit-on-error --no-owner --no-acl \
+              --dbname="postgresql://postgres:restore-test-only@127.0.0.1:54329/postgres" \
+              "/backup/$(basename "$DUMP_FILE")"
+          echo "Full restore completed in the isolated temporary PostgreSQL service."
+
+      - name: Remove decrypted backup
+        if: always()
+        run: rm -f "$RUNNER_TEMP/copiloto-backup/"*.dump
 
       - name: Upload encrypted backup artifact
         uses: actions/upload-artifact@v4
