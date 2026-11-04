@@ -128,8 +128,20 @@ Deno.serve(async (req: Request) => {
 
   try {
     const rawBody = await req.text();
-    if (rawBody.length > 8192) return json({ error: "Solicitação muito grande." }, 413);
-    const body = JSON.parse(rawBody);
+    if (new TextEncoder().encode(rawBody).byteLength > 8192) {
+      return json({ error: "Solicitação muito grande." }, 413);
+    }
+
+    let body: unknown;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return json({ error: "Corpo JSON inválido." }, 400);
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return json({ error: "Corpo da solicitação inválido." }, 400);
+    }
+    const payload = body as Record<string, unknown>;
     const authorization = req.headers.get("Authorization") || "";
     const jwt = authorization.replace(/^Bearer\s+/i, "");
     if (!jwt || jwt === authorization) return json({ error: "Sessão não encontrada." }, 401);
@@ -149,8 +161,8 @@ Deno.serve(async (req: Request) => {
     const { data: userData, error: userError } = await userClient.auth.getUser(jwt);
     if (userError || !userData.user) return json({ error: "Sessão inválida." }, 401);
 
-    const productId = body?.productId;
-    const purchaseToken = body?.purchaseToken;
+    const productId = payload.productId;
+    const purchaseToken = payload.purchaseToken;
     if (typeof productId !== "string" || !products[productId]
         || typeof purchaseToken !== "string"
         || purchaseToken.length < 20 || purchaseToken.length > 4096) {
