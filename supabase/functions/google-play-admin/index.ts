@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { parseJsonObjectRequest } from "../_shared/security.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://gustavosena972-wq.github.io",
@@ -89,22 +90,11 @@ Deno.serve(async (req: Request) => {
     const { data: isAdmin, error: adminCheckError } = await userClient.rpc("eh_admin");
     if (adminCheckError || isAdmin !== true) return json({ error: "Acesso administrativo necessário." }, 403);
 
-    const rawBody = await req.text();
-    if (new TextEncoder().encode(rawBody).byteLength > 8192) {
-      return json({ error: "Solicitação muito grande." }, 413);
+    const parsedRequest = await parseJsonObjectRequest(req);
+    if (!parsedRequest.ok) {
+      return json({ error: parsedRequest.error }, parsedRequest.status);
     }
-
-    let body: unknown;
-    try {
-      body = JSON.parse(rawBody);
-    } catch {
-      return json({ error: "Corpo JSON inválido." }, 400);
-    }
-    if (!body || typeof body !== "object" || Array.isArray(body)) {
-      return json({ error: "Corpo da solicitação inválido." }, 400);
-    }
-
-    const payload = body as Record<string, unknown>;
+    const payload = parsedRequest.value;
     const id = typeof payload.id === "string" ? payload.id : "";
     const action = typeof payload.action === "string" ? payload.action : "";
     if (!/^[0-9a-f-]{36}$/i.test(id) || !["approve", "reject"].includes(action)) {
