@@ -65,7 +65,7 @@ assert.ok(html.includes("A contratação pela Google Play"), "signup checkout co
 assert.ok(!html.includes("chave:'+5531999758385'"), "personal Pix fallback must not be hardcoded in public HTML");
 assert.ok(html.includes('id="confirmar-idade"'), "signup must require an adult confirmation");
 assert.ok(html.includes("payload.acceptedAdult=true"), "signup must submit adult confirmation to the server");
-assert.ok(auth.includes("body?.acceptedAdult !== true"), "server must enforce adult eligibility, not trust the browser alone");
+assert.ok(auth.includes("payload?.acceptedAdult !== true"), "server must enforce adult eligibility, not trust the browser alone");
 assert.ok(auth.includes("byteLength > 8192"), "authentication endpoint must cap request size in bytes");
 assert.ok(html.includes("const precoSelecionado = S.playProducts?.[produtoSelecionado]?.formattedPrice"), "selected plan summary must display the actual Google Play price");
 assert.ok(!html.includes("${brl(plano.valor)}"), "paywall must not display stale web/Pix prices as the Google Play checkout price");
