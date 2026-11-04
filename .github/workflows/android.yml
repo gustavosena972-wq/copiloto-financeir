@@ -27,6 +27,9 @@ jobs:
           cp android-play-billing.js android/app/src/main/assets/
           cp native-play-billing-bridge.js android/app/src/main/assets/
           cp manifest.webmanifest android/app/src/main/assets/
+          cp privacidade.html android/app/src/main/assets/
+          cp termos.html android/app/src/main/assets/
+          cp excluir-conta.html android/app/src/main/assets/
       - name: Build debug APK and release AAB
         working-directory: android
         run: |
