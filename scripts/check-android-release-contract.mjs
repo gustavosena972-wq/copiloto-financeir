@@ -23,6 +23,25 @@ assert.ok(purchase.includes(appOrigin), "purchase function must allow the canoni
 assert.ok(purchase.includes("async function consumePurchase"), "consumable Play purchases must be acknowledged within the store deadline");
 assert.ok(purchase.includes("await consumePurchase(googleToken"), "server must consume verified purchases after persisting them");
 assert.ok(admin.includes(appOrigin), "admin function must allow the canonical app origin");
+
+assert.ok(purchase.includes('"https://gustavosena972-wq.github.io"'), "purchase function must retain the supported web origin");
+assert.ok(purchase.includes("Number(data.purchaseState) !== 0"), "purchase function must reject purchases not confirmed by Google Play");
+assert.ok(purchase.includes("Number(data.quantity || 1) !== 1"), "purchase function must reject unexpected purchase quantities");
+assert.ok(purchase.includes('p_bucket_key: "purchase:user:"'), "purchase verification must apply per-user rate limiting");
+assert.ok(purchase.includes('.eq("token_hash", tokenHash)'), "purchase verification must enforce token idempotency");
+assert.ok(!purchase.includes('"Access-Control-Allow-Origin": "*"'), "purchase function must not use wildcard CORS");
+assert.ok(admin.includes('"https://gustavosena972-wq.github.io"'), "admin function must retain the supported web origin");
+assert.ok(admin.includes('userClient.rpc("eh_admin")'), "admin endpoint must verify the caller's administrator role");
+assert.ok(admin.includes(":refund?revoke=true"), "rejecting a purchase must refund and revoke it through Google Play");
+assert.ok(admin.includes('purchase.status !== "pendente"'), "admin endpoint must reject already-decided purchases");
+assert.ok(!admin.includes('"Access-Control-Allow-Origin": "*"'), "admin function must not use wildcard CORS");
+assert.ok(auth.includes('"https://gustavosena972-wq.github.io"'), "authentication must retain the supported web origin");
+assert.ok(auth.includes(appOrigin), "authentication must allow the canonical Cloudflare origin");
+assert.ok(gradle.includes("compileSdk = 36") && gradle.includes("targetSdk = 36"), "Android must target the current required API level");
+assert.ok(gradle.includes('com.android.billingclient:billing:9.1.0'), "Android must use the pinned Play Billing dependency");
+assert.ok(activity.includes("Purchase.PurchaseState.PENDING"), "Android must handle pending Play purchases");
+assert.ok(activity.includes("BillingClient.BillingResponseCode.USER_CANCELED"), "Android must handle user-cancelled purchases");
+
 assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke native Play Billing");
 assert.ok(html.includes("copiloto:play-purchase"), "web app must receive completed purchase events");
 assert.ok(html.includes("google-play-purchase"), "web app must submit purchase tokens for server verification");
