@@ -114,6 +114,22 @@ for (const secret of ["ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "A
 assert.ok(releaseWorkflow.includes("jarsigner -verify"), "release workflow must verify the AAB signature");
 assert.ok(releaseWorkflow.includes("upload-artifact@v4"), "signed AAB must be uploaded as a CI artifact");
 
+
+// Paid-plan entitlement contract: marketing, checkout and feature gates must agree.
+assert.ok(html.includes("pro:{nome:'Pro',valor:23.90,limite:2,produto:'copiloto_pro_30d'"), "Pro must use the canonical 30-day Play product and 2-person limit");
+assert.ok(html.includes("max:{nome:'Max',valor:35.90,limite:6,produto:'copiloto_max_30d'"), "Max must use the canonical 30-day Play product and 6-person limit");
+assert.ok(html.includes("ultra:{nome:'Ultra',valor:59.90,limite:null,produto:'copiloto_ultra_30d'"), "Ultra must use the canonical 30-day Play product");
+assert.ok(html.includes("recursos:{relatorios:true,patrimonioHistorico:true,simulador:true}"), "Ultra must declare all advertised advanced resources");
+assert.ok(html.includes("const limiteMembros=()=>"), "family member limits must come from the canonical plan matrix");
+assert.ok(html.includes("const planoTemRecurso=(recurso)=>"), "advanced entitlements must use the canonical plan matrix");
+assert.ok(html.includes("planoTemRecurso('relatorios')"), "reports must be gated by the plan matrix");
+assert.ok(html.includes("planoTemRecurso('patrimonioHistorico')"), "patrimonial history must be gated by the plan matrix");
+assert.ok(html.includes("planoTemRecurso('simulador')"), "long-term simulator must be gated by the plan matrix");
+assert.ok(html.includes("/ 30 dias"), "public plan cards must describe the one-time 30-day entitlement");
+assert.ok(html.includes("Produtos de compra única: 30 dias de acesso"), "public pricing footnote must match the Google Play purchase model");
+assert.ok(!html.includes("Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50"), "legacy monthly/Pix pricing copy must not remain");
+assert.ok(html.includes("const produtoSelecionado=PLANOS[S.planoEscolhido]?.produto||PLANOS.pro.produto"), "checkout product selection must come from the canonical plan matrix");
+
 console.log("Android/Cloudflare/Google Play release contract: OK");
 console.log("Signed AAB release gate: OK");
 
