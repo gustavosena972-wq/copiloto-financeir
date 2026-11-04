@@ -15,7 +15,8 @@ assert.match(gradle, new RegExp('applicationId\\s*=\\s*"' + packageName.replaceA
 assert.ok(gradle.includes(appOrigin + "/"), "Android must load the canonical Cloudflare origin");
 assert.ok(activity.includes('allowedHost = "copiloto-financeir.gustavosena972.workers.dev"'));
 assert.ok(activity.includes('allowedPathPrefix = "/"'), "WebView must trust the app root on the canonical host");
-assert.ok(purchase.includes('packageName !== "' + packageName + '"'), "purchase backend package guard must match Android");
+assert.ok(purchase.includes('Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME")'), "purchase backend must use the configured Play package");
+assert.ok(purchase.includes('if (!url || !anon || !service || !packageName)'), "purchase backend must fail closed without the package secret");
 assert.ok(purchase.includes(appOrigin), "purchase function must allow the canonical app origin");
 assert.ok(admin.includes(appOrigin), "admin function must allow the canonical app origin");
 assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke native Play Billing");
