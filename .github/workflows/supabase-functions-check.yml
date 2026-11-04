@@ -3,13 +3,16 @@ name: Supabase Edge Functions check
 on:
   pull_request:
     paths:
+      - "supabase/functions/autenticacao-usuario/**"
       - "supabase/functions/google-play-purchase/**"
       - "supabase/functions/google-play-admin/**"
       - ".github/workflows/supabase-functions-check.yml"
   push:
     branches:
+      - main
       - android/google-play-preparacao
     paths:
+      - "supabase/functions/autenticacao-usuario/**"
       - "supabase/functions/google-play-purchase/**"
       - "supabase/functions/google-play-admin/**"
       - ".github/workflows/supabase-functions-check.yml"
@@ -24,6 +27,8 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Type-check authentication function
+        run: deno check supabase/functions/autenticacao-usuario/index.ts
       - name: Type-check Google Play purchase function
         run: deno check supabase/functions/google-play-purchase/index.ts
       - name: Type-check Google Play admin function
