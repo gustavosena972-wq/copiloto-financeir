@@ -150,23 +150,32 @@ Deno.serve(async (req: Request) => {
     if (!orderResponse.ok) {
       return json({ error: "Não foi possível consultar o pedido na Google Play. A solicitação continua pendente." }, 502);
     }
-    // Permite repetir a ação com segurança se o reembolso já ocorreu, mas a
-    // atualização do banco falhou na tentativa anterior.
-    if (order.state !== "REFUNDED" && order.state !== "PENDING_REFUND") {
-      if (order.state !== "PROCESSED") {
-        return json({ error: "O pedido não está em um estado que permita reembolso. A solicitação continua pendente." }, 409);
-      }
+    // A decisão interna pode ser registrada quando o reembolso foi solicitado,
+    // mas não devemos afirmar que o dinheiro já foi devolvido antes da confirmação.
+    let refundStatus: "completed" | "requested";
+    if (order.state === "REFUNDED") {
+      refundStatus = "completed";
+    } else if (order.state === "PENDING_REFUND") {
+      refundStatus = "requested";
+    } else if (order.state === "PROCESSED") {
       const refundUrl = orderUrl + ":refund?revoke=true";
       const refundResponse = await fetch(refundUrl, {
         method: "POST", headers: { Authorization: "Bearer " + googleToken, "Content-Type": "application/json" }, body: "{}",
       });
-      if (!refundResponse.ok) return json({ error: "A Google Play não confirmou o reembolso e a revogação. A solicitação continua pendente." }, 502);
+      if (!refundResponse.ok) return json({ error: "A Google Play não confirmou a solicitação de reembolso e revogação. A compra continua pendente." }, 502);
+      refundStatus = "requested";
+    } else {
+      return json({ error: "O pedido não está em um estado que permita reembolso. A solicitação continua pendente." }, 409);
     }
+
+    const refundNote = refundStatus === "completed"
+      ? "Compra reembolsada e acesso revogado pela Google Play."
+      : "Compra recusada; reembolso solicitado e acesso revogado pela Google Play.";
     const { error } = await userClient.rpc("recusar_compra_google_play", {
-      p_id: id, p_nota: "Compra reembolsada e acesso revogado pela Google Play.",
+      p_id: id, p_nota: refundNote,
     });
-    if (error) return json({ error: "Reembolso efetuado, mas não foi possível atualizar o status interno. Atualize o painel e confira o pedido." }, 500);
-    return json({ ok: true, status: "recusado" });
+    if (error) return json({ error: "A solicitação de reembolso foi enviada, mas não foi possível atualizar o status interno. Atualize o painel e confira o pedido." }, 500);
+    return json({ ok: true, status: "recusado", refundStatus });
   } catch (error) {
     console.error("google-play-admin", error);
     return json({ error: "Não foi possível concluir a ação. Tente novamente." }, 500);
