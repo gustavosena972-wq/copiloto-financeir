@@ -39,6 +39,8 @@ assert.ok(requestParser.includes("maxBytes = 8192"), "purchase endpoint must use
 assert.ok(!purchase.includes('"Access-Control-Allow-Origin": "*"'), "purchase endpoint must never reflect wildcard CORS");
 assert.ok(purchase.includes('p_bucket_key: "purchase:user:"'), "purchase verification must apply per-user rate limiting");
 assert.ok(purchase.includes('.eq("token_hash", tokenHash)'), "purchase verification must enforce token idempotency");
+assert.ok(purchase.includes("if (existingError) throw existingError"), "purchase lookup failures must not be treated as a missing purchase");
+assert.ok(purchase.includes("racedPurchase.usuario_id !== userData.user.id || racedPurchase.familia_id !== membership.familia_id"), "concurrent duplicate tokens must be rechecked against the owning account");
 assert.ok(!purchase.includes('"Access-Control-Allow-Origin": "*"'), "purchase function must not use wildcard CORS");
 assert.ok(admin.includes('"https://gustavosena972-wq.github.io"'), "admin function must retain the supported web origin");
 assert.ok(admin.includes('userClient.rpc("eh_admin")'), "admin endpoint must verify the caller's administrator role");
