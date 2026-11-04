@@ -11,6 +11,7 @@ on:
       - "supabase/functions/**"
       - "supabase/migrations/**"
       - ".github/workflows/android-build.yml"
+      - ".github/workflows/android-release.yml"
   workflow_dispatch:
 
 permissions:
