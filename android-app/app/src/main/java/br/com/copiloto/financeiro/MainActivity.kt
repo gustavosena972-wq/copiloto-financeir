@@ -24,8 +24,6 @@ import com.android.billingclient.api.QueryPurchasesParams
 class MainActivity : Activity(), PurchasesUpdatedListener {
     private lateinit var webView: WebView
     private lateinit var billingClient: BillingClient
-    private val allowedHost = "copiloto-financeir.gustavosena972.workers.dev"
-    private val allowedPathPrefix = "/"
     private val productIds = listOf(
         "copiloto_pro_30d",
         "copiloto_max_30d",
@@ -68,13 +66,12 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 request: WebResourceRequest?
             ): Boolean {
                 val uri = request?.url ?: return true
-                return !isTrustedAppUrl(uri.scheme, uri.host, uri.path)
+                return !TrustedAppUrl.isAllowed(uri.toString())
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                val parsed = runCatching { android.net.Uri.parse(url) }.getOrNull()
-                if (parsed != null && isTrustedAppUrl(parsed.scheme, parsed.host, parsed.path)) {
+                if (TrustedAppUrl.isAllowed(url)) {
                     dispatchToWeb("copiloto:play-bridge-ready", JSONObject().put("ready", true))
                 }
             }
@@ -83,11 +80,6 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         webView.loadUrl(BuildConfig.WEB_APP_URL)
 
         connectBilling()
-    }
-
-    private fun isTrustedAppUrl(scheme: String?, host: String?, path: String?): Boolean {
-        return scheme == "https" && host == allowedHost &&
-            (path == allowedPathPrefix.removeSuffix("/") || path?.startsWith(allowedPathPrefix) == true)
     }
 
     private fun connectBilling() {
