@@ -6,6 +6,8 @@ const gradle = read("../android-app/app/build.gradle.kts");
 const activity = read("../android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt");
 const purchase = read("../supabase/functions/google-play-purchase/index.ts");
 const auth = read("../supabase/functions/autenticacao-usuario/index.ts");
+const requestParser = read("../supabase/functions/_shared/security.ts");
+const requestTests = read("../supabase/functions/_shared/security.test.ts");
 const admin = read("../supabase/functions/google-play-admin/index.ts");
 const html = read("../index.html");
 const releaseWorkflow = read("../.github/workflows/android-release.yml");
@@ -78,6 +80,13 @@ assert.ok(html.includes('id="confirmar-idade"'), "signup must require an adult c
 assert.ok(html.includes("payload.acceptedAdult=true"), "signup must submit adult confirmation to the server");
 assert.ok(auth.includes("payload?.acceptedAdult !== true"), "server must enforce adult eligibility, not trust the browser alone");
 assert.ok(auth.includes("byteLength > 8192"), "authentication endpoint must cap request size in bytes");
+for (const [name, source] of [["auth", auth], ["purchase", purchase], ["admin", admin]]) {
+  assert.ok(source.includes('import { parseJsonObjectRequest } from "../_shared/security.ts"'), name + " must use the shared bounded JSON parser");
+  assert.ok(!source.includes("req.text()"), name + " must not buffer an unbounded request body");
+}
+assert.ok(requestParser.includes("request.body.getReader()") && requestParser.includes("reader.cancel()"), "shared parser must stream and cancel oversized bodies");
+assert.ok(requestParser.includes("value.byteLength") && requestParser.includes('new TextDecoder("utf-8", { fatal: true })'), "shared parser must enforce byte size and reject invalid UTF-8");
+assert.ok(requestTests.includes("Deno.test(") && requestTests.includes("multibyte UTF-8") && requestTests.includes("malformed JSON"), "shared parser must have runtime security regression tests");
 assert.ok(html.includes("const precoSelecionado = S.playProducts?.[produtoSelecionado]?.formattedPrice"), "selected plan summary must display the actual Google Play price");
 assert.ok(!html.includes("${brl(plano.valor)}"), "paywall must not display stale web/Pix prices as the Google Play checkout price");
 
