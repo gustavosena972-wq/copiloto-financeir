@@ -31,6 +31,12 @@ As funções RPC verificadas não concedem execução ao papel `anon`. As tabela
 
 Esta verificação cobre os privilégios PostgreSQL do schema `public`; não significa que as páginas estáticas públicas do site deixem de ser acessíveis.
 
+## Endpoints públicos de autenticação
+
+A Edge Function `autenticacao-usuario` está publicada com `verify_jwt=false` intencionalmente, pois precisa receber solicitações antes do login. Ela aceita somente POST e as ações `login`, `signup` e `recover`; valida nome de usuário e senha, exige aceite dos termos no cadastro, aplica limite de tentativas por identificador e IP e usa a chave `service_role` apenas no servidor. A função não concede acesso direto às tabelas internas ao cliente. O limite atual é 12 tentativas por usuário e 600 por IP em 10 minutos.
+
+CORS restringe navegadores ao domínio publicado, mas não impede chamadas HTTP feitas por clientes externos; a proteção efetiva depende das validações e limites implementados no endpoint. As outras funções listadas — `copiloto-ia`, `google-play-purchase` e `google-play-admin` — exigem JWT válido (`verify_jwt=true`).
+
 ## Estado dos controles
 
 | Controle | Situação |
