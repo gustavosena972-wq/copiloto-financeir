@@ -30,8 +30,8 @@ BEGIN
       AND n.nspname IN ('public', 'private')
       AND NOT EXISTS (
         SELECT 1
-        FROM pg_catalog.unnest(COALESCE(p.proconfig, ARRAY[]::text[])) AS setting
-        WHERE setting LIKE 'search_path=%pg_temp%'
+        FROM pg_catalog.unnest(COALESCE(p.proconfig, ARRAY[]::text[])) AS settings(config)
+        WHERE config LIKE 'search_path=%pg_temp%'
       )
   ) THEN
     RAISE EXCEPTION 'SECURITY REGRESSION: a SECURITY DEFINER function lacks explicit pg_temp-last search_path';
