@@ -17,7 +17,18 @@ INSERT INTO pg_temp.admins (user_id)
 VALUES ('11111111-1111-4111-8111-111111111111');
 
 DO $test$
+DECLARE
+  visible_count integer;
+  visible_keys text[];
 BEGIN
+  SELECT count(*), array_agg(chave ORDER BY chave)
+    INTO visible_count, visible_keys
+    FROM (SELECT chave, valor FROM public.config_app) AS visible;
+
+  IF visible_count > 8 OR 'pix_valor' = ANY(visible_keys) THEN
+    RAISE EXCEPTION 'SECURITY REGRESSION: config_app exposed an unexpected key set: %', visible_keys;
+  END IF;
+
   IF has_table_privilege('anon', 'public.config_app', 'SELECT')
      OR has_column_privilege('anon', 'public.config_app', 'chave', 'SELECT')
      OR has_table_privilege('authenticated', 'public.config_app', 'SELECT')
