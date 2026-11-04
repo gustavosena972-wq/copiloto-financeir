@@ -1,17 +1,29 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 
-const cors = {
-  "Access-Control-Allow-Origin": "https://gustavosena972-wq.github.io",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Vary": "Origin",
-  "Content-Type": "application/json",
-  "Cache-Control": "no-store",
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://gustavosena972-wq.github.io",
+  "https://copiloto-financeir.gustavosena972.workers.dev",
+]);
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: cors });
+function corsHeadersFor(origin: string | null): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
+  };
+
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+
+  return headers;
+}
+
+const jsonResponse = (body: unknown, status = 200, origin: string | null = null) =>
+  new Response(JSON.stringify(body), { status, headers: corsHeadersFor(origin) });
 
 async function hash(value: string): Promise<string> {
   const bytes = new TextEncoder().encode(value);
@@ -51,7 +63,12 @@ async function ensureRecoveryCode(admin: SupabaseClient<any>, userId: string): P
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  const json = (body: unknown, status = 200) =>
+    jsonResponse(body, status, req.headers.get("Origin"));
+
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeadersFor(req.headers.get("Origin")) });
+  }
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
 
   try {
