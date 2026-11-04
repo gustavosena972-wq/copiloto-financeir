@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 const cors = {
   "Access-Control-Allow-Origin": "https://gustavosena972-wq.github.io",
@@ -29,7 +29,7 @@ function generateRecoveryCode(): string {
   return hex.match(/.{1,4}/g)!.join("-");
 }
 
-async function ensureRecoveryCode(admin: ReturnType<typeof createClient>, userId: string): Promise<string | null> {
+async function ensureRecoveryCode(admin: SupabaseClient<any>, userId: string): Promise<string | null> {
   const { data: existing, error: lookupError } = await admin
     .from("login_recuperacao")
     .select("user_id")
@@ -101,7 +101,7 @@ Deno.serve(async (req: Request) => {
       || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
       || "";
     const userHash = await hash(username);
-    const rateChecks: Promise<{ data: boolean | null; error: unknown }>[] = [
+    const rateChecks = [
       admin.rpc("consume_auth_rate_limit", {
         p_bucket_key: "user:" + userHash,
         p_max_attempts: 12,
