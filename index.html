@@ -2042,15 +2042,20 @@ function mostrarErroInicial(e){
 })();
 
 async function boot(){
-  await carregarConfig();
+  // Isola permissões e dados entre sessões diferentes.
+  S.admin=false;S.adm=null;S.admPend=0;S.me=null;S.fam=null;
+  if(S.rt){try{sb.removeChannel(S.rt)}catch(e){}S.rt=null}
   if(!S.user){renderAuth();checarServidor();return}
   $('#app').innerHTML='<div class="auth mu">Carregando…</div>';
+  await carregarConfig();
+  const adminCheck=await sb.rpc('eh_admin');
+  if(adminCheck.error)throw adminCheck.error;
+  S.admin=adminCheck.data===true;
   const rows=await q(sb.from('membros').select('id,papel,nome,familias(id,nome,meta_reducao_cartao,acesso_ate,plano)').eq('usuario_id',S.user.id).order('criado_em',{ascending:false}));
   S.espacos=rows;
-  if(!rows.length)return renderSemFamilia();
+  if(!rows.length){S.adm=null;return renderSemFamilia();}
   let familiaPreferida=null;try{familiaPreferida=localStorage.getItem('cf_familia_ativa')}catch(e){}
   S.me=rows.find(x=>x.familias?.id===familiaPreferida)||rows[0];S.fam=S.me.familias;
-  S.admin=!!(await sb.rpc('eh_admin')).data;
   if(!S.admin&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
   try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);S.notifs=nr.data||[]}catch(e){S.notifs=[]}
@@ -2998,14 +3003,18 @@ async function renderPaywall(){
   </main>`;
   clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);
 }
+async function confirmarAdmin(){
+  const {data,error}=await sb.rpc('eh_admin');
+  if(error||data!==true){S.admin=false;S.adm=null;S.admPend=0;if(S.view==='admin')S.view='planilha';throw new Error('Acesso administrativo não autorizado.');}
+  S.admin=true;return true;
+}
 async function carregarAdmin(){
-  const[r,l,g]=await Promise.all([
+  await confirmarAdmin();
+  const[r,g]=await Promise.all([
     q(sb.rpc('admin_resumo')),
-    q(sb.rpc('admin_listar_pagamentos',{p_status:'todos'})),
     q(sb.rpc('admin_listar_compras_google_play',{p_status:'todos'}))
   ]);
-  S.adm={r,l,g};S.admPend=r.pendentes;render();
-}
+  S.adm={r,g};S.admPend=r.pendentes;render();}
 function viewAdmin(){
   const A=S.adm||{r:{},l:[],g:[]},r=A.r,code=pixPayload(PIX);
   const linhas=A.l.map(x=>`<tr><td>${new Date(x.informado_em).toLocaleString('pt-BR')}</td><td>${esc(x.familia)}<div class="mu">${esc(x.email||'')}</div></td><td>${esc(x.pagador_nome)}<div class="mu">${esc(x.horario_informado||'')}</div></td><td>${brl(x.valor)}</td>
@@ -3126,7 +3135,11 @@ document.addEventListener('click',async e=>{
   else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}toast('Convite aceito! Abrindo a família…');await boot()}
-  else if(a==='view'){S.view=b.dataset.v;if(S.view==='admin')await carregarAdmin();else if(S.view==='plan')await carregarPlan();else render()}
+  else if(a==='view'){
+    const destino=b.dataset.v;
+    if(destino==='admin'){S.view='admin';await carregarAdmin();}
+    else {if(S.view==='admin')S.adm=null;S.view=destino;if(S.view==='plan')await carregarPlan();else render();}
+  }
   else if(a==='trocarespaco'){return toast('Cada conta está vinculada a uma única família.')}
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='quickedit'){if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);S.quickEdit={kind:b.dataset.kind};render()}
@@ -3213,9 +3226,10 @@ document.addEventListener('click',async e=>{
     toast('Aviso enviado! Assim que o Pix for conferido, o acesso é liberado.');await boot()}
   else if(a==='copiarpix'){try{await navigator.clipboard.writeText(S.pixcode);toast('Código Pix copiado')}catch(e){toast('Não consegui copiar: selecione o código acima e copie.',1)}}
   else if(a==='verstatus')await boot();
-  else if(a==='aprovar'){const dias=parseInt(document.getElementById('dias_'+b.dataset.id).value)||PIX.dias;await q(sb.rpc('aprovar_pagamento',{p_id:b.dataset.id,p_dias:dias}));toast('✔ Acesso liberado por '+dias+' dias');await carregarAdmin()}
-  else if(a==='recusar'){const nota=prompt('Motivo (o cliente vai ver):','Não encontramos o Pix com esse valor/nome.');if(nota===null)return;await q(sb.rpc('recusar_pagamento',{p_id:b.dataset.id,p_nota:nota}));toast('Pedido recusado');await carregarAdmin()}
+  else if(a==='aprovar'){await confirmarAdmin();const dias=parseInt(document.getElementById('dias_'+b.dataset.id).value)||PIX.dias;await q(sb.rpc('aprovar_pagamento',{p_id:b.dataset.id,p_dias:dias}));toast('✔ Acesso liberado por '+dias+' dias');await carregarAdmin()}
+  else if(a==='recusar'){await confirmarAdmin();const nota=prompt('Motivo (o cliente vai ver):','Não encontramos o Pix com esse valor/nome.');if(nota===null)return;await q(sb.rpc('recusar_pagamento',{p_id:b.dataset.id,p_nota:nota}));toast('Pedido recusado');await carregarAdmin()}
   else if(a==='aprovarplay'||a==='recusarplay'){
+    await confirmarAdmin();
     if(a==='recusarplay'&&!confirm('Solicitar reembolso e revogação desta compra na Google Play?'))return;
     const{data,error}=await sb.functions.invoke('google-play-admin',{body:{id:b.dataset.id,action:a==='aprovarplay'?'approve':'reject'}});
     if(error)throw error;if(data?.error)throw new Error(data.error);
