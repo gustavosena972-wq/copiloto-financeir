@@ -59,6 +59,7 @@ assert.ok(definerMigration.includes("p.prosecdef") && definerMigration.includes(
 assert.ok(definerMigration.includes("SET search_path TO pg_catalog, public, private, pg_temp"), "SECURITY DEFINER functions must put pg_temp last");
 assert.ok(existsSync(definerRegressionPath), "temporary-object privilege-escalation regression test must exist");
 assert.ok(definerRegression.includes("CREATE TEMP TABLE admins") && definerRegression.includes("public.eh_admin()"), "regression test must verify temp-table shadowing cannot grant admin");
+assert.ok(definerRegression.includes("public.config_app") && definerRegression.includes("config_ler_authenticated_allowlist"), "regression test must verify anonymous config access is revoked");
 assert.ok(definerRegression.includes("ROLLBACK"), "database security regression test must leave no persistent changes");
 assert.ok(auth.includes('"https://gustavosena972-wq.github.io"'), "authentication must retain the supported web origin");
 assert.ok(auth.includes(appOrigin), "authentication must allow the canonical Cloudflare origin");
