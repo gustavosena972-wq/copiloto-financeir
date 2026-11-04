@@ -35,7 +35,7 @@ assert.ok(admin.includes(appOrigin), "admin function must allow the canonical ap
 assert.ok(purchase.includes('"https://gustavosena972-wq.github.io"'), "purchase function must retain the supported web origin");
 assert.ok(purchase.includes("Number(data.purchaseState) !== 0"), "purchase function must reject purchases not confirmed by Google Play");
 assert.ok(purchase.includes("Number(data.quantity || 1) !== 1"), "purchase function must reject unexpected purchase quantities");
-assert.ok(purchase.includes("byteLength > 8192"), "purchase endpoint must cap request size in bytes");
+assert.ok(requestParser.includes("maxBytes = 8192"), "purchase endpoint must use the bounded request parser default");
 assert.ok(!purchase.includes('"Access-Control-Allow-Origin": "*"'), "purchase endpoint must never reflect wildcard CORS");
 assert.ok(purchase.includes('p_bucket_key: "purchase:user:"'), "purchase verification must apply per-user rate limiting");
 assert.ok(purchase.includes('.eq("token_hash", tokenHash)'), "purchase verification must enforce token idempotency");
@@ -45,8 +45,8 @@ assert.ok(admin.includes('userClient.rpc("eh_admin")'), "admin endpoint must ver
 assert.ok(admin.includes(":refund?revoke=true"), "rejecting a purchase must refund and revoke it through Google Play");
 assert.ok(admin.includes('purchase.status !== "pendente"'), "admin endpoint must reject already-decided purchases");
 assert.ok(!admin.includes('"Access-Control-Allow-Origin": "*"'), "admin function must not use wildcard CORS");
-assert.ok(admin.includes("const rawBody = await req.text()"), "admin endpoint must cap request body size before JSON parsing");
-assert.ok(admin.includes("byteLength > 8192"), "admin endpoint must reject oversized request bodies");
+assert.ok(admin.includes("parseJsonObjectRequest(req)"), "admin endpoint must use the bounded request parser before JSON parsing");
+assert.ok(requestParser.includes("maxBytes = 8192"), "admin endpoint must inherit the bounded request size");
 assert.ok(!admin.includes("error: error instanceof Error ? error.message"), "admin endpoint must not disclose raw internal errors to clients");
 assert.ok(!admin.includes("error.message"), "admin endpoint must not return raw database error details");
 assert.ok(existsSync(securityMigrationPath), "config_app anonymous-read hardening migration must exist");
@@ -79,7 +79,7 @@ assert.ok(!html.includes("chave:'+5531999758385'"), "personal Pix fallback must 
 assert.ok(html.includes('id="confirmar-idade"'), "signup must require an adult confirmation");
 assert.ok(html.includes("payload.acceptedAdult=true"), "signup must submit adult confirmation to the server");
 assert.ok(auth.includes("payload?.acceptedAdult !== true"), "server must enforce adult eligibility, not trust the browser alone");
-assert.ok(auth.includes("byteLength > 8192"), "authentication endpoint must cap request size in bytes");
+assert.ok(requestParser.includes("maxBytes = 8192"), "authentication endpoint must inherit the bounded request size");
 for (const [name, source] of [["auth", auth], ["purchase", purchase], ["admin", admin]]) {
   assert.ok(source.includes('import { parseJsonObjectRequest } from "../_shared/security.ts"'), name + " must use the shared bounded JSON parser");
   assert.ok(!source.includes("req.text()"), name + " must not buffer an unbounded request body");
