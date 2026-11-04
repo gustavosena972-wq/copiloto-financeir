@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths:
       - "android-app/**"
+      - "index.html"
+      - "privacidade.html"
+      - "scripts/**"
+      - "supabase/functions/google-play-*/**"
+      - "supabase/migrations/**"
       - ".github/workflows/android-build.yml"
   workflow_dispatch:
 
