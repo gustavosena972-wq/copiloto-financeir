@@ -54,6 +54,12 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = false
         webView.settings.allowContentAccess = false
+        webView.settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+        webView.settings.javaScriptCanOpenWindowsAutomatically = false
+        webView.settings.setSupportMultipleWindows(false)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            webView.settings.safeBrowsingEnabled = true
+        }
         webView.webChromeClient = WebChromeClient()
         webView.addJavascriptInterface(PlayBillingBridge(), "CopilotoPlayBilling")
         webView.webViewClient = object : WebViewClient() {
