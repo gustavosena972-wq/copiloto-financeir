@@ -42,9 +42,12 @@ assert.ok(admin.includes("rawBody.length > 8192"), "admin endpoint must reject o
 assert.ok(!admin.includes("error: error instanceof Error ? error.message"), "admin endpoint must not disclose raw internal errors to clients");
 assert.ok(!admin.includes("error.message"), "admin endpoint must not return raw database error details");
 assert.ok(existsSync(securityMigrationPath), "config_app anonymous-read hardening migration must exist");
-assert.ok(securityMigration.includes("REVOKE SELECT ON TABLE public.config_app FROM anon, PUBLIC"), "config_app must not be readable by anonymous or PUBLIC roles");
+assert.ok(securityMigration.includes("REVOKE SELECT ON TABLE public.config_app FROM anon, authenticated, PUBLIC"), "config_app table-level SELECT must be revoked from client roles");
+assert.ok(securityMigration.includes("REVOKE SELECT (chave, valor) ON TABLE public.config_app FROM anon, authenticated, PUBLIC"), "existing column-level SELECT grants must also be revoked");
+assert.ok(securityMigration.includes("USING (chave = ANY"), "config_app RLS must expose only an explicit public-key allowlist");
+assert.ok(securityMigration.includes("'pix_chave'") && securityMigration.includes("'contato_email'"), "the app allowlist must preserve only required public configuration keys");
 assert.ok(securityMigration.includes("TO authenticated USING (true)"), "authenticated users must retain config needed by the app");
-assert.ok(securityMigration.includes("GRANT SELECT ON TABLE public.config_app TO authenticated"), "authenticated role must retain explicit config read access");
+assert.ok(securityMigration.includes("GRANT SELECT (chave, valor) ON TABLE public.config_app TO authenticated"), "authenticated role must retain only the required config columns");
 assert.ok(auth.includes('"https://gustavosena972-wq.github.io"'), "authentication must retain the supported web origin");
 assert.ok(auth.includes(appOrigin), "authentication must allow the canonical Cloudflare origin");
 assert.ok(gradle.includes("compileSdk = 36") && gradle.includes("targetSdk = 36"), "Android must target the current required API level");
