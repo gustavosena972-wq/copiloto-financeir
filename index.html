@@ -2328,6 +2328,7 @@ function renderSemFamilia(){
 
 /* ---------- app ---------- */
 function render(){
+  if(S.view==='admin'&&!S.admin){S.view='planilha';S.adm=null;S.admPend=0;}
   const ed=canEdit()&&mesAberto();
   const ultra=S.fam?.plano==='ultra';
   if(S.view==='espacos')S.view='planilha';
@@ -3124,6 +3125,7 @@ document.addEventListener('click',async e=>{
   if(S.busy&&!LIVRE.includes(a))return toast('Aguarde, ainda estou processando…');
   if(!LIVRE.includes(a))S.busy=true;
   try{
+  if(['aprovar','recusar','aprovarplay','recusarplay','salvarcfg'].includes(a))await confirmarAdmin();
   if(a==='entrar'||a==='cadastrar')await autenticar(a);
   else if(a==='escolherplano'){
     const plano=b.dataset.plano;
@@ -3226,10 +3228,9 @@ document.addEventListener('click',async e=>{
     toast('Aviso enviado! Assim que o Pix for conferido, o acesso é liberado.');await boot()}
   else if(a==='copiarpix'){try{await navigator.clipboard.writeText(S.pixcode);toast('Código Pix copiado')}catch(e){toast('Não consegui copiar: selecione o código acima e copie.',1)}}
   else if(a==='verstatus')await boot();
-  else if(a==='aprovar'){await confirmarAdmin();const dias=parseInt(document.getElementById('dias_'+b.dataset.id).value)||PIX.dias;await q(sb.rpc('aprovar_pagamento',{p_id:b.dataset.id,p_dias:dias}));toast('✔ Acesso liberado por '+dias+' dias');await carregarAdmin()}
-  else if(a==='recusar'){await confirmarAdmin();const nota=prompt('Motivo (o cliente vai ver):','Não encontramos o Pix com esse valor/nome.');if(nota===null)return;await q(sb.rpc('recusar_pagamento',{p_id:b.dataset.id,p_nota:nota}));toast('Pedido recusado');await carregarAdmin()}
+  else if(a==='aprovar'){const dias=parseInt(document.getElementById('dias_'+b.dataset.id).value)||PIX.dias;await q(sb.rpc('aprovar_pagamento',{p_id:b.dataset.id,p_dias:dias}));toast('✔ Acesso liberado por '+dias+' dias');await carregarAdmin()}
+  else if(a==='recusar'){const nota=prompt('Motivo (o cliente vai ver):','Não encontramos o Pix com esse valor/nome.');if(nota===null)return;await q(sb.rpc('recusar_pagamento',{p_id:b.dataset.id,p_nota:nota}));toast('Pedido recusado');await carregarAdmin()}
   else if(a==='aprovarplay'||a==='recusarplay'){
-    await confirmarAdmin();
     if(a==='recusarplay'&&!confirm('Solicitar reembolso e revogação desta compra na Google Play?'))return;
     const{data,error}=await sb.functions.invoke('google-play-admin',{body:{id:b.dataset.id,action:a==='aprovarplay'?'approve':'reject'}});
     if(error)throw error;if(data?.error)throw new Error(data.error);
