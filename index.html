@@ -3292,7 +3292,9 @@ document.addEventListener('click',async e=>{
     if(a==='recusarplay'&&!confirm('Solicitar reembolso e revogação desta compra na Google Play?'))return;
     const{data,error}=await sb.functions.invoke('google-play-admin',{body:{id:b.dataset.id,action:a==='aprovarplay'?'approve':'reject'}});
     if(error)throw error;if(data?.error)throw new Error(data.error);
-    toast(a==='aprovarplay'?'Compra aprovada: 30 dias liberados para a família.':'Compra reembolsada e recusada.');
+    if(a==='aprovarplay')toast('Compra aprovada: 30 dias liberados para a família.');
+    else if(data?.refundStatus === "completed")toast('Compra recusada; o reembolso já consta como concluído na Google Play.');
+    else toast('Compra recusada; solicitação de reembolso enviada à Google Play. O processamento ainda pode estar pendente.');
     await carregarAdmin();
   }
   else if(a==='addcat'){const n=$('#c_nome').value.trim();if(!n)return toast('Informe o nome da categoria',1);
