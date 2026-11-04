@@ -5,6 +5,8 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const gradle = read("../android-app/app/build.gradle.kts");
 const activity = read("../android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt");
 const manifest = read("../android-app/app/src/main/AndroidManifest.xml");
+const trustedUrl = read("../android-app/app/src/main/java/br/com/copiloto/financeiro/TrustedAppUrl.kt");
+const trustedUrlTests = read("../android-app/app/src/test/java/br/com/copiloto/financeiro/TrustedAppUrlTest.kt");
 const purchase = read("../supabase/functions/google-play-purchase/index.ts");
 const auth = read("../supabase/functions/autenticacao-usuario/index.ts");
 const requestParser = read("../supabase/functions/_shared/security.ts");
@@ -12,6 +14,7 @@ const requestTests = read("../supabase/functions/_shared/security.test.ts");
 const admin = read("../supabase/functions/google-play-admin/index.ts");
 const html = read("../index.html");
 const releaseWorkflow = read("../.github/workflows/android-release.yml");
+const androidWorkflow = read("../.github/workflows/android-build.yml");
 const securityMigrationPath = new URL("../supabase/migrations/20261104190000_restrict_config_app_anon_read.sql", import.meta.url);
 const securityMigration = existsSync(securityMigrationPath) ? readFileSync(securityMigrationPath, "utf8") : "";
 const definerMigrationPath = new URL("../supabase/migrations/20261104193000_harden_security_definer_search_path.sql", import.meta.url);
@@ -147,5 +150,17 @@ assert.ok(manifest.includes('<uses-permission android:name="android.permission.I
 
 console.log("Web CSP, injection and secret guardrails: OK");
 console.log("Android manifest security guardrails: OK");
+
+assert.ok(activity.includes("TrustedAppUrl.isAllowed(uri.toString())"), "WebView navigation must use the tested strict URL validator");
+assert.ok(activity.includes("TrustedAppUrl.isAllowed(url)"), "Billing bridge readiness must only be announced for the trusted origin");
+assert.ok(trustedUrl.includes("uri.port == -1 || uri.port == 443"), "WebView must reject unexpected HTTPS ports");
+assert.ok(trustedUrl.includes("uri.rawUserInfo == null"), "WebView must reject user-info URL confusion");
+assert.ok(trustedUrl.includes("uri.host.equals(ALLOWED_HOST, ignoreCase = true)"), "WebView must require an exact trusted host match");
+assert.ok(trustedUrlTests.includes("rejectsUnexpectedPortsAndUserInfo"), "strict URL validator must have regression tests for ports and user-info");
+assert.ok(trustedUrlTests.includes("rejectsHttpAndLookalikeHosts"), "strict URL validator must have regression tests for schemes and lookalike hosts");
+assert.ok(androidWorkflow.includes("gradle testDebugUnitTest"), "Android CI must execute JVM unit tests");
+
+console.log("Android trusted-origin unit-test guardrails: OK");
+
 
 
