@@ -2036,10 +2036,19 @@ function mostrarErroInicial(e){
     await boot();
     sb.auth.onAuthStateChange((ev,s)=>{
       const u=s?.user||null;
-      if((u?.id)!==(S.user?.id)){S.user=u;boot().catch(mostrarErroInicial)}
+      if((u?.id)!==(S.user?.id)){S.user=u;scheduleBoot()}
     });
   }catch(e){mostrarErroInicial(e)}
 })();
+
+let authBootTimer=null;
+function scheduleBoot(){
+  if(authBootTimer!==null)return;
+  authBootTimer=setTimeout(()=>{
+    authBootTimer=null;
+    boot().catch(mostrarErroInicial);
+  },0);
+}
 
 async function boot(){
   // Isola permissões e dados entre sessões diferentes.
@@ -3091,7 +3100,7 @@ function viewModais(){
 }
 const LEGAL={nome:'',cnpj:'',email:'',versao:'1'};
 async function carregarConfig(){
-  try{const{data}=await sb.from('config_app').select('*');S.cfg={};(data||[]).forEach(r=>{S.cfg[r.chave]=r.valor});const c=S.cfg;
+  try{const{data}=await sb.from('config_app').select('chave,valor');S.cfg={};(data||[]).forEach(r=>{S.cfg[r.chave]=r.valor});const c=S.cfg;
     if(c.pix_chave)PIX.chave=c.pix_chave;if(c.pix_dias)PIX.dias=parseInt(c.pix_dias)||PIX.dias;
     if(c.pix_nome)PIX.nome=c.pix_nome;if(c.pix_cidade)PIX.cidade=c.pix_cidade;LEGAL.nome=c.operador_nome||'';LEGAL.cnpj=c.operador_cnpj||'';LEGAL.email=c.contato_email||'';LEGAL.versao=c.versao_termos||'1'}catch(e){}
 }
