@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const gradle = read("../android-app/app/build.gradle.kts");
 const activity = read("../android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt");
+const manifest = read("../android-app/app/src/main/AndroidManifest.xml");
 const purchase = read("../supabase/functions/google-play-purchase/index.ts");
 const auth = read("../supabase/functions/autenticacao-usuario/index.ts");
 const requestParser = read("../supabase/functions/_shared/security.ts");
@@ -136,4 +137,18 @@ assert.ok(activity.includes("setSupportMultipleWindows(false)"), "WebView must n
 
 console.log("Web action and auth lifecycle guardrails: OK");
 console.log("Android lifecycle and WebView guardrails: OK");
+
+const csp = html.match(/<meta\\s+http-equiv=["']Content-Security-Policy["']\\s+content=["']([^"']+)["']/i)?.[1] || "";
+assert.ok(csp.includes("default-src 'self'"), "web app must declare a restrictive default Content Security Policy");
+assert.ok(csp.includes("object-src 'none'") && csp.includes("frame-src 'none'"), "web CSP must block plugins and embedded frames");
+assert.ok(csp.includes("https://jlufubazlnrelrbsvsal.supabase.co") && csp.includes("wss://jlufubazlnrelrbsvsal.supabase.co"), "web CSP must allow only the configured Supabase API and realtime origins");
+assert.ok(!/\\beval\\s*\\(/.test(html) && !/new\\s+Function\\s*\\(/.test(html), "web app must not use dynamic code evaluation");
+assert.ok(html.includes("const esc="), "web app must retain a central HTML output-encoding helper");
+assert.ok(!/service_role|-----BEGIN (?:RSA )?PRIVATE KEY-----/.test(html), "web app must not contain server credentials");
+assert.ok(manifest.includes('android:allowBackup="false"') && manifest.includes('android:usesCleartextTraffic="false"'), "Android manifest must disable backup and cleartext traffic");
+assert.ok(manifest.includes('<uses-permission android:name="android.permission.INTERNET"'), "Android manifest must explicitly declare network access");
+
+console.log("Web CSP, injection and secret guardrails: OK");
+console.log("Android manifest security guardrails: OK");
+
 
