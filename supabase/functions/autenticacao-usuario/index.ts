@@ -67,8 +67,15 @@ Deno.serve(async (req: Request) => {
   const json = (body: unknown, status = 200) =>
     jsonResponse(body, status, req.headers.get("Origin"));
 
+  const origin = req.headers.get("Origin");
+  if (origin && !ALLOWED_ORIGINS.has(origin)) {
+    return new Response(JSON.stringify({ error: "Origem não autorizada." }), {
+      status: 403,
+      headers: corsHeadersFor(null),
+    });
+  }
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeadersFor(req.headers.get("Origin")) });
+    return new Response("ok", { headers: corsHeadersFor(origin) });
   }
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
 
