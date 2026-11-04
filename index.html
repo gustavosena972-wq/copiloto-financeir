@@ -1962,6 +1962,40 @@ body:has(.landing-page){background:#f4f6f1!important;color:#25372c!important}
 .landing-plan-cta{font-family:inherit;border:0;cursor:pointer}
 .landing-plan-cta:focus-visible,.landing-hero-actions a:focus-visible{outline:3px solid #88ad88;outline-offset:3px}
 </style>
+<style id="mobile-app-fit">
+/* Ajustes de uso em celular e WebView Android */
+html{min-height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior-y:contain}
+body{min-height:100vh;min-height:100dvh;overflow-x:hidden}
+button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+button,[role="button"]{touch-action:manipulation}
+#toast{bottom:max(16px,env(safe-area-inset-bottom))}
+@media(max-width:640px){
+  body{min-height:100dvh;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  .wrap{width:100%;max-width:100%;padding:14px 12px max(18px,env(safe-area-inset-bottom))}
+  .top{gap:8px;align-items:flex-start}
+  .tabs{width:100%;max-width:100%;display:flex;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:1 0 auto;min-height:42px;white-space:nowrap}
+  .bar,.row{gap:7px}
+  button{min-height:42px}
+  input,select,textarea{font-size:16px;max-width:100%}
+  .grid2,.iagrid{grid-template-columns:minmax(0,1fr)}
+  .auth{width:calc(100% - 24px);max-width:430px;margin: max(24px,5vh) auto;padding:22px 18px}
+  .hero{min-height:0;border-radius:20px}
+  .art,.login{min-width:0;padding:22px 18px}
+  .finance-stage{min-height:340px;transform:scale(.86);transform-origin:top center;margin-bottom:-42px}
+  .scroll{max-width:100%;overscroll-behavior-x:contain}
+  table{min-width:760px}
+  .modal{padding:10px;align-items:center}
+  .box,.legal{max-height:calc(100dvh - 20px);overflow:auto}
+}
+@media(max-width:380px){
+  .wrap{padding-left:10px;padding-right:10px}
+  .cards{grid-template-columns:1fr 1fr;gap:12px 8px}
+  .pix-plans,.marketing-plans{grid-template-columns:1fr 1fr}
+}
+@supports(height:100dvh){body{min-height:100dvh}}
+</style>
 </head>
 <body>
 <div id="app" class="wrap"></div>
@@ -1974,6 +2008,7 @@ const SB_URL='https://jlufubazlnrelrbsvsal.supabase.co';
 const SB_KEY='sb_publishable__CjlaAIa2w5F_7HhOhJKkA_HeDFWxNS';
 if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div class="auth"><h1>Não foi possível carregar</h1><div class="mu">O app precisa de internet para carregar suas bibliotecas. Abra este arquivo no Chrome com internet (não na pré-visualização do Claude).</div></div>';throw new Error('biblioteca supabase ausente')}
 const sb=supabase.createClient(SB_URL,SB_KEY);
+window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null};
 const $=s=>document.querySelector(s);
@@ -2007,15 +2042,24 @@ function mostrarErroInicial(e){
 })();
 
 async function boot(){
+  // Isola permissões e dados entre sessões diferentes.
+  S.admin=false;S.adm=null;S.admPend=0;S.me=null;S.fam=null;
+  if(S.rt){try{sb.removeChannel(S.rt)}catch(e){}S.rt=null}
   await carregarConfig();
   if(!S.user){renderAuth();checarServidor();return}
   $('#app').innerHTML='<div class="auth mu">Carregando…</div>';
+  const adminCheck=await sb.rpc('eh_admin');
+  if(adminCheck.error)throw adminCheck.error;
+  S.admin=adminCheck.data===true;
   const rows=await q(sb.from('membros').select('id,papel,nome,familias(id,nome,meta_reducao_cartao,acesso_ate,plano)').eq('usuario_id',S.user.id).order('criado_em',{ascending:false}));
   S.espacos=rows;
-  if(!rows.length)return renderSemFamilia();
+  if(!rows.length){
+    S.adm=null;
+    if(S.admin){S.me=null;S.fam=null;S.view='admin';await carregarAdmin();return;}
+    return renderSemFamilia();
+  }
   let familiaPreferida=null;try{familiaPreferida=localStorage.getItem('cf_familia_ativa')}catch(e){}
   S.me=rows.find(x=>x.familias?.id===familiaPreferida)||rows[0];S.fam=S.me.familias;
-  S.admin=!!(await sb.rpc('eh_admin')).data;
   if(!S.admin&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
   try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);S.notifs=nr.data||[]}catch(e){S.notifs=[]}
@@ -2288,6 +2332,7 @@ function renderSemFamilia(){
 
 /* ---------- app ---------- */
 function render(){
+  if(S.view==='admin'&&!S.admin){S.view='planilha';S.adm=null;S.admPend=0;}
   const ed=canEdit()&&mesAberto();
   const ultra=S.fam?.plano==='ultra';
   if(S.view==='espacos')S.view='planilha';
@@ -2935,44 +2980,52 @@ function pixPayload(p){
 /*END*/
 function qrSvg(t){const q=qrcode(0,'M');q.addData(t);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}
 async function renderPaywall(){
+  const dono=S.me?.papel==='dono';
+  if(!dono){
+    $('#app').innerHTML=`<main class="pix-page"><section class="pix-card"><div class="pix-heading"><span class="pix-kicker">ACESSO DA FAMÍLIA</span><h1>Aguardando aprovação</h1><p>O responsável pela família precisa concluir a compra pela Google Play e aguardar a aprovação do administrador. Você não precisa fazer outro pagamento.</p></div><div class="pix-pending"><b>Seu acesso ainda não foi liberado.</b><p>Assim que a compra for aprovada, o aplicativo será liberado para os membros desta família.</p></div><div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div></section></main>`;
+    clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);return;
+  }
   if(S.planoEscolhidoFamilia!==S.fam?.id){S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';S.planoEscolhidoFamilia=S.fam?.id;}
   else if(!PLANOS[S.planoEscolhido])S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';
-  const dono=S.me.papel==='dono',venc=S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date();
-  let ult=null;if(dono){const r=await q(sb.from('pagamentos').select('*').eq('familia_id',S.fam.id).order('informado_em',{ascending:false}).limit(1));ult=r[0]||null}
-  const plano=planoAtual();PIX.valor=plano.valor;const code=pixPayload(PIX);S.pixcode=code;const pend=ult&&ult.status==='pendente',rec=ult&&ult.status==='recusado';
-  const pagar=`<section class="pix-payment"><div class="pix-payment-title"><span class="pix-section-number">01</span><div><b>Realize o pagamento</b><small>Abra o aplicativo do seu banco e escolha Pix.</small></div></div><div class="qrbox">${qrSvg(code)}</div><button class="sec pix-copy" data-act="copiarpix">Copiar código Pix</button><div class="pix-payment-title pix-confirm-title"><span class="pix-section-number">02</span><div><b>Informe o pagamento</b><small>Confira o valor e o nome do recebedor no banco.</small></div></div><label class="pix-label" for="pg_nome">Nome que aparece no comprovante</label><input id="pg_nome" placeholder="Nome do pagador"><details class="pix-extra"><summary>Informar horário do pagamento (opcional)</summary><input id="pg_hora" placeholder="Ex.: 14:35"></details><button class="pix-submit" data-act="paguei">Já fiz o Pix</button><p class="pix-security-note">O acesso será liberado após a conferência do pagamento pelo responsável.</p></section>`;
-  const miolo=!dono?`<div class="pix-heading"><span class="pix-kicker">ACESSO DA FAMÍLIA</span><h1>Aguardando ativação</h1><p>O responsável pela família precisa concluir o pagamento. Você poderá acessar o espaço assim que a ativação for confirmada.</p></div>`:
-    `<div class="pix-heading"><span class="pix-kicker">${venc?'RENOVAÇÃO DO ACESSO':'ASSINATURA FAMILIAR'}</span><h1>${venc?'Renove seu acesso':'Escolha o plano da família'}</h1><p>Um pagamento libera o acesso do responsável e dos membros convidados.</p></div>
-    <div class="pix-plan-grid">
-      <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${brl(PLANOS.pro.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
-      <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${brl(PLANOS.max.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas na mesma família.</span></button>
-      <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${brl(PLANOS.ultra.valor)}<small>/mês</small></strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span></button>
-    </div>
-    <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Total para ${PIX.dias} dias</small><strong>${brl(PIX.valor)}</strong></div><p>Assinatura por família · não há cobrança individual dos membros convidados.</p></div>
-    <div class="pix-checkout-disclaimer">O pagamento é feito por Pix e liberado após conferência manual. O Max amplia o limite para até 6 pessoas. Cada conta fica vinculada a uma única família, independentemente do plano. Não há renovação automática.</div>
-    ${rec?'<div class="aviso err">Não conseguimos confirmar o último aviso de pagamento'+(ult.nota?': '+esc(ult.nota):'')+'. Confira os dados e envie novamente.</div>':''}
-    ${pend?'<div class="pix-pending"><b>Aviso de pagamento recebido</b><p>Seu pagamento está em análise. O acesso será liberado após a conferência.</p></div>':pagar}`;
-  const entrarComConvite=`<details class="pix-join"><summary>Já tem um convite de família?</summary><div class="pix-join-panel"><p>Digite o código recebido de alguém da família para entrar sem fazer outro Pix.</p><input id="cod-pix" maxlength="32" autocomplete="off" autocapitalize="characters" placeholder="CÓDIGO DO CONVITE"><button data-act="entrarfam-pix">Entrar na família</button></div></details>`;
+  const plano=planoAtual();
   $('#app').innerHTML=`<main class="pix-page">
-    <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>ASSINATURA E ACESSO FAMILIAR</small></div></header>
-    <div class="pix-layout">
-      <section class="pix-card">${miolo}${entrarComConvite}</section>
-      <aside class="pix-aside"><div class="pix-aside-card"><span class="pix-aside-icon">✓</span><b>Pagamento via Pix</b><p>Confira os dados antes de confirmar no aplicativo do seu banco.</p></div><div class="pix-aside-card"><span class="pix-aside-number">${PIX.dias}</span><b>Dias de acesso</b><p>O acesso é liberado depois da conferência do pagamento.</p></div><div class="pix-aside-help"><b>Precisa de ajuda?</b><span>Consulte os Termos de Uso e a Política de Privacidade.</span><div><a href="#" data-act="legal" data-t="termos">Termos</a> · <a href="#" data-act="legal" data-t="privacidade">Privacidade</a></div></div></aside>
-    </div>
-    <footer class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></footer>
+    <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>COMPRA E ACESSO FAMILIAR</small></div></header>
+    <div class="pix-layout"><section class="pix-card">
+      <div class="pix-heading"><span class="pix-kicker">COMPRA PELA GOOGLE PLAY</span><h1>${S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date()?'Renove o acesso':'Escolha o plano da família'}</h1><p>Selecione um plano. A compra é única, concede 30 dias após a aprovação manual e não tem renovação automática.</p></div>
+      <div class="pix-plan-grid">
+        <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${brl(PLANOS.pro.valor)}</strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
+        <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${brl(PLANOS.max.valor)}</strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas.</span></button>
+        <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${brl(PLANOS.ultra.valor)}</strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span></button>
+      </div>
+      <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${brl(plano.valor)}</strong></div>
+        <div class="pix-payment" hidden><b>Pagamento processado pela Google Play</b></div>
+        <p class="pix-checkout-disclaimer">A compra é feita exclusivamente pela Google Play no aplicativo Android. Depois da verificação, o pedido fica aguardando aprovação do administrador. Não há pagamento por Pix neste aplicativo.</p>
+      </div>
+      <div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div>
+    </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a aprovação do administrador.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Abra o aplicativo Android para concluir a compra pela Google Play.</span></div></aside></div>
   </main>`;
   clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);
 }
-async function carregarAdmin(){
-  const[r,l]=await Promise.all([q(sb.rpc('admin_resumo')),q(sb.rpc('admin_listar_pagamentos',{p_status:'todos'}))]);S.adm={r,l};S.admPend=r.pendentes;render();
+async function confirmarAdmin(){
+  const {data,error}=await sb.rpc('eh_admin');
+  if(error||data!==true){S.admin=false;S.adm=null;S.admPend=0;if(S.view==='admin')S.view='planilha';throw new Error('Acesso administrativo não autorizado.');}
+  S.admin=true;return true;
 }
+async function carregarAdmin(){
+  await confirmarAdmin();
+  const[r,g]=await Promise.all([
+    q(sb.rpc('admin_resumo')),
+    q(sb.rpc('admin_listar_compras_google_play',{p_status:'todos'}))
+  ]);
+  S.adm={r,g};S.admPend=r.pendentes;
+  if(!S.fam){$('#app').innerHTML=`<main class="wrap"><header class="top"><strong>Copiloto Financeiro · Administração</strong><div class="row"><button class="sec" data-act="atualizaradmin">Atualizar</button><button class="sec" data-act="sair">Sair</button></div></header>${viewAdmin()}</main>`;return;}
+  render();}
 function viewAdmin(){
-  const A=S.adm||{r:{},l:[]},r=A.r,code=pixPayload(PIX);
-  const linhas=A.l.map(x=>`<tr><td>${new Date(x.informado_em).toLocaleString('pt-BR')}</td><td>${esc(x.familia)}<div class="mu">${esc(x.email||'')}</div></td><td>${esc(x.pagador_nome)}<div class="mu">${esc(x.horario_informado||'')}</div></td><td>${brl(x.valor)}</td>
-   <td>${x.status==='pendente'?`<input type="number" id="dias_${x.id}" value="${PIX.dias}" min="1" style="width:70px"> dias <button class="chip" data-act="aprovar" data-id="${x.id}">✔ Aprovar</button> <button class="red chip" data-act="recusar" data-id="${x.id}">Recusar</button>`:esc(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5" class="mu" style="padding:14px">Nenhum pagamento informado ainda.</td></tr>';
-  return `<div class="cards"><div class="card"><small>Contas criadas</small><b>${r.contas??0}</b></div><div class="card"><small>Assinaturas ativas</small><b class="pos">${r.ativas??0}</b></div><div class="card"><small>Pedidos a conferir</small><b>${r.pendentes??0}</b></div><div class="card"><small>Receita total</small><b class="pos">${brl(r.receita_total)}</b></div><div class="card"><small>Últimos 30 dias</small><b>${brl(r.receita_30d)}</b></div><div class="card"><small>Vencem em 7 dias</small><b>${r.vencem_7d??0}</b></div></div>
-  <div class="card" style="margin-bottom:14px"><b>Pagamentos informados</b><div class="mu" style="margin:4px 0 8px">Confira no app do seu banco se o Pix chegou (valor, nome e horário) e só então aprove.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Informado</th><th>Família</th><th>Pagador</th><th>Valor</th><th>Ação</th></tr></thead><tbody>${linhas}</tbody></table></div></div>
-  <div class="card"><b>QR de referência do plano Pro</b><div class="mu" style="margin:4px 0">Confira o nome e o valor de ${brl(PLANOS.pro.valor)} em outro banco. No checkout, o QR muda conforme o plano escolhido.</div><div class="qrbox">${qrSvg(code)}</div><input readonly value="${code}" onclick="this.select()" style="width:100%;font-size:11px"></div>`;
+  if(!S.admin)throw new Error('Acesso administrativo não autorizado.');
+  const A=S.adm||{r:{},g:[]},r=A.r;
+  const linhasPlay=(A.g||[]).map(x=>`<tr><td>${new Date(x.criado_em).toLocaleString('pt-BR')}</td><td>${esc(x.familia)}<div class="mu">${esc(x.email||'')}</div></td><td>${esc(x.plano.toUpperCase())}<div class="mu">${esc(x.produto_id)}</div></td><td>${brl(x.valor)}</td><td>${x.status==='pendente'?'<button class="chip" data-act="aprovarplay" data-id="'+x.id+'">✔ Aprovar 30 dias</button> <button class="red chip" data-act="recusarplay" data-id="'+x.id+'">Reembolsar e recusar</button>':esc(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5" class="mu" style="padding:14px">Nenhuma compra Google Play.</td></tr>';
+  return `<div class="cards"><div class="card"><small>Contas criadas</small><b>${r.contas??0}</b></div><div class="card"><small>Assinaturas ativas</small><b class="pos">${r.ativas??0}</b></div><div class="card"><small>Compras pendentes</small><b>${r.pendentes??0}</b></div><div class="card"><small>Receita total</small><b class="pos">${brl(r.receita_total)}</b></div><div class="card"><small>Últimos 30 dias</small><b>${brl(r.receita_30d)}</b></div><div class="card"><small>Vencem em 7 dias</small><b>${r.vencem_7d??0}</b></div></div>
+  <div class="card" style="margin-bottom:14px"><b>Compras Google Play</b><div class="mu" style="margin:4px 0 8px">A compra só libera 30 dias após a aprovação. A recusa solicita reembolso e revogação pela Google Play.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Compra</th><th>Família</th><th>Plano / produto</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${linhasPlay}</tbody></table></div></div>`;
 }
 const catGrupos=[['fixas','Fixas / Financiamentos'],['cartoes','Cartões de Crédito'],['retirada','Retirada mensal'],['variaveis','Outras / Variáveis'],['receita','Receita']];
 function viewCats2(){
@@ -3032,8 +3085,8 @@ function viewConta(){
 function viewConfig(){
   const c=S.cfg||{},f=(k,l,ph)=>`<label class="mu" style="font-size:12px">${l}<input id="cfg_${k}" value="${esc(c[k]||'')}" placeholder="${ph||''}" style="width:100%;margin-top:3px"></label>`;
   const aviso=(!LEGAL.nome||!LEGAL.email)?`<div class="faixa fech" style="margin:8px 0"><span><b>⚠ Antes de vender:</b> preencha o nome do responsável e o e-mail de contato. Eles aparecem nos Termos e na Política. Peça para um advogado revisar os dois textos.</span></div>`:'';
-  return `<div class="card" style="margin-top:14px"><b>⚙ Configurações do negócio</b><div class="mu" style="margin:4px 0 8px">Atualize a chave Pix, o prazo de acesso e os dados de atendimento. Os preços dos planos Pro, Max e Ultra são definidos no catálogo do aplicativo.</div>${aviso}
-  <div class="grid2">${f('pix_chave','Chave Pix (celular com +55, e-mail ou chave aleatória)','+5531999999999')}${f('pix_dias','Dias de acesso por pagamento','30')}${f('pix_nome','Nome no QR (até 25 letras)','COPILOTO FINANCEIRO')}${f('pix_cidade','Cidade no QR (até 15 letras)','CONTAGEM')}${f('operador_nome','Nome ou razão social do responsável','')}${f('operador_cnpj','CNPJ (se tiver)','')}${f('contato_email','E-mail de contato e privacidade','')}</div>
+  return `<div class="card" style="margin-top:14px"><b>⚙ Configurações do negócio</b><div class="mu" style="margin:4px 0 8px">Atualize os dados de atendimento. Os pagamentos e preços são gerenciados exclusivamente pelo catálogo da Google Play.</div>${aviso}
+  <div class="grid2">${f('operador_nome','Nome ou razão social do responsável','')}${f('operador_cnpj','CNPJ (se tiver)','')}${f('contato_email','E-mail de contato e privacidade','')}</div>
   <div class="row" style="margin-top:10px"><button data-act="salvarcfg">Salvar configurações</button></div></div>`;
 }
 function csv(){
@@ -3073,6 +3126,7 @@ document.addEventListener('click',async e=>{
   if(S.busy&&!LIVRE.includes(a))return toast('Aguarde, ainda estou processando…');
   if(!LIVRE.includes(a))S.busy=true;
   try{
+  if(['aprovar','recusar','aprovarplay','recusarplay','salvarcfg'].includes(a))await confirmarAdmin();
   if(a==='entrar'||a==='cadastrar')await autenticar(a);
   else if(a==='escolherplano'){
     const plano=b.dataset.plano;
@@ -3084,7 +3138,11 @@ document.addEventListener('click',async e=>{
   else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}toast('Convite aceito! Abrindo a família…');await boot()}
-  else if(a==='view'){S.view=b.dataset.v;if(S.view==='admin')await carregarAdmin();else if(S.view==='plan')await carregarPlan();else render()}
+  else if(a==='view'){
+    const destino=b.dataset.v;
+    if(destino==='admin'){S.view='admin';await carregarAdmin();}
+    else {if(S.view==='admin')S.adm=null;S.view=destino;if(S.view==='plan')await carregarPlan();else render();}
+  }
   else if(a==='trocarespaco'){return toast('Cada conta está vinculada a uma única família.')}
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='quickedit'){if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);S.quickEdit={kind:b.dataset.kind};render()}
@@ -3173,6 +3231,13 @@ document.addEventListener('click',async e=>{
   else if(a==='verstatus')await boot();
   else if(a==='aprovar'){const dias=parseInt(document.getElementById('dias_'+b.dataset.id).value)||PIX.dias;await q(sb.rpc('aprovar_pagamento',{p_id:b.dataset.id,p_dias:dias}));toast('✔ Acesso liberado por '+dias+' dias');await carregarAdmin()}
   else if(a==='recusar'){const nota=prompt('Motivo (o cliente vai ver):','Não encontramos o Pix com esse valor/nome.');if(nota===null)return;await q(sb.rpc('recusar_pagamento',{p_id:b.dataset.id,p_nota:nota}));toast('Pedido recusado');await carregarAdmin()}
+  else if(a==='aprovarplay'||a==='recusarplay'){
+    if(a==='recusarplay'&&!confirm('Solicitar reembolso e revogação desta compra na Google Play?'))return;
+    const{data,error}=await sb.functions.invoke('google-play-admin',{body:{id:b.dataset.id,action:a==='aprovarplay'?'approve':'reject'}});
+    if(error)throw error;if(data?.error)throw new Error(data.error);
+    toast(a==='aprovarplay'?'Compra aprovada: 30 dias liberados para a família.':'Compra reembolsada e recusada.');
+    await carregarAdmin();
+  }
   else if(a==='addcat'){const n=$('#c_nome').value.trim();if(!n)return toast('Informe o nome da categoria',1);
     const pai=S.cats.find(c=>c.id===$('#c_pai').value),g=pai?pai.grupo:$('#c_grupo').value;
     await q(sb.from('categorias').insert({familia_id:S.fam.id,nome:n,tipo:pai?pai.tipo:(g==='receita'?'receita':'despesa'),grupo:g,parent_id:pai?pai.id:null,essencial:pai?pai.essencial:false}));
@@ -3185,6 +3250,7 @@ document.addEventListener('click',async e=>{
   else if(a==='delconta'){const t=prompt('Isto apaga a sua conta e os dados da sua família, para sempre. Para confirmar, digite EXCLUIR:');if(t!=='EXCLUIR')return;await q(sb.rpc('excluir_minha_conta'));try{await sb.auth.signOut()}catch(e){}S.user=null;toast('Conta excluída.');boot()}
   else if(a==='salvarcfg'){const k=['pix_chave','pix_dias','pix_nome','pix_cidade','operador_nome','operador_cnpj','contato_email'],o={};k.forEach(x=>{const v=$('#cfg_'+x).value.trim();if(v!==''||x.startsWith('operador')||x==='contato_email')o[x]=v});
     await q(sb.rpc('admin_salvar_config',{p_itens:o}));await carregarConfig();toast('Configurações salvas');render()}
+  else if(a==='atualizaradmin'){await carregarAdmin()}
   else if(a==='sino'){S.sino=true;render()}
   else if(a==='lerTodos'){await q(sb.from('notificacoes').update({lida:true}).eq('lida',false));S.notifs=[];S.sino=false;render()}
   else if(a==='hist'){S.hist=await q(sb.from('historico').select('*').eq('familia_id',S.fam.id).eq('tabela','lancamentos').order('criado_em',{ascending:false}).limit(40));render()}
@@ -3248,5 +3314,6 @@ document.addEventListener('wheel',()=>{const a=document.activeElement;if(a&&a.ty
 document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='ArrowUp'||e.key==='ArrowDown'))e.preventDefault();if(e.target.id==='senha'&&e.key==='Enter')document.querySelector('[data-act=entrar]').click();});
 </script>
 
+<script src="./android-play-billing.js"></script>
 </body>
 </html>
