@@ -25,6 +25,8 @@ assert.ok(admin.includes(appOrigin), "admin function must allow the canonical ap
 assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke native Play Billing");
 assert.ok(html.includes("copiloto:play-purchase"), "web app must receive completed purchase events");
 assert.ok(html.includes("google-play-purchase"), "web app must submit purchase tokens for server verification");
+assert.ok(html.includes("salvar_valores_lancamentos"), "monthly quick edit must use the atomic database RPC");
+assert.ok(html.includes("A contratação pela Google Play"), "signup checkout copy must not promise Pix in the Android flow");
 assert.ok(!html.includes("chave:'+5531999758385'"), "personal Pix fallback must not be hardcoded in public HTML");
 assert.ok(html.includes('id="confirmar-idade"'), "signup must require an adult confirmation");
 assert.ok(html.includes("payload.acceptedAdult=true"), "signup must submit adult confirmation to the server");
