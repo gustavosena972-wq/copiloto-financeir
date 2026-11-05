@@ -13,6 +13,7 @@ const requestParser = read("../supabase/functions/_shared/security.ts");
 const requestTests = read("../supabase/functions/_shared/security.test.ts");
 const admin = read("../supabase/functions/google-play-admin/index.ts");
 const html = read("../index.html");
+const mobileHtml = read("../android-app/app/src/main/assets/mobile.html");
 const releaseWorkflow = read("../.github/workflows/android-release.yml");
 const androidWorkflow = read("../.github/workflows/android-build.yml");
 const securityMigrationPath = new URL("../supabase/migrations/20261104190000_restrict_config_app_anon_read.sql", import.meta.url);
@@ -85,6 +86,7 @@ assert.ok(activity.includes("private var pendingPurchaseProductId: String? = nul
 assert.ok(activity.includes("private fun launchPendingPurchaseIfReady()"), "queued purchases must launch after product details are loaded");
 assert.ok(activity.includes("BillingClient.BillingResponseCode.USER_CANCELED"), "Android must handle user-cancelled purchases");
 
+assert.ok(mobileHtml.includes('name="theme-color"'), "bundled Android app must define a theme color for a consistent system UI");
 assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke native Play Billing");
 assert.ok(!html.includes('src="./android-play-billing.js"'), "legacy Android billing script must not register duplicate purchase handlers");
 assert.ok(!html.includes('src="./native-play-billing-bridge.js"'), "obsolete bridge shim must not be loaded alongside the native interface");
