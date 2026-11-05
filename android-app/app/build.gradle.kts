@@ -25,7 +25,7 @@ android {
         buildConfigField(
             "String",
             "WEB_APP_URL",
-            "\"https://copiloto-financeir.gustavosena972.workers.dev/\""
+            "\"https://copiloto-financeir.gustavosena972.workers.dev/app.html\""
         )
     }
 
