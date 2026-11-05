@@ -1,0 +1,21 @@
+name: Production load smoke
+
+on:
+  push:
+    branches:
+      - release/google-play-signed-bundle-gate
+  workflow_dispatch:
+
+jobs:
+  load-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run 2-session baseline
+        run: node scripts/load-smoke.mjs --concurrency 2 --rounds 5
+      - name: Run 10-session concurrency
+        run: node scripts/load-smoke.mjs --concurrency 10 --rounds 10
