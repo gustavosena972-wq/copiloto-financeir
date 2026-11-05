@@ -1,0 +1,185 @@
+import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+
+const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
+const gradle = read("../android-app/app/build.gradle.kts");
+const activity = read("../android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt");
+const manifest = read("../android-app/app/src/main/AndroidManifest.xml");
+const trustedUrl = read("../android-app/app/src/main/java/br/com/copiloto/financeiro/TrustedAppUrl.kt");
+const trustedUrlTests = read("../android-app/app/src/test/java/br/com/copiloto/financeiro/TrustedAppUrlTest.kt");
+const purchase = read("../supabase/functions/google-play-purchase/index.ts");
+const auth = read("../supabase/functions/autenticacao-usuario/index.ts");
+const requestParser = read("../supabase/functions/_shared/security.ts");
+const requestTests = read("../supabase/functions/_shared/security.test.ts");
+const admin = read("../supabase/functions/google-play-admin/index.ts");
+const html = read("../index.html");
+const releaseWorkflow = read("../.github/workflows/android-release.yml");
+const androidWorkflow = read("../.github/workflows/android-build.yml");
+const securityMigrationPath = new URL("../supabase/migrations/20261104190000_restrict_config_app_anon_read.sql", import.meta.url);
+const securityMigration = existsSync(securityMigrationPath) ? readFileSync(securityMigrationPath, "utf8") : "";
+const definerMigrationPath = new URL("../supabase/migrations/20261104193000_harden_security_definer_search_path.sql", import.meta.url);
+const definerMigration = existsSync(definerMigrationPath) ? readFileSync(definerMigrationPath, "utf8") : "";
+const definerRegressionPath = new URL("../supabase/tests/security_definer_search_path.sql", import.meta.url);
+const definerRegression = existsSync(definerRegressionPath) ? readFileSync(definerRegressionPath, "utf8") : "";
+
+const packageName = "br.com.copiloto.financeiro";
+const appOrigin = "https://copiloto-financeir.gustavosena972.workers.dev";
+
+assert.ok(gradle.includes('applicationId = "' + packageName + '"'), "Android applicationId must match the registered Play package");
+assert.ok(activity.includes('webView.loadUrl("file:///android_asset/mobile.html")'), "Android must load the complete bundled application asset");
+assert.ok(activity.includes("file:///android_asset/mobile.html"), "Android must use the bundled application entrypoint instead of the institutional web origin");
+assert.ok(trustedUrl.includes('ALLOWED_HOST = "copiloto-financeir.gustavosena972.workers.dev"'), "WebView URL validator must pin the canonical host");
+assert.ok(activity.includes("TrustedAppUrl.isAllowed(uri.toString())"), "WebView navigation must use the strict URL validator");
+assert.ok(purchase.includes('Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME")'), "purchase backend must use the configured Play package");
+assert.ok(purchase.includes('if (!url || !anon || !service || !packageName)'), "purchase backend must fail closed without the package secret");
+assert.ok(purchase.includes(appOrigin), "purchase function must allow the canonical app origin");
+assert.ok(purchase.includes("async function consumePurchase"), "consumable Play purchases must be acknowledged within the store deadline");
+assert.ok(purchase.includes("await consumePurchase(googleToken"), "server must consume verified purchases after persisting them");
+assert.ok(admin.includes(appOrigin), "admin function must allow the canonical app origin");
+
+assert.ok(purchase.includes('"https://gustavosena972-wq.github.io"'), "purchase function must retain the supported web origin");
+assert.ok(purchase.includes("Number(data.purchaseState) !== 0"), "purchase function must reject purchases not confirmed by Google Play");
+assert.ok(purchase.includes("Number(data.quantity || 1) !== 1"), "purchase function must reject unexpected purchase quantities");
+assert.ok(requestParser.includes("maxBytes = 8192"), "purchase endpoint must use the bounded request parser default");
+assert.ok(!purchase.includes('"Access-Control-Allow-Origin": "*"'), "purchase endpoint must never reflect wildcard CORS");
+assert.ok(purchase.includes('p_bucket_key: "purchase:user:"'), "purchase verification must apply per-user rate limiting");
+assert.ok(purchase.includes('.eq("token_hash", tokenHash)'), "purchase verification must enforce token idempotency");
+assert.ok(purchase.includes("if (existingError) throw existingError"), "purchase lookup failures must not be treated as a missing purchase");
+assert.ok(purchase.includes("racedPurchase.usuario_id !== userData.user.id || racedPurchase.familia_id !== membership.familia_id"), "concurrent duplicate tokens must be rechecked against the owning account");
+assert.ok(admin.includes('"https://gustavosena972-wq.github.io"'), "admin function must retain the supported web origin");
+assert.ok(admin.includes('userClient.rpc("eh_admin")'), "admin endpoint must verify the caller's administrator role");
+assert.ok(admin.includes(":refund?revoke=true"), "rejecting a purchase must refund and revoke it through Google Play");
+assert.ok(admin.includes("refundStatus"), "admin rejection must distinguish completed refunds from refund requests");
+assert.ok(html.includes("data?.refundStatus === \"completed\""), "admin UI must not claim a refund completed while it is still pending");
+assert.ok(admin.includes('purchase.status !== "pendente"'), "admin endpoint must reject already-decided purchases");
+assert.ok(!admin.includes('"Access-Control-Allow-Origin": "*"'), "admin function must not use wildcard CORS");
+assert.ok(admin.includes("parseJsonObjectRequest(req)"), "admin endpoint must use the bounded request parser before JSON parsing");
+assert.ok(admin.indexOf("parseJsonObjectRequest(req)") < admin.indexOf("auth.getUser(jwt)"), "admin endpoint must reject malformed or oversized bodies before external authentication work");
+assert.ok(auth.includes('Não foi possível criar a conta. Confira os dados e tente novamente.'), "authentication endpoint must not expose raw Supabase Auth errors");
+assert.ok(releaseWorkflow.includes("if: github.ref == 'refs/heads/main'"), "production signing workflow must run only from the protected main branch");
+assert.ok(!admin.includes("error: error instanceof Error ? error.message"), "admin endpoint must not disclose raw internal errors to clients");
+assert.ok(!admin.includes("error.message"), "admin endpoint must not return raw database error details");
+assert.ok(existsSync(securityMigrationPath), "config_app anonymous-read hardening migration must exist");
+assert.ok(securityMigration.includes("REVOKE SELECT ON TABLE public.config_app FROM anon, authenticated, PUBLIC"), "config_app table-level SELECT must be revoked from client roles");
+assert.ok(securityMigration.includes("REVOKE SELECT (chave, valor) ON TABLE public.config_app FROM anon, authenticated, PUBLIC"), "existing column-level SELECT grants must also be revoked");
+assert.ok(securityMigration.includes("chave = ANY"), "config_app RLS must expose only an explicit public-key allowlist");
+assert.ok(securityMigration.includes("'pix_chave'") && securityMigration.includes("'contato_email'"), "the app allowlist must preserve only required public configuration keys");
+assert.ok(securityMigration.includes("CREATE POLICY config_ler_authenticated_allowlist") && securityMigration.includes("TO authenticated"), "authenticated users must retain only allowlisted config rows");
+assert.ok(securityMigration.includes("GRANT SELECT (chave, valor) ON TABLE public.config_app TO authenticated"), "authenticated role must retain only the required config columns");
+assert.ok(existsSync(definerMigrationPath), "SECURITY DEFINER search_path hardening migration must exist");
+assert.ok(definerMigration.includes("p.prosecdef") && definerMigration.includes("pg_get_function_identity_arguments"), "hardening migration must cover every existing SECURITY DEFINER function");
+assert.ok(definerMigration.includes("SET search_path TO pg_catalog, public, private, pg_temp"), "SECURITY DEFINER functions must put pg_temp last");
+assert.ok(definerMigration.includes("AND n.nspname = 'public'") && definerMigration.includes("UPDATE %I.%I"), "account cleanup dynamic SQL must be limited to trusted public tables and quoted identifiers");
+assert.ok(existsSync(definerRegressionPath), "temporary-object privilege-escalation regression test must exist");
+assert.ok(definerRegression.includes("CREATE TEMP TABLE admins") && definerRegression.includes("public.eh_admin()"), "regression test must verify temp-table shadowing cannot grant admin");
+assert.ok(definerRegression.includes("public.config_app") && definerRegression.includes("config_ler_authenticated_allowlist"), "regression test must verify anonymous config access is revoked");
+assert.ok(definerRegression.includes("ROLLBACK"), "database security regression test must leave no persistent changes");
+assert.ok(auth.includes('"https://gustavosena972-wq.github.io"'), "authentication must retain the supported web origin");
+assert.ok(auth.includes(appOrigin), "authentication must allow the canonical Cloudflare origin");
+assert.ok(auth.includes("if (origin && !ALLOWED_ORIGINS.has(origin))"), "authentication must reject disallowed cross-origin requests");
+assert.ok(auth.includes("status: 403"), "authentication must fail closed for disallowed origins");
+assert.ok(gradle.includes("compileSdk = 36") && gradle.includes("targetSdk = 36"), "Android must target the current required API level");
+assert.ok(gradle.includes('com.android.billingclient:billing:9.1.0'), "Android must use the pinned Play Billing dependency");
+assert.ok(activity.includes("Purchase.PurchaseState.PENDING"), "Android must handle pending Play purchases");
+assert.ok(activity.includes("private var pendingPurchaseProductId: String? = null"), "purchase requests must survive BillingClient connection startup");
+assert.ok(activity.includes("private fun launchPendingPurchaseIfReady()"), "queued purchases must launch after product details are loaded");
+assert.ok(activity.includes("BillingClient.BillingResponseCode.USER_CANCELED"), "Android must handle user-cancelled purchases");
+
+assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke native Play Billing");
+assert.ok(!html.includes('src="./android-play-billing.js"'), "legacy Android billing script must not register duplicate purchase handlers");
+assert.ok(!html.includes('src="./native-play-billing-bridge.js"'), "obsolete bridge shim must not be loaded alongside the native interface");
+assert.ok(html.includes("copiloto:play-purchase"), "web app must receive completed purchase events");
+assert.ok(html.includes("google-play-purchase"), "web app must submit purchase tokens for server verification");
+assert.ok(html.includes("salvar_valores_lancamentos"), "monthly quick edit must use the atomic database RPC");
+assert.ok(html.includes("A contratação pela Google Play"), "signup checkout copy must not promise Pix in the Android flow");
+assert.ok(!html.includes("chave:'+5531999758385'"), "personal Pix fallback must not be hardcoded in public HTML");
+assert.ok(html.includes('id="confirmar-idade"'), "signup must require an adult confirmation");
+assert.ok(html.includes("payload.acceptedAdult=true"), "signup must submit adult confirmation to the server");
+assert.ok(auth.includes("payload?.acceptedAdult !== true"), "server must enforce adult eligibility, not trust the browser alone");
+for (const [name, source] of [["auth", auth], ["purchase", purchase], ["admin", admin]]) {
+  assert.ok(source.includes('import { parseJsonObjectRequest } from "../_shared/security.ts"'), name + " must use the shared bounded JSON parser");
+  assert.ok(!source.includes("req.text()"), name + " must not buffer an unbounded request body");
+}
+assert.ok(requestParser.includes("request.body.getReader()") && requestParser.includes("reader.cancel()"), "shared parser must stream and cancel oversized bodies");
+assert.ok(requestParser.includes("value.byteLength") && requestParser.includes('new TextDecoder("utf-8", { fatal: true })'), "shared parser must enforce byte size and reject invalid UTF-8");
+assert.ok(requestTests.includes("Deno.test(") && requestTests.includes("multibyte UTF-8") && requestTests.includes("malformed JSON"), "shared parser must have runtime security regression tests");
+assert.ok(html.includes("const precoSelecionado = S.playProducts?.[produtoSelecionado]?.formattedPrice"), "selected plan summary must display the actual Google Play price");
+assert.ok(!html.includes("${brl(plano.valor)}"), "paywall must not display stale web/Pix prices as the Google Play checkout price");
+
+assert.ok(gradle.includes('System.getenv("ANDROID_KEYSTORE_PATH")'), "release signing must be configurable through protected CI environment variables");
+assert.ok(gradle.includes('System.getenv("ANDROID_KEYSTORE_PASSWORD")'), "release signing must use a protected keystore password");
+assert.ok(releaseWorkflow.includes("workflow_dispatch:"), "signed release workflow must be manually triggered");
+for (const secret of ["ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD"]) {
+  assert.ok(releaseWorkflow.includes(secret), `signed release workflow must require ${secret}`);
+}
+assert.ok(releaseWorkflow.includes("jarsigner -verify"), "release workflow must verify the AAB signature");
+assert.ok(releaseWorkflow.includes("upload-artifact@v4"), "signed AAB must be uploaded as a CI artifact");
+
+
+// Paid-plan entitlement contract: marketing, checkout and feature gates must agree.
+assert.ok(html.includes("pro:{nome:'Pro',valor:23.90,limite:2,produto:'copiloto_pro_30d'"), "Pro must use the canonical 30-day Play product and 2-person limit");
+assert.ok(html.includes("max:{nome:'Max',valor:35.90,limite:6,produto:'copiloto_max_30d'"), "Max must use the canonical 30-day Play product and 6-person limit");
+assert.ok(html.includes("ultra:{nome:'Ultra',valor:59.90,limite:null,produto:'copiloto_ultra_30d'"), "Ultra must use the canonical 30-day Play product");
+assert.ok(html.includes("recursos:{relatorios:true,patrimonioHistorico:true,simulador:true}"), "Ultra must declare all advertised advanced resources");
+assert.ok(html.includes("const limiteMembros=()=>"), "family member limits must come from the canonical plan matrix");
+assert.ok(html.includes("const planoTemRecurso=(recurso)=>"), "advanced entitlements must use the canonical plan matrix");
+assert.ok(html.includes("planoTemRecurso('relatorios')"), "reports must be gated by the plan matrix");
+assert.ok(html.includes("planoTemRecurso('patrimonioHistorico')"), "patrimonial history must be gated by the plan matrix");
+assert.ok(html.includes("planoTemRecurso('simulador')"), "long-term simulator must be gated by the plan matrix");
+assert.ok(html.includes("/ 30 dias"), "public plan cards must describe the one-time 30-day entitlement");
+assert.ok(html.includes("Produtos de compra única: 30 dias de acesso"), "public pricing footnote must match the Google Play purchase model");
+assert.ok(!html.includes("Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50"), "legacy monthly/Pix pricing copy must not remain");
+assert.ok(html.includes("const produtoSelecionado=PLANOS[S.planoEscolhido]?.produto||PLANOS.pro.produto"), "checkout product selection must come from the canonical plan matrix");
+
+console.log("Android/Cloudflare/Google Play release contract: OK");
+console.log("Signed AAB release gate: OK");
+
+const configLoader = html.match(/async function carregarConfig\(\)\s*\{([\s\S]*?)\n\}/)?.[1] || "";
+assert.ok(configLoader.includes(".select('chave,valor')"), "config loader must request only columns granted by the hardened config_app policy");
+assert.ok(!configLoader.includes(".select('*')"), "config loader must not request columns outside its least-privilege grant");
+
+const authListener = html.match(/sb\.auth\.onAuthStateChange\(\(ev,s\)=>\{([\s\S]*?)\}\);/)?.[1] || "";
+assert.ok(authListener.includes("scheduleBoot()"), "auth state changes must schedule app boot outside the Supabase auth callback");
+assert.ok(!authListener.includes("boot().catch"), "Supabase API calls must not start synchronously inside onAuthStateChange callbacks");
+assert.match(html, /function scheduleBoot\(\)[\s\S]*?setTimeout\(\(\)=>\{[\s\S]*?boot\(\)\.catch\(mostrarErroInicial\)/, "scheduled boot must run after the auth callback unwinds");
+
+const staticActions = new Set([...html.matchAll(/\bdata-act\s*=\s*["']([^"'<>$]+)["']/g)].map((match) => match[1]));
+const handledActions = new Set([...html.matchAll(/(?:if|else\s+if)\s*\(\s*a\s*===?\s*['"]([^'"]+)['"]/g)].map((match) => match[1]));
+const unhandledActions = [...staticActions].filter((action) => !handledActions.has(action));
+assert.deepEqual(unhandledActions, [], "every static data-act UI action must have a delegated handler");
+
+assert.ok(activity.includes("override fun onBackPressed()"), "Android back navigation must be handled explicitly");
+assert.ok(activity.includes("billingClient.endConnection()"), "BillingClient must be released when the Activity is destroyed");
+assert.ok(activity.includes("MIXED_CONTENT_NEVER_ALLOW"), "WebView must block mixed-content requests");
+assert.ok(activity.includes("javaScriptCanOpenWindowsAutomatically = false"), "WebView must not allow scripts to open windows automatically");
+assert.ok(activity.includes("setSupportMultipleWindows(false)"), "WebView must not create uncontrolled secondary windows");
+
+console.log("Web action and auth lifecycle guardrails: OK");
+console.log("Android lifecycle and WebView guardrails: OK");
+
+const csp = html.match(/<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/i)?.[1] || "";
+assert.ok(csp.includes("default-src 'self'"), "web app must declare a restrictive default Content Security Policy");
+assert.ok(csp.includes("object-src 'none'") && csp.includes("frame-src 'none'"), "web CSP must block plugins and embedded frames");
+assert.ok(csp.includes("https://jlufubazlnrelrbsvsal.supabase.co") && csp.includes("wss://jlufubazlnrelrbsvsal.supabase.co"), "web CSP must allow only the configured Supabase API and realtime origins");
+assert.ok(!/\beval\s*\(/.test(html) && !/new\s+Function\s*\(/.test(html), "web app must not use dynamic code evaluation");
+assert.ok(html.includes("const esc="), "web app must retain a central HTML output-encoding helper");
+assert.ok(!/service_role|-----BEGIN (?:RSA )?PRIVATE KEY-----/.test(html), "web app must not contain server credentials");
+assert.ok(manifest.includes('android:allowBackup="false"') && manifest.includes('android:usesCleartextTraffic="false"'), "Android manifest must disable backup and cleartext traffic");
+assert.ok(manifest.includes('<uses-permission android:name="android.permission.INTERNET"'), "Android manifest must explicitly declare network access");
+
+console.log("Web CSP, injection and secret guardrails: OK");
+console.log("Android manifest security guardrails: OK");
+
+assert.ok(activity.includes("TrustedAppUrl.isAllowed(uri.toString())"), "WebView navigation must use the tested strict URL validator");
+assert.ok(activity.includes("TrustedAppUrl.isAllowed(url)"), "Billing bridge readiness must only be announced for the trusted origin");
+assert.ok(trustedUrl.includes("uri.port == -1 || uri.port == 443"), "WebView must reject unexpected HTTPS ports");
+assert.ok(trustedUrl.includes("uri.rawUserInfo == null"), "WebView must reject user-info URL confusion");
+assert.ok(trustedUrl.includes("uri.host.equals(ALLOWED_HOST, ignoreCase = true)"), "WebView must require an exact trusted host match");
+assert.ok(trustedUrlTests.includes("rejectsUnexpectedPortsAndUserInfo"), "strict URL validator must have regression tests for ports and user-info");
+assert.ok(trustedUrlTests.includes("rejectsHttpAndLookalikeHosts"), "strict URL validator must have regression tests for schemes and lookalike hosts");
+assert.ok(androidWorkflow.includes("gradle testDebugUnitTest"), "Android CI must execute JVM unit tests");
+
+console.log("Android trusted-origin unit-test guardrails: OK");
+
+
+

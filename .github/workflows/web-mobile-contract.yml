@@ -1,0 +1,23 @@
+name: Web and mobile contract checks
+
+on:
+  push:
+    branches:
+      - release/google-play-signed-bundle-gate
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  contract-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check plan and family contracts
+        run: node tests/plan-family-contract.test.js
+      - name: Check web/mobile separation
+        run: node tests/web-mobile-separation.test.js

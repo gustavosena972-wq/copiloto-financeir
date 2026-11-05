@@ -1,13 +1,13 @@
 # Aplicativo Android — Copiloto Financeiro
 
-Esta pasta contém o invólucro Android isolado. O app web principal não foi redesenhado e o checkout Pix do navegador permanece intacto nesta etapa.
+Esta pasta contém o invólucro Android isolado. A página pública em `index.html` é institucional e não é o aplicativo completo. A experiência completa do aplicativo foi preservada em `mobile.html` (asset interno do Android); o Android WebView carrega essa entrada pelo Cloudflare Worker em `/app.html`. A versão Web institucional apresenta o produto e direciona a instalação para a Google Play.
 
 ## Integração implementada na branch
 
 - Android nativo com Google Play Billing Library `9.1.0` e produtos avulsos: `copiloto_pro_30d`, `copiloto_max_30d`, `copiloto_ultra_30d`.
 - Consulta dos produtos e preços formatados diretamente pela Google Play.
 - Início de compra e tratamento de compra concluída, pendente, cancelada e restauração de compras existentes.
-- Ponte Android `CopilotoPlayBilling` ligada ao `android-play-billing.js`.
+- Integração JavaScript de checkout mantida no `index.html`, usando diretamente a interface nativa `CopilotoPlayBilling`.
 - O JavaScript envia o token para a Edge Function autenticada `google-play-purchase`.
 - O servidor valida o token com a Google Play Developer API e cria uma solicitação pendente; não libera acesso sozinho.
 - O painel administrativo tem ações separadas para aprovar ou recusar compras Google Play.

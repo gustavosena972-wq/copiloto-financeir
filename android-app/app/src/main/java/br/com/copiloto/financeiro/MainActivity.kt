@@ -24,14 +24,15 @@ import com.android.billingclient.api.QueryPurchasesParams
 class MainActivity : Activity(), PurchasesUpdatedListener {
     private lateinit var webView: WebView
     private lateinit var billingClient: BillingClient
-    private val allowedHost = "gustavosena972-wq.github.io"
-    private val allowedPathPrefix = "/copiloto-financeir/"
     private val productIds = listOf(
         "copiloto_pro_30d",
         "copiloto_max_30d",
         "copiloto_ultra_30d"
     )
     private val productDetails = mutableMapOf<String, ProductDetails>()
+    private var pendingPurchaseProductId: String? = null
+    private var isConnectingBilling = false
+    private var isLoadingProductDetails = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +52,12 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = false
         webView.settings.allowContentAccess = false
+        webView.settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+        webView.settings.javaScriptCanOpenWindowsAutomatically = false
+        webView.settings.setSupportMultipleWindows(false)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            webView.settings.safeBrowsingEnabled = true
+        }
         webView.webChromeClient = WebChromeClient()
         webView.addJavascriptInterface(PlayBillingBridge(), "CopilotoPlayBilling")
         webView.webViewClient = object : WebViewClient() {
@@ -59,26 +66,20 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 request: WebResourceRequest?
             ): Boolean {
                 val uri = request?.url ?: return true
-                return !isTrustedAppUrl(uri.scheme, uri.host, uri.path)
+                return !TrustedAppUrl.isAllowed(uri.toString())
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                val parsed = runCatching { android.net.Uri.parse(url) }.getOrNull()
-                if (parsed != null && isTrustedAppUrl(parsed.scheme, parsed.host, parsed.path)) {
+                if (url == "file:///android_asset/mobile.html" || TrustedAppUrl.isAllowed(url)) {
                     dispatchToWeb("copiloto:play-bridge-ready", JSONObject().put("ready", true))
                 }
             }
         }
         setContentView(webView)
-        webView.loadUrl(BuildConfig.WEB_APP_URL)
+        webView.loadUrl("file:///android_asset/mobile.html")
 
         connectBilling()
-    }
-
-    private fun isTrustedAppUrl(scheme: String?, host: String?, path: String?): Boolean {
-        return scheme == "https" && host == allowedHost &&
-            (path == allowedPathPrefix.removeSuffix("/") || path?.startsWith(allowedPathPrefix) == true)
     }
 
     private fun connectBilling() {
@@ -87,12 +88,17 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             queryExistingPurchases()
             return
         }
+        if (isConnectingBilling) return
+
+        isConnectingBilling = true
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(result: BillingResult) {
+                isConnectingBilling = false
                 if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                     loadProducts()
                     queryExistingPurchases()
                 } else {
+                    pendingPurchaseProductId = null
                     dispatchToWeb(
                         "copiloto:play-error",
                         JSONObject().put("message", "Não foi possível conectar à Google Play.")
@@ -101,12 +107,15 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             }
 
             override fun onBillingServiceDisconnected() {
+                isConnectingBilling = false
                 // A reconexão automática está habilitada no BillingClient.
             }
         })
     }
 
     private fun loadProducts() {
+        if (isLoadingProductDetails || !billingClient.isReady) return
+        isLoadingProductDetails = true
         val products = productIds.map { id ->
             QueryProductDetailsParams.Product.newBuilder()
                 .setProductId(id)
@@ -118,7 +127,9 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             .build()
 
         billingClient.queryProductDetailsAsync(params) { result, queryResult ->
+            isLoadingProductDetails = false
             if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+                pendingPurchaseProductId = null
                 dispatchToWeb(
                     "copiloto:play-error",
                     JSONObject().put("message", "Não foi possível carregar os planos da Google Play.")
@@ -139,7 +150,25 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 )
             }
             dispatchToWeb("copiloto:play-products", JSONObject().put("products", items))
+            launchPendingPurchaseIfReady()
         }
+    }
+
+    private fun launchPendingPurchaseIfReady() {
+        val productId = pendingPurchaseProductId ?: return
+        if (!billingClient.isReady || isLoadingProductDetails) return
+
+        if (productDetails[productId] == null) {
+            pendingPurchaseProductId = null
+            dispatchToWeb(
+                "copiloto:play-error",
+                JSONObject().put("message", "Este plano não está disponível na Google Play.")
+            )
+            return
+        }
+
+        pendingPurchaseProductId = null
+        launchPurchase(productId)
     }
 
     private fun queryExistingPurchases() {
@@ -250,7 +279,16 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 return
             }
             runOnUiThread {
-                if (billingClient.isReady) launchPurchase(productId) else connectBilling()
+                pendingPurchaseProductId = productId
+                if (billingClient.isReady) {
+                    if (productDetails[productId] != null) {
+                        launchPendingPurchaseIfReady()
+                    } else {
+                        loadProducts()
+                    }
+                } else {
+                    connectBilling()
+                }
             }
         }
     }
