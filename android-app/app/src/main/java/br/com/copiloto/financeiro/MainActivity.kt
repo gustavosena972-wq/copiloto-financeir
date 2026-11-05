@@ -71,7 +71,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                if (TrustedAppUrl.isAllowed(url)) {
+                if (url == "file:///android_asset/mobile.html" || TrustedAppUrl.isAllowed(url)) {
                     dispatchToWeb("copiloto:play-bridge-ready", JSONObject().put("ready", true))
                 }
             }
