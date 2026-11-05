@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - release/google-play-signed-bundle-gate
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
