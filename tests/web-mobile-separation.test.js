@@ -10,6 +10,10 @@ function assert(condition, message) {
 
 // Public Web is institutional/sales-only.
 assert(landing.includes("Baixar na Google Play"), "Google Play CTA missing");
+assert(landing.includes("Quem somos"), "creators section missing");
+assert(landing.includes("Gustavo Sena"), "creator identity missing");
+assert(landing.includes("Planos do Copiloto"), "sales showcase missing");
+assert(landing.includes("R$ 23,90") && landing.includes("R$ 35,90") && landing.includes("R$ 59,90"), "plan prices missing");
 assert(!landing.includes("renderAuth"), "authentication UI must not remain in institutional landing");
 assert(!landing.includes("renderPaywall"), "application paywall must not remain in institutional landing");
 
