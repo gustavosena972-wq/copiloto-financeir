@@ -87,6 +87,7 @@ assert.ok(activity.includes("private fun launchPendingPurchaseIfReady()"), "queu
 assert.ok(activity.includes("BillingClient.BillingResponseCode.USER_CANCELED"), "Android must handle user-cancelled purchases");
 
 assert.ok(mobileHtml.includes('name="theme-color"'), "bundled Android app must define a theme color for a consistent system UI");
+assert.ok(mobileHtml.includes("@media (prefers-reduced-motion: reduce)"), "bundled Android app must provide a reduced-motion accessibility mode");
 assert.ok(html.includes("CopilotoPlayBilling.purchase("), "paywall must invoke native Play Billing");
 assert.ok(!html.includes('src="./android-play-billing.js"'), "legacy Android billing script must not register duplicate purchase handlers");
 assert.ok(!html.includes('src="./native-play-billing-bridge.js"'), "obsolete bridge shim must not be loaded alongside the native interface");
