@@ -77,7 +77,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             }
         }
         setContentView(webView)
-        webView.loadUrl(BuildConfig.WEB_APP_URL)
+        webView.loadUrl("file:///android_asset/mobile.html")
 
         connectBilling()
     }
