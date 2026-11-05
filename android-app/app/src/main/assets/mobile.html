@@ -6,6 +6,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f4f3ee">
 <meta name="description" content="Copiloto Financeiro: um aplicativo brasileiro de finanças para famílias.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://jlufubazlnrelrbsvsal.supabase.co wss://jlufubazlnrelrbsvsal.supabase.co; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:; upgrade-insecure-requests">
 
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2010,7 +2011,7 @@ if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div
 const sb=supabase.createClient(SB_URL,SB_KEY);
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null};
+const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set()};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -2036,10 +2037,19 @@ function mostrarErroInicial(e){
     await boot();
     sb.auth.onAuthStateChange((ev,s)=>{
       const u=s?.user||null;
-      if((u?.id)!==(S.user?.id)){S.user=u;boot().catch(mostrarErroInicial)}
+      if((u?.id)!==(S.user?.id)){S.user=u;scheduleBoot()}
     });
   }catch(e){mostrarErroInicial(e)}
 })();
+
+let authBootTimer=null;
+function scheduleBoot(){
+  if(authBootTimer!==null)return;
+  authBootTimer=setTimeout(()=>{
+    authBootTimer=null;
+    boot().catch(mostrarErroInicial);
+  },0);
+}
 
 async function boot(){
   // Isola permissões e dados entre sessões diferentes.
@@ -2052,14 +2062,13 @@ async function boot(){
   if(adminCheck.error)throw adminCheck.error;
   S.admin=adminCheck.data===true;
   const rows=await q(sb.from('membros').select('id,papel,nome,familias(id,nome,meta_reducao_cartao,acesso_ate,plano)').eq('usuario_id',S.user.id).order('criado_em',{ascending:false}));
-  S.espacos=rows;
   if(!rows.length){
     S.adm=null;
     if(S.admin){S.me=null;S.fam=null;S.view='admin';await carregarAdmin();return;}
     return renderSemFamilia();
   }
-  let familiaPreferida=null;try{familiaPreferida=localStorage.getItem('cf_familia_ativa')}catch(e){}
-  S.me=rows.find(x=>x.familias?.id===familiaPreferida)||rows[0];S.fam=S.me.familias;
+  // Cada conta possui uma única família. A associação vem do banco; não há seletor local de família.
+  S.me=rows[0];S.fam=S.me.familias;
   if(!S.admin&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
   try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);S.notifs=nr.data||[]}catch(e){S.notifs=[]}
@@ -2195,7 +2204,7 @@ function renderAuth(){
       <div class="landing-plan-grid">
         <article class="landing-plan-card">
           <div class="landing-plan-top"><span class="landing-plan-label">CONTROLE FINANCEIRO</span><h3>Pro</h3><p>Para organizar as finanças do dia a dia.</p></div>
-          <div class="landing-price"><strong>${precoPro}</strong><span>/ mês</span></div>
+          <div class="landing-price"><strong>${precoPro}</strong><span>/ 30 dias</span></div>
           <div class="landing-limit">Até 2 pessoas na família</div>
           <div class="landing-feature-heading">RECURSOS INCLUÍDOS</div>
           <ul class="landing-feature-list">
@@ -2212,8 +2221,8 @@ function renderAuth(){
         </article>
         <article class="landing-plan-card recommended">
           <div class="landing-ribbon">FAMÍLIA AMPLIADA</div>
-          <div class="landing-plan-top"><span class="landing-plan-label">MAIS PESSOAS NO MESMO ESPAÇO</span><h3>Max</h3><p>Para famílias que precisam organizar as finanças com mais pessoas.</p></div>
-          <div class="landing-price"><strong>${precoMax}</strong><span>/ mês</span></div>
+          <div class="landing-plan-top"><span class="landing-plan-label">FAMÍLIA AMPLIADA</span><h3>Max</h3><p>Para famílias que precisam organizar as finanças com mais pessoas.</p></div>
+          <div class="landing-price"><strong>${precoMax}</strong><span>/ 30 dias</span></div>
           <div class="landing-limit">Até 6 pessoas na família</div>
           <div class="landing-feature-heading">TUDO DO PRO, COM MAIS ESPAÇO PARA A FAMÍLIA</div>
           <ul class="landing-feature-list">
@@ -2226,8 +2235,8 @@ function renderAuth(){
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="max">Escolher Max <span>↗</span></button>
         </article>
         <article class="landing-plan-card ultra">
-          <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO FINANCEIRA AMPLIADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e espaços familiares já vinculados à sua conta.</p></div>
-          <div class="landing-price"><strong>${precoUltra}</strong><span>/ mês</span></div>
+          <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO AVANÇADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e espaços familiares já vinculados à sua conta.</p></div>
+          <div class="landing-price"><strong>${precoUltra}</strong><span>/ 30 dias</span></div>
           <div class="landing-limit">Ferramentas avançadas de gestão financeira</div>
           <div class="landing-feature-heading">RECURSOS ULTRA DISPONÍVEIS</div>
           <ul class="landing-feature-list">
@@ -2241,7 +2250,7 @@ function renderAuth(){
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="ultra">Escolher Ultra <span>↗</span></button>
         </article>
       </div>
-      <p class="landing-plans-footnote">Valores mensais: Pro R$ 20, Max R$ 30 e Ultra R$ 50. O Max amplia a capacidade da família para até 6 pessoas. O pagamento é feito por Pix, com conferência manual e sem renovação automática. A assinatura é por família. Cada conta fica vinculada a uma única família.</p>
+      <p class="landing-plans-footnote">Produtos de compra única: 30 dias de acesso após a aprovação. O preço final é exibido pela Google Play no momento da compra. Pro comporta até 2 pessoas, Max até 6 e Ultra libera as ferramentas avançadas. A compra é por família e não há renovação automática.</p>
     </section>
     <section class="landing-login-section" id="landing-auth" aria-labelledby="landing-login-title">
       <div class="landing-login-intro"><span>ÁREA DO CLIENTE</span><h2 id="landing-login-title">Seu acesso, em uma área própria.</h2><p>Entre na sua conta ou crie um cadastro para começar a usar o Copiloto Financeiro.</p></div>
@@ -2272,10 +2281,11 @@ function renderAuth(){
           </div>
           <div id="landing-selected-plan"  ${S.planoPreCadastro?'':'hidden'}>
             <span>Plano selecionado</span><strong>${S.planoPreCadastro?PLANOS[S.planoPreCadastro]?.nome||'Pro':'—'}</strong>
-            <small>A contratação e o Pix serão concluídos depois da criação da conta.</small>
+            <small>A contratação pela Google Play será concluída depois da criação da conta, no aplicativo Android.</small>
           </div>
         </div>
         <label class="aceite" id="landing-terms"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
+        <label class="aceite" id="landing-adult-confirmation" hidden><input type="checkbox" id="confirmar-idade"><span>Confirmo que tenho 18 anos ou mais.</span></label>
         <div id="recuperacao" hidden>
           <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
           <input id="codigo-recuperacao" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de recuperação">
@@ -2294,7 +2304,7 @@ function renderAuth(){
     <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar<br><a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a> · <a href="termos.html" target="_blank" rel="noopener">Termos</a> · <a href="excluir-conta.html" target="_blank" rel="noopener">Exclusão de conta</a> · contato: gustavosena972@gmail.com</footer>
   </div>`;
   const cadastro=modoAcesso==='cadastro';
-  const terms=document.getElementById('landing-terms');if(terms)terms.style.display=cadastro?'flex':'none';
+  const terms=document.getElementById('landing-terms');if(terms)terms.style.display=cadastro?'flex':'none';const age=document.getElementById('landing-adult-confirmation');if(age)age.hidden=!cadastro;
   const criar=document.getElementById('landing-create-row');if(criar)criar.style.display=cadastro?'none':'flex';
   const voltar=document.getElementById('landing-back-login');if(voltar)voltar.style.display=cadastro?'flex':'none';
   const reset=document.querySelector('.landing-login [data-act="reset"]');if(reset)reset.style.display=cadastro?'none':'block';
@@ -2334,14 +2344,14 @@ function renderSemFamilia(){
 function render(){
   if(S.view==='admin'&&!S.admin){S.view='planilha';S.adm=null;S.admPend=0;}
   const ed=canEdit()&&mesAberto();
-  const ultra=S.fam?.plano==='ultra';
+  const ultra=planoTemRecurso('relatorios');
   if(S.view==='espacos')S.view='planilha';
   const TL={planilha:'Planilha mensal',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
   if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
   const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
   const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('planilha','Planilha mensal','▦')}${navItem('ano','Visão do ano','▤')}</section>
     <section class="nav-section"><span class="nav-section-title">ANÁLISE E PLANEJAMENTO</span>${navItem('checape','Checape','◈')}${navItem('plan','Planejamento','◎')}${ultra?navItem('relatorios','Relatórios','▥'):''}</section>
-    <section class="nav-section"><span class="nav-section-title">${ultra?'ESPAÇOS E FAMÍLIA':'FAMÍLIA'}</span>${navItem('família','Família e ajustes','♧')}</section>
+    <section class="nav-section"><span class="nav-section-title">FAMÍLIA</span>${navItem('família','Família e ajustes','♧')}</section>
     ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   const info={
@@ -2356,7 +2366,7 @@ function render(){
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
   const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
-  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&ultra)body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
+  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&planoTemRecurso('relatorios'))body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
   const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
   $('#app').innerHTML=`<div class="app-shell">
     <aside class="app-sidebar" aria-label="Navegação principal">
@@ -2395,17 +2405,6 @@ function render(){
   afterRender();
 }
 
-function viewEspacos(){
-  const espacos=Array.isArray(S.espacos)?S.espacos:[];
-  const cards=espacos.map(x=>{
-    const f=x.familias||{},ativo=f.id===S.fam?.id;
-    const liberado=f.acesso_ate&&new Date(f.acesso_ate)>new Date();
-    const nomePlano=({pro:'Pro',max:'Max',ultra:'Ultra'})[f.plano||'pro']||'Pro';
-    const role=x.papel==='dono'?'Responsável':x.papel==='leitor'?'Somente leitura':'Editor';
-    return '<article class="cf-space-row '+(ativo?'active':'')+'"><div class="cf-space-mark">'+(ativo?'●':'◌')+'</div><div class="cf-space-main"><strong>'+esc(f.nome||'Espaço familiar')+'</strong><span>'+esc(x.nome||'Membro')+' · '+role+'</span></div><div class="cf-space-meta"><b>'+nomePlano+'</b><small>'+(liberado?'Acesso ativo':'Acesso não ativo')+'</small></div><div class="cf-space-action">'+(ativo?'<span class="cf-current-space">Espaço atual</span>':'<button class="sec" data-act="trocarespaco" data-id="'+esc(f.id||'')+'">Abrir espaço</button>')+'</div></article>';
-  }).join('');
-  return '<section class="cf-section"><div class="cf-section-head"><div><span>SEUS AMBIENTES</span><h2>Central de espaços</h2><p>Alterne entre as famílias às quais sua conta já pertence.</p></div><div class="cf-space-count">'+espacos.length+' espaço(s)</div></div><div class="cf-space-list">'+(cards||'<p class="mu">Nenhum espaço disponível.</p>')+'</div><div class="cf-note"><b>Sobre os espaços</b><p>Esta central reúne os espaços familiares em que sua conta já entrou por convite. Espaços independentes sob uma única assinatura Ultra precisam de uma ampliação das permissões e da estrutura de assinatura.</p><button class="sec" data-act="view" data-v="família">Ir para convites da família</button></div></section>';
-}
 function viewRelatorios(){
   const R=S.resumo||[];
   const soma=k=>R.reduce((a,r)=>a+Number(r[k]||0),0);
@@ -2537,15 +2536,40 @@ function viewCats(){
   const a=Object.entries(g).sort((x,y)=>y[1]-x[1]);if(!a.length)return '';const t=a.reduce((s,x)=>s+x[1],0);
   return `<div class="card" style="margin-bottom:14px"><b>Para onde vai o dinheiro</b>${a.slice(0,8).map(([n,v])=>`<div class="catrow"><span>${esc(n)}</span><div class="track"><i style="width:${v/t*100}%"></i></div><span class="mu">${brl(v)} · ${(v/t*100).toFixed(0)}%</span></div>`).join('')}</div>`;
 }
+function calcularOrganizacaoFinanceira(receita, despesas, atrasadas, totalLancamentos, cartoes, dividas){
+  const r=Math.max(0,Number(receita)||0),d=Math.max(0,Number(despesas)||0);
+  if(r<=0)return {score:0,nivel:'Sem dados',motivos:['Cadastre pelo menos uma receita para calcular o indicador.']};
+  const poupanca=Math.max(-1,Math.min(1,(r-d)/r));
+  const atraso=totalLancamentos>0?Math.max(0,Math.min(1,(Number(atrasadas)||0)/totalLancamentos)):0;
+  const cartao=r>0?Math.max(0,Math.min(1,(Number(cartoes)||0)/r)):0;
+  const dividaPeso=r>0?Math.max(0,Math.min(1,(Number(dividas)||0)/r)):0;
+  let score=50+poupanca*30-atraso*20-cartao*10-dividaPeso*10;
+  score=Math.max(0,Math.min(100,Math.round(score)));
+  const motivos=[];
+  if(poupanca>=0.2)motivos.push('Boa margem entre receitas e despesas.');
+  else if(poupanca<0)motivos.push('As despesas estão acima das receitas neste mês.');
+  else motivos.push('A margem disponível para poupança está apertada.');
+  if(atraso>0)motivos.push('Existem contas atrasadas que merecem atenção.');
+  if(cartao>0.3)motivos.push('Os gastos classificados em cartão representam uma parcela relevante da receita.');
+  if(dividaPeso>0.5)motivos.push('As dívidas cadastradas têm peso elevado em relação à receita.');
+  if(!motivos.length)motivos.push('Os lançamentos deste mês estão relativamente equilibrados.');
+  return {score,nivel:score>=80?'Boa organização':score>=60?'Organização em atenção':'Organização precisa de atenção',motivos};
+}
+
 function viewGrupos(){
   const G={fixas:['Fixas / Financiamentos',0],cartoes:['Cartões de Crédito',0],retirada:['Retirada mensal',0],variaveis:['Outras / Variáveis',0]};
   S.lanc.filter(l=>l.tipo==='despesa').forEach(l=>{const c=S.cats.find(x=>x.id===l.categoria_id);const g=(c&&G[c.grupo])?c.grupo:'variaveis';G[g][1]+=Number(l.valor)});
   const rec=S.lanc.filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor),0);const tot=Object.values(G).reduce((a,x)=>a+x[1],0);
   const tx=rec>0?Math.max(0,Math.min(1,(rec-tot)/rec)):0;
+  const atrasadas=S.lanc.filter(l=>l.tipo==='despesa'&&l.status==='atrasado').length;
+  const cartoes=G.cartoes[1];
+  const dividas=(S.plan?.dividas||[]).reduce((a,d)=>a+Math.max(0,Number(d.saldo_devedor)||0),0);
+  const indicador=calcularOrganizacaoFinanceira(rec,tot,atrasadas,S.lanc.length,cartoes,dividas);
   const ring=`<div class="card ring"><svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="#252b40" stroke-width="8"/><circle cx="32" cy="32" r="26" fill="none" stroke="${tx>=.1?'#34d399':'#fbbf24'}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(tx*163.4).toFixed(1)} 163.4"/></svg><div><small class="mu">Taxa de poupança</small><br><b style="font-size:21px">${(tx*100).toFixed(0)}%</b></div></div>`;
+  const indicadorCard=`<div class="card"><small>Indicador de organização</small><b class="${indicador.score>=60?'pos':'neg'}">${indicador.score}/100</b><span class="mu" style="display:block;margin-top:4px">${indicador.nivel}</span><details style="margin-top:7px"><summary style="cursor:pointer">Ver leitura</summary><ul class="mu" style="margin:7px 0 0;padding-left:18px">${indicador.motivos.map(esc).map(x=>'<li>'+x+'</li>').join('')}</ul></details></div>`;
   return `<div class="cards">${Object.entries(G).map(([k,[n,v]])=>`<div class="card"><small>${n}</small><b>${brl(v)}</b>${quickEditButton(k)}</div>`).join('')}
   <div class="card"><small>Total de despesas</small><b class="neg">${brl(tot)}</b>${quickEditButton('despesas')}</div>
-  <div class="card"><small>Saldo → vai para a poupança</small><b class="${rec-tot>=0?'pos':'neg'}">${brl(rec-tot)}</b></div>${ring}</div>`;
+  <div class="card"><small>Saldo → vai para a poupança</small><b class="${rec-tot>=0?'pos':'neg'}">${brl(rec-tot)}</b></div>${ring}${indicadorCard}</div>`;
 }
 function viewAno(){
   const R=S.resumo||[];const MC=Object.fromEntries((S.meta||[]).map(m=>[m.mes,m]));const T=k=>R.reduce((a,r)=>a+Number(r[k]),0);
@@ -2789,11 +2813,12 @@ async function autenticar(a){
   if(username.length<3)return aviso('Digite um usuário com pelo menos 3 caracteres.');
   if(senha.length<8)return aviso('A senha precisa ter pelo menos 8 caracteres.');
   if(a==='cadastrar'&&!$('#aceite').checked)return aviso('Para criar a conta, marque que você leu e aceita os Termos de Uso e a Política de Privacidade.');
+  if(a==='cadastrar'&&!$('#confirmar-idade')?.checked)return aviso('O Copiloto Financeiro é destinado a pessoas com 18 anos ou mais.');
   if(a==='cadastrar'&&modoFamilia==='entrar'&&!codigoFamilia)return aviso('Digite o código de convite enviado pelo responsável da família.');
   const bt=document.querySelectorAll('.login button');bt.forEach(x=>x.disabled=true);aviso(a==='entrar'?'Entrando…':'Criando sua conta…',1);
   try{
     const payload={action:a==='entrar'?'login':'signup',username,password:senha};
-    if(a==='cadastrar'){payload.name=nome;payload.acceptedTerms=true;}
+    if(a==='cadastrar'){payload.name=nome;payload.acceptedTerms=true;payload.acceptedAdult=true;}
     const response=await fetch(SB_URL+'/functions/v1/autenticacao-usuario',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify(payload)});
     const result=await response.json();if(!response.ok)throw new Error(result.error||'Não foi possível autenticar.');
     const{error}=await sb.auth.setSession(result.session);if(error)throw error;
@@ -2813,7 +2838,7 @@ async function autenticar(a){
           : 'Sua conta foi criada, mas não foi possível preparar a família. Entre novamente para continuar.',1);
         return;
       }
-      try{localStorage.setItem('cf_familia_ativa',familiaId)}catch(e){}
+      
       if(modoFamilia==='criar'){
         S.planoEscolhido=S.planoPreCadastro||'pro';
         S.planoEscolhidoFamilia=familiaId;
@@ -2967,9 +2992,14 @@ async function fecharAno(){
 }
 const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button><button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>`;
 /*PIX*/
-const PIX={chave:'+5531999758385',nome:'COPILOTO FINANCEIRO',cidade:'CONTAGEM',valor:20,dias:30};
-const PLANOS={pro:{nome:'Pro',valor:20,limite:2},max:{nome:'Max',valor:30,limite:6},ultra:{nome:'Ultra',valor:50}};
+const PLANOS={
+  pro:{nome:'Pro',valor:23.90,limite:2,produto:'copiloto_pro_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
+  max:{nome:'Max',valor:35.90,limite:6,produto:'copiloto_max_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
+  ultra:{nome:'Ultra',valor:59.90,limite:null,produto:'copiloto_ultra_30d',recursos:{relatorios:true,patrimonioHistorico:true,simulador:true}}
+};
 const planoAtual=()=>PLANOS[S.planoEscolhido||S.fam?.plano||'pro']||PLANOS.pro;
+const planoTemRecurso=(recurso)=>Boolean(PLANOS[S.fam?.plano||'pro']?.recursos?.[recurso]);
+const limiteMembros=()=>PLANOS[S.fam?.plano||'pro']?.limite??Infinity;
 function crc16(t){let c=0xFFFF;for(let i=0;i<t.length;i++){c^=t.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,'0')}
 const tlv=(id,v)=>id+String(v.length).padStart(2,'0')+v;
 function pixPayload(p){
@@ -2988,24 +3018,67 @@ async function renderPaywall(){
   if(S.planoEscolhidoFamilia!==S.fam?.id){S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';S.planoEscolhidoFamilia=S.fam?.id;}
   else if(!PLANOS[S.planoEscolhido])S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';
   const plano=planoAtual();
+  const produtoSelecionado=PLANOS[S.planoEscolhido]?.produto||PLANOS.pro.produto;
+  const precoSelecionado = S.playProducts?.[produtoSelecionado]?.formattedPrice || "Preço na Google Play";
   $('#app').innerHTML=`<main class="pix-page">
     <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>COMPRA E ACESSO FAMILIAR</small></div></header>
     <div class="pix-layout"><section class="pix-card">
       <div class="pix-heading"><span class="pix-kicker">COMPRA PELA GOOGLE PLAY</span><h1>${S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date()?'Renove o acesso':'Escolha o plano da família'}</h1><p>Selecione um plano. A compra é única, concede 30 dias após a aprovação manual e não tem renovação automática.</p></div>
       <div class="pix-plan-grid">
-        <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${brl(PLANOS.pro.valor)}</strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
-        <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${brl(PLANOS.max.valor)}</strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas.</span></button>
-        <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${brl(PLANOS.ultra.valor)}</strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span></button>
+        <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${S.playProducts?.copiloto_pro_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
+        <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${S.playProducts?.copiloto_max_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas.</span></button>
+        <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${S.playProducts?.copiloto_ultra_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span></button>
       </div>
-      <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${brl(plano.valor)}</strong></div>
+      <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${precoSelecionado}</strong></div>
         <div class="pix-payment" hidden><b>Pagamento processado pela Google Play</b></div>
-        <p class="pix-checkout-disclaimer">A compra é feita exclusivamente pela Google Play no aplicativo Android. Depois da verificação, o pedido fica aguardando aprovação do administrador. Não há pagamento por Pix neste aplicativo.</p>
+        <p class="pix-checkout-disclaimer">A compra é processada pela Google Play. O preço final é exibido pela loja antes da confirmação. Após a validação do servidor, o pedido aguarda aprovação do administrador.</p>
+        <button type="button" class="pix-submit" data-act="comprarplay" data-product-id="${produtoSelecionado}" ${window.CopilotoPlayBilling?"":"disabled"}>${window.CopilotoPlayBilling?"Comprar pela Google Play":"Disponível no aplicativo Android"}</button>
       </div>
       <div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div>
-    </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a aprovação do administrador.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Abra o aplicativo Android para concluir a compra pela Google Play.</span></div></aside></div>
+    </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a aprovação do administrador.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Para comprar, utilize o aplicativo Android oficial. O navegador não inicia pagamentos Google Play.</span></div></aside></div>
   </main>`;
   clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);
 }
+
+async function enviarCompraGooglePlay(detail){
+  const productId=detail?.products?.find(id=>["copiloto_pro_30d","copiloto_max_30d","copiloto_ultra_30d"].includes(id));
+  const purchaseToken=detail?.purchaseToken;
+  if(!productId||typeof purchaseToken!=="string"||purchaseToken.length<20){
+    toast("A Google Play retornou dados incompletos da compra.",1);return;
+  }
+  if(S.playTokensProcessing.has(purchaseToken))return;
+  S.playTokensProcessing.add(purchaseToken);
+  try{
+    const{data,error}=await sb.functions.invoke("google-play-purchase",{body:{productId,purchaseToken}});
+    if(error)throw new Error("Não foi possível validar a compra no servidor.");
+    if(data?.error)throw new Error(data.error);
+    toast(data?.status==="pendente"?"Compra validada e enviada para aprovação.":"Compra já registrada. Atualizando o acesso.");
+    await boot();
+  }catch(error){
+    toast(error?.message||"Falha ao validar a compra. Abra novamente o aplicativo para tentar de novo.",1);
+  }finally{
+    S.playTokensProcessing.delete(purchaseToken);
+  }
+}
+
+window.addEventListener("copiloto:play-bridge-ready",()=>{
+  if(window.CopilotoPlayBilling){
+    window.CopilotoPlayBilling.queryProducts();
+    if(document.querySelector(".pix-page"))renderPaywall();
+  }
+});
+window.addEventListener("copiloto:play-products",event=>{
+  const products=event.detail?.products;
+  if(!Array.isArray(products))return;
+  S.playProducts=Object.fromEntries(products.filter(p=>p?.productId).map(p=>[p.productId,p]));
+  if(document.querySelector(".pix-page"))renderPaywall();
+});
+window.addEventListener("copiloto:play-purchase",event=>{void enviarCompraGooglePlay(event.detail)});
+window.addEventListener("copiloto:play-existing-purchase",event=>{void enviarCompraGooglePlay(event.detail)});
+window.addEventListener("copiloto:play-pending",event=>toast(event.detail?.message||"Compra pendente na Google Play.",1));
+window.addEventListener("copiloto:play-cancelled",event=>toast(event.detail?.message||"Compra cancelada."));
+window.addEventListener("copiloto:play-error",event=>toast(event.detail?.message||"Falha na Google Play.",1));
+
 async function confirmarAdmin(){
   const {data,error}=await sb.rpc('eh_admin');
   if(error||data!==true){S.admin=false;S.adm=null;S.admPend=0;if(S.view==='admin')S.view='planilha';throw new Error('Acesso administrativo não autorizado.');}
@@ -3046,7 +3119,7 @@ function viewModais(){
 }
 const LEGAL={nome:'',cnpj:'',email:'',versao:'1'};
 async function carregarConfig(){
-  try{const{data}=await sb.from('config_app').select('*');S.cfg={};(data||[]).forEach(r=>{S.cfg[r.chave]=r.valor});const c=S.cfg;
+  try{const{data}=await sb.from('config_app').select('chave,valor');S.cfg={};(data||[]).forEach(r=>{S.cfg[r.chave]=r.valor});const c=S.cfg;
     if(c.pix_chave)PIX.chave=c.pix_chave;if(c.pix_dias)PIX.dias=parseInt(c.pix_dias)||PIX.dias;
     if(c.pix_nome)PIX.nome=c.pix_nome;if(c.pix_cidade)PIX.cidade=c.pix_cidade;LEGAL.nome=c.operador_nome||'';LEGAL.cnpj=c.operador_cnpj||'';LEGAL.email=c.contato_email||'';LEGAL.versao=c.versao_termos||'1'}catch(e){}
 }
@@ -3140,19 +3213,18 @@ document.addEventListener('click',async e=>{
     location.hash='#cadastro';
   }
   else if(a==='sair'){if(S.rt){sb.removeChannel(S.rt);S.rt=null}await sb.auth.signOut();S.user=null;boot()}
-  else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
-  else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
-  else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}toast('Convite aceito! Abrindo a família…');await boot()}
+  else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));await boot()}
+  else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));await boot()}
+  else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));toast('Convite aceito! Abrindo a família…');await boot()}
   else if(a==='view'){
     const destino=b.dataset.v;
     if(destino==='admin'){S.view='admin';await carregarAdmin();}
     else {if(S.view==='admin')S.adm=null;S.view=destino;if(S.view==='plan')await carregarPlan();else render();}
   }
-  else if(a==='trocarespaco'){return toast('Cada conta está vinculada a uma única família.')}
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='quickedit'){if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);S.quickEdit={kind:b.dataset.kind};render()}
   else if(a==='closequick'){S.quickEdit=null;render()}
-  else if(a==='savequick'){const campos=[...document.querySelectorAll('[data-qv]')];for(const i of campos){const v=Number(i.value);if(!Number.isFinite(v)||v<0)return toast('Informe valores válidos (zero ou maior).',1)}for(const i of campos){const v=Math.round(Number(i.value)*100)/100;await q(sb.from('lancamentos').update({valor:v}).eq('id',i.dataset.qv).eq('familia_id',S.fam.id).eq('mes_id',S.mes.id))}S.quickEdit=null;await loadMes();toast('Valores atualizados. Os totais foram recalculados.')}
+  else if(a==='savequick'){if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);const campos=[...document.querySelectorAll('[data-qv]')];const itens=[];for(const i of campos){const v=Number(i.value);if(!Number.isFinite(v)||v<0)return toast('Informe valores válidos (zero ou maior).',1);itens.push({id:i.dataset.qv,valor:Math.round(v*100)/100})}if(!itens.length)return toast('Nenhum lançamento para atualizar.',1);const atualizados=await q(sb.rpc('salvar_valores_lancamentos',{p_familia:S.fam.id,p_mes:S.mes.id,p_itens:itens}));if(Number(atualizados)!==itens.length)throw new Error('A atualização não confirmou todos os lançamentos.');S.quickEdit=null;await loadMes();toast('Valores atualizados. Receitas, despesas e saldo foram recalculados.')}
   else if(a==='compromissos'){await mostrarCompromissos()}
   else if(a==='fecharcompromissos'){document.querySelector('.cf-compromissos-modal')?.remove()}
   else if(a==='add'){
@@ -3207,7 +3279,7 @@ document.addEventListener('click',async e=>{
   else if(a==='checape'){const n=await q(sb.rpc('gerar_checape',{p_mes:S.mes.id}));toast(n+' sugestão(ões) gerada(s)');await loadMes()}
   else if(a==='aceitar'){await q(sb.rpc('aceitar_sugestao',{p_sug:b.dataset.id}));await loadMes()}
   else if(a==='ignorar'){await q(sb.from('sugestoes').update({status:'ignorada'}).eq('id',b.dataset.id));await loadMes()}
-  else if(a==='addmem'){const limite=(PLANOS[S.fam.plano||'pro']||PLANOS.pro).limite;if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas contando o responsável.',1);const n=$('#mnome').value.trim();if(!n)return toast('Informe o nome',1);
+  else if(a==='addmem'){const limite=limiteMembros();if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas contando o responsável.',1);const n=$('#mnome').value.trim();if(!n)return toast('Informe o nome',1);
     await q(sb.from('membros').insert({familia_id:S.fam.id,nome:n,papel:'editor',renda_mensal:parseFloat($('#mrenda').value)||null}));
     S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
   else if(a==='delmem'){await q(sb.from('membros').delete().eq('id',b.dataset.id));S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
@@ -3223,8 +3295,8 @@ document.addEventListener('click',async e=>{
   else if(a==='additem'){const n=$('#p_nome').value.trim(),v=parseFloat($('#p_valor').value);if(!n||!(v>0))return toast('Informe nome e valor',1);
     await q(sb.from('patrimonio_itens').insert({familia_id:S.fam.id,tipo:$('#p_tipo').value,nome:n,valor:v}));await carregarPlan()}
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
-  else if(a==='registrarpat'){if(!canEdit())return toast('Somente quem edita pode registrar o patrimônio.',1);const p=S.plan?.pat||{},now=new Date(),data=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');await q(sb.from('patrimonio_snapshots').upsert({familia_id:S.fam.id,data,ativos:Number(p.ativos)||0,passivos:Number(p.passivos)||0,liquido:Number(p.liquido)||0},{onConflict:'familia_id,data'}));toast('Posição patrimonial registrada.');await carregarPlan()}
-  else if(a==='simularproj'){const inicial=Number($('#proj_inicial').value),aporte=Number($('#proj_aporte').value),meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;if(![inicial,aporte,meses,taxa].every(Number.isFinite)||inicial<0||aporte<0||meses<1||meses>360||!Number.isInteger(meses)||taxa<0||taxa>0.03)return toast('Confira os valores: prazo de 1 a 360 meses e taxa de 0% a 3% ao mês.',1);const fator=Math.pow(1+taxa,meses),futuro=taxa===0?inicial+aporte*meses:inicial*fator+aporte*((fator-1)/taxa),aportado=inicial+aporte*meses,out=$('#proj_result');if(out)out.innerHTML='<span>Resultado ilustrativo</span><strong>'+brl(futuro)+'</strong><p>Valor total colocado: '+brl(aportado)+' · diferença matemática: '+brl(futuro-aportado)+'</p>';}
+  else if(a==='registrarpat'){if(!planoTemRecurso('patrimonioHistorico'))return toast('O histórico patrimonial é um recurso do plano Ultra.',1);if(!canEdit())return toast('Somente quem edita pode registrar o patrimônio.',1);const p=S.plan?.pat||{},now=new Date(),data=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');await q(sb.from('patrimonio_snapshots').upsert({familia_id:S.fam.id,data,ativos:Number(p.ativos)||0,passivos:Number(p.passivos)||0,liquido:Number(p.liquido)||0},{onConflict:'familia_id,data'}));toast('Posição patrimonial registrada.');await carregarPlan()}
+  else if(a==='simularproj'){if(!planoTemRecurso('simulador'))return toast('O simulador de objetivos é um recurso do plano Ultra.',1);const inicial=Number($('#proj_inicial').value),aporte=Number($('#proj_aporte').value),meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;if(![inicial,aporte,meses,taxa].every(Number.isFinite)||inicial<0||aporte<0||meses<1||meses>360||!Number.isInteger(meses)||taxa<0||taxa>0.03)return toast('Confira os valores: prazo de 1 a 360 meses e taxa de 0% a 3% ao mês.',1);const fator=Math.pow(1+taxa,meses),futuro=taxa===0?inicial+aporte*meses:inicial*fator+aporte*((fator-1)/taxa),aportado=inicial+aporte*meses,out=$('#proj_result');if(out)out.innerHTML='<span>Resultado ilustrativo</span><strong>'+brl(futuro)+'</strong><p>Valor total colocado: '+brl(aportado)+' · diferença matemática: '+brl(futuro-aportado)+'</p>';}
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
   else if(a==='fecharmodal'){S.pv=null;S.sino=false;S.hist=null;render()}
   else if(a==='plano'){const p=b.dataset.plano;if(!PLANOS[p])return;S.planoEscolhido=p;PIX.valor=PLANOS[p].valor;renderPaywall();return}
@@ -3233,14 +3305,23 @@ document.addEventListener('click',async e=>{
     if(error)return toast(/uq_pagamento|duplicate/.test(error.message)?'Você já tem um aviso de pagamento em análise.':error.message,1);
     toast('Aviso enviado! Assim que o Pix for conferido, o acesso é liberado.');await boot()}
   else if(a==='copiarpix'){try{await navigator.clipboard.writeText(S.pixcode);toast('Código Pix copiado')}catch(e){toast('Não consegui copiar: selecione o código acima e copie.',1)}}
-  else if(a==='verstatus')await boot();
+  else if(a==='comprarplay'){
+     const productId=b.dataset.productId;
+     if(!window.CopilotoPlayBilling)return toast('Abra o aplicativo Android para comprar pela Google Play.',1);
+     if(!['copiloto_pro_30d','copiloto_max_30d','copiloto_ultra_30d'].includes(productId))return toast('Produto inválido. Atualize o aplicativo.',1);
+     window.CopilotoPlayBilling.purchase(productId);
+     toast('Abrindo a tela segura de pagamento da Google Play…');
+   }
+   else if(a==='verstatus')await boot();
   else if(a==='aprovar'){const dias=parseInt(document.getElementById('dias_'+b.dataset.id).value)||PIX.dias;await q(sb.rpc('aprovar_pagamento',{p_id:b.dataset.id,p_dias:dias}));toast('✔ Acesso liberado por '+dias+' dias');await carregarAdmin()}
   else if(a==='recusar'){const nota=prompt('Motivo (o cliente vai ver):','Não encontramos o Pix com esse valor/nome.');if(nota===null)return;await q(sb.rpc('recusar_pagamento',{p_id:b.dataset.id,p_nota:nota}));toast('Pedido recusado');await carregarAdmin()}
   else if(a==='aprovarplay'||a==='recusarplay'){
     if(a==='recusarplay'&&!confirm('Solicitar reembolso e revogação desta compra na Google Play?'))return;
     const{data,error}=await sb.functions.invoke('google-play-admin',{body:{id:b.dataset.id,action:a==='aprovarplay'?'approve':'reject'}});
     if(error)throw error;if(data?.error)throw new Error(data.error);
-    toast(a==='aprovarplay'?'Compra aprovada: 30 dias liberados para a família.':'Compra reembolsada e recusada.');
+    if(a==='aprovarplay')toast('Compra aprovada: 30 dias liberados para a família.');
+    else if(data?.refundStatus === "completed")toast('Compra recusada; o reembolso já consta como concluído na Google Play.');
+    else toast('Compra recusada; solicitação de reembolso enviada à Google Play. O processamento ainda pode estar pendente.');
     await carregarAdmin();
   }
   else if(a==='addcat'){const n=$('#c_nome').value.trim();if(!n)return toast('Informe o nome da categoria',1);
@@ -3270,7 +3351,7 @@ document.addEventListener('click',async e=>{
   else if(a==='recuperar')await recuperarConta();
   else if(a==='copiarcodigo'){if(!S.codigoRecuperacao)return;try{await navigator.clipboard.writeText(S.codigoRecuperacao);toast('Código copiado. Guarde-o em local seguro.')}catch(e){const i=$('#codigo-recuperacao-exibido');if(i){i.select();toast('Selecione e copie o código manualmente.')}}}
   else if(a==='fecharcodigo'){const o=document.getElementById('codigo-recuperacao-modal');if(o)o.remove();S.codigoRecuperacao=null}
-  else if(a==='convite'){const limite=(PLANOS[S.fam.plano||'pro']||PLANOS.pro).limite;if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
+  else if(a==='convite'){const limite=limiteMembros();if(S.membros.length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
   }catch(err){console.error('Falha em ação do aplicativo:',a,err);toast('Não foi possível concluir esta ação: '+(err?.message||'erro inesperado'),1)}finally{S.busy=false}
 });
 document.addEventListener('change',async e=>{
@@ -3319,7 +3400,6 @@ document.addEventListener('wheel',()=>{const a=document.activeElement;if(a&&a.ty
 document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='ArrowUp'||e.key==='ArrowDown'))e.preventDefault();if(e.target.id==='senha'&&e.key==='Enter')document.querySelector('[data-act=entrar]').click();});
 </script>
 
-<script src="./native-play-billing-bridge.js"></script>
-<script src="./android-play-billing.js"></script>
+<!-- Google Play Billing is handled by the canonical inline integration and the native CopilotoPlayBilling interface. -->
 </body>
 </html>
