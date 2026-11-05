@@ -2068,8 +2068,8 @@ async function boot(){
     if(S.admin){S.me=null;S.fam=null;S.view='admin';await carregarAdmin();return;}
     return renderSemFamilia();
   }
-  let familiaPreferida=null;try{familiaPreferida=localStorage.getItem('cf_familia_ativa')}catch(e){}
-  S.me=rows.find(x=>x.familias?.id===familiaPreferida)||rows[0];S.fam=S.me.familias;
+  // Cada conta possui uma única família. A associação vem do banco; não há seletor local de família.
+  S.me=rows[0];S.fam=S.me.familias;
   if(!S.admin&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
   try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);S.notifs=nr.data||[]}catch(e){S.notifs=[]}
@@ -2352,7 +2352,7 @@ function render(){
   const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
   const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('planilha','Planilha mensal','▦')}${navItem('ano','Visão do ano','▤')}</section>
     <section class="nav-section"><span class="nav-section-title">ANÁLISE E PLANEJAMENTO</span>${navItem('checape','Checape','◈')}${navItem('plan','Planejamento','◎')}${ultra?navItem('relatorios','Relatórios','▥'):''}</section>
-    <section class="nav-section"><span class="nav-section-title">${ultra?'ESPAÇOS E FAMÍLIA':'FAMÍLIA'}</span>${navItem('família','Família e ajustes','♧')}</section>
+    <section class="nav-section"><span class="nav-section-title">FAMÍLIA</span>${navItem('família','Família e ajustes','♧')}</section>
     ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   const info={
@@ -2406,17 +2406,6 @@ function render(){
   afterRender();
 }
 
-function viewEspacos(){
-  const espacos=Array.isArray(S.espacos)?S.espacos:[];
-  const cards=espacos.map(x=>{
-    const f=x.familias||{},ativo=f.id===S.fam?.id;
-    const liberado=f.acesso_ate&&new Date(f.acesso_ate)>new Date();
-    const nomePlano=({pro:'Pro',max:'Max',ultra:'Ultra'})[f.plano||'pro']||'Pro';
-    const role=x.papel==='dono'?'Responsável':x.papel==='leitor'?'Somente leitura':'Editor';
-    return '<article class="cf-space-row '+(ativo?'active':'')+'"><div class="cf-space-mark">'+(ativo?'●':'◌')+'</div><div class="cf-space-main"><strong>'+esc(f.nome||'Espaço familiar')+'</strong><span>'+esc(x.nome||'Membro')+' · '+role+'</span></div><div class="cf-space-meta"><b>'+nomePlano+'</b><small>'+(liberado?'Acesso ativo':'Acesso não ativo')+'</small></div><div class="cf-space-action">'+(ativo?'<span class="cf-current-space">Espaço atual</span>':'<button class="sec" data-act="trocarespaco" data-id="'+esc(f.id||'')+'">Abrir espaço</button>')+'</div></article>';
-  }).join('');
-  return '<section class="cf-section"><div class="cf-section-head"><div><span>SEUS AMBIENTES</span><h2>Central de espaços</h2><p>Alterne entre as famílias às quais sua conta já pertence.</p></div><div class="cf-space-count">'+espacos.length+' espaço(s)</div></div><div class="cf-space-list">'+(cards||'<p class="mu">Nenhum espaço disponível.</p>')+'</div><div class="cf-note"><b>Sobre os espaços</b><p>Esta central reúne os espaços familiares em que sua conta já entrou por convite. Espaços independentes sob uma única assinatura Ultra precisam de uma ampliação das permissões e da estrutura de assinatura.</p><button class="sec" data-act="view" data-v="família">Ir para convites da família</button></div></section>';
-}
 function viewRelatorios(){
   const R=S.resumo||[];
   const soma=k=>R.reduce((a,r)=>a+Number(r[k]||0),0);
@@ -3233,7 +3222,6 @@ document.addEventListener('click',async e=>{
     if(destino==='admin'){S.view='admin';await carregarAdmin();}
     else {if(S.view==='admin')S.adm=null;S.view=destino;if(S.view==='plan')await carregarPlan();else render();}
   }
-  else if(a==='trocarespaco'){return toast('Cada conta está vinculada a uma única família.')}
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='quickedit'){if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);S.quickEdit={kind:b.dataset.kind};render()}
   else if(a==='closequick'){S.quickEdit=null;render()}
