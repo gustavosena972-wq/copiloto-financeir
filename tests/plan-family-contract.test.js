@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const html = fs.readFileSync("app.html", "utf8");
+const html = fs.readFileSync("android-app/app/src/main/assets/mobile.html", "utf8");
 const androidBuild = fs.readFileSync("android-app/app/build.gradle.kts", "utf8");
 const purchaseFn = fs.readFileSync("supabase/functions/google-play-purchase/index.ts", "utf8");
 const memberLimitMigration = fs.readFileSync(
