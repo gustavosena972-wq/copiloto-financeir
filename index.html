@@ -2062,7 +2062,6 @@ async function boot(){
   if(adminCheck.error)throw adminCheck.error;
   S.admin=adminCheck.data===true;
   const rows=await q(sb.from('membros').select('id,papel,nome,familias(id,nome,meta_reducao_cartao,acesso_ate,plano)').eq('usuario_id',S.user.id).order('criado_em',{ascending:false}));
-  S.espacos=rows;
   if(!rows.length){
     S.adm=null;
     if(S.admin){S.me=null;S.fam=null;S.view='admin';await carregarAdmin();return;}
@@ -2839,7 +2838,7 @@ async function autenticar(a){
           : 'Sua conta foi criada, mas não foi possível preparar a família. Entre novamente para continuar.',1);
         return;
       }
-      try{localStorage.setItem('cf_familia_ativa',familiaId)}catch(e){}
+      
       if(modoFamilia==='criar'){
         S.planoEscolhido=S.planoPreCadastro||'pro';
         S.planoEscolhidoFamilia=familiaId;
@@ -3214,9 +3213,9 @@ document.addEventListener('click',async e=>{
     location.hash='#cadastro';
   }
   else if(a==='sair'){if(S.rt){sb.removeChannel(S.rt);S.rt=null}await sb.auth.signOut();S.user=null;boot()}
-  else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
-  else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}await boot()}
-  else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));try{localStorage.setItem('cf_familia_ativa',id)}catch(e){}toast('Convite aceito! Abrindo a família…');await boot()}
+  else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));await boot()}
+  else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));await boot()}
+  else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));toast('Convite aceito! Abrindo a família…');await boot()}
   else if(a==='view'){
     const destino=b.dataset.v;
     if(destino==='admin'){S.view='admin';await carregarAdmin();}
