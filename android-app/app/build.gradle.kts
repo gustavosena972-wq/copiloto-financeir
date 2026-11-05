@@ -21,12 +21,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
-
-        buildConfigField(
-            "String",
-            "WEB_APP_URL",
-            "\"https://copiloto-financeir.gustavosena972.workers.dev/app.html\""
-        )
     }
 
     buildFeatures {
