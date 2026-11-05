@@ -12,12 +12,12 @@ function assert(condition, message) {
 // remains isolated in app.html for the Android WebView.
 assert(landing.includes("Conheça o Copiloto Financeiro"), "institutional landing title missing");
 assert(landing.includes("Baixar na Google Play"), "Google Play CTA missing");
-assert(!landing.includes("function viewDashboard()"), "dashboard must not remain in the institutional landing");
-assert(!landing.includes("function viewLogin()"), "login must not remain in the institutional landing");
+assert(!landing.includes("renderAuth"), "authentication UI must not remain in the institutional landing");
+assert(!landing.includes("renderPaywall"), "application paywall must not remain in the institutional landing");
 
 // The mobile artifact must retain the complete application surface.
-assert(mobile.includes("function viewDashboard()"), "complete mobile app missing dashboard");
-assert(mobile.includes("function viewLogin()"), "complete mobile app missing authentication");
+assert(mobile.includes("function render()"), "complete mobile app missing main application renderer");
+assert(mobile.includes("function renderAuth"), "complete mobile app missing authentication");
 assert(mobile.includes("copiloto_pro_30d"), "complete mobile app missing Pro purchase path");
 assert(mobile.includes("copiloto_max_30d"), "complete mobile app missing Max purchase path");
 assert(mobile.includes("copiloto_ultra_30d"), "complete mobile app missing Ultra purchase path");
