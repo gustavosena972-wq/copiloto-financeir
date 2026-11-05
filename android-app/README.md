@@ -1,6 +1,6 @@
 # Aplicativo Android — Copiloto Financeiro
 
-Esta pasta contém o invólucro Android isolado. A versão web canônica não inicia pagamentos: no navegador, a tela orienta a pessoa a concluir a compra pelo aplicativo Android. Não tratar páginas de demonstração/legadas como checkout de produção.
+Esta pasta contém o invólucro Android isolado. A página pública em `index.html` é institucional e não é o aplicativo completo. A experiência completa do aplicativo foi preservada em `app.html`; o Android WebView carrega essa entrada pelo Cloudflare Worker em `/app.html`. A versão Web institucional apresenta o produto e direciona a instalação para a Google Play.
 
 ## Integração implementada na branch
 
