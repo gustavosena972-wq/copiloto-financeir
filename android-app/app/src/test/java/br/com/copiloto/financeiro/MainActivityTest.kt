@@ -560,24 +560,23 @@ class MainActivityTest {
         assertTrue(html.contains("aria-expanded"))
     }
 
-    @Test
+        @Test
     fun androidV022AddsAnIntelligentFinancialBriefingToTheMobileWorkspace() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("cf-smart-briefing"))
-        assertTrue(html.contains("function viewSmartBriefing()"))
-        assertTrue(html.contains("safeToSpend"))
-        assertTrue(html.contains("smartHealthScore"))
-        assertTrue(html.contains("Próximo passo"))
-        assertTrue(html.contains("Análise inteligente"))
+        assertTrue(html.contains("function mobileSmartContext()"))
+        assertTrue(html.contains("cf-mobile-insight"))
+        assertTrue(html.contains("Próximo passo") || html.contains("PRÓXIMO PASSO"))
+        assertFalse(html.contains("smartHealthScore"))
+        assertFalse(html.contains("safeToSpend"))
     }
 
-    @Test
+        @Test
     fun androidV022AddsSmartSignalsForBillsGoalsAndSpendingWithoutInventingData() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("Contas próximas"))
-        assertTrue(html.contains("Metas"))
-        assertTrue(html.contains("maior categoria"))
-        assertTrue(html.contains("Sem dados suficientes"))
+        assertTrue(html.contains("contas atrasadas"))
+        assertTrue(html.contains("próximos vencimentos"))
+        assertTrue(html.contains("Maior categoria"))
+        assertTrue(html.contains("Sem dados suficientes") || html.contains("Comece pelo primeiro lançamento"))
         assertTrue(html.contains("smartgo"))
     }
 
@@ -589,11 +588,11 @@ class MainActivityTest {
         assertTrue(html.contains("TESTE INTERNO · PAGAMENTOS DESATIVADOS"))
     }
 
-    @Test
+        @Test
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 24"))
-        assertTrue(gradle.contains("versionName = \"1.0.23\""))
+        assertTrue(gradle.contains("versionCode = 27"))
+        assertTrue(gradle.contains("versionName = \"1.0.26\""))
     }
 
     @Test
@@ -678,42 +677,42 @@ class MainActivityTest {
         assertTrue(html.contains("mountMobileCompanion()"))
     }
 
-    @Test
+        @Test
     fun androidV024ShowsFirstRunTamanduaIntroductionBeforeTheFinanceWorkspace() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-tamandua-intro"))
         assertTrue(html.contains("function tamanduaIntroMarkup"))
         assertTrue(html.contains("Oi, eu sou o Tamanduá."))
         assertTrue(html.contains("Eu sou seu ajudante das finanças."))
-        assertTrue(html.contains("Vamos começar?"))
+        assertTrue(html.contains("Conhecer o Copiloto"))
         assertTrue(html.contains("copiloto_tamandua_intro_v1"))
     }
 
-    @Test
+        @Test
     fun androidV024IntroducesTheTamanduaWithShortRectangularSpeechCards() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-tamandua-intro-card"))
         assertTrue(html.contains("cf-tamandua-intro-card-text"))
         assertTrue(html.contains("cf-tamandua-intro-character"))
-        assertTrue(html.contains("Entendo seus lançamentos"))
-        assertTrue(html.contains("acompanho seus objetivos"))
-        assertTrue(html.contains("explico o que merece atenção"))
+        assertTrue(html.contains("<b>Eu explico</b>"))
+        assertTrue(html.contains("<b>Eu acompanho</b>"))
+        assertTrue(html.contains("<b>Eu me adapto</b>"))
     }
 
-    @Test
+        @Test
     fun androidV024CollectsUserNeedsWithCheckboxQuestionsAndStoresACompanionProfile() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-tamandua-question"))
         assertTrue(html.contains("type=\"checkbox\""))
         assertTrue(html.contains("Qual é a sua principal necessidade hoje?"))
-        assertTrue(html.contains("Tem alguma área da sua vida que você quer melhorar?"))
+        assertTrue(html.contains("Tem alguma área da sua vida que você quer melhorar porque baixou o app?"))
         assertTrue(html.contains("Você tem dificuldade para controlar e organizar suas finanças?"))
         assertTrue(html.contains("Você tem dificuldade para economizar?"))
-        assertTrue(html.contains("localStorage.setItem('copiloto_tamandua_profile_v1'"))
+        assertTrue(html.contains("localStorage.setItem(profileKey"))
         assertTrue(html.contains("S.tamanduaProfile"))
     }
 
-    @Test
+        @Test
     fun androidV024UsesTheAnswersToPersonalizeTamanduaSpeechWithoutChangingThePrimaryNavigation() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("function mobileCompanionSpeech"))
@@ -721,18 +720,19 @@ class MainActivityTest {
         assertTrue(html.contains("economizar"))
         assertTrue(html.contains("organizar"))
         assertTrue(html.contains("planejar"))
-        assertTrue(html.contains("data-act="tamandua-intro-finish""))
-        assertFalse(html.contains("data-v="tamandua""))
+        assertTrue(html.contains("data-act=\\"tamandua-intro-finish\\""))
+        assertFalse(html.contains("data-v=\\"tamandua\\""))
     }
 
-    @Test
+        @Test
     fun androidV024DoesNotShowTheOnboardingAgainAfterCompletionAndDoesNotDelayNormalStartup() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("localStorage.getItem('copiloto_tamandua_intro_v1')"))
+        assertTrue(html.contains("localStorage.getItem(introKey)"))
         assertTrue(html.contains("tamanduaIntroCompleted"))
-        assertTrue(html.contains("if(!tamanduaIntroCompleted()"))
+        assertTrue(html.contains("renderWorkspaceOrKeepTamandua()"))
         assertFalse(html.contains("setTimeout(tamanduaIntro"))
         assertFalse(html.contains("await tamanduaIntro"))
+        assertFalse(html.contains("tamandua-intro-skip"))
     }
 
     @Test
@@ -788,6 +788,60 @@ class MainActivityTest {
         assertTrue(html.contains("function mobileCompanionSpeech()"))
         assertTrue(html.contains("function mountMobileCompanion()"))
         assertFalse(html.contains("data-mobile-nav=\"tamandua\""))
+    }
+
+
+    @Test
+    fun androidV026MakesTamanduaOnboardingMandatoryBeforeShowingTheFinanceWorkspace() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val loadMes = html.substringAfter("async function loadMes").substringBefore("/* ---------- telas de entrada ----------")
+        assertTrue(loadMes.contains("renderWorkspaceOrKeepTamandua()"))
+        assertTrue(html.contains("function renderWorkspaceOrKeepTamandua()"))
+        assertFalse(html.contains("tamandua-intro-skip"))
+        assertFalse(html.contains("Pular por enquanto"))
+        assertFalse(html.contains("Agora não"))
+    }
+
+    @Test
+    fun androidV026StoresTamanduaProfileAndCompletionSeparatelyForEachAuthenticatedUser() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function tamanduaStorageKey"))
+        assertTrue(html.contains("S.user?.id"))
+        assertTrue(html.contains("localStorage.getItem(profileKey)"))
+        assertTrue(html.contains("localStorage.getItem(introKey)"))
+        assertTrue(html.contains("localStorage.setItem(profileKey"))
+        assertTrue(html.contains("localStorage.setItem(introKey"))
+        assertFalse(html.contains("localStorage.getItem('copiloto_tamandua_intro_v1')"))
+    }
+
+    @Test
+    fun androidV026RequiresAnAnswerForEveryTamanduaQuestionBeforeEnteringTheApp() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val finish = html.substringAfter("function finishTamanduaIntro()").substringBefore("function mostrarErroInicial(e)")
+        assertTrue(finish.contains("unanswered"))
+        assertTrue(finish.contains("Marque ao menos uma opção em cada pergunta"))
+        assertTrue(finish.contains("if(unanswered.length)"))
+        assertTrue(finish.contains("render()"))
+    }
+
+    @Test
+    fun androidV026KeepsInternalTestersOutsideThePlanAndPaymentGate() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val boot = html.substringAfter("async function boot()").substringBefore("async function loadAno")
+        assertTrue(boot.contains("S.internalTester=testerCheck.data===true"))
+        assertTrue(boot.contains("if(!S.admin&&!S.internalTester&&!(S.fam.acesso_ate"))
+        assertTrue(boot.contains("await loadAno()"))
+        assertTrue(html.contains("ACESSO DE TESTE · SEM COBRANÇA"))
+    }
+
+    @Test
+    fun androidV026KeepsTamanduaVisibleAsTheContextualGuideAfterOnboarding() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileCompanionMarkup()"))
+        assertTrue(html.contains("function mobileCompanionSpeech()"))
+        assertTrue(html.contains("mountMobileCompanion()"))
+        assertTrue(html.contains("S.tamanduaProfile"))
+        assertFalse(html.contains("data-mobile-nav=\\"tamandua\\""))
     }
 
 }
