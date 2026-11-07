@@ -3066,6 +3066,125 @@ body[data-ui="premium-fintech"] .landing-page{background:rgba(238,242,246,.76)!i
   .cf-3d-object,.cf-3d-depth,.cf-3d-shadow,.cf-3d-particle,.cf-scene-beacon{animation:none!important}
 }
 </style>
+<style id="cf-sharp-immersive-1-0-10">
+/* 1.0.10 — imagem nítida + cena 3D dominante. */
+.cf-motion-image{
+  filter:none!important;
+  opacity:.92!important;
+  mix-blend-mode:normal!important;
+  image-rendering:auto;
+}
+.cf-motion-image-a{
+  opacity:.88!important;
+  filter:none!important;
+}
+.cf-motion-image-b{
+  opacity:.62!important;
+  filter:none!important;
+}
+.cf-motion-image-c{
+  opacity:.78!important;
+  filter:none!important;
+}
+.cf-warm-scene{
+  width:min(620px,52vw);
+  height:430px;
+  top:8px;
+  right:10px;
+  opacity:1;
+}
+.cf-scene-visual{
+  width:300px;
+  height:300px;
+  right:46px;
+  top:30px;
+}
+.cf-scene-orbit{
+  width:365px;
+  height:365px;
+  right:-4px;
+  top:4px;
+}
+.cf-3d-object{
+  width:178px;
+  height:178px;
+  right:112px;
+  top:92px;
+}
+.cf-3d-core{
+  box-shadow:inset -20px -22px 34px rgba(24,42,33,.34),inset 12px 12px 24px rgba(255,255,255,.48),0 28px 58px rgba(43,55,44,.24);
+}
+.cf-3d-face{
+  left:38px;
+  top:44px;
+  width:102px;
+  height:72px;
+}
+.cf-3d-depth{
+  width:320px;
+  height:210px;
+  right:50px;
+  top:86px;
+  background:
+    linear-gradient(90deg,rgba(85,122,97,.22) 1px,transparent 1px),
+    linear-gradient(rgba(201,150,69,.18) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.cf-3d-shadow{
+  right:96px;
+  top:248px;
+  width:210px;
+}
+.cf-scene-beacon{
+  right:198px;
+  top:136px;
+  height:116px;
+}
+@media(max-width:820px){
+  .cf-motion-image-a{opacity:.86!important}
+  .cf-motion-image-b{opacity:.56!important}
+  .cf-motion-image-c{opacity:.70!important}
+  .cf-warm-scene{
+    width:100%;
+    height:330px;
+    top:0;
+    right:0;
+    opacity:1;
+  }
+  .cf-scene-visual{
+    width:230px;
+    height:230px;
+    right:12px;
+    top:28px;
+  }
+  .cf-scene-orbit{
+    width:280px;
+    height:280px;
+    right:-18px;
+    top:10px;
+  }
+  .cf-3d-object{
+    width:142px;
+    height:142px;
+    right:64px;
+    top:76px;
+  }
+  .cf-3d-face{
+    left:30px;
+    top:36px;
+    width:82px;
+    height:58px;
+  }
+  .cf-3d-depth{
+    width:250px;
+    height:170px;
+    right:24px;
+    top:74px;
+  }
+  .cf-3d-shadow{right:54px;top:198px;width:170px}
+  .cf-scene-beacon{right:130px;top:108px;height:90px}
+}
+</style>
 </head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
