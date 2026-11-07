@@ -2922,6 +2922,111 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   .mobile-add-toggle button{min-height:56px!important;font-weight:800!important}
 }
 </style>
+<style id="cf-mobile-premium-1-0-19">
+@media(max-width:760px){
+  html{scroll-behavior:smooth;overscroll-behavior-y:contain}
+  body{-webkit-tap-highlight-color:transparent;overscroll-behavior-y:contain}
+  .app-main{scroll-margin-top:96px}
+  .app-main button,.app-main a,.app-main summary,.app-main select{touch-action:manipulation}
+  .mobile-command-bar{
+    display:grid!important;
+    grid-template-columns:1fr 1fr 1fr!important;
+    gap:8px!important;
+    margin:8px 0 12px!important;
+    padding:8px!important;
+    border:1px solid #dce6df!important;
+    border-radius:16px!important;
+    background:linear-gradient(180deg,#ffffff,#f6faf7)!important;
+    box-shadow:0 8px 24px rgba(20,70,43,.08)!important;
+    position:sticky!important;
+    top:0!important;
+    z-index:5!important;
+  }
+  .mobile-command-bar button{
+    min-height:50px!important;
+    border-radius:12px!important;
+    border:1px solid #d7e2da!important;
+    background:#fff!important;
+    color:#174b34!important;
+    box-shadow:0 3px 10px rgba(20,70,43,.05)!important;
+    font-size:11px!important;
+    font-weight:800!important;
+    padding:8px 6px!important;
+  }
+  .mobile-command-bar button.primary{
+    background:linear-gradient(135deg,#146c43,#1f8554)!important;
+    color:#fff!important;
+    border-color:#146c43!important;
+    box-shadow:0 8px 18px rgba(20,108,67,.2)!important;
+  }
+  .mobile-command-bar button:active{transform:translateY(1px)!important}
+  .mobile-connection-status{
+    grid-column:1/-1;
+    min-height:24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    font-size:10px;
+    font-weight:750;
+    color:#5f7066;
+  }
+  .mobile-connection-status:before{
+    content:"";
+    width:7px;height:7px;border-radius:50%;
+    background:#1c7048;
+    box-shadow:0 0 0 4px #1c704815;
+  }
+  .mobile-connection-status.offline{color:#8a5d16}
+  .mobile-connection-status.offline:before{background:#c28a21;box-shadow:0 0 0 4px #c28a2115}
+  .mobile-transaction-search{
+    display:grid!important;
+    grid-template-columns:1fr auto!important;
+    gap:8px!important;
+    align-items:center!important;
+    margin:4px 0 10px!important;
+  }
+  .mobile-transaction-search input{
+    width:100%!important;
+    min-height:50px!important;
+    border:1px solid #d6e2da!important;
+    border-radius:14px!important;
+    background:#fff!important;
+    color:#1b2d23!important;
+    padding:11px 13px!important;
+    box-shadow:0 5px 18px rgba(20,70,43,.05)!important;
+  }
+  .mobile-transaction-search input:focus{
+    border-color:#146c43!important;
+    box-shadow:0 0 0 4px rgba(20,108,67,.11)!important;
+  }
+  .mobile-transaction-search button{
+    min-width:50px!important;
+    min-height:50px!important;
+    padding:0 12px!important;
+    background:#eaf2ed!important;
+    color:#174b34!important;
+    box-shadow:none!important;
+  }
+  .mobile-transaction-count{
+    margin:0 0 8px!important;
+    color:#68786e!important;
+    font-size:10px!important;
+    font-weight:700!important;
+    text-align:right!important;
+  }
+  .mobile-entry-row[hidden]{display:none!important}
+  .mobile-entry-row{scroll-margin-top:96px!important}
+}
+@media(max-width:390px){
+  .mobile-command-bar{grid-template-columns:1fr 1fr!important}
+  .mobile-command-bar .mobile-command-more{grid-column:1/-1}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  .mobile-command-bar button{transition:none!important}
+}
+</style>
 </head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
@@ -4449,5 +4554,104 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     removeDecorativeMotionLayer();
   }
 })();
-</script></body>
+</script><script id="cf-mobile-premium-1-0-19-js">
+(function(){
+  'use strict';
+  function mobileHaptic(){
+    try{if(navigator.vibrate)navigator.vibrate(8)}catch(_){}
+  }
+  function mobileIsPhone(){return window.matchMedia&&window.matchMedia('(max-width:760px)').matches}
+  function mobileCommandBar(){
+    if(!mobileIsPhone())return;
+    const main=document.querySelector('.app-main');
+    const period=main&&main.querySelector('.period-toolbar');
+    if(!main||!period||main.querySelector('.mobile-command-bar'))return;
+    const bar=document.createElement('section');
+    bar.className='mobile-command-bar';
+    bar.setAttribute('aria-label','Ações rápidas');
+    bar.innerHTML=
+      '<button type="button" class="primary mobile-command-add" data-act="mobileadd" aria-label="Novo lançamento">＋ Adicionar</button>'+
+      '<button type="button" data-act="imp" aria-label="Importar planilha">↑ Importar</button>'+
+      '<button type="button" class="mobile-command-more" data-act="mobilemore" aria-label="Mais ações">⋯ Mais</button>'+
+      '<div class="mobile-connection-status" aria-live="polite"></div>';
+    period.before(bar);
+    mobileConnectionStatus();
+  }
+  function mobileConnectionStatus(){
+    document.querySelectorAll('.mobile-connection-status').forEach(el=>{
+      const online=navigator.onLine!==false;
+      el.classList.toggle('offline',!online);
+      el.textContent=online?'Conectado · sincronização disponível':'Sem conexão · verifique a internet';
+    });
+  }
+  function bindMobileTransactionSearch(){
+    const table=document.querySelector('.mobile-entry-table');
+    if(!table)return;
+    const host=table.parentElement;
+    if(!host||host.dataset.mobileSearchBound==='1')return;
+    host.dataset.mobileSearchBound='1';
+    const search=document.createElement('div');
+    search.className='mobile-transaction-search';
+    search.innerHTML='<input type="search" inputmode="search" autocomplete="off" aria-label="Buscar lançamento" placeholder="Buscar lançamento, categoria ou status"><button type="button" aria-label="Limpar busca">Limpar</button>';
+    const count=document.createElement('p');
+    count.className='mobile-transaction-count';
+    count.setAttribute('aria-live','polite');
+    table.before(search,count);
+    const input=search.querySelector('input');
+    const clear=search.querySelector('button');
+    const rows=()=>Array.from(table.querySelectorAll('.mobile-entry-row'));
+    const apply=()=>{
+      const q=(input.value||'').trim().toLocaleLowerCase('pt-BR');
+      let visible=0;
+      rows().forEach(row=>{
+        const match=!q||row.textContent.toLocaleLowerCase('pt-BR').includes(q);
+        const hidden=!match;
+        row.hidden=hidden;
+        if(match)visible++;
+      });
+      const total=rows().length;
+      count.textContent=q?(visible+' de '+total+' lançamentos'):(total+' lançamentos');
+    };
+    input.addEventListener('input',apply);
+    clear.addEventListener('click',()=>{
+      input.value='';
+      apply();
+      input.focus();
+      mobileHaptic();
+    });
+    apply();
+  }
+  function bindPremiumInteractions(){
+    if(document.documentElement.dataset.mobilePremiumBound==='1')return;
+    document.documentElement.dataset.mobilePremiumBound='1';
+    document.addEventListener('click',ev=>{
+      const btn=ev.target.closest('button,[data-act]');
+      if(btn&&!btn.disabled)mobileHaptic();
+      const nav=ev.target.closest('[data-mobile-nav]');
+      if(nav){
+        setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),30);
+      }
+    },{passive:true});
+    window.addEventListener('online',mobileConnectionStatus,{passive:true});
+    window.addEventListener('offline',mobileConnectionStatus,{passive:true});
+  }
+  function enhanceMobileWorkspace(){
+    if(!mobileIsPhone())return;
+    mobileCommandBar();
+    bindMobileTransactionSearch();
+    mobileConnectionStatus();
+    bindPremiumInteractions();
+  }
+  if(typeof afterRender==='function'){
+    const originalAfterRender=afterRender;
+    afterRender=function(){
+      originalAfterRender();
+      enhanceMobileWorkspace();
+    };
+  }
+  document.addEventListener('DOMContentLoaded',enhanceMobileWorkspace,{once:true});
+  window.addEventListener('resize',enhanceMobileWorkspace,{passive:true});
+})();
+</script>
+</body>
 </html>

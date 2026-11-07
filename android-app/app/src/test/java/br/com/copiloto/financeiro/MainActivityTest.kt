@@ -497,3 +497,49 @@ class MainActivityTest {
     }
 
 }
+    @Test
+    fun androidV019AddsPremiumMobileCommandBarAndConnectionStatus() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-mobile-premium-1-0-19"))
+        assertTrue(html.contains("mobile-command-bar"))
+        assertTrue(html.contains("mobile-connection-status"))
+        assertTrue(html.contains("mobile-command-add"))
+        assertTrue(html.contains("mobile-command-more"))
+    }
+
+    @Test
+    fun androidV019AddsClientSideTransactionSearchWithoutChangingTheDataLayer() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("mobile-transaction-search"))
+        assertTrue(html.contains("function bindMobileTransactionSearch()"))
+        assertTrue(html.contains("mobile-transaction-count"))
+        assertTrue(html.contains("dataset.mobileSearchBound"))
+        assertTrue(html.contains("row.hidden=hidden"))
+    }
+
+    @Test
+    fun androidV019UsesSafeAndroidHapticsAndAccessibleMobileFeedback() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileHaptic()"))
+        assertTrue(html.contains("navigator.vibrate"))
+        assertTrue(html.contains("aria-live=\"polite\""))
+        assertTrue(html.contains("prefers-reduced-motion:reduce"))
+    }
+
+    @Test
+    fun androidV019ImprovesMobileTouchAndScrollBehaviorForAHighQualityAppShell() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val mobile = html.substringAfter("<style id=\"cf-mobile-premium-1-0-19\">").substringBefore("</style>")
+        assertTrue(mobile.contains("overscroll-behavior-y:contain"))
+        assertTrue(mobile.contains("-webkit-tap-highlight-color:transparent"))
+        assertTrue(mobile.contains("scroll-margin-top:96px"))
+        assertTrue(mobile.contains("touch-action:manipulation"))
+    }
+
+    @Test
+    fun releaseVersionAdvancesToThePremiumMobileIteration() {
+        val gradle = File("build.gradle.kts").readText()
+        assertTrue(gradle.contains("versionCode = 20"))
+        assertTrue(gradle.contains("versionName = \"1.0.19\""))
+    }
+
