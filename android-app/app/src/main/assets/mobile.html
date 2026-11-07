@@ -2783,6 +2783,135 @@ body[data-ui="premium-fintech"] .landing-page{background:rgba(238,242,246,.76)!i
   .cf-test-mode-tag{flex:none;padding:6px 9px;border:1px solid rgba(54,115,70,.2);border-radius:999px;background:#e5f3e8;color:#356b45;font-size:9px;font-weight:850;letter-spacing:.08em}
   @media(max-width:640px){.cf-test-mode-banner{align-items:flex-start;gap:9px;padding:11px}.cf-test-mode-copy p{font-size:11px}.cf-test-mode-tag{font-size:8px;padding:5px 7px}}
   @media(prefers-reduced-motion:reduce){.cf-test-mode-dot{box-shadow:none}}
+
+/* ---------- 1.0.9 warm cinematic financial scenes ---------- */
+:root{
+  --cf-warm-ink:#24332b;
+  --cf-warm-muted:#7b857d;
+  --cf-warm-cream:#f7f4ec;
+  --cf-warm-paper:#fffdf8;
+  --cf-warm-sage:#557a61;
+  --cf-warm-green:#28634f;
+  --cf-warm-gold:#c99645;
+  --cf-warm-copper:#b96e4b;
+  --cf-warm-line:#e5dfd1;
+}
+#app:has(.app-shell) .app-main{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  background:
+    radial-gradient(600px 420px at 88% 7%,rgba(201,150,69,.12),transparent 62%),
+    radial-gradient(520px 420px at 8% 92%,rgba(85,122,97,.10),transparent 65%),
+    linear-gradient(135deg,#fbfaf5 0%,#f5f3ec 100%);
+}
+#app:has(.app-shell) .app-main > *:not(.cf-warm-scene){position:relative;z-index:2}
+.cf-warm-scene{position:relative;z-index:2}
+.cf-3d-stage{
+  position:absolute;inset:0;perspective:900px;transform-style:preserve-3d;
+  overflow:visible;pointer-events:none;
+}
+.cf-3d-depth{
+  position:absolute;width:240px;height:170px;right:42px;top:78px;
+  transform:rotateX(62deg) rotateZ(-9deg) translateZ(-48px);
+  transform-style:preserve-3d;
+  background:
+    linear-gradient(90deg,rgba(85,122,97,.18) 1px,transparent 1px),
+    linear-gradient(rgba(201,150,69,.14) 1px,transparent 1px);
+  background-size:24px 24px;
+  border-radius:18px;
+  box-shadow:0 28px 55px rgba(60,56,43,.13);
+  animation:cf-3d-drift 7s ease-in-out infinite;
+}
+.cf-3d-depth:before,.cf-3d-depth:after{
+  content:"";position:absolute;border-radius:999px;border:1px solid rgba(85,122,97,.2);
+}
+.cf-3d-depth:before{inset:25px 38px;transform:translateZ(18px)}
+.cf-3d-depth:after{inset:44px 68px;transform:translateZ(38px)}
+.cf-3d-object{
+  position:absolute;right:88px;top:82px;width:126px;height:126px;
+  transform-style:preserve-3d;transform:rotateX(58deg) rotateY(-28deg) translateZ(90px);
+  animation:cf-3d-float 6s ease-in-out infinite;
+}
+.cf-3d-core{
+  position:absolute;inset:17px;border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 26%,rgba(255,255,255,.98) 0 7%,transparent 8%),
+    radial-gradient(circle at 42% 38%,#eef3e8 0 19%,#8fa895 47%,#3f624e 78%,#273c32 100%);
+  box-shadow:inset -16px -18px 30px rgba(24,42,33,.38),inset 10px 10px 22px rgba(255,255,255,.45),0 22px 44px rgba(43,55,44,.22);
+  border:3px solid rgba(255,255,255,.72);
+}
+.cf-3d-rim{
+  position:absolute;inset:4px;border-radius:50%;
+  border:2px solid rgba(201,150,69,.68);
+  transform:translateZ(22px) rotateZ(18deg);
+  box-shadow:0 0 22px rgba(201,150,69,.22);
+}
+.cf-3d-face{
+  position:absolute;left:26px;top:31px;width:72px;height:54px;border-radius:14px;
+  border:1px solid rgba(255,255,255,.48);
+  background:linear-gradient(145deg,rgba(255,255,255,.4),rgba(85,122,97,.08));
+  transform:translateZ(31px) rotateZ(-5deg);
+  box-shadow:inset 0 0 20px rgba(255,255,255,.18);
+}
+.cf-3d-face:before,.cf-3d-face:after{
+  content:"";position:absolute;left:12px;right:12px;height:3px;border-radius:4px;background:rgba(255,255,255,.52);
+}
+.cf-3d-face:before{top:16px}.cf-3d-face:after{top:28px;right:24px}
+.cf-3d-particle{
+  position:absolute;width:7px;height:7px;border-radius:50%;background:var(--scene-second);
+  box-shadow:0 0 16px color-mix(in srgb,var(--scene-second) 65%,transparent);
+  transform-style:preserve-3d;
+}
+.cf-3d-particle.p1{left:-22px;top:20px;transform:translateZ(48px);animation:cf-3d-particle-a 4.8s ease-in-out infinite}
+.cf-3d-particle.p2{right:-18px;top:66px;transform:translateZ(18px);animation:cf-3d-particle-b 5.7s ease-in-out infinite}
+.cf-3d-particle.p3{left:43px;bottom:-20px;transform:translateZ(60px);animation:cf-3d-particle-c 6.3s ease-in-out infinite}
+.cf-3d-shadow{
+  position:absolute;right:73px;top:193px;width:150px;height:36px;border-radius:50%;
+  background:rgba(54,48,37,.15);filter:blur(13px);transform:rotateX(68deg) translateZ(-90px);
+  animation:cf-3d-shadow 6s ease-in-out infinite;
+}
+.cf-scene-beacon{
+  position:absolute;right:142px;top:123px;width:3px;height:84px;
+  background:linear-gradient(to bottom,transparent,var(--scene-second),transparent);
+  filter:blur(.3px);opacity:.5;transform:translateZ(35px);animation:cf-beacon 2.6s ease-in-out infinite;
+}
+.cf-warm-scene[data-scene-key="planilha"] .cf-3d-object{transform:rotateX(61deg) rotateY(-24deg) translateZ(100px)}
+.cf-warm-scene[data-scene-key="ano"] .cf-3d-object{transform:rotateX(52deg) rotateY(-35deg) translateZ(100px) scale(.92)}
+.cf-warm-scene[data-scene-key="checape"] .cf-3d-object{transform:rotateX(58deg) rotateY(-12deg) translateZ(110px) scale(.94)}
+.cf-warm-scene[data-scene-key="planejamento"] .cf-3d-object{transform:rotateX(64deg) rotateY(-38deg) translateZ(105px) scale(.9)}
+.cf-warm-scene[data-scene-key="relatorios"] .cf-3d-object{transform:rotateX(55deg) rotateY(-27deg) translateZ(105px) scale(.88)}
+.cf-warm-scene[data-scene-key="familia"] .cf-3d-object{transform:rotateX(57deg) rotateY(-19deg) translateZ(105px) scale(.95)}
+.cf-warm-scene[data-scene-motion="ledger"] .cf-3d-core{border-radius:12px;inset:10px 18px;background:linear-gradient(145deg,#f6f0df,#b9c9b7 55%,#476451);box-shadow:inset -18px -16px 26px rgba(34,55,42,.32),inset 8px 8px 18px rgba(255,255,255,.55),0 20px 40px rgba(43,55,44,.2)}
+.cf-warm-scene[data-scene-motion="ledger"] .cf-3d-face{left:27px;top:38px;width:72px;height:44px}
+.cf-warm-scene[data-scene-motion="orbit"] .cf-3d-core{background:radial-gradient(circle,transparent 0 27%,#d6e1d5 28% 36%,#597963 37% 48%,transparent 49%),radial-gradient(circle at 35% 30%,#fff 0 5%,transparent 6%),radial-gradient(circle,#263d32 0 100%);box-shadow:0 0 38px rgba(201,150,69,.2)}
+.cf-warm-scene[data-scene-motion="orbit"] .cf-3d-rim{inset:-4px;border-style:dashed;transform:translateZ(28px) rotateZ(26deg)}
+.cf-warm-scene[data-scene-motion="health"] .cf-3d-core{background:radial-gradient(circle at 34% 28%,#fff 0 7%,transparent 8%),radial-gradient(circle,#dbe9dc 0 22%,#5f896d 55%,#294536 100%);box-shadow:0 0 34px rgba(79,145,105,.36),inset -14px -16px 24px rgba(28,54,39,.3)}
+.cf-warm-scene[data-scene-motion="health"] .cf-3d-face{border-radius:50%;width:78px;height:34px;left:24px;top:40px;transform:translateZ(34px) rotateZ(-8deg);border-color:rgba(255,255,255,.58)}
+.cf-warm-scene[data-scene-motion="future"] .cf-3d-core{border-radius:18px 18px 45% 45%;background:linear-gradient(145deg,#f4ead6,#a9bd9f 48%,#4f6e58);box-shadow:inset -16px -18px 28px rgba(40,54,40,.34),0 20px 42px rgba(62,55,42,.18)}
+.cf-warm-scene[data-scene-motion="future"] .cf-3d-face{border-radius:50%;width:62px;height:62px;left:32px;top:30px;transform:translateZ(34px) rotateZ(0)}
+.cf-warm-scene[data-scene-motion="data"] .cf-3d-core{border-radius:10px;inset:18px 8px;background:linear-gradient(90deg,#4f7059 0 18%,transparent 18% 25%,#7d9a80 25% 47%,transparent 47% 54%,#c99645 54% 76%,transparent 76% 83%,#b96e4b 83%);box-shadow:inset 0 -18px 20px rgba(38,52,42,.2)}
+.cf-warm-scene[data-scene-motion="data"] .cf-3d-face{left:15px;top:18px;width:96px;height:82px;border-radius:8px;transform:translateZ(34px) rotateZ(-4deg)}
+.cf-warm-scene[data-scene-motion="network"] .cf-3d-core{background:radial-gradient(circle at 50% 50%,#fff 0 10%,#d9e4d8 11% 24%,#708f74 25% 47%,#3d5946 48% 100%);box-shadow:0 0 34px rgba(128,108,85,.3),inset -14px -18px 28px rgba(36,50,40,.3)}
+.cf-warm-scene[data-scene-motion="network"] .cf-3d-particle{width:10px;height:10px}
+@keyframes cf-3d-float{0%,100%{translate:0 0}50%{translate:-7px -12px}}
+@keyframes cf-3d-drift{0%,100%{translate:0 0 rotateZ(-9deg)}50%{translate:8px -7px rotateZ(-6deg)}}
+@keyframes cf-3d-shadow{0%,100%{transform:rotateX(68deg) translateZ(-90px) scale(.94);opacity:.12}50%{transform:rotateX(68deg) translateZ(-90px) scale(1.08);opacity:.19}}
+@keyframes cf-3d-particle-a{50%{translate:13px -17px}}
+@keyframes cf-3d-particle-b{50%{translate:-14px 9px}}
+@keyframes cf-3d-particle-c{50%{translate:7px -13px}}
+@keyframes cf-beacon{50%{height:112px;opacity:.2}}
+@media(max-width:820px){
+  .cf-3d-stage{transform:scale(.72);transform-origin:top right}
+  .cf-3d-object{right:62px;top:63px}
+  .cf-3d-depth{right:20px;top:65px}
+  .cf-3d-shadow{right:48px;top:167px}
+  .cf-scene-beacon{right:108px;top:101px}
+}
+@media(max-width:520px){.cf-3d-stage{transform:scale(.58);opacity:.72}}
+@media(prefers-reduced-motion:reduce){
+  .cf-3d-object,.cf-3d-depth,.cf-3d-shadow,.cf-3d-particle,.cf-scene-beacon{animation:none!important}
+}
 </style>
 </head>
 <body data-ui="premium-fintech">
@@ -4439,6 +4568,62 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
   window.addEventListener('popstate',()=>{if(dialog?.open)closePreview(true);else previewHistoryEntry=false});
   document.addEventListener('visibilitychange',()=>{document.body.dataset.cfMotionPaused=document.hidden?'true':'false';if(!video||!dialog?.open)return;if(document.hidden)video.pause();else if(!reduce.matches)video.play().catch(()=>{})});
   reduce.addEventListener?.('change',event=>{if(event.matches){resetTilt();video?.pause();document.querySelectorAll('.cf-motion-reveal').forEach(node=>node.classList.add('cf-motion-visible'))}else revealTree(app||document.body)});
+})();
+</script>
+
+<script id="cf-warm-visual-system">
+(function(){
+  'use strict';
+  const sceneMotion={planilha:'ledger',ano:'orbit',checape:'health',planejamento:'future',relatorios:'data',familia:'network',inicio:'core',pagamento:'payment'};
+  const labels={
+    planilha:['Controle vivo','Seu dinheiro, em movimento'],
+    ano:['Visão anual','O ano inteiro em uma leitura'],
+    checape:['Saúde financeira','Sinais importantes, sem ruído'],
+    planejamento:['Plano futuro','Decisões transformadas em direção'],
+    relatorios:['Inteligência de dados','Padrões que ajudam você a decidir'],
+    familia:['Rede familiar','Finanças conectadas com clareza'],
+    inicio:['Copiloto Financeiro','Uma visão mais humana do seu dinheiro'],
+    pagamento:['Pagamento','Uma etapa simples e segura']
+  };
+  function slug(text){
+    return (text||'inicio').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'inicio';
+  }
+  function sceneKey(){
+    const app=document.getElementById('app');
+    const heading=app?.querySelector('.page-heading h1')?.textContent||'';
+    const s=slug(heading);
+    if(/planilha|lancamento|moviment/.test(s))return'planilha';
+    if(/ano|evolucao|evolucao/.test(s))return'ano';
+    if(/checape|saude/.test(s))return'checape';
+    if(/planejamento|plano|metas/.test(s))return'planejamento';
+    if(/relatorio|inteligencia|dados/.test(s))return'relatorios';
+    if(/familia|membro|famil/.test(s))return'familia';
+    if(/pagamento|pix/.test(s))return'pagamento';
+    return'inicio';
+  }
+  function mount(){
+    const main=document.querySelector('.app-main');
+    if(!main)return;
+    let scene=main.querySelector('.cf-warm-scene');
+    if(!scene){
+      scene=document.createElement('div');
+      scene.className='cf-warm-scene';
+      scene.innerHTML='<div class="cf-3d-stage"><div class="cf-3d-depth"></div><div class="cf-3d-object"><div class="cf-3d-core"></div><div class="cf-3d-rim"></div><div class="cf-3d-face"></div><i class="cf-3d-particle p1"></i><i class="cf-3d-particle p2"></i><i class="cf-3d-particle p3"></i></div><div class="cf-3d-shadow"></div></div><div class="cf-scene-visual"></div><div class="cf-scene-orbit"></div><div class="cf-scene-grid"></div><div class="cf-scene-pulse"></div><div class="cf-scene-beacon"></div><div class="cf-scene-caption"><b></b><span></span></div><div class="cf-scene-label"><i></i><span>LIVE</span></div>';
+      main.prepend(scene);
+    }
+    const key=sceneKey();
+    scene.dataset.sceneKey=key;
+    scene.dataset.sceneMotion=sceneMotion[key]||sceneMotion.inicio;
+    const copy=labels[key]||labels.inicio;
+    scene.querySelector('.cf-scene-caption b').textContent=copy[0];
+    scene.querySelector('.cf-scene-caption span').textContent=copy[1];
+    document.body.dataset.cfWarmVisualSystem='true';
+  }
+  let timer=0;
+  function schedule(){clearTimeout(timer);timer=setTimeout(mount,20)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+  const app=document.getElementById('app');
+  if(app)new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
 })();
 </script>
 </body>
