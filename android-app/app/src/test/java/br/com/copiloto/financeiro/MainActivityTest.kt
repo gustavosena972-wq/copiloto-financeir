@@ -363,4 +363,17 @@ class MainActivityTest {
         assertTrue(html.contains("data-act=\"sair\""))
     }
 
+
+    @Test
+    fun androidSystemBackClosesMobileOverlaysBeforeExitingTheApp() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
+        assertTrue(html.contains("window.__copilotoHandleAndroidBack"))
+        assertTrue(html.contains("S.mobileMore"))
+        assertTrue(html.contains("S.mobileAddOpen"))
+        assertTrue(html.contains("document.querySelectorAll('.app-main details[open]')"))
+        assertTrue(activity.contains("__copilotoHandleAndroidBack"))
+        assertTrue(activity.contains("webView.evaluateJavascript"))
+    }
+
 }
