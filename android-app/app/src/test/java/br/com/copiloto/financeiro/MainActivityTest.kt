@@ -284,37 +284,83 @@ class MainActivityTest {
 
 
     @Test
-    fun mobileAppProvidesACompactBottomNavigationForPrimarySections() {
+    fun mobileNavigationUsesPrimaryDestinationsAndAnAccessibleMoreMenu() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("class=\"mobile-bottom-nav\""))
-        assertTrue(html.contains("aria-label=\"Navegação inferior\""))
-        assertTrue(html.contains("data-mobile-nav=\"true\""))
-        assertTrue(html.contains("@media(max-width:760px)"))
-        assertTrue(html.contains(".sidebar-nav{display:none!important}"))
+        assertTrue(html.contains("aria-label=\"Navegação principal do aplicativo\""))
+        assertTrue(html.contains("data-mobile-nav=\"launches\""))
+        assertTrue(html.contains("data-mobile-nav=\"year\""))
+        assertTrue(html.contains("data-mobile-nav=\"checkup\""))
+        assertTrue(html.contains("data-mobile-nav=\"planning\""))
+        assertTrue(html.contains("data-act=\"mobilemore\""))
+        assertTrue(html.contains("class=\"mobile-more-panel\""))
+        assertTrue(html.contains("data-v=\"família\""))
+        assertTrue(html.contains("data-v=\"relatorios\""))
+
     }
 
     @Test
-    fun mobileTransactionsAndYearSummaryRenderAsReadableCardsWithoutWideTables() {
+    fun mobileTransactionsUseExpandableRowsAndTheYearUsesTapToOpenSummaries() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("class=\"mobile-card-table\""))
-        assertTrue(html.contains("data-label=\"Vencimento\""))
-        assertTrue(html.contains("data-label=\"Descrição\""))
+        assertTrue(html.contains("class=\"mobile-entry-table\""))
+        assertTrue(html.contains("class=\"mobile-entry-row\""))
+        assertTrue(html.contains("class=\"mobile-entry-details\""))
+        assertTrue(html.contains("class=\"mobile-year-list\""))
+        assertTrue(html.contains("class=\"mobile-year-open\""))
         assertTrue(html.contains("data-label=\"Valor\""))
         assertTrue(html.contains("data-label=\"Meta cartão\""))
-        assertTrue(html.contains(".mobile-card-table tbody tr"))
-        assertTrue(html.contains("min-width:0!important"))
+        assertTrue(html.contains(".desktop-year-table{display:none!important}"))
+
     }
 
     @Test
-    fun mobileWorkspaceUsesFullViewportAndTouchSizedControlsWithoutLandscapeRequirement() {
+    fun mobileWorkspaceUsesFullWidthSafeAreasAndTouchSizedControls() {
         val html = File("src/main/assets/mobile.html").readText()
         val mobile = html.substringAfter("<style id=\"cf-mobile-first-1-0-15\">").substringBefore("</style>")
         assertTrue(mobile.contains("width:100vw"))
         assertTrue(mobile.contains("min-height:100dvh"))
-        assertTrue(mobile.contains("min-height:44px"))
+        assertTrue(mobile.contains("min-height:48px"))
         assertTrue(mobile.contains("overflow-x:hidden"))
-        assertTrue(mobile.contains("grid-template-columns:repeat(4,minmax(0,1fr))"))
-        assertTrue(mobile.contains("padding-bottom:calc(92px"))
+        assertTrue(mobile.contains("env(safe-area-inset-bottom)"))
+        assertTrue(mobile.contains("grid-template-columns:repeat(5,minmax(0,1fr))"))
+        assertTrue(mobile.contains(".desktop-transactions{display:none!important}"))
+        assertTrue(mobile.contains(".mobile-entry-table{display:block!important"))
+
+    }
+
+
+    @Test
+    fun everyMobileWorkspaceScreenIncludesContextualHowToInstructions() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileGuide(view)"))
+        assertTrue(html.contains("class=\"mobile-guide\""))
+        assertTrue(html.contains("Como usar os lançamentos"))
+        assertTrue(html.contains("Como usar a visão do ano"))
+        assertTrue(html.contains("Como usar o checape"))
+        assertTrue(html.contains("Como usar o planejamento"))
+        assertTrue(html.contains("Como usar a área da família"))
+        assertTrue(html.contains("aria-controls=\"mobile-guide-content\""))
+    }
+
+    @Test
+    fun mobileNewLaunchActionOpensTheExistingValidatedLaunchForm() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("data-act=\"mobileadd\""))
+        assertTrue(html.contains("id=\"mobile-add-launch\""))
+        assertTrue(html.contains("S.mobileAddOpen"))
+        assertTrue(html.contains("else if(a==='mobileadd')"))
+        assertTrue(html.contains("else if(a==='add')"))
+    }
+
+    @Test
+    fun mobileMoreMenuKeepsReportsFamilyAdminAndSignOutReachable() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("S.mobileMore"))
+        assertTrue(html.contains("data-act=\"mobilemore\""))
+        assertTrue(html.contains("data-act=\"view\" data-v=\"família\""))
+        assertTrue(html.contains("data-act=\"view\" data-v=\"relatorios\""))
+        assertTrue(html.contains("data-act=\"view\" data-v=\"admin\""))
+        assertTrue(html.contains("data-act=\"sair\""))
     }
 
 }
