@@ -51,6 +51,18 @@ class MainActivityTest {
     }
 
     @Test
+    fun bundledFinanceUiProvidesAnImmersiveOpeningHero() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-opening-scene"))
+        assertTrue(html.contains("cf-holo-dashboard"))
+        assertTrue(html.contains("cf-finance-orbit"))
+        assertTrue(html.contains("cf-data-stream"))
+        assertTrue(html.contains("cf-cursor-light"))
+        assertTrue(html.contains("data-opening-interactive"))
+        assertTrue(html.contains("cf-opening-reveal"))
+    }
+
+    @Test
     fun bundledFinanceUiProvidesScrollRevealGlassAndInteractiveDepthMotion() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("IntersectionObserver"))
