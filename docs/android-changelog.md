@@ -16,3 +16,13 @@
 - Atualização visual premium e refinamento da interface empacotada no Android.
 - Primeira camada de movimento de fundo e imagem incorporada.
 - Acesso controlado para testadores internos.
+
+## 1.0.5 — Motion Design and navigation polish
+
+- Added scroll-triggered diagonal reveal for financial cards and sections.
+- Added restrained 3D depth, pointer tilt and light response on desktop-capable surfaces.
+- Added a morphing liquid ambient layer and frosted-glass plan/pricing surfaces.
+- Added a user-initiated, muted 6-second MP4 preview in an expandable dialog; playback stops on close, back navigation, app backgrounding and reduced-motion preference.
+- Bundled the privacy, terms and account-deletion pages in the current Android package so these links work inside the app.
+- Kept the public marketing site separate from the Android finance experience.
+- Preserved the existing Supabase, RLS and Google Play Billing flows.
