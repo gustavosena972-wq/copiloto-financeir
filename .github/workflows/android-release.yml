@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "android-app/app/build.gradle.kts"
+      - "android-app/**"
       - ".github/workflows/android-release.yml"
 
 permissions:
