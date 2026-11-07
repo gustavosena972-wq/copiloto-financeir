@@ -590,10 +590,12 @@ class MainActivityTest {
     }
 
     @Test
-    fun releaseVersionAdvancesToTheSmartMobileIteration() {
-        val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 23"))
-        assertTrue(gradle.contains("versionName = \"1.0.22\""))
+    fun androidV023RetainsRealDataInsightsWithoutArtificialFinancialScores() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("Insights do mês"))
+        assertTrue(!html.contains("smartHealthScore"))
+        assertTrue(!html.contains("safeToSpend"))
+        assertTrue(!html.contains("Pode gastar"))
     }
 
     @Test
