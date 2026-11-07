@@ -205,6 +205,16 @@ class MainActivityTest {
     }
 
     @Test
+    fun releasePackageKeepsTheCurrentVersionAndFigmaVisualContractTogether() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val gradle = File("build.gradle.kts").readText()
+        assertTrue(gradle.contains("versionCode = 12"))
+        assertTrue(gradle.contains("versionName = \"1.0.11\""))
+        assertTrue(html.contains("data-ui=\"figma-family-model\""))
+        assertTrue(html.contains("cf-command-hero"))
+    }
+
+    @Test
     fun bundledFinanceUiUsesFigmaFamilyCommandCenterVisualLanguage() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-figma-family-ui"))
