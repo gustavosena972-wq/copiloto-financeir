@@ -738,8 +738,56 @@ class MainActivityTest {
     @Test
     fun releaseVersionAdvancesToTheTamanduaOnboardingIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 25"))
+        assertTrue(gradle.contains("versionCode = 26"))
         assertTrue(gradle.contains("versionName = \"1.0.24\""))
+    }
+
+
+    @Test
+    fun androidV025UsesACompactMobileCommandSurfaceInsteadOfDesktopLikePanels() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-mobile-v025"))
+        assertTrue(html.contains("cf-mobile-command"))
+        assertTrue(html.contains("cf-mobile-balance"))
+        assertTrue(html.contains("cf-mobile-insight"))
+        assertTrue(html.contains("env(safe-area-inset-bottom)"))
+    }
+
+    @Test
+    fun androidV025UsesRealFinancialContextWithoutArtificialScoresOrSpendLimits() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileSmartContext()"))
+        assertTrue(html.contains("cf-mobile-insight"))
+        assertTrue(html.contains("contas atrasadas"))
+        assertTrue(html.contains("próximos vencimentos"))
+        assertFalse(html.contains("smartHealthScore"))
+        assertFalse(html.contains("safeToSpend"))
+        assertFalse(html.contains("Pode gastar*"))
+        assertFalse(html.contains("Indicador de organização"))
+    }
+
+    @Test
+    fun androidV025HardensTheWebViewProductionSurface() {
+        val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
+        assertTrue(activity.contains("WindowManager.LayoutParams.FLAG_SECURE"))
+        assertTrue(activity.contains("WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)"))
+        assertTrue(activity.contains("setSafeBrowsingEnabled(true)"))
+        assertTrue(activity.contains("allowFileAccess = false"))
+        assertTrue(activity.contains("allowUniversalAccessFromFileURLs = false"))
+    }
+
+    @Test
+    fun androidV025KeepsCleartextTrafficDisabled() {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        assertTrue(manifest.contains("android:usesCleartextTraffic=\"false\""))
+    }
+
+    @Test
+    fun androidV025KeepsTheTamanduaAsContextualAssistanceWithoutAddingANewTab() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileCompanionSpeech()"))
+        assertTrue(html.contains("function mountMobileCompanion()"))
+        assertFalse(html.contains("data-mobile-nav=\"tamandua\""))
     }
 
 }
