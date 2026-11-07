@@ -78,10 +78,10 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             ) = assetLoader.shouldInterceptRequest(Uri.parse(url))
 
             override fun shouldOverrideUrlLoading(
-                view: WebView?,
-                request: WebResourceRequest?
+                view: WebView,
+                request: WebResourceRequest
             ): Boolean {
-                val uri = request?.url ?: return true
+                val uri = request.url
                 if (uri.toString().startsWith(APP_ASSET_PREFIX)) return false
 
                 if (uri.scheme == "https" || uri.scheme == "http") {
