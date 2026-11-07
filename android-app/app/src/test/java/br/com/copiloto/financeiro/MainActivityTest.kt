@@ -565,17 +565,17 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-smart-briefing"))
         assertTrue(html.contains("function viewSmartBriefing()"))
-        assertTrue(html.contains("safeToSpend"))
-        assertTrue(html.contains("smartHealthScore"))
+        assertTrue(!html.contains("safeToSpend"))
+        assertTrue(!html.contains("smartHealthScore"))
         assertTrue(html.contains("Próximo passo"))
-        assertTrue(html.contains("Análise inteligente"))
+        assertTrue(html.contains("Insights do mês"))
     }
 
     @Test
     fun androidV022AddsSmartSignalsForBillsGoalsAndSpendingWithoutInventingData() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("Contas próximas"))
-        assertTrue(html.contains("Metas"))
+        assertTrue(html.contains("Contas atrasadas"))
+        assertTrue(html.contains("Próximos vencimentos"))
         assertTrue(html.contains("maior categoria"))
         assertTrue(html.contains("Sem dados suficientes"))
         assertTrue(html.contains("smartgo"))
@@ -597,12 +597,46 @@ class MainActivityTest {
     }
 
     @Test
-    fun androidV022ReplacesBareLoadingTextWithBrandedMobileStartupFeedback() {
+    fun androidV023GuidesNewUsersThroughTheCoreFinancialWorkflowWithoutAddingMenuItems() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("cf-mobile-startup"))
-        assertTrue(html.contains("cf-mobile-startup-logo"))
-        assertTrue(html.contains("cf-mobile-startup-shimmer"))
-        assertTrue(html.contains("Preparando seu financeiro"))
+        assertTrue(html.contains("function mobileFirstSteps()"))
+        assertTrue(html.contains("Primeiros passos"))
+        assertTrue(html.contains("Cadastrar primeira receita"))
+        assertTrue(html.contains("Registrar uma despesa"))
+        assertTrue(html.contains("Criar uma meta"))
+        assertTrue(html.contains("data-act="mobilefirststep""))
+    }
+
+    @Test
+    fun androidV023RemovesDuplicatedMobileQuickNavigationAndKeepsBottomNavigationAsPrimary() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileNavigation()"))
+        assertTrue(html.contains("class="mobile-bottom-nav""))
+        assertTrue(!html.contains("v0-mobile-quick-nav-primary"))
+        assertTrue(!html.contains("v0-mobile-quick-nav-grid"))
+    }
+
+    @Test
+    fun androidV023DoesNotShowAnArtificialStartupScreenBeforeTheFinanceWorkspace() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(!html.contains("function mobileStartupMarkup()"))
+        assertTrue(!html.contains("cf-mobile-startup"))
+        assertTrue(!html.contains("Preparando seu financeiro"))
+    }
+
+    @Test
+    fun androidV023KeepsTheGuidanceContextualInsteadOfRepeatingAFullGuideOnEveryScreen() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("mobileFirstSteps()"))
+        assertTrue(!html.contains("function mobileGuide(view)"))
+        assertTrue(!html.contains("Como usar os lançamentos"))
+    }
+
+    @Test
+    fun releaseVersionAdvancesToTheGuidedMobileWorkspaceIteration() {
+        val gradle = File("build.gradle.kts").readText()
+        assertTrue(gradle.contains("versionCode = 24"))
+        assertTrue(gradle.contains("versionName = "1.0.23""))
     }
 
     @Test
