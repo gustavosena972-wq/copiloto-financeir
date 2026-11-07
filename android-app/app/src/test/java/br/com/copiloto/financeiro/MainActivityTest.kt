@@ -427,7 +427,7 @@ class MainActivityTest {
     @Test
     fun releaseVersionAdvancesWithTheV0MobileRedesign() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 17"))
+        assertTrue(gradle.contains("versionCode = 18"))
         assertTrue(gradle.contains("versionName = \"1.0.16\""))
     }
 
@@ -450,6 +450,30 @@ class MainActivityTest {
         assertTrue(mobile.contains(".v0-mobile-quick-nav-item{"))
         assertTrue(mobile.contains("min-height:64px"))
         assertTrue(mobile.contains("grid-template-columns:repeat(2,minmax(0,1fr))"))
+    }
+
+    @Test
+    fun androidV017KeepsTheMobileWorkspaceVisuallySeparatedByPurpose() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val mobile = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-17\">").substringBefore("</style>")
+        assertTrue(mobile.contains(".app-sidebar{display:none!important}"))
+        assertTrue(mobile.contains(".app-topbar{padding:14px 16px 6px!important}"))
+        assertTrue(mobile.contains(".v0-mobile-quick-nav-primary"))
+        assertTrue(mobile.contains(".v0-mobile-quick-nav-item"))
+        assertTrue(mobile.contains(".v0-mobile-section-divider"))
+        assertTrue(mobile.contains(".v0-mobile-bottom-nav"))
+    }
+
+    @Test
+    fun androidV017KeepsTheSpreadsheetAsThePrimaryMobileWorkspace() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("data-v=\"planilha\""))
+        assertTrue(html.contains("Planilha mensal"))
+        assertTrue(html.contains("Lançamentos, receitas, despesas e saldo"))
+        assertTrue(html.contains("data-v=\"ano\""))
+        assertTrue(html.contains("data-v=\"checape\""))
+        assertTrue(html.contains("data-v=\"plan\""))
+        assertTrue(html.contains("data-v=\"família\""))
     }
 
 }
