@@ -3076,12 +3076,19 @@ function viewAno(){
   const rows=R.map(r=>{const m=MC[r.mes];
     const mc=!m||m.meta==null?'—':(Number(m.real)<=Number(m.meta)?`<span class="pos">✔ ${brl(m.meta)}</span>`:`<span class="neg">▲ meta ${brl(m.meta)}</span>`);
     return `<tr data-act="irmes" data-m="${r.mes}" style="cursor:pointer"><td>${MN[r.mes-1]} ${r.status==='fechado'?'🔒':''}</td><td class="pos">${brl(r.receita)}</td><td>${brl(r.fixas)}</td><td>${brl(r.cartoes)}</td><td>${brl(r.retiradas)}</td><td>${brl(r.outras)}</td><td class="neg">${brl(r.total_despesas)}</td><td class="${r.saldo>=0?'pos':'neg'}">${brl(r.saldo)}</td><td>${brl(r.poupanca_acumulada)}</td><td>${r.pct_cartoes}%</td><td>${mc}</td></tr>`}).join('');
+
+  const mobileRows=R.map(r=>{
+    const mes=MN[r.mes-1];
+    const saldoClass=Number(r.saldo)>=0?'pos':'neg';
+    const status=r.status==='fechado'?' · Fechado':'';
+    return '<article class="mobile-year-item"><button type="button" class="mobile-year-open" data-act="irmes" data-m="'+r.mes+'" aria-label="Abrir lançamentos de '+mes+'"><span class="mobile-year-month"><b>'+mes+status+'</b><small>Ver lançamentos</small></span><span class="mobile-year-balance '+saldoClass+'"><small>Saldo</small><strong>'+brl(r.saldo)+'</strong></span></button><div class="mobile-year-facts"><div><small>Receitas</small><b class="pos">'+brl(r.receita)+'</b></div><div><small>Despesas</small><b class="neg">'+brl(r.total_despesas)+'</b></div><div><small>Poupança acumulada</small><b>'+brl(r.poupanca_acumulada)+'</b></div><div><small>Meta cartão</small><b>'+r.pct_cartoes+'%</b></div></div></article>';
+  }).join('');
   return `${viewStatus()}${barraAno()}<div class="cards"><div class="card"><small>Receita prevista no ano</small><b class="pos">${brl(T('receita'))}</b></div>
   <div class="card"><small>Despesas no ano</small><b class="neg">${brl(T('total_despesas'))}</b></div>
   <div class="card"><small>Poupança no fim do ano</small><b class="pos">${brl(fim)}</b></div>
   <div class="card"><small>Mês mais caro</small><b>${maior.mes?MN[maior.mes-1]:'—'}</b></div></div>
   <div class="card" style="margin-bottom:14px"><b>Receita <span class="pos">■</span> x Despesas <span class="neg">■</span></b><div class="chart">${bars}</div></div>
-  <div class="scroll"><table style="min-width:980px"><thead><tr><th>Mês</th><th>Receita</th><th>Fixas</th><th>Cartões</th><th>Retiradas</th><th>Outras</th><th>Total</th><th>Saldo</th><th>Poupança acum.</th><th>% Cartões</th><th>Meta cartão</th></tr></thead><tbody>${rows}</tbody>
+  <div class="mobile-year-list">${mobileRows||'<p class="mobile-empty">Ainda não há resultados registrados neste ano.</p>'}</div><div class="scroll desktop-year-table"><table style="min-width:980px"><thead><tr><th>Mês</th><th>Receita</th><th>Fixas</th><th>Cartões</th><th>Retiradas</th><th>Outras</th><th>Total</th><th>Saldo</th><th>Poupança acum.</th><th>% Cartões</th><th>Meta cartão</th></tr></thead><tbody>${rows}</tbody>
   <tfoot><tr><td>Total ${S.ano.ano}</td><td class="pos">${brl(T('receita'))}</td><td>${brl(T('fixas'))}</td><td>${brl(T('cartoes'))}</td><td>${brl(T('retiradas'))}</td><td>${brl(T('outras'))}</td><td class="neg">${brl(T('total_despesas'))}</td><td class="${T('saldo')>=0?'pos':'neg'}">${brl(T('saldo'))}</td><td>${brl(fim)}</td><td></td><td></td></tr></tfoot></table></div>
   <div class="grid2" style="margin-top:12px"><div class="card"><b>Poupança trazida do ano anterior</b><div class="row" style="margin-top:8px"><input type="number" step="0.01" data-af="poupanca_inicial" value="${S.ano.poupanca_inicial}" ${canEdit()?'':'disabled'}></div>
   <small class="mu">Ao fechar o ano, o saldo acumulado vira o ponto de partida do próximo.</small></div>
