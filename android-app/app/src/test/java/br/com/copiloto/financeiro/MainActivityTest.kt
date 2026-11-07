@@ -704,7 +704,7 @@ class MainActivityTest {
     fun androidV024CollectsUserNeedsWithCheckboxQuestionsAndStoresACompanionProfile() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-tamandua-question"))
-        assertTrue(html.contains('type="checkbox"'))
+        assertTrue(html.contains("type=\"checkbox\""))
         assertTrue(html.contains("Qual é a sua principal necessidade hoje?"))
         assertTrue(html.contains("Tem alguma área da sua vida que você quer melhorar?"))
         assertTrue(html.contains("Você tem dificuldade para controlar e organizar suas finanças?"))
