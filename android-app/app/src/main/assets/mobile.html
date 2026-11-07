@@ -3923,7 +3923,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     window.addEventListener('scroll',()=>{scroll=window.scrollY||0},{passive:true});window.addEventListener('resize',resize,{passive:true});
     document.addEventListener('visibilitychange',()=>{visible=!document.hidden;if(visible)start();else stop()});
     media.addEventListener?.('change',onMotionPreference);
-    const app=document.getElementById('app');if(app)new MutationObserver(setMode).observe(app,{childList:true,subtree:true,characterData:true});
+    const app=document.getElementById('app');if(app)new MutationObserver(setMode).observe(app,{childList:true,subtree:true});
     resize();setMode();onMotionPreference();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installWholeScreenMotion,{once:true});else installWholeScreenMotion();
@@ -3976,8 +3976,11 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
   }
   document.body.dataset.cfMotionReady='true';
   function resetTilt(){if(!currentTilt)return;currentTilt.style.removeProperty('--cf-tilt-x');currentTilt.style.removeProperty('--cf-tilt-y');currentTilt.style.removeProperty('--cf-glare-x');currentTilt.style.removeProperty('--cf-glare-y');currentTilt=null;}
-  document.addEventListener('pointermove',event=>{
-    if(!fine.matches||reduce.matches||event.pointerType==='touch')return;
+  let tiltFrame=0,tiltEvent=null;
+  function applyTilt(){
+    tiltFrame=0;
+    const event=tiltEvent;tiltEvent=null;
+    if(!event||!fine.matches||reduce.matches||event.pointerType==='touch')return;
     const card=event.target.closest?.('[data-motion-tilt]');
     if(!card){resetTilt();return;}
     if(currentTilt&&currentTilt!==card)resetTilt();
@@ -3989,6 +3992,11 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     card.style.setProperty('--cf-tilt-y',((.5-y)*5).toFixed(2)+'deg');
     card.style.setProperty('--cf-glare-x',(x*100).toFixed(1)+'%');
     card.style.setProperty('--cf-glare-y',(y*100).toFixed(1)+'%');
+  }
+  document.addEventListener('pointermove',event=>{
+    if(!fine.matches||reduce.matches||event.pointerType==='touch')return;
+    tiltEvent=event;
+    if(!tiltFrame)tiltFrame=requestAnimationFrame(applyTilt);
   },{passive:true});
   document.addEventListener('pointerout',event=>{
     if(currentTilt&&event.target===currentTilt&&!currentTilt.contains(event.relatedTarget))resetTilt();

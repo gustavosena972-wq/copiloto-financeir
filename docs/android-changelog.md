@@ -1,3 +1,10 @@
+## 1.0.7 — Performance pass
+
+- Preserved the original canvas particle/curve density and animation cadence.
+- Added strict canvas containment to isolate rendering work.
+- Removed unnecessary character-data observation from the app MutationObserver.
+- Throttled desktop card tilt calculations to animation frames to reduce layout work.
+
 # Histórico de versões Android
 
 ## 1.0.4 — código 5

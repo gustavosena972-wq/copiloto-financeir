@@ -98,8 +98,8 @@ class MainActivityTest {
     @Test
     fun releaseVersionMatchesTheAuditedAndroidPackage() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 7"))
-        assertTrue(gradle.contains("versionName = \"1.0.6\""))
+        assertTrue(gradle.contains("versionCode = 8"))
+        assertTrue(gradle.contains("versionName = \"1.0.7\""))
     }
 
     @Test
