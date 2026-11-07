@@ -62,20 +62,12 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: gradle bundleRelease
 
-      - name: Verify signed bundle
+      - name: Verify signed bundle and minimum SDK
         working-directory: android-app
         run: |
           BUNDLE="app/build/outputs/bundle/release/app-release.aab"
           test -s "$BUNDLE"
-          grep -Eq '^[[:space:]]*minSdk[[:space:]]*=[[:space:]]*24[[:space:]]*
-      - name: Upload production AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: copiloto-financeiro-play-production
-          path: android-app/app/build/outputs/bundle/release/app-release.aab
-          if-no-files-found: error
-          retention-days: 30
- app/build.gradle.kts
+          grep -Eq '^[[:space:]]*minSdk[[:space:]]*=[[:space:]]*24[[:space:]]*$' app/build.gradle.kts
           jarsigner -verify -verbose -certs "$BUNDLE" > "$RUNNER_TEMP/aab-signature.log" 2>&1
           grep -q 'jar verified' "$RUNNER_TEMP/aab-signature.log"
           keytool -printcert -jarfile "$BUNDLE" | grep 'SHA256:'
