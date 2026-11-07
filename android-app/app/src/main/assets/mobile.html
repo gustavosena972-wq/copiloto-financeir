@@ -2375,10 +2375,65 @@ body[data-ui="premium-fintech"] .app-sidebar{background:rgba(23,43,67,.965)!impo
 body[data-ui="premium-fintech"] .landing-page{background:rgba(238,242,246,.76)!important}
 @media(max-width:640px){.cf-motion-image-a{width:115vw;right:-56%;top:8%;opacity:.27}.cf-motion-image-b{width:92vw;left:-43%;bottom:-8%;opacity:.13}.cf-motion-orbit-a{width:112vw;height:54vw;right:-48%;top:10%}.cf-motion-orbit-b{width:82vw;height:42vw;left:-45%;bottom:8%}.cf-motion-light{width:82vw;height:82vw;left:10%;top:24%;filter:blur(28px)}}
 @media(prefers-reduced-motion:reduce){.cf-motion-camera,.cf-motion-image,.cf-motion-orbit,.cf-motion-light{animation:none!important;transition:none!important}.cf-motion-camera{transform:none!important}.cf-motion-ripple{animation-duration:180ms}}
-</style></head>
+</style>
+<style id="cf-motion-design-system">
+  :root{--cf-motion-ease:cubic-bezier(.16,1,.3,1);--cf-motion-glass:rgba(255,255,255,.72)}
+  .cf-motion-image-c{position:absolute;width:clamp(260px,48vw,690px);aspect-ratio:16/10;top:31%;left:30%;border-radius:34px;background-image:linear-gradient(145deg,rgba(255,255,255,.04),rgba(20,72,45,.08)),var(--cf-scene);background-size:cover;background-position:center;opacity:.10;mix-blend-mode:multiply;transform:translate3d(calc(var(--cf-mx,0px)*.22),calc(var(--cf-my,0px)*-.28),-35px) rotateX(13deg) rotateY(18deg) rotateZ(-4deg);filter:saturate(.9);backface-visibility:hidden;animation:cf-scene-float-c 31s ease-in-out infinite}
+  body[data-cf-motion-paused="true"] .cf-motion-liquid,body[data-cf-motion-paused="true"] .cf-motion-image-c{animation-play-state:paused!important}
+  .cf-motion-liquid{position:absolute;z-index:1;width:min(55vw,650px);height:min(38vw,420px);min-width:250px;min-height:180px;right:3%;top:20%;border-radius:41% 59% 64% 36%/47% 39% 61% 53%;background:conic-gradient(from 20deg,rgba(64,146,101,.17),rgba(180,150,91,.12),rgba(81,157,119,.10),rgba(64,146,101,.17));filter:blur(24px);opacity:.48;mix-blend-mode:multiply;transform:translate3d(calc(var(--cf-mx,0px)*-.14),calc(var(--cf-my,0px)*.18),-30px);animation:cf-liquid-flow 23s ease-in-out infinite alternate;pointer-events:none}
+  @keyframes cf-scene-float-c{0%,100%{translate:0 0;rotate:0deg}50%{translate:0 -17px;rotate:1.8deg}}
+  @keyframes cf-liquid-flow{0%{border-radius:41% 59% 64% 36%/47% 39% 61% 53%;transform:translate3d(-2vw,0,0) scale(.92) rotate(-8deg)}50%{border-radius:62% 38% 43% 57%/39% 61% 39% 61%;transform:translate3d(2vw,4vh,0) scale(1.08) rotate(9deg)}100%{border-radius:49% 51% 58% 42%/62% 36% 64% 38%;transform:translate3d(-1vw,-2vh,0) scale(1) rotate(16deg)}}
+  /* A entrada diagonal só começa quando o observador é instalado; sem JS o conteúdo permanece visível. */
+  body[data-cf-motion-ready="true"] .cf-motion-reveal:not(.cf-motion-visible){opacity:0;transform:translate3d(var(--cf-reveal-x,22px),26px,0) rotateZ(var(--cf-reveal-rotation,.8deg)) scale(.987);filter:blur(4px)}
+  .cf-motion-reveal{transition:opacity .58s var(--cf-motion-ease),transform .68s var(--cf-motion-ease),filter .58s var(--cf-motion-ease);transition-delay:var(--cf-reveal-delay,0ms)}
+  .cf-motion-reveal.cf-motion-visible{opacity:1;transform:translate3d(0,0,0) rotateZ(0) scale(1);filter:none}
+  .app-main .cards>.card,.app-main .grid2>.card,.app-main .cf-section,.landing-plan-card,.pix-plan{transform-style:preserve-3d;backface-visibility:hidden}
+  .app-main .cards>.card,.app-main .grid2>.card{position:relative;border-radius:15px;border:1px solid rgba(219,229,220,.9);background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(247,250,246,.88));box-shadow:0 7px 22px rgba(28,55,37,.045);transition:border-color .25s,box-shadow .3s,transform .3s var(--cf-motion-ease)}
+  .app-main .cards>.card::after,.landing-plan-card::after,.pix-plan::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;background:radial-gradient(240px circle at var(--cf-glare-x,50%) var(--cf-glare-y,50%),rgba(255,255,255,.55),transparent 68%);transition:opacity .25s}
+  .app-main .cards>.card[data-motion-tilt]:hover,.landing-plan-card[data-motion-tilt]:hover,.pix-plan[data-motion-tilt]:hover{will-change:transform}
+  .app-main .cards>.card[data-motion-tilt]:hover,.app-main .grid2>.card[data-motion-tilt]:hover,.landing-plan-card[data-motion-tilt]:hover,.pix-plan[data-motion-tilt]:hover{transform:perspective(900px) rotateX(var(--cf-tilt-y,0deg)) rotateY(var(--cf-tilt-x,0deg)) translateY(-3px);border-color:#b8d1bd;box-shadow:0 18px 36px rgba(34,76,48,.105)}
+  .app-main .cards>.card[data-motion-tilt]:hover::after,.landing-plan-card[data-motion-tilt]:hover::after,.pix-plan[data-motion-tilt]:hover::after{opacity:1}
+  .landing-plan-card,.pix-plan,.pix-total{background:linear-gradient(145deg,rgba(255,255,255,.86),rgba(244,249,243,.69));backdrop-filter:blur(15px) saturate(1.16);-webkit-backdrop-filter:blur(15px) saturate(1.16);border-color:rgba(255,255,255,.88);box-shadow:0 12px 32px rgba(35,66,44,.075),inset 0 1px rgba(255,255,255,.82)}
+  .pix-plan.selected{background:linear-gradient(145deg,rgba(235,246,236,.95),rgba(225,239,226,.77));border-color:#7ca989;box-shadow:0 0 0 2px rgba(73,130,88,.12),0 12px 27px rgba(40,91,53,.08)}
+  .cf-motion-open{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:48px;padding:9px 12px;border:1px solid rgba(72,116,84,.22);border-radius:10px;background:linear-gradient(140deg,rgba(255,255,255,.9),rgba(238,246,237,.76));color:#315b40;font-size:11px;font-weight:800;box-shadow:0 5px 15px rgba(36,67,43,.055);transition:transform .22s var(--cf-motion-ease),box-shadow .22s,border-color .22s}
+  .cf-motion-open:hover,.cf-motion-open:focus-visible{transform:translateY(-2px);border-color:#a5c6aa;box-shadow:0 10px 24px rgba(36,67,43,.12)}
+  .cf-motion-dialog{width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:clamp(14px,3vw,38px);border:0;background:transparent;color:#f5f7f3;overflow:auto}
+  .cf-motion-dialog::backdrop{background:rgba(12,28,19,.78);backdrop-filter:blur(18px) saturate(.8);-webkit-backdrop-filter:blur(18px) saturate(.8)}
+  .cf-motion-dialog[open] .cf-motion-dialog-panel{animation:cf-film-expand .46s var(--cf-motion-ease) both}
+  @keyframes cf-film-expand{from{opacity:0;transform:scale(.94) translateY(18px);filter:blur(6px)}to{opacity:1;transform:scale(1) translateY(0);filter:none}}
+  .cf-motion-dialog-panel{width:min(100%,1320px);min-height:100%;margin:auto;display:flex;flex-direction:column;justify-content:center;gap:clamp(14px,2.4vh,28px);padding:clamp(14px,3vw,34px);border:1px solid rgba(226,238,226,.24);border-radius:clamp(16px,2.5vw,28px);background:radial-gradient(ellipse at 82% 0%,rgba(74,133,89,.25),transparent 48%),linear-gradient(145deg,rgba(21,43,30,.97),rgba(12,27,19,.97));box-shadow:0 30px 110px rgba(0,0,0,.42)}
+  .cf-motion-dialog-head,.cf-motion-dialog-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+  .cf-motion-dialog-kicker{color:#c0d8c1;font-size:9px;font-weight:850;letter-spacing:.17em}
+  .cf-motion-dialog-head h2{margin:7px 0;color:#fff;font-size:clamp(21px,3vw,34px);letter-spacing:-.035em}
+  .cf-motion-dialog-head p,.cf-motion-dialog-footer span{margin:0;color:#ccdbce;font-size:12px;line-height:1.6}
+  .cf-motion-dialog-close{flex:none;width:48px;height:48px;border:1px solid #ffffff35;border-radius:50%;background:#ffffff12;color:#fff;font-size:17px}
+  .cf-motion-video-frame{position:relative;width:100%;aspect-ratio:16/9;max-height:min(68vh,760px);max-height:min(68dvh,760px);overflow:hidden;border:1px solid #ffffff28;border-radius:17px;background:#07140c;box-shadow:0 22px 58px rgba(0,0,0,.32);isolation:isolate}
+  .cf-motion-video{display:block;width:100%;height:100%;object-fit:cover}
+  .cf-motion-video-caption{position:absolute;left:14px;bottom:12px;padding:6px 9px;border:1px solid #ffffff33;border-radius:6px;background:rgba(11,27,17,.55);backdrop-filter:blur(9px);color:#eef8ef;font-size:8px;letter-spacing:.13em;font-weight:850}
+  .cf-motion-dialog-footer{align-items:center}
+  .cf-motion-dialog-close-secondary{flex:none;border:1px solid #ffffff44;background:#ffffff14;color:#fff}
+  body[data-cf-motion-ready="true"] .cf-motion-dialog[open]{overscroll-behavior:contain}
+  @media(max-width:640px){.cf-motion-open{min-height:48px;padding:8px 9px;font-size:10px}.cf-motion-dialog{padding:8px}.cf-motion-dialog-panel{justify-content:center;padding:15px 12px;border-radius:16px}.cf-motion-dialog-head h2{font-size:20px}.cf-motion-video-frame{max-height:52dvh;border-radius:11px}.cf-motion-dialog-footer{align-items:stretch;flex-direction:column}.cf-motion-dialog-close-secondary{width:100%;min-height:48px}}
+  @media(hover:none),(pointer:coarse){.app-main .cards>.card[data-motion-tilt]:hover,.landing-plan-card[data-motion-tilt]:hover,.pix-plan[data-motion-tilt]:hover{transform:none}.app-main .cards>.card::after,.landing-plan-card::after,.pix-plan::after{display:none}}
+  .app-shell button,.landing-page button,.pix-page button{min-height:48px}
+  .app-shell .app-sidebar .nav-item{min-height:48px!important;flex-shrink:0}
+  .app-shell .top-actions .cf-motion-open,.landing-page .landing-hero-actions .cf-motion-open{min-height:48px!important;flex-shrink:0}
+  @media(prefers-reduced-motion:reduce){.cf-motion-liquid,.cf-motion-image-c{animation:none!important}.cf-motion-reveal,.cf-motion-reveal.cf-motion-visible{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}.cf-motion-dialog[open] .cf-motion-dialog-panel{animation:none!important}.cf-motion-open{transition:none!important}.app-main .cards>.card[data-motion-tilt]:hover,.landing-plan-card[data-motion-tilt]:hover,.pix-plan[data-motion-tilt]:hover{transform:none!important}}
+</style>
+</head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
 <div id="toast"></div>
+<dialog id="cf-motion-dialog" class="cf-motion-dialog" aria-labelledby="cf-motion-dialog-title" aria-describedby="cf-motion-dialog-copy">
+  <section class="cf-motion-dialog-panel">
+    <header class="cf-motion-dialog-head">
+      <div><span class="cf-motion-dialog-kicker">COPILOTO FINANCEIRO · EXPERIÊNCIA VISUAL</span><h2 id="cf-motion-dialog-title">Uma visão mais viva das suas finanças.</h2><p id="cf-motion-dialog-copy">Prévia cinematográfica em movimento, sem som e sem interferir nos seus lançamentos.</p></div>
+      <button type="button" class="cf-motion-dialog-close" data-motion-close aria-label="Fechar prévia">✕</button>
+    </header>
+    <div class="cf-motion-video-frame"><video class="cf-motion-video" src="copiloto-motion-preview.mp4" poster="copiloto-dashboard-premium.webp" muted playsinline controls loop preload="none" aria-label="Prévia visual animada do Copiloto Financeiro"></video><span class="cf-motion-video-caption">PRÉVIA VISUAL · 6 SEGUNDOS · SEM ÁUDIO</span></div>
+    <footer class="cf-motion-dialog-footer"><span>O ambiente animado do app continua independente dos seus dados financeiros.</span><button type="button" class="cf-motion-dialog-close-secondary" data-motion-close>Voltar ao aplicativo</button></footer>
+  </section>
+</dialog>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
@@ -2506,7 +2561,7 @@ function renderAuth(){
           <span class="landing-kicker"><i></i> FINANÇAS DA FAMÍLIA, COM MAIS CLAREZA</span>
           <h1>Seu dinheiro organizado. Sua família mais tranquila.</h1>
           <p>Reúna receitas, despesas, contas e objetivos em um só lugar. Tenha uma visão clara do mês e acompanhe a evolução financeira da família.</p>
-          <div class="landing-hero-actions"><a class="landing-hero-primary" href="#recursos" data-public-route="recursos">Conheça o aplicativo <span>↗</span></a><a class="landing-hero-secondary" href="#planos" data-public-route="planos">Ver planos</a></div>
+          <div class="landing-hero-actions"><a class="landing-hero-primary" href="#recursos" data-public-route="recursos">Conheça o aplicativo <span>↗</span></a><a class="landing-hero-secondary" href="#planos" data-public-route="planos">Ver planos</a><button type="button" class="landing-hero-secondary cf-motion-open" data-motion-expand aria-label="Abrir prévia cinematográfica do aplicativo">▶ Prévia imersiva</button></div>
           <div class="landing-highlights">
             <div><span class="landing-highlight-icon">✓</span><b>Controle mensal</b><small>Receitas, despesas e contas organizadas.</small></div>
             <div><span class="landing-highlight-icon">↗</span><b>Visão do ano</b><small>Acompanhe resultados e compare os meses.</small></div>
@@ -2678,11 +2733,11 @@ function renderAuth(){
         <div class="landing-create-row" id="landing-create-row"><span>Primeira vez por aqui?</span><a class="landing-secondary" href="#cadastro">Criar minha conta</a></div>
         <div class="landing-create-row" id="landing-back-login"><span>Já tem uma conta?</span><a class="landing-secondary" href="#login">Fazer login</a></div>
         <button class="landing-link-button" data-act="reset">Esqueci minha senha</button>
-        <a class="demo-link" href="demo.html"><span aria-hidden="true">◉</span> Conhecer a demonstração do aplicativo</a>
+        <a class="demo-link" href="#" data-motion-expand aria-label="Assistir à prévia animada do aplicativo"><span aria-hidden="true">◉</span> Assistir à prévia imersiva do aplicativo</a>
       </section>
 
     </section>
-    <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar<br><a href="privacidade.html" target="_blank" rel="noopener">Privacidade</a> · <a href="termos.html" target="_blank" rel="noopener">Termos</a> · <a href="excluir-conta.html" target="_blank" rel="noopener">Exclusão de conta</a> · contato: gustavosena972@gmail.com</footer>
+    <footer class="landing-footer">Copiloto Financeiro · Gestão organizada para a vida financeira familiar<br><a href="privacidade.html" rel="noopener">Privacidade</a> · <a href="termos.html" rel="noopener">Termos</a> · <a href="excluir-conta.html" rel="noopener">Exclusão de conta</a> · contato: gustavosena972@gmail.com</footer>
   </div>`;
   const cadastro=modoAcesso==='cadastro';
   const terms=document.getElementById('landing-terms');if(terms)terms.style.display=cadastro?'flex':'none';const age=document.getElementById('landing-adult-confirmation');if(age)age.hidden=!cadastro;
@@ -2771,6 +2826,7 @@ function render(){
         </div>
         <div class="top-actions">
           ${S.notifs&&S.notifs.length?`<button type="button" class="utility-button notification-button" data-act="sino" aria-label="Abrir notificações">Avisos <span>${S.notifs.length}</span></button>`:''}
+          <button type="button" class="cf-motion-open" data-motion-expand aria-label="Expandir prévia cinematográfica">▶ <span>Prévia imersiva</span></button>
           <div class="year-control">
             <button type="button" class="utility-button year-arrow" data-act="anoant" title="Ano anterior" aria-label="Ano anterior">‹</button>
             <select id="anosel" aria-label="Selecionar ano">${anos}</select>
@@ -3508,7 +3564,7 @@ function legalHtml(t){
   const op=LEGAL.nome||'o responsável pelo aplicativo';
   const ct=LEGAL.email||'o contato disponível no próprio aplicativo';
   const cj=LEGAL.cnpj?', CNPJ '+esc(LEGAL.cnpj):'';
-  const links='<p><a href="privacidade.html" target="_blank" rel="noopener">Política pública de privacidade</a> · <a href="excluir-conta.html" target="_blank" rel="noopener">Solicitar exclusão de conta</a> · <a href="termos.html" target="_blank" rel="noopener">Termos públicos</a></p>';
+  const links='<p><a href="privacidade.html" rel="noopener">Política pública de privacidade</a> · <a href="excluir-conta.html" rel="noopener">Solicitar exclusão de conta</a> · <a href="termos.html" rel="noopener">Termos públicos</a></p>';
   const T=t==='termos'?[
    ['Quem somos','O Copiloto Financeiro é desenvolvido e mantido por '+esc(op)+cj+'. Contato: '+esc(ct)+'.'],
    ['O que o aplicativo faz','Organiza receitas, despesas, metas, dívidas e patrimônio da família, calcula totais e apresenta informações de apoio. Não é consultoria, recomendação de investimento nem serviço financeiro regulado. O recurso de inteligência artificial está desativado e não processa dados dos usuários. Evite inserir senhas bancárias ou dados de cartão em campos de texto.'],
@@ -3538,7 +3594,7 @@ function legalHtml(t){
 function showLegal(t){const d=document.getElementById('legalov');if(d)d.remove();const o=document.createElement('div');o.id='legalov';o.className='modal';o.innerHTML='<div class="card box legal">'+legalHtml(t)+'<div class="row" style="margin-top:14px"><button data-act="fecharlegal">Fechar</button></div></div>';document.body.appendChild(o)}
 function viewConta(){
   return `<div class="card" style="margin-top:12px"><b>🔒 Conta e privacidade</b><div class="mu" style="margin:4px 0 10px">Seus direitos pela LGPD: ver, levar e apagar os seus dados.</div>
-  <div class="row"><button class="sec" data-act="legal" data-t="termos">Termos de Uso</button><button class="sec" data-act="legal" data-t="privacidade">Política de Privacidade</button><button class="sec" data-act="expjson">⬇ Baixar todos os meus dados (JSON)</button><button class="red" data-act="delconta">Excluir minha conta e dados</button></div><p class="mu" style="font-size:12px;margin:8px 0 0"><a href="privacidade.html" target="_blank" rel="noopener">Política pública</a> · <a href="excluir-conta.html" target="_blank" rel="noopener">Solicitar exclusão sem acessar o aplicativo</a></p>
+  <div class="row"><button class="sec" data-act="legal" data-t="termos">Termos de Uso</button><button class="sec" data-act="legal" data-t="privacidade">Política de Privacidade</button><button class="sec" data-act="expjson">⬇ Baixar todos os meus dados (JSON)</button><button class="red" data-act="delconta">Excluir minha conta e dados</button></div><p class="mu" style="font-size:12px;margin:8px 0 0"><a href="privacidade.html" rel="noopener">Política pública</a> · <a href="excluir-conta.html" rel="noopener">Solicitar exclusão sem acessar o aplicativo</a></p>
   <small class="mu">Dúvidas de privacidade: ${LEGAL.email?esc(LEGAL.email):'fale com o administrador do aplicativo'}.</small><p class="mu" style="font-size:12px;margin-top:8px">O código de recuperação é mostrado uma única vez no cadastro ou no primeiro acesso após a atualização. Guarde-o fora do aplicativo. A recuperação de senha não depende de Gmail.</p></div>`;
 }
 function viewConfig(){
@@ -3790,7 +3846,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     world.className='cf-motion-world';
     world.setAttribute('aria-hidden','true');
     world.setAttribute('data-motion-mode','inicio');
-    world.innerHTML='<div class="cf-motion-camera"><div class="cf-motion-image cf-motion-image-a"></div><div class="cf-motion-image cf-motion-image-b"></div><div class="cf-motion-orbit cf-motion-orbit-a"></div><div class="cf-motion-orbit cf-motion-orbit-b"></div><div class="cf-motion-light"></div><canvas class="cf-motion-canvas"></canvas></div>';
+    world.innerHTML='<div class="cf-motion-camera"><div class="cf-motion-image cf-motion-image-a"></div><div class="cf-motion-image cf-motion-image-b"></div><div class="cf-motion-image cf-motion-image-c"></div><div class="cf-motion-orbit cf-motion-orbit-a"></div><div class="cf-motion-orbit cf-motion-orbit-b"></div><div class="cf-motion-light"></div><div class="cf-motion-liquid"></div><canvas class="cf-motion-canvas"></canvas></div>';
     document.body.prepend(world);
     const canvas=world.querySelector('.cf-motion-canvas'),ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
     if(!ctx)return;
@@ -3863,5 +3919,97 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installWholeScreenMotion,{once:true});else installWholeScreenMotion();
 })();
-</script></body>
+</script>
+<script id="cf-motion-effects-js">
+(function(){
+  'use strict';
+  const app=document.getElementById('app');
+  const dialog=document.getElementById('cf-motion-dialog');
+  const video=dialog?.querySelector('video');
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
+  document.body.dataset.cfMotionPaused=document.hidden?'true':'false';
+  const fine=window.matchMedia('(hover: hover) and (pointer: fine)');
+  let revealObserver=null;
+  let currentTilt=null;
+  let delayGroup=0;
+  const revealTargets='.app-main .cards>.card,.app-main .grid2>.card,.app-main .sug,.app-main .cf-section,.landing-page .landing-plan-card,.pix-page .pix-plan,.pix-page .pix-card';
+  function revealTree(root){
+    const nodes=[];
+    if(root instanceof Element&&root.matches(revealTargets))nodes.push(root);
+    if(root.querySelectorAll)nodes.push(...root.querySelectorAll(revealTargets));
+    nodes.forEach((node,index)=>{
+      if(node.dataset.motionReveal==='true')return;
+      node.setAttribute('data-motion-reveal','true');
+      node.classList.add('cf-motion-reveal');
+      const position=(delayGroup++%6);
+      node.style.setProperty('--cf-reveal-delay',Math.min(position*34,170)+'ms');
+      node.style.setProperty('--cf-reveal-x',position%2===0?'22px':'-22px');
+      if(position%3===0)node.style.setProperty('--cf-reveal-rotation','1deg');
+      if(fine.matches&&node.matches('.app-main .cards>.card,.landing-page .landing-plan-card,.pix-page .pix-plan'))node.setAttribute('data-motion-tilt','true');
+      if(reduce.matches||!revealObserver)node.classList.add('cf-motion-visible');
+      else revealObserver.observe(node);
+    });
+  }
+  if('IntersectionObserver' in window){
+    revealObserver=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(!entry.isIntersecting)return;
+        entry.target.classList.add('cf-motion-visible');
+        revealObserver.unobserve(entry.target);
+      });
+    },{root:null,threshold:.08,rootMargin:'0px 0px -5% 0px'});
+  }
+  if(app){
+    revealTree(app);
+    new MutationObserver(records=>{
+      records.forEach(record=>record.addedNodes.forEach(node=>{if(node.nodeType===1)revealTree(node)}));
+    }).observe(app,{childList:true,subtree:true});
+  }
+  document.body.dataset.cfMotionReady='true';
+  function resetTilt(){if(!currentTilt)return;currentTilt.style.removeProperty('--cf-tilt-x');currentTilt.style.removeProperty('--cf-tilt-y');currentTilt.style.removeProperty('--cf-glare-x');currentTilt.style.removeProperty('--cf-glare-y');currentTilt=null;}
+  document.addEventListener('pointermove',event=>{
+    if(!fine.matches||reduce.matches||event.pointerType==='touch')return;
+    const card=event.target.closest?.('[data-motion-tilt]');
+    if(!card){resetTilt();return;}
+    if(currentTilt&&currentTilt!==card)resetTilt();
+    currentTilt=card;
+    const rect=card.getBoundingClientRect();
+    const x=Math.max(0,Math.min(1,(event.clientX-rect.left)/Math.max(1,rect.width)));
+    const y=Math.max(0,Math.min(1,(event.clientY-rect.top)/Math.max(1,rect.height)));
+    card.style.setProperty('--cf-tilt-x',((x-.5)*5).toFixed(2)+'deg');
+    card.style.setProperty('--cf-tilt-y',((.5-y)*5).toFixed(2)+'deg');
+    card.style.setProperty('--cf-glare-x',(x*100).toFixed(1)+'%');
+    card.style.setProperty('--cf-glare-y',(y*100).toFixed(1)+'%');
+  },{passive:true});
+  document.addEventListener('pointerout',event=>{
+    if(currentTilt&&event.target===currentTilt&&!currentTilt.contains(event.relatedTarget))resetTilt();
+  },{passive:true});
+  let previewHistoryEntry=false;
+  async function openPreview(){
+    if(!dialog||dialog.open)return;
+    if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
+    history.pushState({...history.state,cfMotionPreview:true},'');previewHistoryEntry=true;
+    if(video&&!reduce.matches){try{video.currentTime=0;await video.play()}catch(_){/* A prévia continua disponível pelo poster se o dispositivo bloquear a reprodução. */}}
+  }
+  function closePreview(fromHistory=false){
+    if(!dialog)return;
+    if(video){video.pause();try{video.currentTime=0}catch(_){}}
+    if(fromHistory)previewHistoryEntry=false;
+    if(typeof dialog.close==='function'&&dialog.open)dialog.close();else dialog.removeAttribute('open');
+    if(!fromHistory&&previewHistoryEntry){previewHistoryEntry=false;history.back();}
+  }
+  document.addEventListener('click',event=>{
+    const openButton=event.target.closest?.('[data-motion-expand]');
+    if(openButton){event.preventDefault();openPreview();return;}
+    const closeButton=event.target.closest?.('[data-motion-close]');
+    if(closeButton){event.preventDefault();closePreview();return;}
+    if(event.target===dialog)closePreview();
+  });
+  dialog?.addEventListener('close',()=>{if(video)video.pause();if(previewHistoryEntry){previewHistoryEntry=false;history.back()}});
+  window.addEventListener('popstate',()=>{if(dialog?.open)closePreview(true);else previewHistoryEntry=false});
+  document.addEventListener('visibilitychange',()=>{document.body.dataset.cfMotionPaused=document.hidden?'true':'false';if(!video||!dialog?.open)return;if(document.hidden)video.pause();else if(!reduce.matches)video.play().catch(()=>{})});
+  reduce.addEventListener?.('change',event=>{if(event.matches){resetTilt();video?.pause();document.querySelectorAll('.cf-motion-reveal').forEach(node=>node.classList.add('cf-motion-visible'))}else revealTree(app||document.body)});
+})();
+</script>
+</body>
 </html>
