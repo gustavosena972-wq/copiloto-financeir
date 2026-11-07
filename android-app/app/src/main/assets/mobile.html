@@ -3625,7 +3625,29 @@ const stOpts=sel=>['pendente','pago','atrasado'].map(s=>`<option ${s===sel?'sele
 const tpOpts=sel=>['despesa','receita'].map(s=>`<option ${s===sel?'selected':''}>${s}</option>`).join('');
 
 function quickEditButton(kind){return canEdit()&&mesAberto()?`<button type="button" class="sec chip cf-quick-edit" data-act="quickedit" data-kind="${kind}">Editar valores</button>`:''}
-function viewPlanilha(ed){
+function buildCopilotInsights(){
+  const lanc=S.lanc||[],now=new Date(),day=Math.max(1,now.getDate()),days=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const receitas=lanc.filter(x=>x.tipo==='receita').reduce((a,x)=>a+Number(x.valor||0),0);
+  const despesas=lanc.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+Number(x.valor||0),0);
+  const pendentes=lanc.filter(x=>x.tipo==='despesa'&&x.status!=='pago');
+  const vencidas=pendentes.filter(x=>x.data_vencimento&&new Date(x.data_vencimento+'T23:59:59')<now);
+  const proximas=pendentes.filter(x=>x.data_vencimento&&new Date(x.data_vencimento+'T23:59:59')>=now&&new Date(x.data_vencimento+'T23:59:59')<=new Date(now.getTime()+7*86400000)).sort((a,b)=>String(a.data_vencimento).localeCompare(String(b.data_vencimento)));
+  const saldo=receitas-despesas,projDespesas=day>0?despesas/day*days:despesas,projSaldo=receitas-projDespesas,taxa=receitas>0?saldo/receitas*100:0;
+  const maior=[...lanc.filter(x=>x.tipo==='despesa')].sort((a,b)=>Number(b.valor||0)-Number(a.valor||0))[0],alertas=[];
+  if(vencidas.length)alertas.push({tone:'danger',title:'Há contas vencidas',text:vencidas.length+' conta(s) precisam de atenção.'});
+  else if(proximas.length)alertas.push({tone:'warn',title:'Contas próximas',text:proximas.length+' conta(s) vencem nos próximos 7 dias.'});
+  if(receitas>0&&projSaldo<0)alertas.push({tone:'danger',title:'Ritmo de gastos acima da receita',text:'Mantendo o ritmo atual, o mês tende a terminar negativo.'});
+  else if(receitas>0&&projDespesas>receitas*.8)alertas.push({tone:'warn',title:'Ritmo de gastos elevado',text:'A projeção já consome mais de 80% das receitas.'});
+  if(maior&&receitas>0&&Number(maior.valor)>receitas*.2)alertas.push({tone:'info',title:'Despesa de maior impacto',text:maior.descricao+' representa '+(Number(maior.valor)/receitas*100).toFixed(0)+'% das receitas registradas.'});
+  if(!alertas.length)alertas.push({tone:'ok',title:'Mês sob controle',text:'Não encontrei um alerta crítico nos lançamentos registrados até agora.'});
+  return {receitas,despesas,saldo,projSaldo,projDespesas,taxa,pendentes,vencidas,proximas,alertas,headline:projSaldo>=0?'Projeção positiva para o fim do mês':'Atenção: a projeção indica saldo negativo',days};
+}
+function viewCopiloto(){
+  if(!planoTemRecurso('copilotoInteligente'))return '<section class="cf-intel-card"><span class="cf-intel-kicker">COPILOTO</span><h2>Inteligência financeira</h2><p>Este recurso está disponível a partir do plano Pro.</p></section>';
+  const I=buildCopilotInsights(),alerts=I.alertas.map(a=>'<div class="cf-intel-alert '+a.tone+'"><span class="cf-intel-dot"></span><div><b>'+esc(a.title)+'</b><p>'+esc(a.text)+'</p></div></div>').join('');
+  const next=I.proximas.slice(0,3).map(x=>'<div class="cf-intel-next"><span>'+esc(x.descricao)+'</span><b>'+brl(x.valor)+'</b><small>vence '+new Date(x.data_vencimento+'T12:00:00').toLocaleDateString('pt-BR')+'</small></div>').join('');
+  return '<section class="cf-intel-card"><div class="cf-intel-head"><div><span class="cf-intel-kicker">COPILOTO INTELIGENTE</span><h2>'+esc(I.headline)+'</h2><p>Leitura automática dos dados deste mês. O Copiloto mostra tendências e prioridades; não é recomendação de investimento.</p></div><span class="cf-intel-badge">ATIVO</span></div><div class="cf-intel-metrics"><div><small>Saldo atual</small><b class="'+(I.saldo>=0?'pos':'neg')+'">'+brl(I.saldo)+'</b></div><div><small>Projeção do mês</small><b class="'+(I.projSaldo>=0?'pos':'neg')+'">'+brl(I.projSaldo)+'</b></div><div><small>Taxa de saldo</small><b>'+I.taxa.toFixed(1)+'%</b></div></div><div class="cf-intel-grid"><div><h3>Alertas inteligentes</h3>'+alerts+'</div><div><h3>Contas próximas</h3>'+(next||'<p class="mu">Nenhuma conta com vencimento nos próximos 7 dias.</p>')+'</div></div><div class="cf-intel-foot"><span>Ritmo: '+brl(I.projDespesas)+' de despesas projetadas para '+I.days+' dias.</span><button class="sec chip" data-act="view" data-v="checape">Abrir checape</button></div></section>';
+}function viewPlanilha(ed){
   ed=!!ed&&S.mes.status==='aberto';
   const rec=S.lanc.filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor),0);
   const des=S.lanc.filter(l=>l.tipo==='despesa').reduce((a,l)=>a+Number(l.valor),0);
@@ -4160,9 +4182,9 @@ async function fecharAno(){
 const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button><button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>`;
 /*PIX*/
 const PLANOS={
-  pro:{nome:'Pro',valor:23.90,limite:2,produto:'copiloto_pro_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
-  max:{nome:'Max',valor:35.90,limite:6,produto:'copiloto_max_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
-  ultra:{nome:'Ultra',valor:59.90,limite:null,produto:'copiloto_ultra_30d',recursos:{relatorios:true,patrimonioHistorico:true,simulador:true}}
+  pro:{nome:'Pro',valor:23.90,limite:2,produto:'copiloto_pro_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false,copilotoInteligente:true,alertasFinanceiros:true,previsaoSaldo:true,planejamentoAvancado:false}},
+  max:{nome:'Max',valor:35.90,limite:6,produto:'copiloto_max_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false,copilotoInteligente:true,alertasFinanceiros:true,previsaoSaldo:true,planejamentoAvancado:true}},
+  ultra:{nome:'Ultra',valor:59.90,limite:null,produto:'copiloto_ultra_30d',recursos:{relatorios:true,patrimonioHistorico:true,simulador:true,copilotoInteligente:true,alertasFinanceiros:true,previsaoSaldo:true,planejamentoAvancado:true}}
 };
 const planoAtual=()=>PLANOS[S.planoEscolhido||S.fam?.plano||'pro']||PLANOS.pro;
 const planoTemRecurso=(recurso)=>Boolean(PLANOS[S.fam?.plano||'pro']?.recursos?.[recurso]);
@@ -4177,6 +4199,7 @@ function pixPayload(p){
 /*END*/
 function qrSvg(t){if(!window.qrcode)throw new Error("QR ainda não carregado");const q=qrcode(0,'M');q.addData(t);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}
 async function renderPaywall(){
+  if(S.internalTester)return render();
   const dono=S.me?.papel==='dono';
   if(!dono){
     $('#app').innerHTML=`<main class="pix-page"><section class="pix-card"><div class="pix-heading"><span class="pix-kicker">ACESSO DA FAMÍLIA</span><h1>Aguardando aprovação</h1><p>O responsável pela família precisa concluir a compra pela Google Play e aguardar a aprovação do administrador. Você não precisa fazer outro pagamento.</p></div><div class="pix-pending"><b>Seu acesso ainda não foi liberado.</b><p>Assim que a compra for aprovada, o aplicativo será liberado para os membros desta família.</p></div><div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div></section></main>`;
