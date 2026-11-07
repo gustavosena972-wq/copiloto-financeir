@@ -545,4 +545,33 @@ class MainActivityTest {
         assertTrue(gradle.contains("versionName = \"1.0.20\""))
     }
 
+    @Test
+    fun androidV021SeparatesFamilyWorkspaceIntoClearInterfaceAreasWithEditActions() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-family-area-shell"))
+        assertTrue(html.contains("cf-family-area-header"))
+        assertTrue(html.contains("data-act=\\"editfamily\\""))
+        assertTrue(html.contains("data-act=\\"editcategories\\""))
+        assertTrue(html.contains("data-act=\\"editaccount\\""))
+        assertTrue(html.contains("Membros da família"))
+        assertTrue(html.contains("Convites e acessos"))
+        assertTrue(html.contains("Categorias e grupos"))
+        assertTrue(html.contains("Conta e privacidade"))
+    }
+
+    @Test
+    fun androidV021KeepsFamilyAreaActionsSeparatedInsteadOfMixingControls() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-family-area-actions"))
+        assertTrue(html.contains("cf-family-area-body"))
+        assertTrue(html.contains("aria-expanded"))
+    }
+
+    @Test
+    fun releaseVersionAdvancesToTheInterfaceOrganizationIteration() {
+        val gradle = File("build.gradle.kts").readText()
+        assertTrue(gradle.contains("versionCode = 22"))
+        assertTrue(gradle.contains("versionName = \"1.0.21\""))
+    }
+
 }

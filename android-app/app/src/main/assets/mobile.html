@@ -3027,7 +3027,29 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   .mobile-command-bar button{transition:none!important}
 }
 </style>
-</head>
+<style id="cf-android-v0-mobile-1-0-21">
+.cf-family-area-shell{display:grid;gap:12px}
+.cf-family-area{background:var(--card);border:1px solid var(--bd);border-radius:18px;overflow:hidden}
+.cf-family-area-body{padding:16px}
+.cf-family-area-header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
+.cf-family-area-header h2{margin:2px 0 3px;font-size:18px;letter-spacing:-.01em}
+.cf-family-area-header p{margin:0;color:var(--mu);font-size:12.5px;max-width:620px}
+.cf-family-area-kicker{font-size:10px;letter-spacing:.12em;color:var(--ac2);font-weight:800}
+.cf-family-area-actions{display:flex;flex:none}
+.cf-family-editor{padding-top:10px;border-top:1px solid var(--bd);margin-top:10px}
+.cf-family-table{margin:0!important}
+.cf-family-table table{min-width:0!important}
+.cf-family-code{font-size:22px;font-weight:800;letter-spacing:.12em;padding:12px 0}
+@media(max-width:760px){
+  .cf-family-area-body{padding:15px 13px}
+  .cf-family-area-header{align-items:flex-start}
+  .cf-family-area-header h2{font-size:17px}
+  .cf-family-area-header p{font-size:12px}
+  .cf-family-area-actions .chip{min-height:44px;padding:9px 12px}
+  .cf-family-editor{display:grid;grid-template-columns:1fr;gap:8px}
+  .cf-family-editor>*{width:100%!important;min-height:48px}
+}
+</style></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
 <div id="toast"></div>
@@ -3066,7 +3088,7 @@ function ensureQrCode(){
 }
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false};
+const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false}};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -4247,12 +4269,15 @@ function viewAdmin(){
 }
 const catGrupos=[['fixas','Fixas / Financiamentos'],['cartoes','Cartões de Crédito'],['retirada','Retirada mensal'],['variaveis','Outras / Variáveis'],['receita','Receita']];
 function viewCats2(){
-  const d=canEdit()?'':'disabled',go=sel=>catGrupos.map(g=>`<option value="${g[0]}" ${g[0]===sel?'selected':''}>${g[1]}</option>`).join('');
-  const pais=S.cats.filter(c=>!c.parent_id);
-  const rows=pais.map(p=>[p].concat(S.cats.filter(c=>c.parent_id===p.id))).flat().map(c=>`<tr data-cid="${c.id}"><td data-label="Categoria" style="padding-left:${c.parent_id?28:8}px">${c.parent_id?'↳ ':''}<input data-cf="nome" value="${esc(c.nome)}" ${d} style="width:calc(100% - 20px)"></td><td data-label="Grupo"><select data-cf="grupo" ${d}>${go(c.grupo)}</select></td><td data-label="Importância"><select data-cf="essencial" ${d}><option value="true" ${c.essencial?'selected':''}>Essencial</option><option value="false" ${c.essencial?'':'selected'}>Não essencial</option></select></td><td data-label="Ações"><button class="red chip" data-act="delcat" data-id="${c.id}" ${d}>✕</button></td></tr>`).join('');
-  return `<div class="card" style="margin-top:12px"><b>🏷️ Categorias e grupos</b><div class="mu" style="margin:4px 0 8px">O grupo decide em qual coluna do resumo o gasto entra (Fixas, Cartões, Retirada, Outras). "Essencial" evita que o Checape sugira cortar.</div>
-  <div class="scroll"><table style="min-width:560px"><tbody>${rows}</tbody></table></div>
-  <div class="row" style="margin-top:10px"><input id="c_nome" placeholder="Nova categoria" style="flex:1" ${d}><select id="c_grupo" ${d}>${go('variaveis')}</select><select id="c_pai" ${d}><option value="">Categoria principal</option>${pais.filter(p=>p.tipo==='despesa').map(p=>`<option value="${p.id}">Dentro de: ${esc(p.nome)}</option>`).join('')}</select><button data-act="addcat" ${d}>Criar</button></div></div>`;
+  const d=canEdit()?'':'disabled',go=sel=>catGrupos.map(g=>'<option value="'+g[0]+'" '+(g[0]===sel?'selected':'')+'>'+g[1]+'</option>').join('');
+  const pais=S.cats.filter(c=>!c.parent_id),edit=!!S.familyAreas?.categorias;
+  const rows=pais.map(p=>[p].concat(S.cats.filter(c=>c.parent_id===p.id))).flat().map(c=>edit
+    ? '<tr data-cid="'+c.id+'"><td data-label="Categoria" style="padding-left:'+(c.parent_id?28:8)+'px">'+(c.parent_id?'↳ ':'')+'<input data-cf="nome" value="'+esc(c.nome)+'" '+d+' style="width:calc(100% - 20px)"></td><td data-label="Grupo"><select data-cf="grupo" '+d+'>'+go(c.grupo)+'</select></td><td data-label="Importância"><select data-cf="essencial" '+d+'><option value="true" '+(c.essencial?'selected':'')+'>Essencial</option><option value="false" '+(c.essencial?'':'selected')+'>Não essencial</option></select></td><td data-label="Ações"><button class="red chip" data-act="delcat" data-id="'+c.id+'" '+d+'>Excluir</button></td></tr>'
+    : '<tr data-cid="'+c.id+'"><td data-label="Categoria" style="padding-left:'+(c.parent_id?28:8)+'px">'+(c.parent_id?'↳ ':'')+'<b>'+esc(c.nome)+'</b></td><td data-label="Grupo" class="mu">'+esc(c.grupo||'variáveis')+'</td><td data-label="Importância" class="mu">'+(c.essencial?'Essencial':'Não essencial')+'</td><td data-label="Ações" class="mu">—</td></tr>'
+  ).join('');
+  const editor=edit&&canEdit()?'<div class="row cf-family-editor"><input id="c_nome" placeholder="Nova categoria" style="flex:1"><select id="c_grupo">'+go('variaveis')+'</select><select id="c_pai"><option value="">Categoria principal</option>'+pais.filter(p=>p.tipo==='despesa').map(p=>'<option value="'+p.id+'">Dentro de: '+esc(p.nome)+'</option>').join('')+'</select><button data-act="addcat">Criar categoria</button></div>':'';
+  return '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('categorias','Categorias e grupos','Organize categorias, grupos e itens essenciais sem misturar esta configuração à relação da família.')+
+    '<div class="scroll cf-family-table"><table style="min-width:560px"><tbody>'+rows+'</tbody></table></div>'+editor+'</div></section>';
 }
 
 function viewModais(){
@@ -4301,10 +4326,13 @@ function legalHtml(t){
 }
 function showLegal(t){const d=document.getElementById('legalov');if(d)d.remove();const o=document.createElement('div');o.id='legalov';o.className='modal';o.innerHTML='<div class="card box legal">'+legalHtml(t)+'<div class="row" style="margin-top:14px"><button data-act="fecharlegal">Fechar</button></div></div>';document.body.appendChild(o)}
 function viewConta(){
-  return `<div class="card" style="margin-top:12px"><b>🔒 Conta e privacidade</b><div class="mu" style="margin:4px 0 10px">Seus direitos pela LGPD: ver, levar e apagar os seus dados.</div>
-  <div class="row"><button class="sec" data-act="legal" data-t="termos">Termos de Uso</button><button class="sec" data-act="legal" data-t="privacidade">Política de Privacidade</button><button class="sec" data-act="expjson">⬇ Baixar todos os meus dados (JSON)</button><button class="red" data-act="delconta">Excluir minha conta e dados</button></div><p class="mu" style="font-size:12px;margin:8px 0 0"><a href="privacidade.html" target="_blank" rel="noopener">Política pública</a> · <a href="excluir-conta.html" target="_blank" rel="noopener">Solicitar exclusão sem acessar o aplicativo</a></p>
-  <small class="mu">Dúvidas de privacidade: ${LEGAL.email?esc(LEGAL.email):'fale com o administrador do aplicativo'}.</small><p class="mu" style="font-size:12px;margin-top:8px">O código de recuperação é mostrado uma única vez no cadastro ou no primeiro acesso após a atualização. Guarde-o fora do aplicativo. A recuperação de senha não depende de Gmail.</p></div>`;
+  const open=!!S.familyAreas?.conta;
+  return '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('conta','Conta e privacidade','Ações da conta, documentos legais e exportação dos seus dados.','Gerenciar conta')+
+    (open?'<div class="row cf-family-editor"><button class="sec" data-act="legal" data-t="termos">Termos de Uso</button><button class="sec" data-act="legal" data-t="privacidade">Política de Privacidade</button><button class="sec" data-act="expjson">Baixar meus dados</button><button class="red" data-act="delconta">Excluir conta e dados</button></div>':'<p class="mu">Seus direitos pela LGPD: ver, levar e apagar os seus dados. Abra esta área para acessar as ações da conta.</p>')+
+    '<p class="mu" style="font-size:12px;margin:8px 0 0"><a href="privacidade.html" target="_blank" rel="noopener">Política pública</a> · <a href="excluir-conta.html" target="_blank" rel="noopener">Solicitar exclusão sem acessar o aplicativo</a></p>'+
+    '<small class="mu">Dúvidas de privacidade: '+(LEGAL.email?esc(LEGAL.email):'fale com o administrador do aplicativo')+'.</small></div></section>';
 }
+
 function viewConfig(){
   const c=S.cfg||{},f=(k,l,ph)=>`<label class="mu" style="font-size:12px">${l}<input id="cfg_${k}" value="${esc(c[k]||'')}" placeholder="${ph||''}" style="width:100%;margin-top:3px"></label>`;
   const aviso=(!LEGAL.nome||!LEGAL.email)?`<div class="faixa fech" style="margin:8px 0"><span><b>⚠ Antes de vender:</b> preencha o nome do responsável e o e-mail de contato. Eles aparecem nos Termos e na Política. Peça para um advogado revisar os dois textos.</span></div>`:'';
@@ -4330,16 +4358,23 @@ function viewChecape(ed){
   return `<div class="bar"><button data-act="checape" ${ed?'':'disabled'}>Gerar checape de ${MN[S.mes.mes-1]}</button><span class="mu">A análise considera o mês atual e o histórico disponível.</span></div>
   ${cards||'<div class="mu">Lance as despesas e receitas do mês e gere o checape para receber uma análise. Quanto mais meses registrados, melhores serão as comparações.</div>'}`;
 }
+function familyAreaHeader(key,title,desc,label){
+  const open=!!S.familyAreas?.[key];
+  return '<div class="cf-family-area-header"><div><span class="cf-family-area-kicker">ÁREA</span><h2>'+title+'</h2><p>'+desc+'</p></div><div class="cf-family-area-actions"><button type="button" class="sec chip" data-act="'+(key==='membros'?'editfamily':key==='convites'?'editinvites':key==='categorias'?'editcategories':'editaccount')+'" aria-expanded="'+(open?'true':'false')+'">'+label+'</button></div></div>';
+}
 function viewFamilia(){
-  const ed=canEdit(),dono=S.me?.papel==='dono';
-  const m=S.membros.map(x=>`<tr data-mid="${x.id}"><td data-label="Membro">${esc(x.nome)}</td><td data-label="Acesso" class="mu">${x.usuario_id?(dono&&x.papel!=='dono'?`<select data-papel-membro="${x.id}" aria-label="Permissão de ${esc(x.nome)}"><option value="editor" ${x.papel==='editor'?'selected':''}>Editora</option><option value="leitor" ${x.papel==='leitor'?'selected':''}>Somente leitura</option></select>`:esc(x.papel)):'sem login'}</td>
-   <td data-label="Renda mensal"><input type="number" step="0.01" min="0" data-rf="renda_mensal" value="${x.renda_mensal??''}" placeholder="Renda" ${ed?'':'disabled'}></td>
-   <td data-label="Ações">${ed&&!x.usuario_id?`<button class="red" data-act="delmem" data-id="${x.id}">✕</button>`:''}</td></tr>`).join('');
-  return `<div class="grid2"><div class="card"><b>Membros da família</b><div class="scroll" style="margin:10px 0"><table style="min-width:0"><tbody>${m}</tbody></table></div>
-   ${ed?`<div class="row"><input id="mnome" placeholder="Nome (ex.: filho, esposa)"><input id="mrenda" type="number" step="0.01" placeholder="Renda mensal"><button data-act="addmem">Adicionar</button></div>`:''}</div>
-   <div class="card"><b>Convidar alguém com login</b><div class="mu" style="margin:6px 0">Gere um código e envie. A pessoa entra com ele depois de criar a conta.</div>
-   <div class="row"><select id="cpapel"><option value="editor">Editor</option><option value="leitor">Leitor</option></select><button data-act="convite" ${ed?'':'disabled'}>Gerar código</button></div>
-   <div id="cres" style="font-size:20px;font-weight:700;letter-spacing:2px"></div></div></div>`;
+  const ed=canEdit(),dono=S.me?.papel==='dono',areas=S.familyAreas||{};
+  const m=S.membros.map(x=>areas.membros
+    ? '<tr data-mid="'+x.id+'"><td data-label="Membro">'+esc(x.nome)+'</td><td data-label="Acesso" class="mu">'+(x.usuario_id?(dono&&x.papel!=='dono'?'<select data-papel-membro="'+x.id+'" aria-label="Permissão de '+esc(x.nome)+'"><option value="editor" '+(x.papel==='editor'?'selected':'')+'>Editor</option><option value="leitor" '+(x.papel==='leitor'?'selected':'')+'>Somente leitura</option></select>':esc(x.papel)):'sem login')+'</td><td data-label="Renda mensal"><input type="number" step="0.01" min="0" data-rf="renda_mensal" value="'+(x.renda_mensal??'')+'" placeholder="Renda" '+(ed?'':'disabled')+'></td><td data-label="Ações">'+(ed&&!x.usuario_id?'<button class="red chip" data-act="delmem" data-id="'+x.id+'">Excluir</button>':'')+'</td></tr>'
+    : '<tr data-mid="'+x.id+'"><td data-label="Membro"><b>'+esc(x.nome)+'</b></td><td data-label="Acesso" class="mu">'+esc(x.usuario_id?(x.papel==='dono'?'Responsável':x.papel==='editor'?'Editor':'Somente leitura'):'Sem login')+'</td><td data-label="Renda mensal" class="mu">'+(x.renda_mensal!=null?brl(x.renda_mensal):'Não informada')+'</td><td data-label="Ações" class="mu">—</td></tr>'
+  ).join('');
+  const memberEdit=areas.membros&&ed?'<div class="row cf-family-editor"><input id="mnome" placeholder="Nome (ex.: filho, esposa)"><input id="mrenda" type="number" step="0.01" placeholder="Renda mensal"><button data-act="addmem">Adicionar membro</button></div>':'';
+  const inviteEdit=areas.convites&&ed?'<div class="row cf-family-editor"><select id="cpapel"><option value="editor">Editor</option><option value="leitor">Leitor</option></select><button data-act="convite">Gerar código</button></div><div id="cres" class="cf-family-code"></div>':'<div class="mu">Convites ficam separados dos membros para facilitar o controle de acesso.</div>';
+  return '<div class="cf-family-area-shell">'+
+    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('membros','Membros da família','Pessoas cadastradas nesta família, permissões e renda mensal.','Editar membros')+
+    '<div class="scroll cf-family-table"><table style="min-width:0"><tbody>'+m+'</tbody></table></div>'+memberEdit+'</div></section>'+
+    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('convites','Convites e acessos','Crie códigos para adicionar alguém sem misturar convites com a relação de membros.','Gerenciar convites')+inviteEdit+'</div></section>'+
+    '</div>';
 }
 
 /* ---------- ações ---------- */
@@ -4363,6 +4398,7 @@ document.addEventListener('click',async e=>{
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));toast('Convite aceito! Abrindo a família…');await boot()}
   else if(a==='mobilemore'){S.mobileMore=!S.mobileMore;render()}
   else if(a==='mobileadd'){S.mobileAddOpen=!S.mobileAddOpen;render();if(S.mobileAddOpen)document.getElementById('n_desc')?.focus()}
+  else if(a==='editfamily'||a==='editinvites'||a==='editcategories'||a==='editaccount'){const key={editfamily:'membros',editinvites:'convites',editcategories:'categorias',editaccount:'conta'}[a];S.familyAreas[key]=!S.familyAreas[key];render()}
   else if(a==='view'){
     S.mobileMore=false;S.mobileAddOpen=false;
     const destino=b.dataset.v;
