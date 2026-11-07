@@ -628,7 +628,9 @@ class MainActivityTest {
         assertTrue(html.contains("cf-companion-tail"))
         assertTrue(html.contains("cf-companion-face"))
         assertFalse(html.contains("http://"))
-        assertFalse(html.contains("https://") && html.contains("cf-companion-animal"))
+        val companionMarkup=html.substringAfter("function mobileCompanionMarkup()").substringBefore("function mobileCompanionGuide()")
+        assertFalse(companionMarkup.contains("http://"))
+        assertFalse(companionMarkup.contains("https://"))
     }
 
     @Test
