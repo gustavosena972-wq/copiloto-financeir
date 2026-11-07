@@ -496,7 +496,6 @@ class MainActivityTest {
         assertTrue(mobile.contains("min-height:52px!important"))
     }
 
-}
     @Test
     fun androidV019AddsPremiumMobileCommandBarAndConnectionStatus() {
         val html = File("src/main/assets/mobile.html").readText()
