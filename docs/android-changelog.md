@@ -1,8 +1,6 @@
 ## 1.0.7 — Performance pass
 
-- Reduced canvas particle count on small screens.
-- Reduced animated curve count on small screens.
-- Limited ambient canvas rendering to a lower frame budget on mobile.
+- Preserved the original canvas particle/curve density and animation cadence.
 - Added strict canvas containment to isolate rendering work.
 - Removed unnecessary character-data observation from the app MutationObserver.
 - Throttled desktop card tilt calculations to animation frames to reduce layout work.
