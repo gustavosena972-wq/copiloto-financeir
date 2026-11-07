@@ -1,3 +1,12 @@
+## 1.0.7 — Performance pass
+
+- Reduced canvas particle count on small screens.
+- Reduced animated curve count on small screens.
+- Limited ambient canvas rendering to a lower frame budget on mobile.
+- Added strict canvas containment to isolate rendering work.
+- Removed unnecessary character-data observation from the app MutationObserver.
+- Throttled desktop card tilt calculations to animation frames to reduce layout work.
+
 # Histórico de versões Android
 
 ## 1.0.4 — código 5
