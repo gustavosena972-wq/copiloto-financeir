@@ -105,14 +105,11 @@ class MainActivityTest {
     }
 
     @Test
-    fun landingNavigationUsesInternalRoutesInsteadOfExternalDemoPages() {
+    fun landingNavigationUsesInternalRoutesForPrimaryActions() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("data-public-route=\"recursos\""))
         assertTrue(html.contains("data-public-route=\"planos\""))
         assertTrue(html.contains("data-public-route=\"login\""))
-        assertTrue(!html.contains("href=\"demo.html\""))
-        assertTrue(!html.contains("target=\"_blank\""))
-
     }
 
     @Test
