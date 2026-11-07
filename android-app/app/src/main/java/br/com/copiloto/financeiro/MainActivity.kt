@@ -157,7 +157,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 return@addWebMessageListener
             }
             if (message.type != WebMessageCompat.TYPE_STRING) return@addWebMessageListener
-            handleBillingBridgeMessage(message.data)
+            message.data?.let(::handleBillingBridgeMessage)
         }
         nativeBillingBridgeAvailable = true
     }
