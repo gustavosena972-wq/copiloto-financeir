@@ -431,4 +431,25 @@ class MainActivityTest {
         assertTrue(gradle.contains("versionName = \"1.0.16\""))
     }
 
+    @Test
+    fun androidV016SeparatesMobileFinanceSectionsIntoDedicatedButtons() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("v0-mobile-quick-nav"))
+        assertTrue(html.contains("data-v=\"planilha\""))
+        assertTrue(html.contains("data-v=\"ano\""))
+        assertTrue(html.contains("data-v=\"checape\""))
+        assertTrue(html.contains("data-v=\"plan\""))
+        assertTrue(html.contains("data-v=\"família\""))
+        assertTrue(html.contains("v0-mobile-quick-nav-item"))
+    }
+
+    @Test
+    fun androidV016KeepsQuickNavigationTouchFriendly() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val mobile = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-16\">").substringBefore("</style>")
+        assertTrue(mobile.contains(".v0-mobile-quick-nav-item{"))
+        assertTrue(mobile.contains("min-height:64px"))
+        assertTrue(mobile.contains("grid-template-columns:repeat(2,minmax(0,1fr))"))
+    }
+
 }
