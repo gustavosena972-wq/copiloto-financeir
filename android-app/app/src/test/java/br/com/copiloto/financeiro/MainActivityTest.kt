@@ -113,13 +113,6 @@ class MainActivityTest {
     }
 
     @Test
-    fun releaseVersionMatchesTheAuditedAndroidPackage() {
-        val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 16"))
-        assertTrue(gradle.contains("versionName = \"1.0.15\""))
-    }
-
-    @Test
     fun bundledFinanceUiUsesAnExplicitSupabaseSdkVersion() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("@supabase/supabase-js@2.45.4"))
@@ -213,16 +206,6 @@ class MainActivityTest {
         assertTrue(html.contains("table{width:100%;border-collapse:collapse;min-width:860px}"))
         assertTrue(cleanup.contains("html,body,#app{max-width:100%;overflow-x:hidden}"))
 
-    }
-
-    @Test
-    fun releasePackageKeepsTheCurrentVersionAndPremiumFintechVisualContractTogether() {
-        val html = File("src/main/assets/mobile.html").readText()
-        val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 16"))
-        assertTrue(gradle.contains("versionName = \"1.0.15\""))
-        assertTrue(html.contains("body[data-ui=\"premium-fintech\"]"))
-        assertTrue(html.contains("--surface:#ffffff"))
     }
 
     @Test
@@ -425,13 +408,6 @@ class MainActivityTest {
     }
 
     @Test
-    fun releaseVersionAdvancesWithTheV0MobileRedesign() {
-        val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 18"))
-        assertTrue(gradle.contains("versionName = \"1.0.16\""))
-    }
-
-    @Test
     fun androidV016SeparatesMobileFinanceSectionsIntoDedicatedButtons() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("v0-mobile-quick-nav"))
@@ -496,7 +472,6 @@ class MainActivityTest {
         assertTrue(mobile.contains("min-height:52px!important"))
     }
 
-}
     @Test
     fun androidV019AddsPremiumMobileCommandBarAndConnectionStatus() {
         val html = File("src/main/assets/mobile.html").readText()
@@ -537,9 +512,37 @@ class MainActivityTest {
     }
 
     @Test
-    fun releaseVersionAdvancesToThePremiumMobileIteration() {
-        val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 20"))
-        assertTrue(gradle.contains("versionName = \"1.0.19\""))
+    fun androidV020LoadsCriticalMonthDataBeforeSecondaryAnnualAggregates() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("async function loadMes(rd=true,refreshAggregates=true)"))
+        assertTrue(html.contains("const[l,s]=await Promise.all(["))
+        assertTrue(html.contains("if(rd)render();"))
+        assertTrue(html.contains("if(refreshAggregates)"))
     }
 
+    @Test
+    fun androidV020ReusesAnnualAggregatesWhenSwitchingMonthsInTheSameYear() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("S._aggregateYearId"))
+        assertTrue(html.contains("const refreshAggregates=!S._aggregateYearId||S._aggregateYearId!==S.ano.id;"))
+        assertTrue(html.contains("await loadMes(true,refreshAggregates);"))
+        assertTrue(html.contains("else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes(true,false)}"))
+    }
+
+    @Test
+    fun androidV020KeepsAnnualAndCardDataRefreshableAfterFinancialMutations() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("async function loadMes(rd=true,refreshAggregates=true)"))
+        assertTrue(html.contains("if(refreshAggregates){"))
+        assertTrue(html.contains("S.resumo=rs;S.meta=mc;S._aggregateYearId=S.ano.id"))
+        assertTrue(html.contains("await loadMes()"))
+    }
+
+    @Test
+    fun releaseVersionAdvancesToThePerformanceIteration() {
+        val gradle = File("build.gradle.kts").readText()
+        assertTrue(gradle.contains("versionCode = 21"))
+        assertTrue(gradle.contains("versionName = \"1.0.20\""))
+    }
+
+}

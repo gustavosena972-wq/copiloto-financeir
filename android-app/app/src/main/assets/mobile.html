@@ -3146,15 +3146,22 @@ async function loadAno(mesNum){
   if(!S.meses.length){$('#app').innerHTML='<div class="auth"><h1>Preparando seu financeiro</h1><p class="mu">Ainda não existem meses cadastrados neste ano. Seus dados estão preservados. Entre em contato com o suporte para concluir a configuração.</p></div>';return}
   const hoje=new Date();
   S.mes=S.meses.find(m=>m.mes===mesNum)||(S.ano.ano===hoje.getFullYear()?S.meses.find(m=>m.mes===hoje.getMonth()+1):null)||S.meses[0];
-  await loadMes();
+  const refreshAggregates=!S._aggregateYearId||S._aggregateYearId!==S.ano.id;
+  await loadMes(true,refreshAggregates);
 }
-async function loadMes(rd=true){
-  const[l,s,rs,mc]=await Promise.all([
+async function loadMes(rd=true,refreshAggregates=true){
+  const[l,s]=await Promise.all([
     q(sb.from('lancamentos').select('*').eq('mes_id',S.mes.id).order('data_vencimento',{nullsFirst:false}).order('criado_em')),
-    q(sb.from('sugestoes').select('*').eq('mes_id',S.mes.id).order('criado_em')),
-    q(sb.from('v_resumo_anual').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano).order('mes')),
-    q(sb.from('v_meta_cartao').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano))]);
-  S.lanc=l;S.sug=s;S.resumo=rs;S.meta=mc;if(rd)render();
+    q(sb.from('sugestoes').select('*').eq('mes_id',S.mes.id).order('criado_em'))]);
+  S.lanc=l;S.sug=s;
+  if(rd)render();
+  if(refreshAggregates){
+    const[rs,mc]=await Promise.all([
+      q(sb.from('v_resumo_anual').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano).order('mes')),
+      q(sb.from('v_meta_cartao').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano))]);
+    S.resumo=rs;S.meta=mc;S._aggregateYearId=S.ano.id;
+    if(rd)render();
+  }
 }
 
 /* ---------- telas de entrada ---------- */
@@ -4362,7 +4369,7 @@ document.addEventListener('click',async e=>{
     if(destino==='admin'){S.view='admin';await carregarAdmin();}
     else {if(S.view==='admin')S.adm=null;S.view=destino;if(S.view==='plan')await carregarPlan();else render();}
   }
-  else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
+  else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes(true,false)}
   else if(a==='quickedit'){if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);S.quickEdit={kind:b.dataset.kind};render()}
   else if(a==='closequick'){S.quickEdit=null;render()}
   else if(a==='savequick'){if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);const campos=[...document.querySelectorAll('[data-qv]')];const itens=[];for(const i of campos){const v=Number(i.value);if(!Number.isFinite(v)||v<0)return toast('Informe valores válidos (zero ou maior).',1);itens.push({id:i.dataset.qv,valor:Math.round(v*100)/100})}if(!itens.length)return toast('Nenhum lançamento para atualizar.',1);const atualizados=await q(sb.rpc('salvar_valores_lancamentos',{p_familia:S.fam.id,p_mes:S.mes.id,p_itens:itens}));if(Number(atualizados)!==itens.length)throw new Error('A atualização não confirmou todos os lançamentos.');S.quickEdit=null;await loadMes();toast('Valores atualizados. Receitas, despesas e saldo foram recalculados.')}
