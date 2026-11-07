@@ -3805,7 +3805,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     function setMode(){
       const app=document.getElementById('app'),heading=app?.querySelector('.page-heading h1')?.textContent||app?.querySelector('.landing-intro h1')?.textContent||(app?.querySelector('.pix-page')?'pagamento':'inicio');
       const mode=(heading||'inicio').trim().toLocaleLowerCase('pt-BR').slice(0,48);
-      const slug=mode.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'inicio';
+      const slug=mode.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'inicio';
       world.dataset.motionMode=slug;
       motionAccent=/planejamento|checape/.test(slug)?'179,139,72':/relatorios|ano/.test(slug)?'76,133,173':/pagamento|pix/.test(slug)?'125,112,174':'67,146,101';
     }
