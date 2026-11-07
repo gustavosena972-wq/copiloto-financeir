@@ -3262,6 +3262,7 @@ async function importar(){
         if(!primeiroImportado)primeiroImportado={ano:m.ano,mes:m.mes};
       }catch(err){pul.push(MN[m.mes-1]+' '+m.ano+': '+(err?.message||'falha ao gravar'))}
     }
+    S.mobileAddOpen=false;
     S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));
     if(primeiroImportado){
       S.ano=S.anos.find(x=>x.ano===primeiroImportado.ano)||S.ano;
@@ -3712,7 +3713,10 @@ document.addEventListener('click',async e=>{
   else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));await boot()}
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));await boot()}
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));toast('Convite aceito! Abrindo a família…');await boot()}
+  else if(a==='mobilemore'){S.mobileMore=!S.mobileMore;render()}
+  else if(a==='mobileadd'){S.mobileAddOpen=!S.mobileAddOpen;render();if(S.mobileAddOpen)document.getElementById('n_desc')?.focus()}
   else if(a==='view'){
+    S.mobileMore=false;S.mobileAddOpen=false;
     const destino=b.dataset.v;
     if(destino==='admin'){S.view='admin';await carregarAdmin();}
     else {if(S.view==='admin')S.adm=null;S.view=destino;if(S.view==='plan')await carregarPlan();else render();}
