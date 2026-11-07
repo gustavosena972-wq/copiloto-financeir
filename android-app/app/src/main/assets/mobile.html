@@ -2436,6 +2436,215 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 @media(prefers-reduced-motion:reduce){.cf-preview{animation:none!important;transition:none!important}}
 </style>
 
+
+<style id="cf-mobile-first-1-0-15">
+:root{
+  --mobile-bg:#f5f7f4;--mobile-surface:#fff;--mobile-ink:#1b2d23;
+  --mobile-muted:#64746a;--mobile-line:#e2e9e3;--mobile-primary:#1e6543;
+  --mobile-primary-dark:#174b34;--mobile-soft:#e9f2eb;--mobile-danger:#a23d3d;
+}
+.mobile-bottom-nav,.mobile-more-panel,.mobile-guide,.mobile-add-toggle,.mobile-entry-list-wrap,.mobile-year-list,.mobile-flow{display:none}
+@media(max-width:760px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  body{min-height:100dvh;background:var(--mobile-bg)!important;color:var(--mobile-ink)!important}
+  #app:has(.app-shell){width:100vw!important;max-width:100vw!important;min-width:0!important;margin:0!important;padding:0!important;overflow-x:hidden!important}
+  .app-shell{display:flex!important;flex-direction:column!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:100dvh!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;background:var(--mobile-bg)!important}
+  .app-sidebar{display:flex!important;flex-direction:column!important;gap:0!important;width:100%!important;min-width:0!important;padding:10px 16px!important;border:0!important;border-radius:0!important;background:#173d2d!important;color:#f5f8f5!important}
+  .sidebar-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;min-width:0!important}
+  .sidebar-brand{display:flex!important;align-items:center!important;gap:9px!important;min-width:0!important}
+  .sidebar-brand svg,.sidebar-brand .cf-mark{width:30px!important;height:30px!important;flex:none!important}
+  .sidebar-brand strong{font-size:15px!important;line-height:1.2!important}
+  .sidebar-brand small{margin-top:2px!important;font-size:8px!important;letter-spacing:.14em!important}
+  .sidebar-family{max-width:58%!important;min-width:0!important;padding:6px 9px!important;border:1px solid #ffffff22!important;border-radius:9px!important;background:#ffffff0c!important;text-align:right!important}
+  .sidebar-family small{font-size:8px!important}
+  .sidebar-family strong{display:block!important;max-width:100%!important;font-size:11px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .sidebar-family>span,.sidebar-nav,.sidebar-footer{display:none!important}
+  .app-main{width:100%!important;max-width:100%!important;min-width:0!important;padding:13px 16px calc(92px + env(safe-area-inset-bottom))!important;border-radius:0!important;background:var(--mobile-bg)!important;color:var(--mobile-ink)!important}
+  .app-topbar{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;min-height:0!important;margin:0 0 12px!important;padding:4px 0 11px!important;border:0!important;border-bottom:1px solid var(--mobile-line)!important;border-radius:0!important;background:none!important;box-shadow:none!important;overflow:visible!important}
+  .app-topbar:before,.app-topbar:after{display:none!important;content:none!important}
+  .page-heading{flex:1 1 auto!important;min-width:0!important;max-width:100%!important}
+  .page-eyebrow{display:none!important}
+  .page-heading h1{margin:0!important;font-size:22px!important;font-weight:750!important;line-height:1.18!important;letter-spacing:-.025em!important;color:var(--mobile-ink)!important}
+  .page-heading p{margin:4px 0 0!important;font-size:12px!important;line-height:1.4!important;color:var(--mobile-muted)!important}
+  .date-line{margin-top:4px!important;font-size:10px!important;color:var(--mobile-muted)!important}
+  .top-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:5px!important;flex:0 0 auto!important;min-width:0!important}
+  .top-actions .session-button{display:none!important}
+  .top-actions .year-arrow{display:none!important}
+  .top-actions .year-control{display:flex!important;align-items:center!important;min-width:0!important}
+  .top-actions .year-control select{width:82px!important;min-width:72px!important;min-height:44px!important;padding:0 8px!important;font-size:13px!important}
+  .top-actions .notification-button{min-width:44px!important;min-height:44px!important;padding:6px!important;font-size:0!important}
+  .top-actions .notification-button span{font-size:10px!important}
+  .period-toolbar{width:100%!important;min-width:0!important;margin:0 0 7px!important}
+  .app-main .meses{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:5px!important;width:100%!important;margin:0!important;padding:0!important;overflow:visible!important}
+  .app-main .meses button{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:48px!important;padding:4px 2px!important;border:1px solid transparent!important;border-radius:8px!important;background:transparent!important;color:var(--mobile-muted)!important;font-size:11px!important;font-weight:700!important}
+  .app-main .meses button.on{background:var(--mobile-primary)!important;color:#fff!important;border-color:var(--mobile-primary)!important}
+  .app-main .meses button.fech{color:#87928a!important}
+  .mobile-guide{display:block!important;margin:6px 0 13px!important;border-bottom:1px solid var(--mobile-line)!important}
+  .mobile-guide>summary{display:flex!important;align-items:center!important;gap:10px!important;min-height:52px!important;padding:7px 0!important;list-style:none!important;cursor:pointer!important}
+  .mobile-guide>summary::-webkit-details-marker{display:none!important}
+  .mobile-guide-mark{display:flex!important;align-items:center!important;justify-content:center!important;width:30px!important;height:30px!important;flex:none!important;border-radius:50%!important;background:var(--mobile-soft)!important;color:var(--mobile-primary-dark)!important;font-size:16px!important;font-weight:800!important}
+  .mobile-guide-copy{display:grid!important;gap:2px!important;min-width:0!important;flex:1!important}
+  .mobile-guide-copy b{font-size:12px!important;line-height:1.25!important}
+  .mobile-guide-copy small{font-size:10px!important;line-height:1.25!important;color:var(--mobile-muted)!important}
+  .mobile-guide-action{font-size:10px!important;font-weight:700!important;color:var(--mobile-primary)!important;white-space:nowrap!important}
+  .mobile-guide-content{padding:4px 0 13px 40px!important;color:var(--mobile-muted)!important;font-size:12px!important;line-height:1.5!important}
+  .mobile-guide-content p{margin:0 0 6px!important;color:var(--mobile-ink)!important}
+  .mobile-guide-content ol{display:grid!important;gap:5px!important;margin:0!important;padding-left:19px!important}
+  .mobile-guide-content li{padding-left:2px!important}
+  .app-content{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important}
+  .app-main .cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0!important;margin:0 0 16px!important;border-top:1px solid var(--mobile-line)!important;border-bottom:1px solid var(--mobile-line)!important}
+  .app-main .cards .card{display:block!important;min-width:0!important;margin:0!important;padding:11px 10px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+  .app-main .cards .card:nth-child(odd){border-right:1px solid var(--mobile-line)!important}
+  .app-main .cards .card small{display:block!important;margin-bottom:4px!important;color:var(--mobile-muted)!important;font-size:10px!important;line-height:1.3!important}
+  .app-main .cards .card b{display:block!important;max-width:100%!important;font-size:clamp(15px,4vw,19px)!important;line-height:1.2!important;overflow-wrap:anywhere!important;color:var(--mobile-ink)!important}
+  .app-main .cards .card .pos{color:#1d7149!important}
+  .app-main .cards .card .neg{color:#aa4945!important}
+  .app-main .mobile-month-overview{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .app-main .mobile-month-overview .card:nth-child(3){grid-column:1/-1!important;order:-1!important;padding:12px 2px 15px!important;border-right:0!important;border-bottom:1px solid var(--mobile-line)!important}
+  .app-main .mobile-month-overview .card:nth-child(3) small{font-size:11px!important}
+  .app-main .mobile-month-overview .card:nth-child(3) b{font-size:31px!important;font-weight:800!important;letter-spacing:-.035em!important}
+  .app-main .mobile-month-overview .card:nth-child(1){padding-left:2px!important}
+  .app-main .mobile-month-overview .card:nth-child(2){padding-right:2px!important;border-right:0!important}
+  .mobile-flow{display:block!important;margin:0 0 16px!important;padding:12px 0 15px!important;border-bottom:1px solid var(--mobile-line)!important}
+  .mobile-flow-header{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:12px!important;margin-bottom:11px!important}
+  .mobile-flow-header>div{display:grid!important;gap:3px!important}
+  .mobile-flow-header small,.mobile-flow-values small,.mobile-flow-empty small{font-size:9px!important;font-weight:800!important;letter-spacing:.1em!important;color:var(--mobile-muted)!important}
+  .mobile-flow-header b,.mobile-flow-empty b{font-size:14px!important;color:var(--mobile-ink)!important}
+  .mobile-flow-header>span{font-size:10px!important;color:var(--mobile-muted)!important;white-space:nowrap!important}
+  .mobile-flow-track{display:flex!important;width:100%!important;height:9px!important;overflow:hidden!important;border-radius:20px!important;background:#e8eee9!important}
+  .mobile-flow-track .income{display:block!important;height:100%!important;background:#24744b!important}
+  .mobile-flow-track .expense{display:block!important;height:100%!important;background:#d18b80!important}
+  .mobile-flow-values{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;margin-top:10px!important}
+  .mobile-flow-values>div{display:grid!important;gap:3px!important;min-width:0!important}
+  .mobile-flow-values b{font-size:13px!important;overflow-wrap:anywhere!important}
+  .mobile-flow-empty{padding:3px 0 13px!important}
+  .mobile-flow-empty>div{display:grid!important;gap:5px!important}
+  .mobile-flow-empty p{margin:0!important;font-size:11px!important;line-height:1.45!important;color:var(--mobile-muted)!important}
+  .app-main .card{min-width:0!important;max-width:100%!important;margin:0 0 15px!important;padding:14px 0!important;border:0!important;border-bottom:1px solid var(--mobile-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+  .app-main .modal .card,.app-main .modal .box{margin:0!important;padding:16px!important;border:1px solid var(--mobile-line)!important;border-radius:14px!important;background:#fff!important;box-shadow:0 12px 30px rgba(24,48,33,.14)!important}
+  .app-main .card>b:first-child{display:block!important;margin-bottom:7px!important;font-size:15px!important;color:var(--mobile-ink)!important}
+  .app-main .grid2,.app-main .grid3{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important}
+  .app-main .item{padding:12px 0!important;border-bottom:1px solid var(--mobile-line)!important;border-radius:0!important;background:transparent!important}
+  .app-main .sug{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:9px!important;padding:14px 0!important;border:0!important;border-bottom:1px solid var(--mobile-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+  .app-main .sug .row{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+  .app-main .bar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;width:100%!important;margin:10px 0!important}
+  .app-main button,.app-main a,.app-main input,.app-main select,.app-main textarea{min-width:0!important;max-width:100%!important;min-height:48px!important;font-size:14px!important}
+  .app-main input,.app-main select,.app-main textarea{width:100%!important;padding:10px 11px!important;border:1px solid #d6e0d8!important;border-radius:8px!important;background:#fff!important;color:var(--mobile-ink)!important}
+  .app-main button{border-radius:9px!important}
+  .app-main .row{display:flex!important;flex-wrap:wrap!important;align-items:center!important;min-width:0!important;gap:8px!important}
+  .app-main .row>*{min-width:0!important;max-width:100%!important}
+  .app-main .scroll{width:100%!important;max-width:100%!important;min-width:0!important;overflow:visible!important;overscroll-behavior:auto!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+  .app-main .scroll table:not(.mobile-entry-table):not(.desktop-year-table){display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important;border:0!important}
+  .app-main .scroll table:not(.mobile-entry-table):not(.desktop-year-table) thead{display:none!important}
+  .app-main .scroll table:not(.mobile-entry-table):not(.desktop-year-table) tbody{display:grid!important;width:100%!important;gap:0!important}
+  .app-main .scroll table:not(.mobile-entry-table):not(.desktop-year-table) tbody tr{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px 12px!important;padding:12px 0!important;border:0!important;border-bottom:1px solid var(--mobile-line)!important;background:transparent!important}
+  .app-main .scroll table:not(.mobile-entry-table):not(.desktop-year-table) tbody td{display:flex!important;flex-direction:column!important;align-items:stretch!important;min-width:0!important;max-width:100%!important;padding:0!important;border:0!important;background:transparent!important;overflow-wrap:anywhere!important}
+  .app-main .scroll table:not(.mobile-entry-table):not(.desktop-year-table) tbody td[data-label]:before{content:attr(data-label);display:block!important;margin-bottom:4px!important;color:var(--mobile-muted)!important;font-size:9px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.05em!important}
+  .app-main .scroll table:not(.mobile-entry-table):not(.desktop-year-table) tbody td input,.app-main .scroll table:not(.mobile-entry-table):not(.desktop-year-table) tbody td select{width:100%!important;min-width:0!important;max-width:100%!important}
+  .mobile-analysis{display:block!important;margin:14px 0!important;border-top:1px solid var(--mobile-line)!important;border-bottom:1px solid var(--mobile-line)!important}
+  .mobile-analysis>summary,.mobile-actions-menu>summary{display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:52px!important;list-style:none!important;cursor:pointer!important;color:var(--mobile-primary-dark)!important;font-size:13px!important;font-weight:750!important}
+  .mobile-analysis>summary::-webkit-details-marker,.mobile-actions-menu>summary::-webkit-details-marker{display:none!important}
+  .mobile-analysis-content{padding:4px 0 12px!important}
+  .mobile-actions-menu{display:block!important;margin:12px 0!important;border-top:1px solid var(--mobile-line)!important;border-bottom:1px solid var(--mobile-line)!important}
+  .mobile-actions-menu .bar{grid-template-columns:repeat(2,minmax(0,1fr))!important;padding:0 0 12px!important}
+  .mobile-add-toggle{display:block!important;margin:15px 0 17px!important}
+  .mobile-add-toggle button{display:flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;width:100%!important;min-height:52px!important;border:0!important;border-radius:10px!important;background:var(--mobile-primary)!important;color:#fff!important;font-size:14px!important;font-weight:750!important}
+  .mobile-add-toggle svg{width:20px!important;height:20px!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important;stroke-linecap:round!important}
+  .desktop-transactions{display:none!important}
+  .desktop-transactions:has(tr.novo.is-open){display:block!important;margin:0 0 18px!important;padding:0!important;border:0!important}
+  .desktop-transactions table{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important}
+  .desktop-transactions thead{display:none!important}
+  .desktop-transactions tbody{display:block!important;width:100%!important}
+  .desktop-transactions tbody tr:not(.novo){display:none!important}
+  .desktop-transactions tbody tr.novo{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:11px!important;width:100%!important;padding:13px 0!important;border:0!important;border-top:1px solid var(--mobile-line)!important;border-bottom:1px solid var(--mobile-line)!important;background:transparent!important}
+  .desktop-transactions tbody tr.novo td{display:flex!important;flex-direction:column!important;gap:5px!important;min-width:0!important;max-width:100%!important;padding:0!important;border:0!important;background:transparent!important}
+  .desktop-transactions tbody tr.novo td:before{content:attr(data-label);display:block!important;color:var(--mobile-muted)!important;font-size:9px!important;font-weight:800!important;letter-spacing:.05em!important;text-transform:uppercase!important}
+  .desktop-transactions tbody tr.novo td:nth-child(2){grid-column:1/-1!important}
+  .desktop-transactions tbody tr.novo td:last-child{grid-column:1/-1!important}
+  .desktop-transactions tbody tr.novo td input,.desktop-transactions tbody tr.novo td select{width:100%!important;min-width:0!important;max-width:100%!important}
+  .desktop-transactions tbody tr.novo td button{width:100%!important;background:var(--mobile-primary)!important;color:#fff!important}
+  .mobile-entry-list-wrap{display:block!important;width:100%!important;min-width:0!important;margin:19px 0 0!important}
+  .mobile-list-heading{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:12px!important;margin:0 0 6px!important;padding-bottom:9px!important;border-bottom:1px solid var(--mobile-line)!important}
+  .mobile-list-heading h2{margin:0!important;font-size:16px!important;font-weight:800!important;color:var(--mobile-ink)!important}
+  .mobile-list-heading p{margin:3px 0 0!important;font-size:11px!important;color:var(--mobile-muted)!important}
+  .mobile-list-heading>span{font-size:11px!important;color:var(--mobile-muted)!important}
+  .mobile-entry-table{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;border:0!important;background:transparent!important}
+  .mobile-entry-table tbody{display:block!important;width:100%!important}
+  .mobile-entry-row{display:block!important;width:100%!important;padding:0!important;border:0!important;border-bottom:1px solid var(--mobile-line)!important;background:transparent!important}
+  .mobile-entry-row>td{display:block!important;width:100%!important;max-width:100%!important;padding:0!important;border:0!important;background:transparent!important}
+  .mobile-entry-details{display:block!important;width:100%!important}
+  .mobile-entry-summary{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;min-height:72px!important;padding:10px 0!important;list-style:none!important;cursor:pointer!important}
+  .mobile-entry-summary::-webkit-details-marker{display:none!important}
+  .mobile-entry-main{display:grid!important;gap:4px!important;flex:1 1 auto!important;min-width:0!important}
+  .mobile-entry-main strong{font-size:13px!important;font-weight:750!important;line-height:1.3!important;color:var(--mobile-ink)!important;overflow-wrap:anywhere!important}
+  .mobile-entry-main small{font-size:10px!important;line-height:1.3!important;color:var(--mobile-muted)!important;overflow-wrap:anywhere!important}
+  .mobile-entry-aside{display:grid!important;justify-items:end!important;gap:5px!important;flex:0 0 auto!important}
+  .mobile-entry-aside>b{font-size:14px!important;font-weight:800!important;white-space:nowrap!important;color:var(--mobile-ink)!important}
+  .mobile-entry-status{font-size:9px!important;font-weight:750!important;color:var(--mobile-muted)!important}
+  .mobile-entry-status.is-paid{color:#1c7048!important}
+  .mobile-entry-status.is-late{color:var(--mobile-danger)!important}
+  .mobile-entry-fields{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;padding:4px 0 12px!important}
+  .mobile-entry-fields label{display:grid!important;gap:4px!important;min-width:0!important;color:var(--mobile-muted)!important;font-size:10px!important;font-weight:700!important}
+  .mobile-entry-fields input,.mobile-entry-fields select{min-width:0!important;width:100%!important;min-height:48px!important;padding:8px!important;font-size:13px!important}
+  .mobile-entry-fields .mobile-entry-owner{grid-column:1/-1!important}
+  .mobile-entry-actions{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;padding:0 0 12px!important}
+  .mobile-entry-actions span{font-size:10px!important;color:var(--mobile-muted)!important}
+  .mobile-entry-actions button{min-height:48px!important;padding:8px 12px!important}
+  .mobile-entry-empty{display:block!important;padding:17px 0!important;border-bottom:1px solid var(--mobile-line)!important}
+  .mobile-entry-empty td{display:block!important;padding:0!important;border:0!important}
+  .mobile-entry-empty strong{font-size:14px!important}
+  .mobile-entry-empty p{margin:5px 0 0!important;color:var(--mobile-muted)!important;font-size:12px!important;line-height:1.45!important}
+  .desktop-year-table{display:none!important}
+  .mobile-year-list{display:grid!important;gap:0!important;width:100%!important;margin:12px 0!important}
+  .mobile-year-item{display:block!important;padding:12px 0!important;border-bottom:1px solid var(--mobile-line)!important}
+  .mobile-year-open{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;width:100%!important;min-height:56px!important;padding:3px 0 10px!important;border:0!important;background:transparent!important;text-align:left!important}
+  .mobile-year-month{display:grid!important;gap:3px!important}
+  .mobile-year-month b{font-size:15px!important;color:var(--mobile-ink)!important}
+  .mobile-year-month small,.mobile-year-balance small{font-size:10px!important;color:var(--mobile-muted)!important}
+  .mobile-year-balance{display:grid!important;gap:3px!important;text-align:right!important}
+  .mobile-year-balance strong{font-size:17px!important;font-weight:800!important}
+  .mobile-year-facts{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px 14px!important;padding:0 0 4px!important}
+  .mobile-year-facts>div{display:grid!important;gap:3px!important;min-width:0!important}
+  .mobile-year-facts small{font-size:9px!important;color:var(--mobile-muted)!important}
+  .mobile-year-facts b{font-size:12px!important;overflow-wrap:anywhere!important;color:var(--mobile-ink)!important}
+  .mobile-empty{padding:15px 0!important;font-size:12px!important;color:var(--mobile-muted)!important}
+  .mobile-more-panel{position:fixed!important;z-index:101!important;left:12px!important;right:12px!important;bottom:calc(77px + env(safe-area-inset-bottom))!important;display:block!important;max-width:520px!important;margin:0 auto!important;padding:10px 15px!important;border:1px solid var(--mobile-line)!important;border-radius:14px!important;background:#fff!important;box-shadow:0 12px 34px rgba(24,48,33,.16)!important}
+  .mobile-more-panel[hidden]{display:none!important}
+  .mobile-more-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;padding:3px 0 8px!important;border-bottom:1px solid var(--mobile-line)!important}
+  .mobile-more-heading b{font-size:14px!important}
+  .mobile-more-heading button{min-height:40px!important;border:0!important;background:transparent!important;color:var(--mobile-primary)!important;font-size:12px!important}
+  .mobile-more-panel>button{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;min-height:48px!important;padding:8px 2px!important;border:0!important;border-bottom:1px solid var(--mobile-line)!important;border-radius:0!important;background:transparent!important;color:var(--mobile-ink)!important;text-align:left!important;font-size:13px!important}
+  .mobile-more-panel>button:last-child{border-bottom:0!important}
+  .mobile-more-panel .mobile-more-signout{color:var(--mobile-danger)!important}
+  .mobile-bottom-nav{position:fixed!important;z-index:100!important;left:0!important;right:0!important;bottom:0!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important;width:100%!important;min-height:64px!important;margin:0!important;padding:5px 5px calc(5px + env(safe-area-inset-bottom))!important;border-top:1px solid var(--mobile-line)!important;background:#fff!important;box-shadow:0 -4px 18px rgba(24,48,33,.06)!important}
+  .mobile-nav-item{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;min-width:0!important;min-height:48px!important;padding:4px 2px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:var(--mobile-muted)!important;font-size:10px!important;font-weight:700!important;line-height:1.1!important;white-space:nowrap!important}
+  .mobile-nav-item svg{width:21px!important;height:21px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+  .mobile-nav-item.is-active{background:var(--mobile-soft)!important;color:var(--mobile-primary-dark)!important}
+  .app-main .modal{padding:10px!important}
+  .app-main .modal .box{max-width:100%!important;width:100%!important;max-height:calc(100dvh - 20px)!important;overflow:auto!important}
+  .app-main .modal .box input,.app-main .modal .box select{font-size:16px!important}
+  .app-main .cf-section{min-width:0!important}
+  .app-main .cf-section-head{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:8px!important}
+  .app-main .chart{min-width:0!important;width:100%!important;max-width:100%!important}
+  .app-main .cf-report-line{display:grid!important;grid-template-columns:1fr!important;gap:5px!important;padding:10px 0!important;border-bottom:1px solid var(--mobile-line)!important}
+  .app-main .cf-report-line .cf-report-track{width:100%!important}
+}
+@media(max-width:390px){
+  .app-main{padding-left:12px!important;padding-right:12px!important}
+  .page-heading h1{font-size:20px!important}
+  .app-main .meses{gap:3px!important}
+  .app-main .meses button{min-height:44px!important;font-size:10px!important}
+  .mobile-entry-fields{gap:8px!important}
+  .mobile-entry-summary{gap:8px!important}
+  .mobile-entry-main strong{font-size:12px!important}
+  .mobile-entry-aside>b{font-size:13px!important}
+  .mobile-nav-item{font-size:9px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .mobile-bottom-nav,.mobile-more-panel,.mobile-entry-details,.mobile-guide{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
+</style>
+
 </head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
@@ -2450,7 +2659,7 @@ if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div
 const sb=supabase.createClient(SB_URL,SB_KEY);
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false};
+const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -2782,13 +2991,55 @@ function renderSemFamilia(){
   <button class="red" data-act="sair">Sair</button></div>`;
 }
 
+
+function mobileGuide(view){
+  const guides={
+    planilha:{title:'Como usar os lançamentos',hint:'Entradas, despesas e pagamentos do mês.',intro:'Esta é a área de movimentações da família. Cada alteração é gravada na conta compartilhada.',steps:['Confira o mês selecionado logo acima.','Toque em “Novo lançamento” para registrar uma receita ou despesa. Informe data, descrição, categoria, valor e responsável.','Toque em uma movimentação para abrir os campos de edição. As alterações são salvas quando você sai do campo.','Use “Mais ações do mês” para importar, exportar, gerar recorrências ou fechar o período.']},
+    ano:{title:'Como usar a visão do ano',hint:'Compare os meses e abra qualquer período.',intro:'A visão anual reúne os resultados que já foram registrados. Os valores são calculados a partir dos lançamentos.',steps:['Escolha o ano no seletor do topo.','Compare receitas, despesas, saldo e poupança.','Toque em um mês para abrir os lançamentos daquele período.','Use as metas e os ajustes do fim da página para configurar o acompanhamento.']},
+    checape:{title:'Como usar o checape',hint:'Entenda as sugestões geradas pelos seus lançamentos.',intro:'O checape analisa os dados cadastrados e apresenta sugestões. Ele não altera seus lançamentos sozinho.',steps:['Registre receitas e despesas para alimentar a análise.','Toque em “Gerar checape” para atualizar as sugestões do mês.','Abra cada sugestão, leia a explicação e o comparativo.','Escolha “Aceitar” ou “Ignorar”. Você mantém o controle da decisão.']},
+    plan:{title:'Como usar o planejamento',hint:'Metas, dívidas e patrimônio em um só lugar.',intro:'Use esta área para acompanhar objetivos e compromissos de longo prazo da família.',steps:['Cadastre uma meta e informe o valor que pretende alcançar.','Registre dívidas com saldo, juros e pagamento mínimo.','Atualize os aportes das metas conforme guardar dinheiro.','Mantenha ativos e passivos atualizados para acompanhar o patrimônio.']},
+    'família':{title:'Como usar a área da família',hint:'Membros, convites, categorias e conta.',intro:'As informações desta área são compartilhadas com os membros que têm acesso à mesma família.',steps:['Confira quem participa e qual permissão cada pessoa possui.','Adicione um membro ou gere um convite para quem já tem login.','Ajuste categorias e grupos para organizar melhor as despesas.','Revise as configurações da conta antes de compartilhar o acesso.']},
+    relatorios:{title:'Como usar os relatórios',hint:'Tendências e comparativos dos dados registrados.',intro:'Os relatórios transformam os lançamentos em comparações e tendências. Quanto melhor o histórico, mais útil a leitura.',steps:['Escolha o ano que deseja analisar.','Compare as barras de receitas e despesas por mês.','Confira a distribuição dos gastos por categoria.','Toque em um mês para investigar os lançamentos que formaram o resultado.']},
+    admin:{title:'Como usar a administração',hint:'Acompanhamento operacional do serviço.',intro:'Esta área é restrita à administração e reúne informações operacionais da plataforma.',steps:['Confira os dados apresentados antes de tomar uma decisão.','Use apenas as ações correspondentes à tarefa administrativa.','Não compartilhe dados de acesso ou informações privadas com terceiros.']}
+  };
+  const g=guides[view];if(!g)return '';
+  const steps=g.steps.map(step=>'<li>'+step+'</li>').join('');
+  return '<details class="mobile-guide"><summary aria-controls="mobile-guide-content"><span class="mobile-guide-mark" aria-hidden="true">?</span><span class="mobile-guide-copy"><b>'+g.title+'</b><small>'+g.hint+'</small></span><span class="mobile-guide-action">Passo a passo</span></summary><div class="mobile-guide-content" id="mobile-guide-content"><p>'+g.intro+'</p><ol>'+steps+'</ol></div></details>';
+}
+function mobileNavigation(){
+  const activeMore=['família','relatorios','admin'].includes(S.view);
+  return '<nav class="mobile-bottom-nav" aria-label="Navegação principal do aplicativo">'+
+    '<button type="button" class="mobile-nav-item '+(S.view==='planilha'?'is-active':'')+'" data-act="view" data-v="planilha" data-mobile-nav="launches" aria-label="Abrir lançamentos" '+(S.view==='planilha'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5"/></svg><span>Lanç.</span></button>'+
+    '<button type="button" class="mobile-nav-item '+(S.view==='ano'?'is-active':'')+'" data-act="view" data-v="ano" data-mobile-nav="year" aria-label="Abrir visão do ano" '+(S.view==='ano'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17M7 15l4-4 3 2 5-7"/></svg><span>Ano</span></button>'+
+    '<button type="button" class="mobile-nav-item '+(S.view==='checape'?'is-active':'')+'" data-act="view" data-v="checape" data-mobile-nav="checkup" aria-label="Abrir checape financeiro" '+(S.view==='checape'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 4.6-3 8-8 10-5-2-8-5.4-8-10V6zM8.5 12l2.2 2.2 4.8-5"/></svg><span>Checape</span></button>'+
+    '<button type="button" class="mobile-nav-item '+(S.view==='plan'?'is-active':'')+'" data-act="view" data-v="plan" data-mobile-nav="planning" aria-label="Abrir planejamento" '+(S.view==='plan'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 2v3M22 12h-3"/></svg><span>Metas</span></button>'+
+    '<button type="button" class="mobile-nav-item '+(activeMore?'is-active':'')+'" data-act="mobilemore" data-mobile-nav="more" aria-label="Mais ferramentas" aria-expanded="'+(S.mobileMore?'true':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg><span>Mais</span></button>'+
+    '</nav>';
+}
+function mobileMoreMenu(){
+  let links='<button type="button" data-act="view" data-v="família"><span>Família e ajustes</span><span aria-hidden="true">›</span></button>';
+  if(planoTemRecurso('relatorios'))links+='<button type="button" data-act="view" data-v="relatorios"><span>Relatórios financeiros</span><span aria-hidden="true">›</span></button>';
+  if(S.admin)links+='<button type="button" data-act="view" data-v="admin"><span>Administração</span><span aria-hidden="true">›</span></button>';
+  links+='<button type="button" class="mobile-more-signout" data-act="sair"><span>Sair da conta</span><span aria-hidden="true">↗</span></button>';
+  return '<div class="mobile-more-panel" '+(S.mobileMore?'':'hidden')+'><div class="mobile-more-heading"><b>Mais ferramentas</b><button type="button" data-act="mobilemore" aria-label="Fechar menu">Fechar</button></div>'+links+'</div>';
+}
+
+window.__copilotoHandleAndroidBack=()=>{
+  if(S.mobileMore){S.mobileMore=false;render();return true}
+  if(S.mobileAddOpen){S.mobileAddOpen=false;render();return true}
+  const openDetails=[...document.querySelectorAll('.app-main details[open]')];
+  if(openDetails.length){openDetails[openDetails.length-1].open=false;return true}
+  if(S.view!=='planilha'&&S.fam){S.view='planilha';S.adm=null;render();return true}
+  return false;
+};
+
 /* ---------- app ---------- */
 function render(){
   if(S.view==='admin'&&!S.admin){S.view='planilha';S.adm=null;S.admPend=0;}
   const ed=canEdit()&&mesAberto();
   const ultra=planoTemRecurso('relatorios');
   if(S.view==='espacos')S.view='planilha';
-  const TL={planilha:'Planilha mensal',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
+  const TL={planilha:'Lançamentos',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
   if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
   const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
   const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('planilha','Planilha mensal','▦')}${navItem('ano','Visão do ano','▤')}</section>
@@ -2797,7 +3048,7 @@ function render(){
     ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   const info={
-    planilha:['Lançamentos do mês','Registre receitas e despesas, organize categorias e acompanhe os pagamentos.'],
+    planilha:['Lançamentos do mês','Veja o saldo, registre entradas e despesas e acompanhe cada pagamento.'],
     ano:['Visão do ano','Acompanhe os resultados financeiros e compare os meses do ano.'],
     checape:['Checape financeiro','Revise as sugestões geradas a partir dos lançamentos do mês.'],
     plan:['Planejamento financeiro','Organize metas, dívidas e patrimônio em um só lugar.'],
@@ -2841,8 +3092,11 @@ function render(){
         </div>
       </header>
       <div class="period-toolbar">${meses}</div>
+      ${mobileGuide(S.view)}
       <section class="app-content">${body}${viewImport()}${viewModais()}</section>
     </main>
+    ${mobileMoreMenu()}
+    ${mobileNavigation()}
   </div>`;
   afterRender();
 }
@@ -2949,17 +3203,40 @@ function viewPlanilha(ed){
    <td><select data-f="status" ${d}>${stOpts(l.status)}</select></td>
    <td><select data-f="membro_id" ${d}>${memOpts(l.membro_id)}</select></td>
    <td><button class="red" data-act="del" data-id="${l.id}" ${d}>✕</button></td></tr>`).join('');
-  const novo=ed?`<tr class="novo" id="novo"><td><input type="date" id="n_data"></td><td><div style="display:grid;gap:5px;min-width:210px"><input id="n_desc" placeholder="Descrição da compra ou compromisso" style="min-width:110px"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
-   <td><select id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td><select id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
-   <td><input type="number" step="0.01" min="0" id="n_valor" placeholder="Valor total (R$)"></td><td><select id="n_status">${stOpts('pendente')}</select></td>
-   <td><select id="n_mem">${memOpts(S.me.id)}</select></td><td><button data-act="add">+</button></td></tr>
+  const mobileRows=S.lanc.map(l=>{
+    const categoria=S.cats.find(x=>x.id===l.categoria_id)?.nome||'Sem categoria';
+    const membro=S.membros.find(x=>x.id===l.membro_id)?.nome||'Família';
+    const data=l.data_vencimento?new Date(l.data_vencimento+'T12:00:00').toLocaleDateString('pt-BR'):'Sem data';
+    const status=l.status==='pago'?'Pago':l.status==='atrasado'?'Atrasado':l.status==='pendente'?'Pendente':String(l.status||'Sem status');
+    return '<tr class="mobile-entry-row" data-id="'+esc(l.id)+'"><td colspan="8"><details class="mobile-entry-details"><summary class="mobile-entry-summary"><span class="mobile-entry-main"><strong>'+esc(l.descricao)+'</strong><small>'+esc(data)+' · '+esc(categoria)+' · '+esc(membro)+'</small></span><span class="mobile-entry-aside"><b>'+brl(l.valor)+'</b><small class="mobile-entry-status '+(l.status==='pago'?'is-paid':l.status==='atrasado'?'is-late':'')+'">'+esc(status)+'</small></span></summary><div class="mobile-entry-fields">'+
+      '<label>Vencimento<input type="date" data-f="data_vencimento" value="'+(l.data_vencimento||'')+'" '+d+'></label>'+
+      '<label>Descrição<input data-f="descricao" value="'+esc(l.descricao)+'" '+d+'></label>'+
+      '<label>Tipo<select data-f="tipo" '+d+'>'+tpOpts(l.tipo)+'</select></label>'+
+      '<label>Categoria<select data-f="categoria_id" '+d+'>'+catOpts(l.tipo==='receita'?'receita':'despesa',l.categoria_id)+'</select></label>'+
+      '<label>Valor<input type="number" step="0.01" min="0" data-f="valor" value="'+l.valor+'" '+d+'></label>'+
+      '<label>Status<select data-f="status" '+d+'>'+stOpts(l.status)+'</select></label>'+
+      '<label class="mobile-entry-owner">Responsável<select data-f="membro_id" '+d+'>'+memOpts(l.membro_id)+'</select></label>'+
+      '</div><div class="mobile-entry-actions"><span>As alterações são salvas ao sair de cada campo.</span><button type="button" class="red" data-act="del" data-id="'+esc(l.id)+'" '+d+'>Excluir lançamento</button></div></details></td></tr>';
+  }).join('');
+  const mobileAddToggle=ed?'<div class="mobile-add-toggle"><button id="mobile-add-launch" type="button" data-act="mobileadd" aria-expanded="'+(S.mobileAddOpen?'true':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+(S.mobileAddOpen?'Fechar formulário':'Novo lançamento')+'</button></div>':'';
+
+  const totalFluxo=rec+des;
+  const percentualEntradas=totalFluxo>0?rec/totalFluxo*100:0;
+  const percentualSaidas=totalFluxo>0?des/totalFluxo*100:0;
+  const mobileFlow=totalFluxo>0
+    ?'<section class="mobile-flow" aria-label="Comparativo de entradas e saídas do mês"><div class="mobile-flow-header"><div><small>FLUXO DO MÊS</small><b>Entradas e saídas</b></div><span>'+S.lanc.length+' movimentações</span></div><div class="mobile-flow-track" role="img" aria-label="Entradas representam '+percentualEntradas.toFixed(0)+'% e saídas '+percentualSaidas.toFixed(0)+'% do volume registrado"><i class="income" style="width:'+percentualEntradas+'%"></i><i class="expense" style="width:'+percentualSaidas+'%"></i></div><div class="mobile-flow-values"><div><small>Entradas</small><b class="pos">'+brl(rec)+'</b></div><div><small>Saídas</small><b class="neg">'+brl(des)+'</b></div></div></section>'
+    :'<section class="mobile-flow mobile-flow-empty"><div><small>FLUXO DO MÊS</small><b>Seu movimento financeiro começa aqui</b><p>Registre uma receita ou despesa para acompanhar entradas e saídas neste comparativo.</p></div></section>';
+  const novo=ed?`<tr class="novo ${S.mobileAddOpen?'is-open':''}" id="novo"><td data-label="Vencimento"><input aria-label="Vencimento" type="date" id="n_data"></td><td data-label="Descrição"><div style="display:grid;gap:5px;min-width:0"><input id="n_desc" placeholder="Descrição da compra ou compromisso" style="min-width:0"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
+   <td data-label="Tipo"><select aria-label="Tipo" id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td data-label="Categoria"><select aria-label="Categoria" id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
+   <td data-label="Valor"><input aria-label="Valor" type="number" step="0.01" min="0" id="n_valor" placeholder="Valor total (R$)"></td><td data-label="Status"><select aria-label="Status" id="n_status">${stOpts('pendente')}</select></td>
+   <td data-label="Responsável"><select aria-label="Responsável" id="n_mem">${memOpts(S.me.id)}</select></td><td data-label="Ações"><button data-act="add" aria-label="Salvar novo lançamento">Adicionar</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
-  return `${viewStatus()}<div class="cards"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
+  return `${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
-  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>${viewGrupos()}${viewCats()}
-  <div class="bar">
+  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>${mobileFlow}<details class="mobile-analysis"><summary>Ver análise e categorias do mês</summary><div class="mobile-analysis-content">${viewGrupos()}${viewCats()}</div></details>
+  <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
    <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
    <button class="sec" data-act="recorr" ${ed?'':'disabled'}>Gerar recorrentes</button>
@@ -2969,9 +3246,11 @@ function viewPlanilha(ed){
    <button class="sec" data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button>
    <button class="red" data-act="apagarmes" ${ed?'':'disabled'}>Apagar mês</button>
    <button class="red" data-act="apagarano" ${S.me.papel==='dono'?'':'disabled'}>Apagar todos os meses</button>
-   <button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>
-  <div class="scroll"><table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Tipo</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Quem</th><th></th></tr></thead>
-  <tbody>${novo}${rows||'<tr><td colspan="8" class="mu" style="padding:16px">Nenhum lançamento neste mês.</td></tr>'}</tbody></table></div>`;
+   <button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div></details>
+  ${mobileAddToggle}
+  <div class="scroll desktop-transactions"><table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Tipo</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Quem</th><th></th></tr></thead>
+  <tbody>${novo}${rows||'<tr><td colspan="8" class="mu" style="padding:16px">Nenhum lançamento neste mês.</td></tr>'}</tbody></table></div>
+  <section class="mobile-entry-list-wrap"><div class="mobile-list-heading"><div><h2>Movimentações</h2><p>Toque em uma linha para consultar ou editar.</p></div><span>${S.lanc.length}</span></div><div class="scroll"><table class="mobile-entry-table"><tbody>${mobileRows||'<tr class="mobile-entry-empty"><td colspan="8"><strong>Nenhum lançamento neste mês</strong><p>Comece registrando uma receita ou despesa. Depois, toque nela para editar ou acompanhar o pagamento.</p></td></tr>'}</tbody></table></div></section>`;
 }
 function viewCats(){
   const g={};S.lanc.filter(l=>l.tipo==='despesa').forEach(l=>{const c=S.cats.find(x=>x.id===l.categoria_id);const p=c&&c.parent_id?S.cats.find(x=>x.id===c.parent_id):c;const n=p?p.nome:'Sem categoria';g[n]=(g[n]||0)+Number(l.valor)});
@@ -3022,12 +3301,19 @@ function viewAno(){
   const rows=R.map(r=>{const m=MC[r.mes];
     const mc=!m||m.meta==null?'—':(Number(m.real)<=Number(m.meta)?`<span class="pos">✔ ${brl(m.meta)}</span>`:`<span class="neg">▲ meta ${brl(m.meta)}</span>`);
     return `<tr data-act="irmes" data-m="${r.mes}" style="cursor:pointer"><td>${MN[r.mes-1]} ${r.status==='fechado'?'🔒':''}</td><td class="pos">${brl(r.receita)}</td><td>${brl(r.fixas)}</td><td>${brl(r.cartoes)}</td><td>${brl(r.retiradas)}</td><td>${brl(r.outras)}</td><td class="neg">${brl(r.total_despesas)}</td><td class="${r.saldo>=0?'pos':'neg'}">${brl(r.saldo)}</td><td>${brl(r.poupanca_acumulada)}</td><td>${r.pct_cartoes}%</td><td>${mc}</td></tr>`}).join('');
+
+  const mobileRows=R.map(r=>{
+    const mes=MN[r.mes-1];
+    const saldoClass=Number(r.saldo)>=0?'pos':'neg';
+    const status=r.status==='fechado'?' · Fechado':'';
+    return '<article class="mobile-year-item"><button type="button" class="mobile-year-open" data-act="irmes" data-m="'+r.mes+'" aria-label="Abrir lançamentos de '+mes+'"><span class="mobile-year-month"><b>'+mes+status+'</b><small>Ver lançamentos</small></span><span class="mobile-year-balance '+saldoClass+'"><small>Saldo</small><strong>'+brl(r.saldo)+'</strong></span></button><div class="mobile-year-facts"><div><small>Receitas</small><b class="pos">'+brl(r.receita)+'</b></div><div><small>Despesas</small><b class="neg">'+brl(r.total_despesas)+'</b></div><div><small>Poupança acumulada</small><b>'+brl(r.poupanca_acumulada)+'</b></div><div data-label="% Cartões"><small>% Cartões</small><b>'+r.pct_cartoes+'%</b></div><div data-label="Meta cartão"><small>Meta cartão</small><b>'+mc+'</b></div></div></article>';
+  }).join('');
   return `${viewStatus()}${barraAno()}<div class="cards"><div class="card"><small>Receita prevista no ano</small><b class="pos">${brl(T('receita'))}</b></div>
   <div class="card"><small>Despesas no ano</small><b class="neg">${brl(T('total_despesas'))}</b></div>
   <div class="card"><small>Poupança no fim do ano</small><b class="pos">${brl(fim)}</b></div>
   <div class="card"><small>Mês mais caro</small><b>${maior.mes?MN[maior.mes-1]:'—'}</b></div></div>
   <div class="card" style="margin-bottom:14px"><b>Receita <span class="pos">■</span> x Despesas <span class="neg">■</span></b><div class="chart">${bars}</div></div>
-  <div class="scroll"><table style="min-width:980px"><thead><tr><th>Mês</th><th>Receita</th><th>Fixas</th><th>Cartões</th><th>Retiradas</th><th>Outras</th><th>Total</th><th>Saldo</th><th>Poupança acum.</th><th>% Cartões</th><th>Meta cartão</th></tr></thead><tbody>${rows}</tbody>
+  <div class="mobile-year-list">${mobileRows||'<p class="mobile-empty">Ainda não há resultados registrados neste ano.</p>'}</div><div class="scroll desktop-year-table"><table style="min-width:980px"><thead><tr><th>Mês</th><th>Receita</th><th>Fixas</th><th>Cartões</th><th>Retiradas</th><th>Outras</th><th>Total</th><th>Saldo</th><th>Poupança acum.</th><th>% Cartões</th><th>Meta cartão</th></tr></thead><tbody>${rows}</tbody>
   <tfoot><tr><td>Total ${S.ano.ano}</td><td class="pos">${brl(T('receita'))}</td><td>${brl(T('fixas'))}</td><td>${brl(T('cartoes'))}</td><td>${brl(T('retiradas'))}</td><td>${brl(T('outras'))}</td><td class="neg">${brl(T('total_despesas'))}</td><td class="${T('saldo')>=0?'pos':'neg'}">${brl(T('saldo'))}</td><td>${brl(fim)}</td><td></td><td></td></tr></tfoot></table></div>
   <div class="grid2" style="margin-top:12px"><div class="card"><b>Poupança trazida do ano anterior</b><div class="row" style="margin-top:8px"><input type="number" step="0.01" data-af="poupanca_inicial" value="${S.ano.poupanca_inicial}" ${canEdit()?'':'disabled'}></div>
   <small class="mu">Ao fechar o ano, o saldo acumulado vira o ponto de partida do próximo.</small></div>
@@ -3546,7 +3832,7 @@ const catGrupos=[['fixas','Fixas / Financiamentos'],['cartoes','Cartões de Cré
 function viewCats2(){
   const d=canEdit()?'':'disabled',go=sel=>catGrupos.map(g=>`<option value="${g[0]}" ${g[0]===sel?'selected':''}>${g[1]}</option>`).join('');
   const pais=S.cats.filter(c=>!c.parent_id);
-  const rows=pais.map(p=>[p].concat(S.cats.filter(c=>c.parent_id===p.id))).flat().map(c=>`<tr data-cid="${c.id}"><td style="padding-left:${c.parent_id?28:8}px">${c.parent_id?'↳ ':''}<input data-cf="nome" value="${esc(c.nome)}" ${d} style="width:calc(100% - 20px)"></td><td><select data-cf="grupo" ${d}>${go(c.grupo)}</select></td><td><select data-cf="essencial" ${d}><option value="true" ${c.essencial?'selected':''}>Essencial</option><option value="false" ${c.essencial?'':'selected'}>Não essencial</option></select></td><td><button class="red chip" data-act="delcat" data-id="${c.id}" ${d}>✕</button></td></tr>`).join('');
+  const rows=pais.map(p=>[p].concat(S.cats.filter(c=>c.parent_id===p.id))).flat().map(c=>`<tr data-cid="${c.id}"><td data-label="Categoria" style="padding-left:${c.parent_id?28:8}px">${c.parent_id?'↳ ':''}<input data-cf="nome" value="${esc(c.nome)}" ${d} style="width:calc(100% - 20px)"></td><td data-label="Grupo"><select data-cf="grupo" ${d}>${go(c.grupo)}</select></td><td data-label="Importância"><select data-cf="essencial" ${d}><option value="true" ${c.essencial?'selected':''}>Essencial</option><option value="false" ${c.essencial?'':'selected'}>Não essencial</option></select></td><td data-label="Ações"><button class="red chip" data-act="delcat" data-id="${c.id}" ${d}>✕</button></td></tr>`).join('');
   return `<div class="card" style="margin-top:12px"><b>🏷️ Categorias e grupos</b><div class="mu" style="margin:4px 0 8px">O grupo decide em qual coluna do resumo o gasto entra (Fixas, Cartões, Retirada, Outras). "Essencial" evita que o Checape sugira cortar.</div>
   <div class="scroll"><table style="min-width:560px"><tbody>${rows}</tbody></table></div>
   <div class="row" style="margin-top:10px"><input id="c_nome" placeholder="Nova categoria" style="flex:1" ${d}><select id="c_grupo" ${d}>${go('variaveis')}</select><select id="c_pai" ${d}><option value="">Categoria principal</option>${pais.filter(p=>p.tipo==='despesa').map(p=>`<option value="${p.id}">Dentro de: ${esc(p.nome)}</option>`).join('')}</select><button data-act="addcat" ${d}>Criar</button></div></div>`;
@@ -3629,9 +3915,9 @@ function viewChecape(ed){
 }
 function viewFamilia(){
   const ed=canEdit(),dono=S.me?.papel==='dono';
-  const m=S.membros.map(x=>`<tr data-mid="${x.id}"><td>${esc(x.nome)}</td><td class="mu">${x.usuario_id?(dono&&x.papel!=='dono'?`<select data-papel-membro="${x.id}" aria-label="Permissão de ${esc(x.nome)}"><option value="editor" ${x.papel==='editor'?'selected':''}>Editora</option><option value="leitor" ${x.papel==='leitor'?'selected':''}>Somente leitura</option></select>`:esc(x.papel)):'sem login'}</td>
-   <td><input type="number" step="0.01" min="0" data-rf="renda_mensal" value="${x.renda_mensal??''}" placeholder="Renda" ${ed?'':'disabled'}></td>
-   <td>${ed&&!x.usuario_id?`<button class="red" data-act="delmem" data-id="${x.id}">✕</button>`:''}</td></tr>`).join('');
+  const m=S.membros.map(x=>`<tr data-mid="${x.id}"><td data-label="Membro">${esc(x.nome)}</td><td data-label="Acesso" class="mu">${x.usuario_id?(dono&&x.papel!=='dono'?`<select data-papel-membro="${x.id}" aria-label="Permissão de ${esc(x.nome)}"><option value="editor" ${x.papel==='editor'?'selected':''}>Editora</option><option value="leitor" ${x.papel==='leitor'?'selected':''}>Somente leitura</option></select>`:esc(x.papel)):'sem login'}</td>
+   <td data-label="Renda mensal"><input type="number" step="0.01" min="0" data-rf="renda_mensal" value="${x.renda_mensal??''}" placeholder="Renda" ${ed?'':'disabled'}></td>
+   <td data-label="Ações">${ed&&!x.usuario_id?`<button class="red" data-act="delmem" data-id="${x.id}">✕</button>`:''}</td></tr>`).join('');
   return `<div class="grid2"><div class="card"><b>Membros da família</b><div class="scroll" style="margin:10px 0"><table style="min-width:0"><tbody>${m}</tbody></table></div>
    ${ed?`<div class="row"><input id="mnome" placeholder="Nome (ex.: filho, esposa)"><input id="mrenda" type="number" step="0.01" placeholder="Renda mensal"><button data-act="addmem">Adicionar</button></div>`:''}</div>
    <div class="card"><b>Convidar alguém com login</b><div class="mu" style="margin:6px 0">Gere um código e envie. A pessoa entra com ele depois de criar a conta.</div>
@@ -3658,7 +3944,10 @@ document.addEventListener('click',async e=>{
   else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));await boot()}
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));await boot()}
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));toast('Convite aceito! Abrindo a família…');await boot()}
+  else if(a==='mobilemore'){S.mobileMore=!S.mobileMore;render()}
+  else if(a==='mobileadd'){S.mobileAddOpen=!S.mobileAddOpen;render();if(S.mobileAddOpen)document.getElementById('n_desc')?.focus()}
   else if(a==='view'){
+    S.mobileMore=false;S.mobileAddOpen=false;
     const destino=b.dataset.v;
     if(destino==='admin'){S.view='admin';await carregarAdmin();}
     else {if(S.view==='admin')S.adm=null;S.view=destino;if(S.view==='plan')await carregarPlan();else render();}
@@ -3692,6 +3981,7 @@ document.addEventListener('click',async e=>{
     S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));
     S.ano=S.anos.find(x=>x.ano===yy)||S.ano;
     toast(parcelas>1?(natureza==='financiamento'?`Compromisso criado: ${parcelas} prestações mensais de ${brl(valorBase)}.`:`Compra dividida em ${parcelas} parcelas. Valor total: ${brl(valorBase)}.`):'Lançamento adicionado.');
+    S.mobileAddOpen=false;
     await loadAno(mm)}
   else if(a==='del'){
     const lanc=S.lanc.find(x=>x.id===b.dataset.id);

@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MainActivityTest {
-    // 1.0.14 mobile visual cleanup contract
+    // 1.0.15 mobile-first workspace contract
     // Release artifact trigger: keep production APK/AAB build aligned with main.
     @Test
     fun appStartsFromBundledFinanceUi() {
@@ -63,7 +63,7 @@ class MainActivityTest {
     @Test
     fun financialViewsRemainAvailableInTheRestoredUi() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("const TL={planilha:'Planilha mensal',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'}"))
+        assertTrue(html.contains("const TL={planilha:'Lançamentos',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'}"))
         assertTrue(html.contains("function viewPlanilha("))
         assertTrue(html.contains("function viewAno("))
         assertTrue(html.contains("function viewChecape("))
@@ -115,8 +115,8 @@ class MainActivityTest {
     @Test
     fun releaseVersionMatchesTheAuditedAndroidPackage() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 15"))
-        assertTrue(gradle.contains("versionName = \"1.0.14\""))
+        assertTrue(gradle.contains("versionCode = 16"))
+        assertTrue(gradle.contains("versionName = \"1.0.15\""))
     }
 
     @Test
@@ -219,8 +219,8 @@ class MainActivityTest {
     fun releasePackageKeepsTheCurrentVersionAndPremiumFintechVisualContractTogether() {
         val html = File("src/main/assets/mobile.html").readText()
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 15"))
-        assertTrue(gradle.contains("versionName = \"1.0.14\""))
+        assertTrue(gradle.contains("versionCode = 16"))
+        assertTrue(gradle.contains("versionName = \"1.0.15\""))
         assertTrue(html.contains("body[data-ui=\"premium-fintech\"]"))
         assertTrue(html.contains("--surface:#ffffff"))
     }
@@ -280,6 +280,113 @@ class MainActivityTest {
         assertTrue(cleanup.contains("@media(max-width:390px)"))
         assertTrue(cleanup.contains(".cf-preview-sidebar{display:none!important}"))
         assertTrue(cleanup.contains("overflow-x:hidden"))
+    }
+
+
+    @Test
+    fun mobileNavigationUsesPrimaryDestinationsAndAnAccessibleMoreMenu() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("class=\"mobile-bottom-nav\""))
+        assertTrue(html.contains("aria-label=\"Navegação principal do aplicativo\""))
+        assertTrue(html.contains("data-mobile-nav=\"launches\""))
+        assertTrue(html.contains("data-mobile-nav=\"year\""))
+        assertTrue(html.contains("data-mobile-nav=\"checkup\""))
+        assertTrue(html.contains("data-mobile-nav=\"planning\""))
+        assertTrue(html.contains("data-act=\"mobilemore\""))
+        assertTrue(html.contains("class=\"mobile-more-panel\""))
+        assertTrue(html.contains("data-v=\"família\""))
+        assertTrue(html.contains("data-v=\"relatorios\""))
+
+    }
+
+    @Test
+    fun mobileTransactionsUseExpandableRowsAndTheYearUsesTapToOpenSummaries() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("class=\"mobile-entry-table\""))
+        assertTrue(html.contains("class=\"mobile-entry-row\""))
+        assertTrue(html.contains("class=\"mobile-entry-details\""))
+        assertTrue(html.contains("class=\"mobile-year-list\""))
+        assertTrue(html.contains("class=\"mobile-year-open\""))
+        assertTrue(html.contains("data-label=\"Valor\""))
+        assertTrue(html.contains("data-label=\"Meta cartão\""))
+        assertTrue(html.contains(".desktop-year-table{display:none!important}"))
+
+    }
+
+    @Test
+    fun mobileWorkspaceUsesFullWidthSafeAreasAndTouchSizedControls() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val mobile = html.substringAfter("<style id=\"cf-mobile-first-1-0-15\">").substringBefore("</style>")
+        assertTrue(mobile.contains("width:100vw"))
+        assertTrue(mobile.contains("min-height:100dvh"))
+        assertTrue(mobile.contains("min-height:48px"))
+        assertTrue(mobile.contains("overflow-x:hidden"))
+        assertTrue(mobile.contains("env(safe-area-inset-bottom)"))
+        assertTrue(mobile.contains("grid-template-columns:repeat(5,minmax(0,1fr))"))
+        assertTrue(mobile.contains(".desktop-transactions{display:none!important}"))
+        assertTrue(mobile.contains(".mobile-entry-table{display:block!important"))
+
+    }
+
+
+    @Test
+    fun everyMobileWorkspaceScreenIncludesContextualHowToInstructions() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileGuide(view)"))
+        assertTrue(html.contains("class=\"mobile-guide\""))
+        assertTrue(html.contains("Como usar os lançamentos"))
+        assertTrue(html.contains("Como usar a visão do ano"))
+        assertTrue(html.contains("Como usar o checape"))
+        assertTrue(html.contains("Como usar o planejamento"))
+        assertTrue(html.contains("Como usar a área da família"))
+        assertTrue(html.contains("aria-controls=\"mobile-guide-content\""))
+    }
+
+    @Test
+    fun mobileNewLaunchActionOpensTheExistingValidatedLaunchForm() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("data-act=\"mobileadd\""))
+        assertTrue(html.contains("id=\"mobile-add-launch\""))
+        assertTrue(html.contains("S.mobileAddOpen"))
+        assertTrue(html.contains("else if(a==='mobileadd')"))
+        assertTrue(html.contains("else if(a==='add')"))
+    }
+
+    @Test
+    fun mobileMoreMenuKeepsReportsFamilyAdminAndSignOutReachable() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("S.mobileMore"))
+        assertTrue(html.contains("data-act=\"mobilemore\""))
+        assertTrue(html.contains("data-act=\"view\" data-v=\"família\""))
+        assertTrue(html.contains("data-act=\"view\" data-v=\"relatorios\""))
+        assertTrue(html.contains("data-act=\"view\" data-v=\"admin\""))
+        assertTrue(html.contains("data-act=\"sair\""))
+    }
+
+
+    @Test
+    fun androidSystemBackClosesMobileOverlaysBeforeExitingTheApp() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
+        assertTrue(html.contains("window.__copilotoHandleAndroidBack"))
+        assertTrue(html.contains("S.mobileMore"))
+        assertTrue(html.contains("S.mobileAddOpen"))
+        assertTrue(html.contains("document.querySelectorAll('.app-main details[open]')"))
+        assertTrue(html.contains("if(S.view!=='planilha'&&S.fam)"))
+        assertTrue(activity.contains("__copilotoHandleAndroidBack"))
+        assertTrue(activity.contains("webView.evaluateJavascript"))
+    }
+
+
+    @Test
+    fun mobileCashFlowVisualizationUsesRealMonthlyIncomeAndExpenseTotals() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("const totalFluxo=rec+des;"))
+        assertTrue(html.contains("class=\"mobile-flow-track\""))
+        assertTrue(html.contains("brl(rec)"))
+        assertTrue(html.contains("brl(des)"))
+        assertTrue(html.contains("Entradas"))
+        assertTrue(html.contains("Saídas"))
     }
 
 }

@@ -419,10 +419,21 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     }
 
     override fun onBackPressed() {
-        if (::webView.isInitialized && webView.canGoBack()) {
-            webView.goBack()
-        } else {
+        if (!::webView.isInitialized) {
             finish()
+            return
+        }
+
+        webView.evaluateJavascript(
+            "window.__copilotoHandleAndroidBack ? window.__copilotoHandleAndroidBack() : false"
+        ) { handled ->
+            if (handled == "true") return@evaluateJavascript
+
+            if (webView.canGoBack()) {
+                webView.goBack()
+            } else {
+                finish()
+            }
         }
     }
 
