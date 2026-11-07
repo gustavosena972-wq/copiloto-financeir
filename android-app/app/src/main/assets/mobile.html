@@ -3184,7 +3184,238 @@ body[data-ui="premium-fintech"] .landing-page{background:rgba(238,242,246,.76)!i
   .cf-3d-shadow{right:54px;top:198px;width:170px}
   .cf-scene-beacon{right:130px;top:108px;height:90px}
 }
-</style>
+<style id="cf-figma-family-ui">
+/* 1.0.11 — Figma Make como referência visual: família + fintech + dados vivos. */
+.cf-figma-family-ui{
+  --cf-figma-bg:#070b09;
+  --cf-figma-surface:#0d1511;
+  --cf-figma-surface-2:#142019;
+  --cf-figma-border:#1e3027;
+  --cf-figma-emerald:#35e991;
+  --cf-figma-emerald-dim:#16995b;
+  --cf-figma-gold:#d9aa4b;
+  --cf-figma-text:#f1f5ef;
+  --cf-figma-muted:#8b9d92;
+}
+body:has(.cf-figma-family-ui){background:
+  radial-gradient(900px 520px at 8% -10%,rgba(53,233,145,.08),transparent 58%),
+  radial-gradient(760px 520px at 100% 0,rgba(217,170,75,.06),transparent 56%),
+  #060907!important;
+}
+#app:has(.cf-figma-family-ui){max-width:1500px;width:100%;padding:16px}
+.cf-figma-family-ui.app-shell{
+  display:grid;
+  grid-template-columns:246px minmax(0,1fr);
+  min-height:calc(100dvh - 32px);
+  background:rgba(7,11,9,.96)!important;
+  border:1px solid rgba(83,132,101,.22)!important;
+  border-radius:24px!important;
+  box-shadow:0 30px 100px rgba(0,0,0,.42),0 0 90px rgba(35,175,96,.05)!important;
+  overflow:hidden!important;
+}
+.cf-figma-family-ui .app-sidebar{
+  background:linear-gradient(180deg,#0d1812 0%,#08100c 100%)!important;
+  border-right:1px solid rgba(83,132,101,.18)!important;
+  border-radius:0!important;
+  padding:22px 15px 16px!important;
+  gap:24px!important;
+}
+.cf-figma-family-ui .sidebar-brand strong{color:#f1f5ef!important}
+.cf-figma-family-ui .sidebar-brand small,
+.cf-figma-family-ui .nav-section-title{color:#708879!important}
+.cf-figma-family-ui .sidebar-family{
+  border:1px solid rgba(83,132,101,.2)!important;
+  background:rgba(20,32,25,.68)!important;
+  border-radius:14px!important;
+}
+.cf-figma-family-ui .sidebar-family strong{color:#eaf8ee!important}
+.cf-figma-family-ui .sidebar-family span{color:#8ca494!important}
+.cf-figma-family-ui .sidebar-family i{background:var(--cf-figma-emerald)!important;box-shadow:0 0 12px rgba(53,233,145,.7)}
+.cf-figma-family-ui .nav-item{
+  color:#93a99b!important;
+  border-radius:11px!important;
+  min-height:42px!important;
+  background:transparent!important;
+}
+.cf-figma-family-ui .nav-item:hover{background:rgba(53,233,145,.06)!important;color:#e6f4e9!important}
+.cf-figma-family-ui .nav-item.on{
+  color:#f4fff7!important;
+  background:linear-gradient(90deg,rgba(31,111,70,.58),rgba(20,56,37,.42))!important;
+  border-color:rgba(53,233,145,.22)!important;
+  box-shadow:inset 3px 0 var(--cf-figma-emerald),0 8px 28px rgba(0,0,0,.18)!important;
+}
+.cf-figma-family-ui .nav-icon{background:rgba(53,233,145,.06)!important;color:#9bd9b1!important}
+.cf-figma-family-ui .nav-item.on .nav-icon{background:rgba(53,233,145,.12)!important;color:var(--cf-figma-emerald)!important}
+.cf-figma-family-ui .sidebar-footer{border-top-color:rgba(83,132,101,.18)!important}
+.cf-figma-family-ui .sidebar-avatar{background:linear-gradient(145deg,#1d5e3b,#0e2c1c)!important;color:#dfffea!important;border:1px solid rgba(53,233,145,.22)}
+.cf-figma-family-ui .sidebar-user b{color:#eaf8ee!important}
+.cf-figma-family-ui .sidebar-user small{color:#708879!important}
+
+.cf-figma-family-ui .app-main{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(620px 420px at 88% 0%,rgba(53,233,145,.055),transparent 68%),
+    radial-gradient(560px 380px at 0% 100%,rgba(217,170,75,.035),transparent 70%),
+    #09100c!important;
+  color:var(--cf-figma-text)!important;
+  border-radius:0!important;
+  padding:28px 30px 42px!important;
+}
+.cf-figma-family-ui .app-main:after{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(rgba(53,233,145,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(53,233,145,.022) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.5),transparent 72%);
+}
+.cf-figma-family-ui .app-topbar{position:relative;z-index:2;border-bottom-color:rgba(83,132,101,.2)!important}
+.cf-figma-family-ui .page-eyebrow{color:#6f8b79!important}
+.cf-figma-family-ui .page-heading h1{color:#f1f5ef!important;font-size:28px!important}
+.cf-figma-family-ui .page-heading p{color:#8b9d92!important}
+.cf-figma-family-ui .date-line{color:#63766a!important}
+.cf-figma-family-ui .year-control,
+.cf-figma-family-ui .utility-button,
+.cf-figma-family-ui .session-button{
+  background:#0e1712!important;color:#a6b7aa!important;
+  border-color:rgba(83,132,101,.22)!important;
+}
+.cf-figma-family-ui .year-control select{background:#0e1712!important;color:#dbe9df!important}
+.cf-figma-family-ui .notification-button span{background:rgba(53,233,145,.12)!important;color:#8fe6ac!important}
+.cf-figma-family-ui .app-main .meses button{
+  background:#0d1711!important;color:#809487!important;border-color:rgba(83,132,101,.22)!important;
+}
+.cf-figma-family-ui .app-main .meses button.on{
+  background:linear-gradient(135deg,#167447,#23975e)!important;border-color:#23975e!important;color:#fff!important;
+  box-shadow:0 8px 24px rgba(35,151,94,.18)!important;
+}
+.cf-figma-family-ui .app-main .meses button.fech{outline-color:var(--cf-figma-gold)!important}
+.cf-figma-family-ui .app-main .card{
+  background:linear-gradient(145deg,rgba(14,25,18,.94),rgba(11,20,15,.92))!important;
+  color:#e8f2ea!important;
+  border-color:rgba(83,132,101,.2)!important;
+  border-radius:18px!important;
+  box-shadow:0 14px 40px rgba(0,0,0,.18)!important;
+}
+.cf-figma-family-ui .app-main .cards .card b{color:#f1f5ef!important}
+.cf-figma-family-ui .app-main .cards .card small{color:#819688!important}
+.cf-figma-family-ui .app-main .cards .card b.pos{color:#35e991!important}
+.cf-figma-family-ui .app-main .cards .card b.neg{color:#ff7d7d!important}
+.cf-figma-family-ui .app-main button{
+  background:linear-gradient(135deg,#197948,#2ca864)!important;
+  border-color:#2ca864!important;
+  color:#fff!important;
+  border-radius:11px!important;
+  box-shadow:0 10px 24px rgba(30,150,87,.16)!important;
+}
+.cf-figma-family-ui .app-main button.sec{
+  background:#101b15!important;color:#c8d8cc!important;border-color:rgba(83,132,101,.24)!important;box-shadow:none!important;
+}
+.cf-figma-family-ui .app-main button.red{
+  background:#241413!important;color:#ff9b9b!important;border-color:#6a2f2f!important;box-shadow:none!important;
+}
+.cf-figma-family-ui .app-main input:not([type=checkbox]),
+.cf-figma-family-ui .app-main select,
+.cf-figma-family-ui .app-main textarea{
+  background:#0d1711!important;color:#e4eee6!important;border-color:rgba(83,132,101,.24)!important;border-radius:11px!important;
+}
+.cf-figma-family-ui .app-main input:focus,
+.cf-figma-family-ui .app-main select:focus,
+.cf-figma-family-ui .app-main textarea:focus{
+  border-color:rgba(53,233,145,.58)!important;box-shadow:0 0 0 3px rgba(53,233,145,.09)!important;
+}
+.cf-figma-family-ui .app-main .scroll{
+  background:#0c1510!important;border-color:rgba(83,132,101,.2)!important;border-radius:18px!important;
+}
+.cf-figma-family-ui .app-main th{background:#101b15!important;color:#819688!important}
+.cf-figma-family-ui .app-main td{color:#d8e5da!important;border-top-color:rgba(83,132,101,.15)!important}
+.cf-figma-family-ui .app-main tbody tr:hover td{background:rgba(53,233,145,.035)!important}
+.cf-figma-family-ui .app-main .mu{color:#819688!important}
+.cf-figma-family-ui .app-main .pos{color:#35e991!important}
+.cf-figma-family-ui .app-main .neg{color:#ff7d7d!important}
+.cf-figma-family-ui .app-main .sug{
+  background:linear-gradient(145deg,#0e1912,#0b1510)!important;
+  border-color:rgba(83,132,101,.2)!important;border-radius:16px!important;
+}
+.cf-figma-family-ui .app-main .sug.corte{border-left-color:#35e991!important}
+.cf-figma-family-ui .app-main .sug.dica{border-left-color:#d9aa4b!important}
+.cf-figma-family-ui .app-main .sug.alerta{border-left-color:#ff7d7d!important}
+
+.cf-command-hero{
+  position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);
+  min-height:330px;margin:0 0 22px;padding:28px;overflow:hidden;border-radius:26px;
+  border:1px solid rgba(83,132,101,.25);
+  background:
+    radial-gradient(circle at 76% 38%,rgba(53,233,145,.10),transparent 25%),
+    linear-gradient(135deg,#0d1a12 0%,#0b1510 52%,#101b14 100%);
+  box-shadow:0 28px 80px rgba(0,0,0,.26),inset 0 1px rgba(255,255,255,.04);
+}
+.cf-command-copy{position:relative;z-index:4;align-self:center;max-width:620px}
+.cf-command-kicker{display:inline-flex;align-items:center;gap:8px;color:#75b789;font-size:9px;font-weight:800;letter-spacing:.17em}
+.cf-command-kicker i{width:6px;height:6px;border-radius:50%;background:#35e991;box-shadow:0 0 16px rgba(53,233,145,.85)}
+.cf-command-copy h2{margin:12px 0 9px;color:#f4fff6;font-size:clamp(28px,4vw,46px);line-height:1.02;letter-spacing:-.045em}
+.cf-command-copy p{margin:0;max-width:560px;color:#92a698;font-size:13px;line-height:1.65}
+.cf-command-copy p strong{color:#d8e9dc}
+.cf-command-meta{display:flex;gap:20px;flex-wrap:wrap;margin-top:22px;color:#748a7b;font-size:10px}
+.cf-command-meta b{color:#e3f0e6}.cf-command-meta i{display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:50%;background:#35e991;box-shadow:0 0 10px rgba(53,233,145,.7)}
+.cf-command-stage{position:relative;min-height:280px;perspective:1100px;transform-style:preserve-3d}
+.cf-command-grid{position:absolute;inset:16% -4% 4% 4%;transform:perspective(700px) rotateX(64deg);transform-origin:center bottom;
+  background:linear-gradient(rgba(53,233,145,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(53,233,145,.16) 1px,transparent 1px);
+  background-size:28px 28px;mask-image:linear-gradient(to top,black,transparent 88%);opacity:.36;
+}
+.cf-command-orbit{position:absolute;border:1px solid rgba(53,233,145,.3);border-radius:50%;transform-style:preserve-3d;animation:cf-command-orbit 15s linear infinite}
+.cf-command-orbit i{position:absolute;width:9px;height:9px;border-radius:50%;background:#35e991;box-shadow:0 0 20px rgba(53,233,145,.85)}
+.cf-command-orbit.o1{width:78%;height:42%;right:1%;top:17%;transform:rotateX(64deg) rotateZ(-14deg)}
+.cf-command-orbit.o1 i{left:18%;top:11%}
+.cf-command-orbit.o2{width:62%;height:34%;right:12%;top:30%;border-color:rgba(217,170,75,.28);transform:rotateX(64deg) rotateZ(17deg);animation-duration:20s;animation-direction:reverse}
+.cf-command-orbit.o2 i{right:12%;bottom:9%;background:#d9aa4b;box-shadow:0 0 18px rgba(217,170,75,.65)}
+.cf-command-orbit.o3{width:48%;height:27%;left:16%;bottom:17%;border-color:rgba(53,233,145,.18);transform:rotateX(64deg) rotateZ(-24deg);animation-duration:24s}
+.cf-command-orbit.o3 i{right:17%;top:4%;width:7px;height:7px}
+.cf-command-core{position:absolute;right:25%;top:28%;width:112px;height:112px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid rgba(53,233,145,.48);
+  background:radial-gradient(circle at 35% 30%,#1c5737 0%,#0d2015 48%,#07100b 100%);
+  box-shadow:0 0 0 12px rgba(53,233,145,.025),0 0 70px rgba(53,233,145,.16),inset 0 0 30px rgba(53,233,145,.1);
+  animation:cf-command-core 4s ease-in-out infinite;
+}
+.cf-command-core span{color:#35e991;font-size:26px;font-weight:800;letter-spacing:-.06em}
+.cf-command-core b{position:absolute;bottom:22px;color:#d9aa4b;font-size:7px;letter-spacing:.18em}
+.cf-command-pulse{position:absolute;right:calc(25% + 25px);top:calc(28% + 25px);width:62px;height:62px;border:1px solid rgba(53,233,145,.34);border-radius:50%;animation:cf-command-pulse 2.8s ease-out infinite}
+.cf-command-stats{position:absolute;right:3%;bottom:2%;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:min(370px,72%);z-index:3}
+.cf-command-stats article{padding:9px 10px;border:1px solid rgba(83,132,101,.18);border-radius:12px;background:rgba(7,16,11,.78);backdrop-filter:blur(8px)}
+.cf-command-stats small{display:block;color:#668071;font-size:7px;font-weight:800;letter-spacing:.1em}
+.cf-command-stats b{display:block;margin-top:4px;color:#effff3;font-size:12px;letter-spacing:-.02em}
+.cf-command-stats b.positive{color:#35e991}.cf-command-stats b.negative{color:#ff7d7d}
+@keyframes cf-command-orbit{to{transform:rotateX(64deg) rotateZ(346deg)}}
+@keyframes cf-command-core{50%{transform:translateZ(18px) scale(1.035);box-shadow:0 0 0 16px rgba(53,233,145,.025),0 0 86px rgba(53,233,145,.2),inset 0 0 34px rgba(53,233,145,.12)}}
+@keyframes cf-command-pulse{0%{opacity:.8;transform:scale(.72)}100%{opacity:0;transform:scale(2.6)}}
+@media(max-width:900px){
+  .cf-figma-family-ui.app-shell{grid-template-columns:78px minmax(0,1fr)}
+  .cf-figma-family-ui .sidebar-brand div,.cf-figma-family-ui .sidebar-family,.cf-figma-family-ui .nav-section-title,.cf-figma-family-ui .nav-item span:not(.nav-icon),.cf-figma-family-ui .sidebar-user{display:none}
+  .cf-figma-family-ui .app-sidebar{padding:20px 9px}
+  .cf-figma-family-ui .nav-item{justify-content:center;padding:9px}
+  .cf-command-hero{grid-template-columns:1fr;min-height:520px}
+  .cf-command-stage{min-height:250px}
+}
+@media(max-width:640px){
+  #app:has(.cf-figma-family-ui){padding:0}
+  .cf-figma-family-ui.app-shell{display:block;min-height:100dvh;border-radius:0!important;border:0!important}
+  .cf-figma-family-ui .app-sidebar{display:none}
+  .cf-figma-family-ui .app-main{padding:18px 15px 30px!important}
+  .cf-figma-family-ui .page-heading h1{font-size:23px!important}
+  .cf-command-hero{min-height:560px;margin-bottom:18px;padding:21px 18px;border-radius:22px;display:block}
+  .cf-command-copy h2{font-size:32px}
+  .cf-command-stage{height:300px;min-height:300px;margin-top:4px}
+  .cf-command-core{right:50%;top:34%;transform:translateX(50%)}
+  .cf-command-pulse{right:calc(50% + 31px);top:calc(34% + 25px)}
+  .cf-command-stats{left:0;right:0;bottom:0;width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  .cf-figma-family-ui .cf-command-orbit,.cf-figma-family-ui .cf-command-core,.cf-figma-family-ui .cf-command-pulse{animation:none!important}
+}
+</style></style>
 </head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
@@ -3586,7 +3817,7 @@ function viewAnimatedScene(view){
   const scenes={planilha:{eyebrow:'LIVE LEDGER',title:'Movimentações em fluxo',sub:'Cada lançamento ganha vida conforme você organiza o mês.',visual:'ledger'},ano:{eyebrow:'YEAR ORBIT',title:'O ano inteiro em uma visão',sub:'Meses, saldo e evolução conectados em uma única superfície.',visual:'orbit'},checape:{eyebrow:'FINANCIAL HEALTH',title:'Seu dinheiro em análise',sub:'O Copiloto transforma sinais financeiros em uma leitura visual.',visual:'health'},plan:{eyebrow:'FUTURE PLAN',title:'Objetivos em movimento',sub:'Metas, dívidas e patrimônio formando o próximo passo.',visual:'goals'},relatorios:{eyebrow:'DATA INTELLIGENCE',title:'Dados que contam uma história',sub:'Tendências financeiras apresentadas como uma interface viva.',visual:'reports'},família:{eyebrow:'FAMILY NETWORK',title:'Finanças conectadas',sub:'Pessoas, responsabilidades e decisões no mesmo espaço.',visual:'family'}};
   const sceneMotionMap={planilha:'ledger',ano:'orbit',checape:'health',planejamento:'future',relatorios:'data',familia:'network'};
   const s=scenes[view]||scenes.planilha,v=s.visual;
-  const visual=v==='ledger'?'<div class="cf-ledger-lines"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="cf-floating-value cf-v1">+ R$ 2.450</div><div class="cf-floating-value cf-v2">− R$ 780</div><div class="cf-floating-value cf-v3">SALDO +18,4%</div>':v==='orbit'?'<div class="cf-orbit-core"><b>2026</b><span>VISÃO ANUAL</span></div><i class="cf-orbit-ring r1"></i><i class="cf-orbit-ring r2"></i><i class="cf-orbit-dot d1"></i><i class="cf-orbit-dot d2"></i><i class="cf-orbit-dot d3"></i>':v==='health'?'<div class="cf-health-ring"><div><b>92</b><span>SAÚDE</span></div></div><div class="cf-health-pulse"></div><div class="cf-health-chip c1">Reserva <b>+24%</b></div><div class="cf-health-chip c2">Dívidas <b>−12%</b></div>':v==='goals'?'<div class="cf-goal-rings"><i class="g1"></i><i class="g2"></i><i class="g3"></i><div><b>R$ 48.600</b><span>patrimônio projetado</span></div></div><div class="cf-goal-node n1">CASA</div><div class="cf-goal-node n2">RESERVA</div><div class="cf-goal-node n3">VIAGEM</div>':v==='reports'?'<div class="cf-data-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="cf-data-line"></div><div class="cf-report-pulse">+23,7% <small>evolução</small></div>':'<div class="cf-family-core"><b>FAMÍLIA</b><span>SYNC 100%</span></div><div class="cf-family-node n1">VOCÊ</div><div class="cf-family-node n2">MEMBRO</div><div class="cf-family-node n3">META</div><div class="cf-family-link l1"></div><div class="cf-family-link l2"></div><div class="cf-family-link l3"></div>';
+  const visual=v==='ledger'?'<div class="cf-ledger-lines"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="cf-floating-value cf-v1">ENTRADAS</div><div class="cf-floating-value cf-v2">SAÍDAS</div><div class="cf-floating-value cf-v3">SALDO</div>':v==='orbit'?'<div class="cf-orbit-core"><b>2026</b><span>VISÃO ANUAL</span></div><i class="cf-orbit-ring r1"></i><i class="cf-orbit-ring r2"></i><i class="cf-orbit-dot d1"></i><i class="cf-orbit-dot d2"></i><i class="cf-orbit-dot d3"></i>':v==='health'?'<div class="cf-health-ring"><div><b>AI</b><span>LEITURA</span></div></div><div class="cf-health-pulse"></div><div class="cf-health-chip c1">Reserva <b>ATIVA</b></div><div class="cf-health-chip c2">Dívidas <b>EM ANÁLISE</b></div>':v==='goals'?'<div class="cf-goal-rings"><i class="g1"></i><i class="g2"></i><i class="g3"></i><div><b>FUTURO</b><span>patrimônio em análise</span></div></div><div class="cf-goal-node n1">CASA</div><div class="cf-goal-node n2">RESERVA</div><div class="cf-goal-node n3">VIAGEM</div>':v==='reports'?'<div class="cf-data-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="cf-data-line"></div><div class="cf-report-pulse">EVOLUÇÃO <small>em análise</small></div>':'<div class="cf-family-core"><b>FAMÍLIA</b><span>SYNC 100%</span></div><div class="cf-family-node n1">VOCÊ</div><div class="cf-family-node n2">MEMBRO</div><div class="cf-family-node n3">META</div><div class="cf-family-link l1"></div><div class="cf-family-link l2"></div><div class="cf-family-link l3"></div>';
   const motion=sceneMotionMap[view]||v;
   const depth='<div class="cf-3d-stage"><div class="cf-3d-depth"></div><div class="cf-3d-object"><div class="cf-3d-core"></div><div class="cf-3d-rim"></div><div class="cf-3d-face"></div><i class="cf-3d-particle p1"></i><i class="cf-3d-particle p2"></i><i class="cf-3d-particle p3"></i></div><div class="cf-3d-shadow"></div><div class="cf-scene-beacon"></div></div>';
   return '<section class="cf-screen-stage cf-screen-'+v+'" data-screen-stage data-scene-key="'+view+'" data-scene-motion="'+motion+'" aria-label="'+s.title+'"><div class="cf-stage-copy"><span>'+s.eyebrow+'</span><h2>'+s.title+'</h2><p>'+s.sub+'</p></div><div class="cf-stage-visual" aria-hidden="true">'+visual+depth+'</div><div class="cf-stage-scan"></div></section>';
@@ -3617,9 +3848,9 @@ function render(){
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
   const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
-  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&planoTemRecurso('relatorios'))body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
+  if(S.view==='planilha')body=viewCommandHero()+viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&planoTemRecurso('relatorios'))body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
   const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
-  $('#app').innerHTML=`<div class="app-shell">
+  $('#app').innerHTML=`<div class="app-shell cf-figma-family-ui" data-ui="figma-family-model">
     <aside class="app-sidebar" aria-label="Navegação principal">
       <div class="sidebar-head">
         <div class="sidebar-brand">${LOGO}<div><strong>Copiloto</strong><small>FINANCEIRO</small></div></div>
@@ -3745,6 +3976,36 @@ const stOpts=sel=>['pendente','pago','atrasado'].map(s=>`<option ${s===sel?'sele
 const tpOpts=sel=>['despesa','receita'].map(s=>`<option ${s===sel?'selected':''}>${s}</option>`).join('');
 
 function quickEditButton(kind){return canEdit()&&mesAberto()?`<button type="button" class="sec chip cf-quick-edit" data-act="quickedit" data-kind="${kind}">Editar valores</button>`:''}
+function viewCommandHero(){
+  const lanc=S.lanc||[];
+  const receitas=lanc.filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor||0),0);
+  const despesas=lanc.filter(l=>l.tipo==='despesa').reduce((a,l)=>a+Number(l.valor||0),0);
+  const saldo=receitas-despesas;
+  const ativos=lanc.length;
+  const mesNome=S.mes?MN[(Number(S.mes.mes)||1)-1]:'mês atual';
+  return '<section class="cf-command-hero" aria-label="Resumo financeiro do mês">'+
+    '<div class="cf-command-copy">'+
+      '<span class="cf-command-kicker"><i></i> COPILOTO · CONTROLE FAMILIAR</span>'+
+      '<h2>Seu dinheiro, em uma visão viva.</h2>'+
+      '<p>Receitas, despesas e compromissos do <strong>'+esc(mesNome)+'</strong> reunidos em uma superfície clara para você decidir melhor.</p>'+
+      '<div class="cf-command-meta"><span><b>'+ativos+'</b> lançamentos</span><span><i></i> dados sincronizados</span></div>'+
+    '</div>'+
+    '<div class="cf-command-stage" aria-hidden="true">'+
+      '<div class="cf-command-grid"></div>'+
+      '<div class="cf-command-orbit o1"><i></i></div>'+
+      '<div class="cf-command-orbit o2"><i></i></div>'+
+      '<div class="cf-command-orbit o3"><i></i></div>'+
+      '<div class="cf-command-core"><span>AI</span><b>FAMÍLIA</b></div>'+
+      '<div class="cf-command-pulse"></div>'+
+      '<div class="cf-command-stats">'+
+        '<article><small>ENTRADAS</small><b>'+brl(receitas)+'</b></article>'+
+        '<article><small>SAÍDAS</small><b>'+brl(despesas)+'</b></article>'+
+        '<article><small>SALDO</small><b class="'+(saldo>=0?'positive':'negative')+'">'+brl(saldo)+'</b></article>'+
+      '</div>'+
+    '</div>'+
+  '</section>';
+}
+
 function viewPlanilha(ed){
   ed=!!ed&&S.mes.status==='aberto';
   const rec=S.lanc.filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor),0);
