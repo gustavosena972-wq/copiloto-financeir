@@ -63,7 +63,7 @@ class MainActivityTest {
     @Test
     fun financialViewsRemainAvailableInTheRestoredUi() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("const TL={planilha:'Planilha mensal',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'}"))
+        assertTrue(html.contains("const TL={planilha:'Lançamentos',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'}"))
         assertTrue(html.contains("function viewPlanilha("))
         assertTrue(html.contains("function viewAno("))
         assertTrue(html.contains("function viewChecape("))
