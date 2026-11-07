@@ -437,7 +437,8 @@ class MainActivityTest {
         assertTrue(html.contains(".v0-mobile-quick-nav-primary"))
         assertTrue(html.contains(".v0-mobile-quick-nav-item"))
         assertTrue(html.contains(".v0-mobile-section-divider"))
-        assertTrue(html.contains(".v0-mobile-bottom-nav"))
+        assertTrue(html.contains("function mobileNavigation()"))
+        assertTrue(html.contains(".mobile-bottom-nav"))
     }
 
     @Test
