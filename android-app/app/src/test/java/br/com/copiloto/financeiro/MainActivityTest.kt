@@ -605,4 +605,37 @@ class MainActivityTest {
         assertTrue(html.contains("Preparando seu financeiro"))
     }
 
+
+    @Test
+    fun privacyPolicyIsAvailableBeforeAndInsideTheFinanceExperience() {
+        val privacy = File("src/main/assets/privacidade.html").readText()
+        val terms = File("src/main/assets/termos.html").readText()
+        val deletion = File("src/main/assets/excluir-conta.html").readText()
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(privacy.contains("Política de Privacidade"))
+        assertTrue(privacy.contains("LGPD"))
+        assertTrue(terms.contains("Política de Privacidade"))
+        assertTrue(deletion.contains("Política de Privacidade"))
+        assertTrue(html.contains("data-act=\"legal\""))
+    }
+
+    @Test
+    fun mobilePrivacyPolicyDoesNotPromiseDataProtectionWithoutARealControl() {
+        val privacy = File("src/main/assets/privacidade.html").readText()
+        assertTrue(privacy.contains("nenhum sistema é totalmente invulnerável"))
+        assertTrue(privacy.contains("exclusão da conta"))
+        assertTrue(privacy.contains("exportação"))
+    }
+
+    @Test
+    fun securitySensitiveClientCodeDoesNotContainServiceRoleSecrets() {
+        val assets = File("src/main/assets")
+        val files = assets.walkTopDown().filter { it.isFile && it.extension in setOf("html", "js", "json") }.toList()
+        files.forEach { file ->
+            val text = file.readText()
+            assertTrue(!text.contains("SUPABASE_SERVICE_ROLE_KEY"))
+            assertTrue(!text.contains("service_role", ignoreCase = true))
+        }
+    }
+
 }
