@@ -26,6 +26,16 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("--surface:#ffffff"))
         assertTrue(html.contains("--primary:#146c43"))
-        assertTrue(html.contains("data-ui="premium-fintech""))
+        assertTrue(html.contains("data-ui=\"premium-fintech\""))
+    }
+
+    @Test
+    fun bundledFinanceUiUsesWholeScreenMotionSystem() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-motion-world"))
+        assertTrue(html.contains("cf-motion-image"))
+        assertTrue(html.contains("data-motion-parallax"))
+        assertTrue(html.contains("@keyframes cf-image-float"))
+        assertTrue(html.contains("prefers-reduced-motion:reduce"))
     }
 }
