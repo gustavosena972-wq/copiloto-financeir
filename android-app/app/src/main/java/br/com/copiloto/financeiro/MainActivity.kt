@@ -8,6 +8,7 @@ import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.view.WindowManager
 import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
@@ -49,6 +50,12 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
+
         billingClient = BillingClient.newBuilder(this)
             .setListener(this)
             .enablePendingPurchases(
@@ -77,7 +84,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             mediaPlaybackRequiresUserGesture = true
             setGeolocationEnabled(false)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                safeBrowsingEnabled = true
+                setSafeBrowsingEnabled(true)
             }
         }
 
