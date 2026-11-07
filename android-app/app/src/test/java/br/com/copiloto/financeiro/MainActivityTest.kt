@@ -605,4 +605,46 @@ class MainActivityTest {
         assertTrue(html.contains("Preparando seu financeiro"))
     }
 
+
+    @Test
+    fun androidV023ProvidesContextualGuidanceWithoutExpandingThePrimaryNavigation() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-companion"))
+        assertTrue(html.contains("cf-companion-guide"))
+        assertTrue(html.contains("function mobileCompanionGuide"))
+        assertTrue(html.contains("Planilha mensal"))
+        assertTrue(html.contains("Checape"))
+        assertTrue(html.contains("Metas"))
+        assertTrue(html.contains("Família"))
+        assertTrue(html.contains("aria-label=\"Abrir ajuda do Copiloto\""))
+        assertFalse(html.contains("data-v=\"ajuda\""))
+    }
+
+    @Test
+    fun androidV023AddsAnInteractiveTamanduaCompanionUsingLocalAssetsOnly() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("Tamanduá"))
+        assertTrue(html.contains("cf-companion-animal"))
+        assertTrue(html.contains("cf-companion-tail"))
+        assertTrue(html.contains("cf-companion-face"))
+        assertFalse(html.contains("http://"))
+        assertFalse(html.contains("https://") && html.contains("cf-companion-animal"))
+    }
+
+    @Test
+    fun androidV023DoesNotDelayStartupForTheCompanion() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val companion = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-23-companion\">").substringBefore("</style>")
+        assertTrue(companion.contains("pointer-events:none"))
+        assertTrue(companion.contains("animation"))
+        assertFalse(companion.contains("backdrop-filter:blur"))
+    }
+
+    @Test
+    fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
+        val gradle = File("build.gradle.kts").readText()
+        assertTrue(gradle.contains("versionCode = 24"))
+        assertTrue(gradle.contains("versionName = \"1.0.23\""))
+    }
+
 }
