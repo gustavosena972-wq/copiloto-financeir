@@ -586,7 +586,7 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("S.internalTester=testerCheck.data===true"))
         assertTrue(html.contains("!S.internalTester&&!(S.fam.acesso_ate"))
-        assertTrue(html.contains("Teste interno"))
+        assertTrue(html.contains("TESTE INTERNO · PAGAMENTOS DESATIVADOS"))
     }
 
     @Test
