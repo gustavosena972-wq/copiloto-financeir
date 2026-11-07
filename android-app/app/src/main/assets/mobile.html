@@ -2506,6 +2506,7 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   .app-main .mobile-month-overview .card:nth-child(1){padding-left:2px!important}
   .app-main .mobile-month-overview .card:nth-child(2){padding-right:2px!important;border-right:0!important}
   .app-main .card{min-width:0!important;max-width:100%!important;margin:0 0 15px!important;padding:14px 0!important;border:0!important;border-bottom:1px solid var(--mobile-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+  .app-main .modal .card,.app-main .modal .box{margin:0!important;padding:16px!important;border:1px solid var(--mobile-line)!important;border-radius:14px!important;background:#fff!important;box-shadow:0 12px 30px rgba(24,48,33,.14)!important}
   .app-main .card>b:first-child{display:block!important;margin-bottom:7px!important;font-size:15px!important;color:var(--mobile-ink)!important}
   .app-main .grid2,.app-main .grid3{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important}
   .app-main .item{padding:12px 0!important;border-bottom:1px solid var(--mobile-line)!important;border-radius:0!important;background:transparent!important}
@@ -3283,7 +3284,7 @@ function viewAno(){
     const mes=MN[r.mes-1];
     const saldoClass=Number(r.saldo)>=0?'pos':'neg';
     const status=r.status==='fechado'?' · Fechado':'';
-    return '<article class="mobile-year-item"><button type="button" class="mobile-year-open" data-act="irmes" data-m="'+r.mes+'" aria-label="Abrir lançamentos de '+mes+'"><span class="mobile-year-month"><b>'+mes+status+'</b><small>Ver lançamentos</small></span><span class="mobile-year-balance '+saldoClass+'"><small>Saldo</small><strong>'+brl(r.saldo)+'</strong></span></button><div class="mobile-year-facts"><div><small>Receitas</small><b class="pos">'+brl(r.receita)+'</b></div><div><small>Despesas</small><b class="neg">'+brl(r.total_despesas)+'</b></div><div><small>Poupança acumulada</small><b>'+brl(r.poupanca_acumulada)+'</b></div><div data-label="Meta cartão"><small>Meta cartão</small><b>'+r.pct_cartoes+'%</b></div></div></article>';
+    return '<article class="mobile-year-item"><button type="button" class="mobile-year-open" data-act="irmes" data-m="'+r.mes+'" aria-label="Abrir lançamentos de '+mes+'"><span class="mobile-year-month"><b>'+mes+status+'</b><small>Ver lançamentos</small></span><span class="mobile-year-balance '+saldoClass+'"><small>Saldo</small><strong>'+brl(r.saldo)+'</strong></span></button><div class="mobile-year-facts"><div><small>Receitas</small><b class="pos">'+brl(r.receita)+'</b></div><div><small>Despesas</small><b class="neg">'+brl(r.total_despesas)+'</b></div><div><small>Poupança acumulada</small><b>'+brl(r.poupanca_acumulada)+'</b></div><div data-label="% Cartões"><small>% Cartões</small><b>'+r.pct_cartoes+'%</b></div><div data-label="Meta cartão"><small>Meta cartão</small><b>'+mc+'</b></div></div></article>';
   }).join('');
   return `${viewStatus()}${barraAno()}<div class="cards"><div class="card"><small>Receita prevista no ano</small><b class="pos">${brl(T('receita'))}</b></div>
   <div class="card"><small>Despesas no ano</small><b class="neg">${brl(T('total_despesas'))}</b></div>
