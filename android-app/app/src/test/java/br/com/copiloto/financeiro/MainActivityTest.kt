@@ -377,4 +377,16 @@ class MainActivityTest {
         assertTrue(activity.contains("webView.evaluateJavascript"))
     }
 
+
+    @Test
+    fun mobileCashFlowVisualizationUsesRealMonthlyIncomeAndExpenseTotals() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("const totalFluxo=rec+des;"))
+        assertTrue(html.contains("class=\"mobile-flow-track\""))
+        assertTrue(html.contains("brl(rec)"))
+        assertTrue(html.contains("brl(des)"))
+        assertTrue(html.contains("Entradas"))
+        assertTrue(html.contains("Saídas"))
+    }
+
 }
