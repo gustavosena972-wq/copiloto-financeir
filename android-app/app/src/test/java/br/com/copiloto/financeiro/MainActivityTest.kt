@@ -130,8 +130,8 @@ class MainActivityTest {
     @Test
     fun releaseVersionMatchesTheAuditedAndroidPackage() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 13"))
-        assertTrue(gradle.contains("versionName = \"1.0.11\""))
+        assertTrue(gradle.contains("versionCode = 15"))
+        assertTrue(gradle.contains("versionName = \"1.0.14\""))
     }
 
     @Test
@@ -227,25 +227,22 @@ class MainActivityTest {
     }
 
     @Test
-    fun releasePackageKeepsTheCurrentVersionAndFigmaVisualContractTogether() {
+    fun releasePackageKeepsTheCurrentVersionAndPremiumFintechVisualContractTogether() {
         val html = File("src/main/assets/mobile.html").readText()
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 13"))
-        assertTrue(gradle.contains("versionName = \"1.0.13\""))
-        assertTrue(html.contains("data-ui=\"figma-family-model\""))
-        assertTrue(html.contains("cf-command-hero"))
+        assertTrue(gradle.contains("versionCode = 15"))
+        assertTrue(gradle.contains("versionName = \"1.0.14\""))
+        assertTrue(html.contains("body[data-ui=\"premium-fintech\"]"))
+        assertTrue(html.contains("--surface:#ffffff"))
     }
 
     @Test
-    fun bundledFinanceUiUsesFigmaFamilyCommandCenterVisualLanguage() {
+    fun bundledFinanceUiUsesTheCurrentPremiumFintechVisualSystem() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("cf-figma-family-ui"))
-        assertTrue(html.contains("cf-command-hero"))
-        assertTrue(html.contains("cf-command-orbit"))
-        assertTrue(html.contains("cf-command-pulse"))
-        assertTrue(html.contains("--cf-figma-emerald"))
-        assertTrue(html.contains("--cf-figma-gold"))
-        assertTrue(html.contains("data-ui=\"figma-family-model\""))
+        assertTrue(html.contains("--surface:#ffffff"))
+        assertTrue(html.contains("--primary:#146c43"))
+        assertTrue(html.contains("body[data-ui=\"premium-fintech\"]"))
+        assertTrue(html.contains("mobile-app-fit"))
     }
 
     @Test
@@ -281,4 +278,32 @@ class MainActivityTest {
         assertTrue(html.contains("relatorios:'data'"))
         assertTrue(html.contains("familia:'network'"))
     }
+
+    @Test
+    fun bundledFinanceUiRemovesDecorativeCoinsAndBackgroundImageLayers() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val cleanup = html.substringAfter("<style id=\"cf-mobile-visual-cleanup\">").substringBefore("</style>")
+        assertTrue(cleanup.contains(".cf-motion-world{display:none!important}"))
+        assertTrue(cleanup.contains(".coin,.coin-stack,.coin-float{display:none!important}"))
+        assertTrue(cleanup.contains("body[data-ui=\"premium-fintech\"] .app-main:before"))
+        assertTrue(cleanup.contains("content:none!important"))
+        val motionScript = html.substringAfter("<script id=\"cf-whole-screen-motion-js\">").substringBefore("</script>")
+        assertTrue(motionScript.contains("removeDecorativeMotionLayer"))
+        assertTrue(!motionScript.contains("world.innerHTML="))
+        assertTrue(!motionScript.contains("requestAnimationFrame"))
+    }
+
+    @Test
+    fun landingPreviewFitsInsideMobileViewportWithoutCroppingOrNegativeMargins() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val cleanup = html.substringAfter("<style id=\"cf-mobile-visual-cleanup\">").substringBefore("</style>")
+        assertTrue(cleanup.contains("width:100%!important"))
+        assertTrue(cleanup.contains("max-width:100%!important"))
+        assertTrue(cleanup.contains("margin:22px 0 0!important"))
+        assertTrue(cleanup.contains("transform:none!important"))
+        assertTrue(cleanup.contains("@media(max-width:390px)"))
+        assertTrue(cleanup.contains(".cf-preview-sidebar{display:none!important}"))
+        assertTrue(cleanup.contains("overflow-x:hidden"))
+    }
+
 }
