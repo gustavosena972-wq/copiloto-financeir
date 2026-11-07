@@ -539,13 +539,6 @@ class MainActivityTest {
     }
 
     @Test
-    fun releaseVersionAdvancesToThePerformanceIteration() {
-        val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 21"))
-        assertTrue(gradle.contains("versionName = \"1.0.20\""))
-    }
-
-    @Test
     fun androidV021SeparatesFamilyWorkspaceIntoClearInterfaceAreasWithEditActions() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-family-area-shell"))
@@ -568,10 +561,39 @@ class MainActivityTest {
     }
 
     @Test
-    fun releaseVersionAdvancesToTheInterfaceOrganizationIteration() {
+    fun androidV022AddsAnIntelligentFinancialBriefingToTheMobileWorkspace() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-smart-briefing"))
+        assertTrue(html.contains("function viewSmartBriefing()"))
+        assertTrue(html.contains("safeToSpend"))
+        assertTrue(html.contains("smartHealthScore"))
+        assertTrue(html.contains("Próximo passo"))
+        assertTrue(html.contains("Análise inteligente"))
+    }
+
+    @Test
+    fun androidV022AddsSmartSignalsForBillsGoalsAndSpendingWithoutInventingData() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("Contas próximas"))
+        assertTrue(html.contains("Metas"))
+        assertTrue(html.contains("maior categoria"))
+        assertTrue(html.contains("Sem dados suficientes"))
+        assertTrue(html.contains("smartgo"))
+    }
+
+    @Test
+    fun androidV022KeepsTestersOutOfThePaymentWall() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("S.internalTester=testerCheck.data===true"))
+        assertTrue(html.contains("!S.internalTester&&!(S.fam.acesso_ate"))
+        assertTrue(html.contains("Teste interno"))
+    }
+
+    @Test
+    fun releaseVersionAdvancesToTheSmartMobileIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 22"))
-        assertTrue(gradle.contains("versionName = \"1.0.21\""))
+        assertTrue(gradle.contains("versionCode = 23"))
+        assertTrue(gradle.contains("versionName = \"1.0.22\""))
     }
 
 }
