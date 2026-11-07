@@ -3860,7 +3860,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     const canvas=world.querySelector('.cf-motion-canvas'),ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
     if(!ctx)return;
     const media=window.matchMedia('(prefers-reduced-motion: reduce)');
-    const particleCount=Math.min(34,window.innerWidth<=640?18:28);const particles=Array.from({length:particleCount},(_,i)=>({x:(i*.61803398875)%1,y:(i*.754877666)%1,depth:.25+(i%7)/9,phase:i*2.39996,speed:.000012+(i%5)*.000004,radius:.65+(i%4)*.42}));
+    const particles=Array.from({length:34},(_,i)=>({x:(i*.61803398875)%1,y:(i*.754877666)%1,depth:.25+(i%7)/9,phase:i*2.39996,speed:.000012+(i%5)*.000004,radius:.65+(i%4)*.42}));
     let width=0,height=0,dpr=1,raf=0,lastFrame=0,elapsed=0,visible=!document.hidden,pointerX=0,pointerY=0,scroll=0,currentX=0,currentY=0,motionAccent='67,146,101';
     function resize(){
       width=Math.max(1,window.innerWidth);height=Math.max(1,window.innerHeight);dpr=Math.min(window.devicePixelRatio||1,1.35);
@@ -3879,7 +3879,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
       const glow=ctx.createRadialGradient(width*.78+Math.sin(t*.13)*width*.08,height*.19+Math.cos(t*.11)*height*.06,0,width*.78,height*.2,Math.max(width,height)*.67);
       glow.addColorStop(0,'rgba(70,145,101,.105)');glow.addColorStop(.46,'rgba(70,145,101,.035)');glow.addColorStop(1,'rgba(70,145,101,0)');
       ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);
-      const curveCount=window.innerWidth<=640?3:4;for(let i=0;i<curveCount;i++){
+      for(let i=0;i<4;i++){
         const phase=t*.12+i*1.47,y=height*(.24+i*.16)+Math.sin(phase)*height*.045,drift=Math.sin(phase*.7)*width*.07;
         const curve=ctx.createLinearGradient(0,y,width,y+height*.18);
         curve.addColorStop(0,'rgba(48,119,82,0)');curve.addColorStop(.38,'rgba('+motionAccent+','+(.095-i*.012)+')');curve.addColorStop(.72,'rgba(193,158,96,'+(.075-i*.009)+')');curve.addColorStop(1,'rgba(48,119,82,0)');
@@ -3895,7 +3895,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     }
     function frame(now){
       raf=0;if(!visible)return;
-      const frameBudget=window.innerWidth<=640?42:32;if(!media.matches&&now-lastFrame<frameBudget){raf=requestAnimationFrame(frame);return}
+      if(!media.matches&&now-lastFrame<32){raf=requestAnimationFrame(frame);return}
       const dt=lastFrame?Math.min(64,now-lastFrame):32;lastFrame=now;elapsed=now;
       if(!media.matches){
         const t=now/1000,targetX=pointerX*13+Math.sin(t*.17)*8,targetY=pointerY*10+Math.cos(t*.14)*6+scroll*.018;
