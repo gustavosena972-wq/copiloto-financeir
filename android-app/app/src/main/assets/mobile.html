@@ -3081,6 +3081,8 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   .cf-smart-grid{grid-template-columns:1fr}
   .cf-smart-signal .chip{min-height:44px}
 }
+</style><style id="cf-tester-mode-1-0-22">
+.cf-tester-badge{display:inline-flex;align-items:center;width:max-content;margin-top:7px;padding:5px 9px;border-radius:999px;background:#e8f3ec;color:#356247;border:1px solid #cfe3d5;font-size:9px;font-weight:900;letter-spacing:.08em}
 </style></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
@@ -3544,7 +3546,7 @@ function render(){
     <main class="app-main">
       <header class="app-topbar">
         <div class="page-heading">
-          <div class="page-eyebrow">COPILOTO FINANCEIRO · ${S.view==='admin'?'PAINEL ADMINISTRATIVO':'GESTÃO FAMILIAR'}</div>
+          <div class="page-eyebrow">COPILOTO FINANCEIRO · ${S.view==='admin'?'PAINEL ADMINISTRATIVO':'GESTÃO FAMILIAR'}</div><div class="cf-tester-badge" ${S.internalTester?'':'hidden'}>TESTE INTERNO · PAGAMENTOS DESATIVADOS</div>
           <h1>${info[0]}</h1>
           <p>${info[1]}</p>
           <div class="date-line">${saudacao()} · ${dataHoje}</div>
