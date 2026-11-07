@@ -282,4 +282,39 @@ class MainActivityTest {
         assertTrue(cleanup.contains("overflow-x:hidden"))
     }
 
+
+    @Test
+    fun mobileAppProvidesACompactBottomNavigationForPrimarySections() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("class=\"mobile-bottom-nav\""))
+        assertTrue(html.contains("aria-label=\"Navegação inferior\""))
+        assertTrue(html.contains("data-mobile-nav=\"true\""))
+        assertTrue(html.contains("@media(max-width:760px)"))
+        assertTrue(html.contains(".sidebar-nav{display:none!important}"))
+    }
+
+    @Test
+    fun mobileTransactionsAndYearSummaryRenderAsReadableCardsWithoutWideTables() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("class=\"mobile-card-table\""))
+        assertTrue(html.contains("data-label=\"Vencimento\""))
+        assertTrue(html.contains("data-label=\"Descrição\""))
+        assertTrue(html.contains("data-label=\"Valor\""))
+        assertTrue(html.contains("data-label=\"Meta cartão\""))
+        assertTrue(html.contains(".mobile-card-table tbody tr"))
+        assertTrue(html.contains("min-width:0!important"))
+    }
+
+    @Test
+    fun mobileWorkspaceUsesFullViewportAndTouchSizedControlsWithoutLandscapeRequirement() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val mobile = html.substringAfter("<style id=\"cf-mobile-first-1-0-15\">").substringBefore("</style>")
+        assertTrue(mobile.contains("width:100vw"))
+        assertTrue(mobile.contains("min-height:100dvh"))
+        assertTrue(mobile.contains("min-height:44px"))
+        assertTrue(mobile.contains("overflow-x:hidden"))
+        assertTrue(mobile.contains("grid-template-columns:repeat(4,minmax(0,1fr))"))
+        assertTrue(mobile.contains("padding-bottom:calc(92px"))
+    }
+
 }
