@@ -20,4 +20,12 @@ class MainActivityTest {
         assertTrue(html.contains("sb.rpc('is_internal_tester')"))
         assertTrue(html.contains("S.internalTester"))
     }
+
+    @Test
+    fun bundledFinanceUiUsesPremiumFintechVisualSystem() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("--surface:#ffffff"))
+        assertTrue(html.contains("--primary:#146c43"))
+        assertTrue(html.contains("data-ui="premium-fintech""))
+    }
 }
