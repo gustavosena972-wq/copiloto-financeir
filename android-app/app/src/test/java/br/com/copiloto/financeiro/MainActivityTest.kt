@@ -98,7 +98,79 @@ class MainActivityTest {
     @Test
     fun releaseVersionMatchesTheAuditedAndroidPackage() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 6"))
-        assertTrue(gradle.contains("versionName = \"1.0.5\""))
+        assertTrue(gradle.contains("versionCode = 7"))
+        assertTrue(gradle.contains("versionName = \"1.0.6\""))
+    }
+
+    @Test
+    fun bundledFinanceUiPinsCurrentSupabaseSdkAndSubresourceIntegrity() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("@supabase/supabase-js@2.119.0"))
+        assertTrue(html.contains("integrity=\"sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O\""))
+        assertTrue(html.contains("integrity=\"sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT\""))
+        assertTrue(html.contains("integrity=\"sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k\""))
+    }
+
+    @Test
+    fun authSessionDoesNotConsumeTokensFromNavigationUrls() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("detectSessionInUrl: false"))
+        assertTrue(html.contains("scope:'local'"))
+    }
+
+    @Test
+    fun internalTestersSeeAnExplicitNoPaymentTestModeBanner() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("MODO DE TESTE"))
+        assertTrue(html.contains("Nenhuma compra ou cobrança é necessária nesta etapa"))
+    }
+
+    @Test
+    fun privacyPolicyExplainsTheCookieAndSessionStorageModel() {
+        val privacy = File("src/main/assets/privacidade.html").readText()
+        assertTrue(privacy.contains("Cookies"))
+        assertTrue(privacy.contains("localStorage"))
+        assertTrue(privacy.contains("não utiliza cookies de publicidade"))
+    }
+
+    @Test
+    fun webViewDisablesCookiesAndUsesTheOriginCheckedMessageBridge() {
+        assertEquals(false, MainActivity.ACCEPT_WEBVIEW_COOKIES)
+        assertEquals(false, MainActivity.ACCEPT_THIRD_PARTY_COOKIES)
+        val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
+        assertTrue(activity.contains("addWebMessageListener"))
+        assertTrue(activity.contains("isTrustedBillingOrigin"))
+        assertTrue(!activity.contains("addJavascriptInterface"))
+    }
+
+    @Test
+    fun navigationOnlyKeepsTheExactBundledHttpsAssetOrigin() {
+        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html"))
+        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/privacidade.html"))
+        assertTrue(!isTrustedAppAssetUrl("http://appassets.androidplatform.net/assets/mobile.html"))
+        assertTrue(!isTrustedAppAssetUrl("https://appassets.androidplatform.net.evil.test/assets/mobile.html"))
+        assertTrue(!isTrustedAppAssetUrl("https://appassets.androidplatform.net:444/assets/mobile.html"))
+        assertTrue(!isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/../secret.html"))
+        assertTrue(!isTrustedAppAssetUrl("https://user@appassets.androidplatform.net/assets/mobile.html"))
+    }
+
+    @Test
+    fun nativeBillingBridgeRejectsNonMainFramesAndUnknownOrigins() {
+        assertTrue(isTrustedBillingOrigin("https", "appassets.androidplatform.net", -1, true))
+        assertTrue(!isTrustedBillingOrigin("https", "evil.test", -1, true))
+        assertTrue(!isTrustedBillingOrigin("http", "appassets.androidplatform.net", -1, true))
+        assertTrue(!isTrustedBillingOrigin("https", "appassets.androidplatform.net", 8443, true))
+        assertTrue(!isTrustedBillingOrigin("https", "appassets.androidplatform.net", -1, false))
+    }
+
+    @Test
+    fun nativeBillingBridgeAcceptsOnlySafeCommandsAndKnownProducts() {
+        assertTrue(isAllowedBillingCommand("queryProducts", null))
+        assertTrue(isAllowedBillingCommand("purchase", "copiloto_pro_30d"))
+        assertTrue(isAllowedBillingCommand("purchase", "copiloto_max_30d"))
+        assertTrue(isAllowedBillingCommand("purchase", "copiloto_ultra_30d"))
+        assertTrue(!isAllowedBillingCommand("purchase", "unknown_product"))
+        assertTrue(!isAllowedBillingCommand("deleteAccount", null))
+        assertTrue(!isAllowedBillingCommand("queryProducts", "copiloto_pro_30d"))
     }
 }

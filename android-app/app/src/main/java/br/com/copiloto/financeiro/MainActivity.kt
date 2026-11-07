@@ -2,12 +2,17 @@ package br.com.copiloto.financeiro
 
 import android.app.Activity
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
@@ -24,11 +29,15 @@ import org.json.JSONObject
 class MainActivity : Activity(), PurchasesUpdatedListener {
     companion object {
         const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html"
-        private const val APP_ASSET_PREFIX = "https://appassets.androidplatform.net/assets/"
+        private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
+        const val ACCEPT_WEBVIEW_COOKIES = false
+        const val ACCEPT_THIRD_PARTY_COOKIES = false
+        private const val BILLING_BRIDGE_NAME = "CopilotoPlayBilling"
     }
 
     private lateinit var webView: WebView
     private lateinit var billingClient: BillingClient
+    private var nativeBillingBridgeAvailable = false
 
     private val productIds = listOf(
         "copiloto_pro_30d",
@@ -55,16 +64,30 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             .build()
 
         webView = WebView(this)
-        webView.settings.javaScriptEnabled = true
-        webView.settings.domStorageEnabled = true
-        webView.settings.allowFileAccess = false
-        webView.settings.allowContentAccess = false
-        webView.settings.allowFileAccessFromFileURLs = false
-        webView.settings.allowUniversalAccessFromFileURLs = false
-        webView.settings.mixedContentMode =
-            android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            allowFileAccess = false
+            allowContentAccess = false
+            allowFileAccessFromFileURLs = false
+            allowUniversalAccessFromFileURLs = false
+            mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            javaScriptCanOpenWindowsAutomatically = false
+            setSupportMultipleWindows(false)
+            mediaPlaybackRequiresUserGesture = true
+            setGeolocationEnabled(false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                safeBrowsingEnabled = true
+            }
+        }
+
+        CookieManager.getInstance().apply {
+            setAcceptCookie(ACCEPT_WEBVIEW_COOKIES)
+            setAcceptThirdPartyCookies(webView, ACCEPT_THIRD_PARTY_COOKIES)
+        }
+
         webView.webChromeClient = WebChromeClient()
-        webView.addJavascriptInterface(PlayBillingBridge(), "CopilotoPlayBilling")
+        registerBillingBridge()
 
         webView.webViewClient = object : WebViewClientCompat() {
             override fun shouldInterceptRequest(
@@ -82,25 +105,30 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 request: WebResourceRequest
             ): Boolean {
                 val uri = request.url
-                if (uri.toString().startsWith(APP_ASSET_PREFIX)) return false
+                if (isTrustedAppAssetUrl(uri.toString())) return false
 
-                if (uri.scheme == "https" || uri.scheme == "http") {
-                    startActivity(
-                        android.content.Intent(
-                            android.content.Intent.ACTION_VIEW,
-                            uri
-                        )
-                    )
+                // Never navigate an untrusted URL inside the privileged WebView.
+                if (uri.scheme == "https" &&
+                    uri.host != "appassets.androidplatform.net" &&
+                    uri.userInfo == null
+                ) {
+                    openExternalUri(uri)
+                } else if (
+                    uri.scheme == "mailto" &&
+                    uri.schemeSpecificPart.substringBefore('?')
+                        .equals("gustavosena972@gmail.com", ignoreCase = true)
+                ) {
+                    openExternalUri(uri, android.content.Intent.ACTION_SENDTO)
                 }
                 return true
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                if (url?.startsWith(APP_ASSET_PREFIX) == true) {
+                if (url?.let(::isTrustedAppAssetUrl) == true) {
                     dispatchToWeb(
                         "copiloto:play-bridge-ready",
-                        JSONObject().put("ready", true)
+                        JSONObject().put("ready", nativeBillingBridgeAvailable)
                     )
                 }
             }
@@ -108,8 +136,72 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
 
         setContentView(webView)
         webView.loadUrl(APP_ENTRY_URL)
-
         connectBilling()
+    }
+
+    private fun registerBillingBridge() {
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) return
+
+        WebViewCompat.addWebMessageListener(
+            webView,
+            BILLING_BRIDGE_NAME,
+            setOf(APP_ASSET_ORIGIN)
+        ) { _, message: WebMessageCompat, sourceOrigin, isMainFrame, _ ->
+            if (!isTrustedBillingOrigin(
+                    sourceOrigin.scheme,
+                    sourceOrigin.host,
+                    sourceOrigin.port,
+                    isMainFrame
+                )
+            ) {
+                return@addWebMessageListener
+            }
+            if (message.type != WebMessageCompat.TYPE_STRING) return@addWebMessageListener
+            message.data?.let(::handleBillingBridgeMessage)
+        }
+        nativeBillingBridgeAvailable = true
+    }
+
+    private fun handleBillingBridgeMessage(rawMessage: String) {
+        val payload = runCatching { JSONObject(rawMessage) }.getOrNull() ?: return
+        val action = payload.optString("action")
+        val productId = payload.optString("productId").takeIf { it.isNotBlank() }
+
+        if (!isAllowedBillingCommand(action, productId)) {
+            if (action == "purchase") {
+                dispatchToWeb(
+                    "copiloto:play-error",
+                    JSONObject().put("message", "Produto não reconhecido.")
+                )
+            }
+            return
+        }
+
+        when (action) {
+            "queryProducts" -> runOnUiThread { connectBilling() }
+            "purchase" -> runOnUiThread {
+                val selectedProduct = productId ?: return@runOnUiThread
+                if (billingClient.isReady) {
+                    launchPurchase(selectedProduct)
+                } else {
+                    connectBilling()
+                }
+            }
+        }
+    }
+
+    private fun openExternalUri(
+        uri: Uri,
+        action: String = android.content.Intent.ACTION_VIEW
+    ) {
+        try {
+            startActivity(android.content.Intent(action, uri))
+        } catch (_: android.content.ActivityNotFoundException) {
+            dispatchToWeb(
+                "copiloto:play-error",
+                JSONObject().put("message", "Não foi possível abrir o link neste dispositivo.")
+            )
+        }
     }
 
     private fun connectBilling() {
@@ -326,32 +418,6 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         }
     }
 
-    inner class PlayBillingBridge {
-        @android.webkit.JavascriptInterface
-        fun queryProducts() {
-            runOnUiThread { connectBilling() }
-        }
-
-        @android.webkit.JavascriptInterface
-        fun purchase(productId: String) {
-            if (productId !in productIds) {
-                dispatchToWeb(
-                    "copiloto:play-error",
-                    JSONObject().put("message", "Produto não reconhecido.")
-                )
-                return
-            }
-
-            runOnUiThread {
-                if (billingClient.isReady) {
-                    launchPurchase(productId)
-                } else {
-                    connectBilling()
-                }
-            }
-        }
-    }
-
     override fun onBackPressed() {
         if (::webView.isInitialized && webView.canGoBack()) {
             webView.goBack()
@@ -362,7 +428,6 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
 
     override fun onDestroy() {
         if (::webView.isInitialized) {
-            webView.removeJavascriptInterface("CopilotoPlayBilling")
             webView.destroy()
         }
 
@@ -373,3 +438,37 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         super.onDestroy()
     }
 }
+
+internal fun isTrustedAppAssetUrl(rawUrl: String): Boolean = runCatching {
+    val uri = java.net.URI(rawUrl)
+    val path = uri.path ?: return@runCatching false
+
+    uri.scheme == "https" &&
+        uri.host == "appassets.androidplatform.net" &&
+        uri.port == -1 &&
+        uri.userInfo == null &&
+        path.startsWith("/assets/") &&
+        '\\' !in path &&
+        path.split('/').none { it == "." || it == ".." }
+}.getOrDefault(false)
+
+internal fun isTrustedBillingOrigin(
+    scheme: String?,
+    host: String?,
+    port: Int,
+    isMainFrame: Boolean
+): Boolean = isMainFrame &&
+    scheme == "https" &&
+    host == "appassets.androidplatform.net" &&
+    port == -1
+
+internal fun isAllowedBillingCommand(action: String, productId: String?): Boolean =
+    when (action) {
+        "queryProducts" -> productId == null
+        "purchase" -> productId in setOf(
+            "copiloto_pro_30d",
+            "copiloto_max_30d",
+            "copiloto_ultra_30d"
+        )
+        else -> false
+    }

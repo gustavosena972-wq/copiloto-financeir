@@ -26,3 +26,12 @@
 - Bundled the privacy, terms and account-deletion pages in the current Android package so these links work inside the app.
 - Kept the public marketing site separate from the Android finance experience.
 - Preserved the existing Supabase, RLS and Google Play Billing flows.
+
+## 1.0.6 — WebView hardening, privacy and tester clarity
+
+- Updated the Supabase JavaScript SDK to 2.119.0 and pinned the integrity of all external script dependencies with Subresource Integrity.
+- Replaced the legacy JavaScript interface with an origin- and main-frame-checked WebMessageListener for Google Play billing commands.
+- Restricted internal WebView navigation to the exact HTTPS app-assets origin; external navigation now requires HTTPS.
+- Disabled WebView cookies because the Android app uses Supabase local storage for its session and does not rely on cookies.
+- Disabled automatic URL-based session detection and made ordinary sign-out local to the current device.
+- Added a visible internal-test banner explaining that evaluation access is already granted and no purchase is required during this phase.
