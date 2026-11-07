@@ -389,4 +389,46 @@ class MainActivityTest {
         assertTrue(html.contains("Saídas"))
     }
 
+    @Test
+    fun androidV016UsesV0InspiredLightFintechMobileShell() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val mobile = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-16\">").substringBefore("</style>")
+        assertTrue(mobile.contains("--v0-bg:#f6f5ef"))
+        assertTrue(mobile.contains("--v0-green:#146c43"))
+        assertTrue(mobile.contains("--v0-lime:#d8f24a"))
+        assertTrue(mobile.contains(".v0-mobile-dashboard"))
+        assertTrue(mobile.contains(".v0-mobile-balance"))
+        assertTrue(mobile.contains(".v0-mobile-action-grid"))
+        assertTrue(mobile.contains(".v0-mobile-bottom-nav"))
+    }
+
+    @Test
+    fun androidV016KeepsFinanceViewsInsideTheV0MobileSystem() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("data-v=\"planilha\""))
+        assertTrue(html.contains("data-v=\"ano\""))
+        assertTrue(html.contains("data-v=\"checape\""))
+        assertTrue(html.contains("data-v=\"plan\""))
+        assertTrue(html.contains("data-v=\"família\""))
+        assertTrue(html.contains(".v0-mobile-section-title"))
+        assertTrue(html.contains(".v0-mobile-transaction-list"))
+    }
+
+    @Test
+    fun androidV016UsesTouchSizedControlsAndSafeAreaSpacing() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val mobile = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-16\">").substringBefore("</style>")
+        assertTrue(mobile.contains("min-height:48px"))
+        assertTrue(mobile.contains("padding-bottom:calc(84px + env(safe-area-inset-bottom))"))
+        assertTrue(mobile.contains("grid-template-columns:repeat(5,minmax(0,1fr))"))
+        assertTrue(mobile.contains("overflow-x:hidden"))
+    }
+
+    @Test
+    fun releaseVersionAdvancesWithTheV0MobileRedesign() {
+        val gradle = File("build.gradle.kts").readText()
+        assertTrue(gradle.contains("versionCode = 17"))
+        assertTrue(gradle.contains("versionName = \"1.0.16\""))
+    }
+
 }
