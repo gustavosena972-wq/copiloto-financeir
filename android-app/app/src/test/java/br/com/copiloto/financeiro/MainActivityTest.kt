@@ -590,10 +590,10 @@ class MainActivityTest {
     }
 
     @Test
-    fun releaseVersionAdvancesToTheSmartMobileIteration() {
+    fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 23"))
-        assertTrue(gradle.contains("versionName = \"1.0.22\""))
+        assertTrue(gradle.contains("versionCode = 24"))
+        assertTrue(gradle.contains("versionName = \"1.0.23\""))
     }
 
     @Test
