@@ -2783,6 +2783,147 @@ body[data-ui="premium-fintech"] .landing-page{background:rgba(238,242,246,.76)!i
   .cf-test-mode-tag{flex:none;padding:6px 9px;border:1px solid rgba(54,115,70,.2);border-radius:999px;background:#e5f3e8;color:#356b45;font-size:9px;font-weight:850;letter-spacing:.08em}
   @media(max-width:640px){.cf-test-mode-banner{align-items:flex-start;gap:9px;padding:11px}.cf-test-mode-copy p{font-size:11px}.cf-test-mode-tag{font-size:8px;padding:5px 7px}}
   @media(prefers-reduced-motion:reduce){.cf-test-mode-dot{box-shadow:none}}
+
+/* ---------- 1.0.9 warm cinematic financial scenes ---------- */
+:root{
+  --cf-warm-ink:#24332b;
+  --cf-warm-muted:#7b857d;
+  --cf-warm-cream:#f7f4ec;
+  --cf-warm-paper:#fffdf8;
+  --cf-warm-sage:#557a61;
+  --cf-warm-green:#28634f;
+  --cf-warm-gold:#c99645;
+  --cf-warm-copper:#b96e4b;
+  --cf-warm-line:#e5dfd1;
+}
+#app:has(.app-shell) .app-main{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  background:
+    radial-gradient(600px 420px at 88% 7%,rgba(201,150,69,.12),transparent 62%),
+    radial-gradient(520px 420px at 8% 92%,rgba(85,122,97,.10),transparent 65%),
+    linear-gradient(135deg,#fbfaf5 0%,#f5f3ec 100%);
+}
+#app:has(.app-shell) .app-main > *:not(.cf-warm-scene){position:relative;z-index:2}
+.cf-warm-scene{
+  position:absolute;
+  z-index:1;
+  top:20px;
+  right:24px;
+  width:min(420px,42vw);
+  height:360px;
+  pointer-events:none;
+  opacity:.96;
+  transition:opacity .35s ease,transform .7s cubic-bezier(.2,.8,.2,1);
+}
+.cf-warm-scene[data-scene-key="planilha"]{--scene-accent:#557a61;--scene-second:#c99645}
+.cf-warm-scene[data-scene-key="ano"]{--scene-accent:#b96e4b;--scene-second:#c99645}
+.cf-warm-scene[data-scene-key="checape"]{--scene-accent:#3f7b62;--scene-second:#d2a14f}
+.cf-warm-scene[data-scene-key="planejamento"]{--scene-accent:#6d7f53;--scene-second:#b96e4b}
+.cf-warm-scene[data-scene-key="relatorios"]{--scene-accent:#557a61;--scene-second:#a87945}
+.cf-warm-scene[data-scene-key="familia"]{--scene-accent:#806c55;--scene-second:#c99645}
+.cf-scene-visual{
+  position:absolute;
+  width:230px;
+  height:230px;
+  right:28px;
+  top:36px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 38% 32%,rgba(255,255,255,.95) 0 3%,transparent 4%),
+    radial-gradient(circle at 48% 48%,rgba(255,253,248,.9) 0 17%,rgba(255,253,248,.2) 31%,transparent 55%),
+    conic-gradient(from 18deg,transparent 0 14%,rgba(201,150,69,.28) 15% 17%,transparent 18% 42%,rgba(85,122,97,.32) 43% 45%,transparent 46% 72%,rgba(185,110,75,.24) 73% 76%,transparent 77%);
+  border:1px solid rgba(78,96,81,.22);
+  box-shadow:0 28px 80px rgba(74,65,49,.14),inset 0 0 55px rgba(255,255,255,.65);
+  animation:cf-warm-breathe 8s ease-in-out infinite;
+}
+.cf-scene-visual:before{
+  content:"";
+  position:absolute;
+  inset:20px;
+  border:1px solid color-mix(in srgb,var(--scene-accent) 45%,transparent);
+  border-radius:50%;
+  transform:rotate(-18deg) scaleX(.72);
+  box-shadow:0 0 0 17px rgba(255,255,255,.08),0 0 0 34px rgba(201,150,69,.06);
+  animation:cf-warm-orbit 12s linear infinite;
+}
+.cf-scene-visual:after{
+  content:"";
+  position:absolute;
+  width:78px;height:78px;left:76px;top:76px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fffdf7,#d8e5d7 42%,#799783 100%);
+  box-shadow:0 0 45px color-mix(in srgb,var(--scene-accent) 35%,transparent);
+  border:5px solid rgba(255,255,255,.72);
+}
+.cf-scene-orbit{
+  position:absolute;
+  right:0;top:20px;width:285px;height:285px;border:1px solid rgba(78,96,81,.16);
+  border-radius:50%;transform:rotate(22deg) scaleY(.42);
+  animation:cf-warm-orbit 14s linear infinite;
+}
+.cf-scene-orbit:before,.cf-scene-orbit:after{
+  content:"";position:absolute;width:11px;height:11px;border-radius:50%;
+  background:var(--scene-second);box-shadow:0 0 20px color-mix(in srgb,var(--scene-second) 55%,transparent);
+}
+.cf-scene-orbit:before{left:20px;top:50%;}.cf-scene-orbit:after{right:28px;bottom:18%}
+.cf-scene-grid{
+  position:absolute;right:18px;bottom:18px;width:250px;height:130px;
+  background:linear-gradient(90deg,rgba(85,122,97,.16) 1px,transparent 1px),linear-gradient(rgba(85,122,97,.14) 1px,transparent 1px);
+  background-size:25px 25px;
+  mask-image:linear-gradient(to top,black,transparent 88%);
+  transform:perspective(320px) rotateX(58deg) rotateZ(-3deg);
+  opacity:.7;
+}
+.cf-scene-pulse{
+  position:absolute;right:74px;top:145px;width:138px;height:62px;
+  border-top:2px solid var(--scene-accent);
+  border-right:2px solid transparent;
+  border-radius:50%;
+  transform:rotate(-12deg);
+  filter:drop-shadow(0 0 8px color-mix(in srgb,var(--scene-accent) 35%,transparent));
+}
+.cf-scene-pulse:after{
+  content:"";position:absolute;width:7px;height:7px;right:8px;top:-5px;border-radius:50%;
+  background:var(--scene-second);box-shadow:0 0 16px color-mix(in srgb,var(--scene-second) 60%,transparent);
+  animation:cf-scene-ping 2s ease-in-out infinite;
+}
+.cf-scene-label{
+  position:absolute;right:32px;bottom:8px;display:flex;align-items:center;gap:7px;
+  color:#647067;font-size:8px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
+}
+.cf-scene-label i{width:6px;height:6px;border-radius:50%;background:var(--scene-accent);box-shadow:0 0 10px color-mix(in srgb,var(--scene-accent) 65%,transparent);animation:cf-scene-ping 1.8s ease-in-out infinite}
+.cf-scene-caption{
+  position:absolute;left:8px;bottom:22px;max-width:155px;color:#67736a;font-size:10px;line-height:1.45;
+  padding:10px 12px;border:1px solid rgba(93,105,93,.12);border-radius:12px;
+  background:rgba(255,253,248,.64);backdrop-filter:blur(12px);
+  box-shadow:0 12px 30px rgba(66,60,48,.07);
+}
+.cf-scene-caption b{display:block;color:#34483b;font-size:11px;margin-bottom:3px}
+@keyframes cf-warm-breathe{50%{transform:translate3d(-8px,-8px,0) scale(1.035)}}
+@keyframes cf-warm-orbit{to{transform:rotate(382deg) scaleY(.42)}}
+@keyframes cf-scene-ping{50%{transform:scale(1.55);opacity:.45}}
+@media(max-width:820px){
+  .cf-warm-scene{top:8px;right:8px;width:270px;height:230px;opacity:.48;transform:scale(.9);transform-origin:top right}
+  .cf-scene-visual{width:145px;height:145px;right:20px;top:20px}
+  .cf-scene-visual:after{width:48px;height:48px;left:48px;top:48px;border-width:3px}
+  .cf-scene-visual:before{inset:12px}
+  .cf-scene-orbit{width:185px;height:185px;right:0;top:8px}
+  .cf-scene-grid{width:180px;height:90px;right:4px;bottom:12px;background-size:18px 18px}
+  .cf-scene-pulse{right:42px;top:92px;width:88px}
+  .cf-scene-caption{left:2px;bottom:10px;font-size:8px;padding:7px 8px}
+  .cf-scene-caption b{font-size:9px}
+  .cf-scene-label{right:10px;bottom:0;font-size:7px}
+}
+@media(max-width:520px){
+  .cf-warm-scene{height:205px;opacity:.38}
+  #app:has(.app-shell) .app-main{background:
+    radial-gradient(330px 280px at 92% 0%,rgba(201,150,69,.11),transparent 65%),
+    radial-gradient(320px 260px at 0% 100%,rgba(85,122,97,.08),transparent 65%),#f8f6f0}
+}
+@media(prefers-reduced-motion:reduce){
+  .cf-warm-scene,.cf-scene-visual,.cf-scene-orbit,.cf-scene-pulse:after,.cf-scene-label i{animation:none!important}
+}
 </style>
 </head>
 <body data-ui="premium-fintech">
@@ -4439,6 +4580,60 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
   window.addEventListener('popstate',()=>{if(dialog?.open)closePreview(true);else previewHistoryEntry=false});
   document.addEventListener('visibilitychange',()=>{document.body.dataset.cfMotionPaused=document.hidden?'true':'false';if(!video||!dialog?.open)return;if(document.hidden)video.pause();else if(!reduce.matches)video.play().catch(()=>{})});
   reduce.addEventListener?.('change',event=>{if(event.matches){resetTilt();video?.pause();document.querySelectorAll('.cf-motion-reveal').forEach(node=>node.classList.add('cf-motion-visible'))}else revealTree(app||document.body)});
+})();
+</script>
+
+<script id="cf-warm-visual-system">
+(function(){
+  'use strict';
+  const labels={
+    planilha:['Controle vivo','Seu dinheiro, em movimento'],
+    ano:['Visão anual','O ano inteiro em uma leitura'],
+    checape:['Saúde financeira','Sinais importantes, sem ruído'],
+    planejamento:['Plano futuro','Decisões transformadas em direção'],
+    relatorios:['Inteligência de dados','Padrões que ajudam você a decidir'],
+    familia:['Rede familiar','Finanças conectadas com clareza'],
+    inicio:['Copiloto Financeiro','Uma visão mais humana do seu dinheiro'],
+    pagamento:['Pagamento','Uma etapa simples e segura']
+  };
+  function slug(text){
+    return (text||'inicio').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'inicio';
+  }
+  function sceneKey(){
+    const app=document.getElementById('app');
+    const heading=app?.querySelector('.page-heading h1')?.textContent||'';
+    const s=slug(heading);
+    if(/planilha|lancamento|moviment/.test(s))return'planilha';
+    if(/ano|evolucao|evolucao/.test(s))return'ano';
+    if(/checape|saude/.test(s))return'checape';
+    if(/planejamento|plano|metas/.test(s))return'planejamento';
+    if(/relatorio|inteligencia|dados/.test(s))return'relatorios';
+    if(/familia|membro|famil/.test(s))return'familia';
+    if(/pagamento|pix/.test(s))return'pagamento';
+    return'inicio';
+  }
+  function mount(){
+    const main=document.querySelector('.app-main');
+    if(!main)return;
+    let scene=main.querySelector('.cf-warm-scene');
+    if(!scene){
+      scene=document.createElement('div');
+      scene.className='cf-warm-scene';
+      scene.innerHTML='<div class="cf-scene-visual"></div><div class="cf-scene-orbit"></div><div class="cf-scene-grid"></div><div class="cf-scene-pulse"></div><div class="cf-scene-caption"><b></b><span></span></div><div class="cf-scene-label"><i></i><span>LIVE</span></div>';
+      main.prepend(scene);
+    }
+    const key=sceneKey();
+    scene.dataset.sceneKey=key;
+    const copy=labels[key]||labels.inicio;
+    scene.querySelector('.cf-scene-caption b').textContent=copy[0];
+    scene.querySelector('.cf-scene-caption span').textContent=copy[1];
+    document.body.dataset.cfWarmVisualSystem='true';
+  }
+  let timer=0;
+  function schedule(){clearTimeout(timer);timer=setTimeout(mount,20)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+  const app=document.getElementById('app');
+  if(app)new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
 })();
 </script>
 </body>
