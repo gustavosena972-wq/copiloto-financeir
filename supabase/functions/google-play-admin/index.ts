@@ -1,17 +1,24 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { parseJsonObjectRequest } from "../_shared/security.ts";
 
-const cors = {
-  "Access-Control-Allow-Origin": "https://gustavosena972-wq.github.io",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Vary": "Origin",
-  "Content-Type": "application/json",
-  "Cache-Control": "no-store",
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://gustavosena972-wq.github.io",
+  "https://copiloto-financeir.gustavosena972.workers.dev",
+  "https://appassets.androidplatform.net",
+]);
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: cors });
+function corsHeadersFor(origin: string | null): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
+  };
+  if (origin && ALLOWED_ORIGINS.has(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
+}
 
 const products = new Set(["copiloto_pro_30d", "copiloto_max_30d", "copiloto_ultra_30d"]);
 
@@ -52,9 +59,25 @@ async function accessToken(): Promise<string> {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  const origin = req.headers.get("Origin");
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), { status, headers: corsHeadersFor(origin) });
+
+  if (origin && !ALLOWED_ORIGINS.has(origin)) {
+    return new Response(JSON.stringify({ error: "Origem não autorizada." }), {
+      status: 403,
+      headers: corsHeadersFor(null),
+    });
+  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeadersFor(origin) });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
   try {
+    const parsedRequest = await parseJsonObjectRequest(req);
+    if (!parsedRequest.ok) {
+      return json({ error: parsedRequest.error }, parsedRequest.status);
+    }
+    const payload = parsedRequest.value;
+
     const authorization = req.headers.get("Authorization") || "";
     const jwt = authorization.replace(/^Bearer\s+/i, "");
     if (!jwt || jwt === authorization) return json({ error: "Sessão não encontrada." }, 401);
@@ -74,9 +97,8 @@ Deno.serve(async (req: Request) => {
     const { data: isAdmin, error: adminCheckError } = await userClient.rpc("eh_admin");
     if (adminCheckError || isAdmin !== true) return json({ error: "Acesso administrativo necessário." }, 403);
 
-    const body = await req.json();
-    const id = String(body?.id || "");
-    const action = String(body?.action || "");
+    const id = typeof payload.id === "string" ? payload.id : "";
+    const action = typeof payload.action === "string" ? payload.action : "";
     if (!/^[0-9a-f-]{36}$/i.test(id) || !["approve", "reject"].includes(action)) {
       return json({ error: "Ação ou compra inválida." }, 400);
     }
@@ -112,7 +134,10 @@ Deno.serve(async (req: Request) => {
         if (!consumeResponse.ok) return json({ error: "A Google Play não confirmou o processamento da compra. Tente novamente." }, 502);
       }
       const { data, error } = await userClient.rpc("aprovar_compra_google_play", { p_id: id, p_dias: 30 });
-      if (error) return json({ error: "Compra processada na loja, mas a aprovação no sistema falhou. Repita a aprovação para concluir: " + error.message }, 500);
+      if (error) {
+        console.error("google-play-admin approval persistence failed", error.code);
+        return json({ error: "A Google Play processou a compra, mas o acesso não foi atualizado. Atualize o painel e tente concluir a aprovação." }, 500);
+      }
       return json({ ok: true, status: "aprovado", acesso_ate: data });
     }
 
@@ -126,25 +151,34 @@ Deno.serve(async (req: Request) => {
     if (!orderResponse.ok) {
       return json({ error: "Não foi possível consultar o pedido na Google Play. A solicitação continua pendente." }, 502);
     }
-    // Permite repetir a ação com segurança se o reembolso já ocorreu, mas a
-    // atualização do banco falhou na tentativa anterior.
-    if (order.state !== "REFUNDED" && order.state !== "PENDING_REFUND") {
-      if (order.state !== "PROCESSED") {
-        return json({ error: "O pedido não está em um estado que permita reembolso. A solicitação continua pendente." }, 409);
-      }
+    // A decisão interna pode ser registrada quando o reembolso foi solicitado,
+    // mas não devemos afirmar que o dinheiro já foi devolvido antes da confirmação.
+    let refundStatus: "completed" | "requested";
+    if (order.state === "REFUNDED") {
+      refundStatus = "completed";
+    } else if (order.state === "PENDING_REFUND") {
+      refundStatus = "requested";
+    } else if (order.state === "PROCESSED") {
       const refundUrl = orderUrl + ":refund?revoke=true";
       const refundResponse = await fetch(refundUrl, {
         method: "POST", headers: { Authorization: "Bearer " + googleToken, "Content-Type": "application/json" }, body: "{}",
       });
-      if (!refundResponse.ok) return json({ error: "A Google Play não confirmou o reembolso e a revogação. A solicitação continua pendente." }, 502);
+      if (!refundResponse.ok) return json({ error: "A Google Play não confirmou a solicitação de reembolso e revogação. A compra continua pendente." }, 502);
+      refundStatus = "requested";
+    } else {
+      return json({ error: "O pedido não está em um estado que permita reembolso. A solicitação continua pendente." }, 409);
     }
+
+    const refundNote = refundStatus === "completed"
+      ? "Compra reembolsada e acesso revogado pela Google Play."
+      : "Compra recusada; reembolso solicitado e acesso revogado pela Google Play.";
     const { error } = await userClient.rpc("recusar_compra_google_play", {
-      p_id: id, p_nota: "Compra reembolsada e acesso revogado pela Google Play.",
+      p_id: id, p_nota: refundNote,
     });
-    if (error) return json({ error: "Reembolso efetuado, mas não foi possível atualizar o status interno. Atualize o painel e confira o pedido." }, 500);
-    return json({ ok: true, status: "recusado" });
+    if (error) return json({ error: "A solicitação de reembolso foi enviada, mas não foi possível atualizar o status interno. Atualize o painel e confira o pedido." }, 500);
+    return json({ ok: true, status: "recusado", refundStatus });
   } catch (error) {
     console.error("google-play-admin", error);
-    return json({ error: error instanceof Error ? error.message : "Não foi possível concluir a ação." }, 400);
+    return json({ error: "Não foi possível concluir a ação. Tente novamente." }, 500);
   }
 });
