@@ -129,7 +129,7 @@ class MainActivityTest {
     fun releaseVersionMatchesTheAuditedAndroidPackage() {
         val gradle = File("build.gradle.kts").readText()
         assertTrue(gradle.contains("versionCode = 10"))
-        assertTrue(gradle.contains("versionName = \"1.0.8\""))
+        assertTrue(gradle.contains("versionName = \"1.0.9\""))
     }
 
     @Test
@@ -214,6 +214,11 @@ class MainActivityTest {
         assertTrue(html.contains("cf-scene-pulse"))
         assertTrue(html.contains("cf-scene-label"))
         assertTrue(html.contains("cf-warm-visual-system"))
+        assertTrue(html.contains("cf-3d-stage"))
+        assertTrue(html.contains("cf-3d-object"))
+        assertTrue(html.contains("cf-3d-depth"))
+        assertTrue(html.contains("cf-3d-particle"))
+        assertTrue(html.contains("cf-scene-beacon"))
     }
 
     @Test
@@ -225,5 +230,11 @@ class MainActivityTest {
         assertTrue(html.contains("planejamento"))
         assertTrue(html.contains("relatorios"))
         assertTrue(html.contains("familia"))
+        assertTrue(html.contains("data-scene-motion"))
+        assertTrue(html.contains("planilha:ledger"))
+        assertTrue(html.contains("checape:health"))
+        assertTrue(html.contains("planejamento:future"))
+        assertTrue(html.contains("relatorios:data"))
+        assertTrue(html.contains("familia:network"))
     }
 }
