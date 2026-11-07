@@ -1,17 +1,24 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { parseJsonObjectRequest } from "../_shared/security.ts";
 
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Vary": "Origin",
-  "Content-Type": "application/json",
-  "Cache-Control": "no-store",
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://gustavosena972-wq.github.io",
+  "https://copiloto-financeir.gustavosena972.workers.dev",
+  "https://appassets.androidplatform.net",
+]);
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: cors });
+function corsHeadersFor(origin: string | null): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
+  };
+  if (origin && ALLOWED_ORIGINS.has(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
+}
 
 const products: Record<string, { plan: string; amount: number }> = {
   copiloto_pro_30d: { plan: "pro", amount: 23.90 },
@@ -83,6 +90,25 @@ async function verifyPurchase(accessToken: string, packageName: string, productI
 }
 
 
+async function consumePurchase(
+  accessToken: string,
+  packageName: string,
+  productId: string,
+  purchaseToken: string,
+  consumptionState: unknown,
+): Promise<void> {
+  if (Number(consumptionState) === 1) return;
+  const url = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/"
+    + encodeURIComponent(packageName) + "/purchases/products/"
+    + encodeURIComponent(productId) + "/tokens/" + encodeURIComponent(purchaseToken) + ":consume";
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
+    body: "{}",
+  });
+  if (!response.ok) throw new Error("A Google Play não confirmou o processamento da compra.");
+}
+
 async function sha256(value: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -90,19 +116,24 @@ async function sha256(value: string): Promise<string> {
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin");
-  if (origin && origin !== "https://gustavosena972-wq.github.io" && origin !== "null") {
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), { status, headers: corsHeadersFor(origin) });
+
+  if (origin && !ALLOWED_ORIGINS.has(origin)) {
     return new Response(JSON.stringify({ error: "Origem não autorizada." }), {
       status: 403,
-      headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "Vary": "Origin" },
+      headers: corsHeadersFor(null),
     });
   }
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeadersFor(origin) });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
 
   try {
-    const rawBody = await req.text();
-    if (rawBody.length > 8192) return json({ error: "Solicitação muito grande." }, 413);
-    const body = JSON.parse(rawBody);
+    const parsedRequest = await parseJsonObjectRequest(req);
+    if (!parsedRequest.ok) {
+      return json({ error: parsedRequest.error }, parsedRequest.status);
+    }
+    const payload = parsedRequest.value;
     const authorization = req.headers.get("Authorization") || "";
     const jwt = authorization.replace(/^Bearer\s+/i, "");
     if (!jwt || jwt === authorization) return json({ error: "Sessão não encontrada." }, 401);
@@ -122,11 +153,8 @@ Deno.serve(async (req: Request) => {
     const { data: userData, error: userError } = await userClient.auth.getUser(jwt);
     if (userError || !userData.user) return json({ error: "Sessão inválida." }, 401);
 
-    if (packageName !== "com.gustavosena.copilotofinanceiro") {
-      return json({ error: "Identificador Android não corresponde à configuração do aplicativo." }, 503);
-    }
-    const productId = body?.productId;
-    const purchaseToken = body?.purchaseToken;
+    const productId = payload.productId;
+    const purchaseToken = payload.purchaseToken;
     if (typeof productId !== "string" || !products[productId]
         || typeof purchaseToken !== "string"
         || purchaseToken.length < 20 || purchaseToken.length > 4096) {
@@ -168,16 +196,17 @@ Deno.serve(async (req: Request) => {
     const purchase = await verifyPurchase(googleToken, packageName, productId, purchaseToken);
     const tokenHash = await sha256(purchaseToken);
 
-    const { data: existing } = await admin.from("google_play_compras")
+    const { data: existing, error: existingError } = await admin.from("google_play_compras")
       .select("id,status,usuario_id,familia_id")
       .eq("token_hash", tokenHash).maybeSingle();
+    if (existingError) throw existingError;
     if (existing) {
       if (existing.usuario_id !== userData.user.id || existing.familia_id !== membership.familia_id) {
         return json({ error: "Esta compra já está vinculada a outra conta." }, 409);
       }
-      // O produto é consumível: não confirmar nem consumir enquanto aguarda
-      // aprovação manual. O consumo no fluxo administrativo confirma a compra
-      // somente quando o acesso de 30 dias é efetivamente concedido.
+      // Consumir imediatamente após a validação para confirmar a compra à Google Play
+      // dentro do prazo de 3 dias. A liberação do acesso continua sob aprovação administrativa.
+      await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
       return json({ ok: true, status: existing.status, duplicate: true });
     }
 
@@ -198,14 +227,26 @@ Deno.serve(async (req: Request) => {
       status: "pendente",
     });
     if (insertError) {
-      if (insertError.code === "23505") return json({ ok: true, status: "pendente", duplicate: true });
+      if (insertError.code === "23505") {
+        // Another request may have inserted this token after the initial lookup.
+        // Re-read ownership before returning an idempotent success response.
+        const { data: racedPurchase, error: racedLookupError } = await admin.from("google_play_compras")
+          .select("id,status,usuario_id,familia_id")
+          .eq("token_hash", tokenHash).maybeSingle();
+        if (racedLookupError) throw racedLookupError;
+        if (!racedPurchase) throw insertError;
+        if (racedPurchase.usuario_id !== userData.user.id || racedPurchase.familia_id !== membership.familia_id) {
+          return json({ error: "Esta compra já está vinculada a outra conta." }, 409);
+        }
+        await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
+        return json({ ok: true, status: racedPurchase.status, duplicate: true });
+      }
       throw insertError;
     }
 
-    // A compra permanece pendente e sem consumo até a decisão do administrador.
-    // Para estes passes consumíveis, o consumo na aprovação também confirma à
-    // Google Play que o acesso foi concedido. A fila deve ser decidida em até 3 dias;
-    // compras não confirmadas nesse prazo podem ser reembolsadas automaticamente.
+    // A compra é consumida após a persistência do token para cumprir o prazo de confirmação
+    // da Google Play. O acesso de 30 dias só é concedido após aprovação administrativa.
+    await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
     return json({ ok: true, status: "pendente", message: "Compra verificada e enviada para aprovação manual." });
   } catch (error) {
     console.error("google-play-purchase", error);
