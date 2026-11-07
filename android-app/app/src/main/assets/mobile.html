@@ -2985,17 +2985,33 @@ function viewPlanilha(ed){
    <td><select data-f="status" ${d}>${stOpts(l.status)}</select></td>
    <td><select data-f="membro_id" ${d}>${memOpts(l.membro_id)}</select></td>
    <td><button class="red" data-act="del" data-id="${l.id}" ${d}>✕</button></td></tr>`).join('');
-  const novo=ed?`<tr class="novo" id="novo"><td><input type="date" id="n_data"></td><td><div style="display:grid;gap:5px;min-width:210px"><input id="n_desc" placeholder="Descrição da compra ou compromisso" style="min-width:110px"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
-   <td><select id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td><select id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
-   <td><input type="number" step="0.01" min="0" id="n_valor" placeholder="Valor total (R$)"></td><td><select id="n_status">${stOpts('pendente')}</select></td>
-   <td><select id="n_mem">${memOpts(S.me.id)}</select></td><td><button data-act="add">+</button></td></tr>
+  const mobileRows=S.lanc.map(l=>{
+    const categoria=S.cats.find(x=>x.id===l.categoria_id)?.nome||'Sem categoria';
+    const membro=S.membros.find(x=>x.id===l.membro_id)?.nome||'Família';
+    const data=l.data_vencimento?new Date(l.data_vencimento+'T12:00:00').toLocaleDateString('pt-BR'):'Sem data';
+    const status=l.status==='pago'?'Pago':l.status==='atrasado'?'Atrasado':l.status==='pendente'?'Pendente':String(l.status||'Sem status');
+    return '<tr class="mobile-entry-row" data-id="'+esc(l.id)+'"><td colspan="8"><details class="mobile-entry-details"><summary class="mobile-entry-summary"><span class="mobile-entry-main"><strong>'+esc(l.descricao)+'</strong><small>'+esc(data)+' · '+esc(categoria)+' · '+esc(membro)+'</small></span><span class="mobile-entry-aside"><b>'+brl(l.valor)+'</b><small class="mobile-entry-status '+(l.status==='pago'?'is-paid':l.status==='atrasado'?'is-late':'')+'">'+esc(status)+'</small></span></summary><div class="mobile-entry-fields">'+
+      '<label>Vencimento<input type="date" data-f="data_vencimento" value="'+(l.data_vencimento||'')+'" '+d+'></label>'+
+      '<label>Descrição<input data-f="descricao" value="'+esc(l.descricao)+'" '+d+'></label>'+
+      '<label>Tipo<select data-f="tipo" '+d+'>'+tpOpts(l.tipo)+'</select></label>'+
+      '<label>Categoria<select data-f="categoria_id" '+d+'>'+catOpts(l.tipo==='receita'?'receita':'despesa',l.categoria_id)+'</select></label>'+
+      '<label>Valor<input type="number" step="0.01" min="0" data-f="valor" value="'+l.valor+'" '+d+'></label>'+
+      '<label>Status<select data-f="status" '+d+'>'+stOpts(l.status)+'</select></label>'+
+      '<label class="mobile-entry-owner">Responsável<select data-f="membro_id" '+d+'>'+memOpts(l.membro_id)+'</select></label>'+
+      '</div><div class="mobile-entry-actions"><span>As alterações são salvas ao sair de cada campo.</span><button type="button" class="red" data-act="del" data-id="'+esc(l.id)+'" '+d+'>Excluir lançamento</button></div></details></td></tr>';
+  }).join('');
+  const mobileAddToggle=ed?'<div class="mobile-add-toggle"><button type="button" data-act="mobileadd" aria-expanded="'+(S.mobileAddOpen?'true':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+(S.mobileAddOpen?'Fechar formulário':'Novo lançamento')+'</button></div>':'';
+  const novo=ed?`<tr class="novo ${S.mobileAddOpen?'is-open':''}" id="novo"><td data-label="Vencimento"><input aria-label="Vencimento" type="date" id="n_data"></td><td data-label="Descrição"><div style="display:grid;gap:5px;min-width:0"><input id="n_desc" placeholder="Descrição da compra ou compromisso" style="min-width:0"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
+   <td data-label="Tipo"><select aria-label="Tipo" id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td data-label="Categoria"><select aria-label="Categoria" id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
+   <td data-label="Valor"><input aria-label="Valor" type="number" step="0.01" min="0" id="n_valor" placeholder="Valor total (R$)"></td><td data-label="Status"><select aria-label="Status" id="n_status">${stOpts('pendente')}</select></td>
+   <td data-label="Responsável"><select aria-label="Responsável" id="n_mem">${memOpts(S.me.id)}</select></td><td data-label="Ações"><button data-act="add" aria-label="Salvar novo lançamento">Adicionar</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
   return `${viewStatus()}<div class="cards"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
-  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>${viewGrupos()}${viewCats()}
-  <div class="bar">
+  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div><details class="mobile-analysis"><summary>Ver análise e categorias do mês</summary><div class="mobile-analysis-content">${viewGrupos()}${viewCats()}</div></details>
+  <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
    <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
    <button class="sec" data-act="recorr" ${ed?'':'disabled'}>Gerar recorrentes</button>
@@ -3005,9 +3021,11 @@ function viewPlanilha(ed){
    <button class="sec" data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button>
    <button class="red" data-act="apagarmes" ${ed?'':'disabled'}>Apagar mês</button>
    <button class="red" data-act="apagarano" ${S.me.papel==='dono'?'':'disabled'}>Apagar todos os meses</button>
-   <button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>
-  <div class="scroll"><table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Tipo</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Quem</th><th></th></tr></thead>
-  <tbody>${novo}${rows||'<tr><td colspan="8" class="mu" style="padding:16px">Nenhum lançamento neste mês.</td></tr>'}</tbody></table></div>`;
+   <button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div></details>
+  ${mobileAddToggle}
+  <div class="scroll desktop-transactions"><table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Tipo</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Quem</th><th></th></tr></thead>
+  <tbody>${novo}${rows||'<tr><td colspan="8" class="mu" style="padding:16px">Nenhum lançamento neste mês.</td></tr>'}</tbody></table></div>
+  <section class="mobile-entry-list-wrap"><div class="mobile-list-heading"><div><h2>Movimentações</h2><p>Toque em uma linha para consultar ou editar.</p></div><span>${S.lanc.length}</span></div><div class="scroll"><table class="mobile-entry-table"><tbody>${mobileRows||'<tr class="mobile-entry-empty"><td colspan="8"><strong>Nenhum lançamento neste mês</strong><p>Comece registrando uma receita ou despesa. Depois, toque nela para editar ou acompanhar o pagamento.</p></td></tr>'}</tbody></table></div></section>`;
 }
 function viewCats(){
   const g={};S.lanc.filter(l=>l.tipo==='despesa').forEach(l=>{const c=S.cats.find(x=>x.id===l.categoria_id);const p=c&&c.parent_id?S.cats.find(x=>x.id===c.parent_id):c;const n=p?p.nome:'Sem categoria';g[n]=(g[n]||0)+Number(l.valor)});
