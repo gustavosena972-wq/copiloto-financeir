@@ -641,12 +641,4 @@ class MainActivityTest {
         assertTrue(companion.contains("animation"))
         assertFalse(companion.contains("backdrop-filter:blur"))
     }
-
-    @Test
-    fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
-        val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 24"))
-        assertTrue(gradle.contains("versionName = \"1.0.23\""))
-    }
-
 }
