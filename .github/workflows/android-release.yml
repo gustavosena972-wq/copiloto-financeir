@@ -84,3 +84,5 @@ jobs:
             android-app/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 30
+
+# Release trigger for the restored 1.0.13 tester build.
