@@ -241,7 +241,7 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("--surface:#ffffff"))
         assertTrue(html.contains("--primary:#146c43"))
-        assertTrue(html.contains("body[data-ui=\\\"premium-fintech\\\"]"))
+        assertTrue(html.contains("body[data-ui=\"premium-fintech\"]"))
         assertTrue(html.contains("mobile-app-fit"))
     }
 
