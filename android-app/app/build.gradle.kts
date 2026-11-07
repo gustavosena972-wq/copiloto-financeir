@@ -19,14 +19,8 @@ android {
         applicationId = "br.com.copiloto.financeiro"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
-
-        buildConfigField(
-            "String",
-            "WEB_APP_URL",
-            "\"https://gustavosena972-wq.github.io/copiloto-financeir/\""
-        )
+        versionCode = 2
+        versionName = "1.0.1"
     }
 
     buildFeatures {
@@ -65,4 +59,6 @@ android {
 
 dependencies {
     implementation("com.android.billingclient:billing:9.1.0")
+    implementation("androidx.webkit:webkit:1.18.0")
+    testImplementation("junit:junit:4.13.2")
 }
