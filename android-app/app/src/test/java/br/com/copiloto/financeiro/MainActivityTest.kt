@@ -34,8 +34,8 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-motion-world"))
         assertTrue(html.contains("cf-motion-image"))
-        assertTrue(html.contains("data-motion-parallax"))
-        assertTrue(html.contains("@keyframes cf-image-float"))
+        assertTrue(html.contains("cf-motion-camera"))
+        assertTrue(html.contains("@keyframes cf-scene-float-a"))
         assertTrue(html.contains("prefers-reduced-motion:reduce"))
     }
     @Test
@@ -47,6 +47,6 @@ class MainActivityTest {
         assertTrue(html.contains("cf-motion-ripple"))
         assertTrue(html.contains("visibilitychange"))
         assertTrue(html.contains("prefers-reduced-motion: reduce"))
-        assertTrue(html.contains("data-motion-mode"))
+        assertTrue(html.contains("setAttribute('data-motion-mode','inicio')"))
     }
 }
