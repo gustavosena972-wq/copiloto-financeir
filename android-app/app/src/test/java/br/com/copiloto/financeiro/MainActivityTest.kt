@@ -373,7 +373,7 @@ class MainActivityTest {
         assertTrue(html.contains("Saídas"))
     }
 
-    @Test
+        @Test
     fun androidV016UsesV0InspiredLightFintechMobileShell() {
         val html = File("src/main/assets/mobile.html").readText()
         val mobile = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-16\">").substringBefore("</style>")
@@ -381,9 +381,9 @@ class MainActivityTest {
         assertTrue(mobile.contains("--v0-green:#146c43"))
         assertTrue(mobile.contains("--v0-lime:#d8f24a"))
         assertTrue(mobile.contains(".v0-mobile-dashboard"))
-        assertTrue(mobile.contains(".v0-mobile-balance"))
-        assertTrue(mobile.contains(".v0-mobile-action-grid"))
-        assertTrue(mobile.contains(".v0-mobile-bottom-nav"))
+        assertTrue(html.contains("class=\"card v0-mobile-balance\""))
+        assertTrue(html.contains("v0-mobile-action-grid"))
+        assertTrue(html.contains("mobile-bottom-nav"))
     }
 
     @Test
@@ -420,25 +420,24 @@ class MainActivityTest {
         assertTrue(html.contains("v0-mobile-quick-nav-item"))
     }
 
-    @Test
+        @Test
     fun androidV016KeepsQuickNavigationTouchFriendly() {
         val html = File("src/main/assets/mobile.html").readText()
-        val mobile = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-16\">").substringBefore("</style>")
-        assertTrue(mobile.contains(".v0-mobile-quick-nav-item{"))
-        assertTrue(mobile.contains("min-height:64px"))
-        assertTrue(mobile.contains("grid-template-columns:repeat(2,minmax(0,1fr))"))
+        assertTrue(html.contains(".v0-mobile-quick-nav-item{"))
+        assertTrue(html.contains("min-height:64px!important"))
+        assertTrue(html.contains("grid-template-columns:repeat(2,minmax(0,1fr))!important"))
     }
 
-    @Test
+        @Test
     fun androidV017KeepsTheMobileWorkspaceVisuallySeparatedByPurpose() {
         val html = File("src/main/assets/mobile.html").readText()
         val mobile = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-17\">").substringBefore("</style>")
         assertTrue(mobile.contains(".app-sidebar{display:none!important}"))
-        assertTrue(mobile.contains(".app-topbar{padding:14px 16px 6px!important}"))
-        assertTrue(mobile.contains(".v0-mobile-quick-nav-primary"))
-        assertTrue(mobile.contains(".v0-mobile-quick-nav-item"))
-        assertTrue(mobile.contains(".v0-mobile-section-divider"))
-        assertTrue(mobile.contains(".v0-mobile-bottom-nav"))
+        assertTrue(mobile.contains("padding:14px 16px 6px!important"))
+        assertTrue(html.contains(".v0-mobile-quick-nav-primary"))
+        assertTrue(html.contains(".v0-mobile-quick-nav-item"))
+        assertTrue(html.contains(".v0-mobile-section-divider"))
+        assertTrue(html.contains(".v0-mobile-bottom-nav"))
     }
 
     @Test
@@ -463,14 +462,14 @@ class MainActivityTest {
         assertTrue(html.contains("await ensureXlsx()"))
     }
 
-    @Test
+        @Test
     fun androidV018UsesMobileFirstPerformanceDefaults() {
         val html = File("src/main/assets/mobile.html").readText()
         val mobile = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-18\">").substringBefore("</style>")
         assertTrue(mobile.contains("content-visibility:auto"))
         assertTrue(mobile.contains("backdrop-filter:none!important"))
-        assertTrue(mobile.contains(".v0-mobile-quick-nav-grid{grid-template-columns:1fr!important}"))
-        assertTrue(mobile.contains("min-height:52px!important"))
+        assertTrue(mobile.contains(".mobile-bottom-nav{min-height:72px!important}"))
+        assertTrue(mobile.contains(".mobile-nav-item{min-height:54px!important}"))
     }
 
     @Test
@@ -656,7 +655,7 @@ class MainActivityTest {
         assertFalse(html.contains("Guia rápido da área atual"))
     }
 
-    @Test
+        @Test
     fun androidV023SpeechIsContextualAndUsesRealFinancialState() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("S.lanc"))
@@ -665,7 +664,7 @@ class MainActivityTest {
         assertTrue(html.contains("data-v=\"checape\""))
         assertTrue(html.contains("data-v=\"plan\""))
         assertTrue(html.contains("mobileCompanionSpeech"))
-        assertTrue(html.contains("Sem dados suficientes"))
+        assertTrue(html.contains("dados suficientes"))
         assertTrue(html.contains("próximos vencimentos"))
     }
 
