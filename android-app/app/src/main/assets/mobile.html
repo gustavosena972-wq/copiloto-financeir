@@ -3329,7 +3329,6 @@ window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false},tamanduaProfile:null,tamanduaIntroStep:0};
 const $=s=>document.querySelector(s);
-loadTamanduaProfile();
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3342,14 +3341,23 @@ const mesAberto=()=>S.mes&&S.mes.status==='aberto';
 function mobileStartupMarkup(){
   return '<div class="cf-mobile-startup" role="status" aria-live="polite"><div class="cf-mobile-startup-logo">'+LOGO+'</div><div class="cf-mobile-startup-brand"><b>Copiloto Financeiro</b><span>GESTÃO FINANCEIRA FAMILIAR</span></div><div class="cf-mobile-startup-shimmer"><i></i><i></i><i></i></div><p>Preparando seu financeiro</p></div>';
 }
+function tamanduaStorageKey(kind){
+  const userId=S.user?.id;
+  return userId?'copiloto_tamandua_'+kind+'_v1_'+encodeURIComponent(userId):null;
+}
 function loadTamanduaProfile(){
+  S.tamanduaProfile=null;
+  const profileKey=tamanduaStorageKey('profile');
+  if(!profileKey)return;
   try{
-    const raw=localStorage.getItem('copiloto_tamandua_profile_v1');
+    const raw=localStorage.getItem(profileKey);
     S.tamanduaProfile=raw?JSON.parse(raw):null;
   }catch(e){S.tamanduaProfile=null}
 }
 function tamanduaIntroCompleted(){
-  try{return localStorage.getItem('copiloto_tamandua_intro_v1')==='1'}catch(e){return false}
+  const introKey=tamanduaStorageKey('intro');
+  if(!introKey)return false;
+  try{return localStorage.getItem(introKey)==='1'}catch(e){return false}
 }
 function tamanduaCharacterSvg(){
   return '<svg viewBox="0 0 180 220" aria-hidden="true">'+
@@ -3372,7 +3380,7 @@ function tamanduaIntroMarkup(step=0){
   if(step===0){
     return '<div class="cf-tamandua-intro" role="dialog" aria-modal="true" aria-labelledby="cf-tamandua-title">'+
       '<div class="cf-tamandua-intro-shell">'+
-        '<div class="cf-tamandua-intro-top"><span class="cf-tamandua-intro-progress">1 DE 2 · PRIMEIRO CONTATO</span><button class="cf-tamandua-intro-skip" type="button" data-act="tamandua-intro-skip">Agora não</button></div>'+
+        '<div class="cf-tamandua-intro-top"><span class="cf-tamandua-intro-progress">'+(S.internalTester?'ACESSO DE TESTE · SEM COBRANÇA':'1 DE 2 · PRIMEIRO CONTATO')+'</span></div>'+
         '<section class="cf-tamandua-intro-card">'+
           '<div class="cf-tamandua-intro-character">'+
             '<div class="cf-tamandua-intro-portrait">'+tamanduaCharacterSvg()+'</div>'+
@@ -3383,7 +3391,7 @@ function tamanduaIntroMarkup(step=0){
             '<div class="cf-tamandua-intro-card-text"><b>Eu acompanho</b><span>Ajudo você a perceber contas, metas e pontos de atenção.</span></div>'+
             '<div class="cf-tamandua-intro-card-text"><b>Eu me adapto</b><span>Suas respostas ajudam a definir o que merece mais destaque para você.</span></div>'+
           '</div>'+
-          '<div class="cf-tamandua-intro-actions"><button class="sec" type="button" data-act="tamandua-intro-skip">Pular por enquanto</button><button type="button" data-act="tamandua-intro-next">Conhecer o Copiloto →</button></div>'+
+          '<div class="cf-tamandua-intro-actions"><button type="button" data-act="tamandua-intro-next">Conhecer o Copiloto →</button></div>'+
         '</section>'+
       '</div>'+
     '</div>';
@@ -3391,9 +3399,9 @@ function tamanduaIntroMarkup(step=0){
   const check=(name,value,label)=>'<label class="cf-tamandua-option"><input type="checkbox" name="'+name+'" value="'+esc(value)+'"><span>'+label+'</span></label>';
   return '<div class="cf-tamandua-intro" role="dialog" aria-modal="true" aria-labelledby="cf-tamandua-question-title">'+
     '<div class="cf-tamandua-intro-shell">'+
-      '<div class="cf-tamandua-intro-top"><span class="cf-tamandua-intro-progress">2 DE 2 · VAMOS PERSONALIZAR</span><button class="cf-tamandua-intro-skip" type="button" data-act="tamandua-intro-skip">Agora não</button></div>'+
+      '<div class="cf-tamandua-intro-top"><span class="cf-tamandua-intro-progress">2 DE 2 · VAMOS PERSONALIZAR</span></div>'+
       '<section class="cf-tamandua-intro-card">'+
-        '<div class="cf-tamandua-intro-copy"><span class="kicker">UMA PERGUNTA DE CADA VEZ, SEM PRESSA</span><h1 id="cf-tamandua-question-title">Quero entender o que você precisa.</h1><p>Você pode marcar mais de uma opção. Essas respostas ficam salvas neste aparelho e servem para adaptar as falas e orientações do Tamanduá. Não precisamos de valores ou dados bancários.</p></div>'+
+        '<div class="cf-tamandua-intro-copy"><span class="kicker">UMA PERGUNTA DE CADA VEZ, SEM PRESSA</span><h1 id="cf-tamandua-question-title">Quero entender o que você precisa.</h1><p>Você pode marcar mais de uma opção em cada pergunta. Marque pelo menos uma resposta em cada bloco para continuar. Suas preferências ficam salvas neste aparelho e adaptam as falas do Tamanduá; não precisamos de valores nem dados bancários.</p></div>'+
         '<div class="cf-tamandua-question-list">'+
           '<section class="cf-tamandua-question"><h2>Tem alguma área da sua vida que você quer melhorar porque baixou o app?</h2><p>Marque tudo que fizer sentido.</p><div class="cf-tamandua-options">'+
             check('melhorar','organizar','Organizar melhor minhas finanças')+
@@ -3430,16 +3438,39 @@ function renderTamanduaIntro(step=0){
   S.tamanduaIntroStep=step;
   $('#app').innerHTML=tamanduaIntroMarkup(step);
 }
+function renderWorkspaceOrKeepTamandua(){
+  if(S.user&&S.fam&&!tamanduaIntroCompleted()){
+    if(!document.querySelector('.cf-tamandua-intro')){
+      renderTamanduaIntro(S.tamanduaIntroStep||0);
+    }
+    return;
+  }
+  render();
+}
 function finishTamanduaIntro(){
   const groups=['melhorar','necessidade','organizacao','economia'];
+  const unanswered=groups.filter(name=>!document.querySelector('input[name="'+name+'"]:checked'));
+  if(unanswered.length){
+    toast('Marque ao menos uma opção em cada pergunta para continuar.',1);
+    return;
+  }
   const profile={};
   groups.forEach(name=>profile[name]=[...document.querySelectorAll('input[name="'+name+'"]:checked')].map(x=>x.value));
   profile.version=1;
   profile.savedAt=new Date().toISOString();
+  const profileKey=tamanduaStorageKey('profile');
+  const introKey=tamanduaStorageKey('intro');
+  if(!profileKey||!introKey){
+    toast('Entre novamente na sua conta para salvar suas preferências.',1);
+    return;
+  }
   try{
-    localStorage.setItem('copiloto_tamandua_profile_v1',JSON.stringify(profile));
-    localStorage.setItem('copiloto_tamandua_intro_v1','1');
-  }catch(e){}
+    localStorage.setItem(profileKey,JSON.stringify(profile));
+    localStorage.setItem(introKey,'1');
+  }catch(e){
+    toast('Não foi possível salvar suas respostas neste aparelho. Tente novamente.',1);
+    return;
+  }
   S.tamanduaProfile=profile;
   S.tamanduaIntroStep=0;
   render();
@@ -3480,7 +3511,8 @@ async function boot(){
   S.admin=false;S.adm=null;S.admPend=0;S.me=null;S.fam=null;
   if(S.rt){try{sb.removeChannel(S.rt)}catch(e){}S.rt=null}
   await carregarConfig();
-  if(!S.user){renderAuth();checarServidor();return}
+  if(!S.user){S.tamanduaProfile=null;renderAuth();checarServidor();return}
+  loadTamanduaProfile();
   $('#app').innerHTML='<div class="auth mu">Carregando…</div>';
   const adminCheck=await sb.rpc('eh_admin');
   if(adminCheck.error)throw adminCheck.error;
@@ -3523,13 +3555,13 @@ async function loadMes(rd=true,refreshAggregates=true){
     q(sb.from('lancamentos').select('*').eq('mes_id',S.mes.id).order('data_vencimento',{nullsFirst:false}).order('criado_em')),
     q(sb.from('sugestoes').select('*').eq('mes_id',S.mes.id).order('criado_em'))]);
   S.lanc=l;S.sug=s;
-  if(rd){if(!tamanduaIntroCompleted())renderTamanduaIntro();else render();}
+  if(rd)renderWorkspaceOrKeepTamandua();
   if(refreshAggregates){
     const[rs,mc]=await Promise.all([
       q(sb.from('v_resumo_anual').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano).order('mes')),
       q(sb.from('v_meta_cartao').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano))]);
     S.resumo=rs;S.meta=mc;S._aggregateYearId=S.ano.id;
-    if(rd)render();
+    if(rd)renderWorkspaceOrKeepTamandua();
   }
 }
 
@@ -3821,6 +3853,12 @@ window.__copilotoHandleAndroidBack=()=>{
 
 /* ---------- app ---------- */
 function render(){
+  if(S.user&&S.fam&&!tamanduaIntroCompleted()){
+    if(!document.querySelector('.cf-tamandua-intro')){
+      renderTamanduaIntro(S.tamanduaIntroStep||0);
+    }
+    return;
+  }
   if(S.view==='admin'&&!S.admin){S.view='planilha';S.adm=null;S.admPend=0;}
   const ed=canEdit()&&mesAberto();
   const ultra=planoTemRecurso('relatorios');
