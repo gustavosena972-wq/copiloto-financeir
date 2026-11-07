@@ -574,4 +574,38 @@ class MainActivityTest {
         assertTrue(gradle.contains("versionName = \"1.0.21\""))
     }
 
+    @Test
+    fun androidV022ProvidesDataDrivenCopilotIntelligenceInTheMonthlyWorkspace() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function buildCopilotInsights"))
+        assertTrue(html.contains("Previsão de saldo"))
+        assertTrue(html.contains("Ritmo de gastos"))
+        assertTrue(html.contains("Contas próximas"))
+        assertTrue(html.contains("Copiloto inteligente"))
+    }
+
+    @Test
+    fun androidV022ProtectsTestersFromThePaymentScreen() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("S.internalTester"))
+        assertTrue(html.contains("if(S.internalTester)return render()"))
+        assertTrue(html.contains("Modo teste"))
+    }
+
+    @Test
+    fun androidV022ExposesIntelligenceCapabilitiesAcrossPlans() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("copilotoInteligente"))
+        assertTrue(html.contains("alertasFinanceiros"))
+        assertTrue(html.contains("previsaoSaldo"))
+        assertTrue(html.contains("planejamentoAvancado"))
+    }
+
+    @Test
+    fun releaseVersionAdvancesToTheIntelligenceIteration() {
+        val gradle = File("build.gradle.kts").readText()
+        assertTrue(gradle.contains("versionCode = 23"))
+        assertTrue(gradle.contains("versionName = \"1.0.22\""))
+    }
+
 }
