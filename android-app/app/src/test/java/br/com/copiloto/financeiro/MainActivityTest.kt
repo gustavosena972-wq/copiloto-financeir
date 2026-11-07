@@ -214,7 +214,7 @@ class MainActivityTest {
         assertTrue(html.contains("cf-command-glow"))
         assertTrue(html.contains("--cf-figma-emerald"))
         assertTrue(html.contains("--cf-figma-gold"))
-        assertTrue(html.contains("data-ui="figma-family-model""))
+        assertTrue(html.contains("data-ui=\"figma-family-model\""))
         assertTrue(html.contains("cf-command-reveal"))
     }
 
