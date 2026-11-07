@@ -2450,7 +2450,7 @@ if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div
 const sb=supabase.createClient(SB_URL,SB_KEY);
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false};
+const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -2780,6 +2780,39 @@ function renderSemFamilia(){
   <input id="fnome" placeholder="Nome da família (ex.: Família Silva)"><button data-act="criarfam">Criar família</button>
   <div class="mu" style="margin-top:8px">Ou entre numa família existente:</div><input id="cod" placeholder="Código do convite"><button class="sec" data-act="entrarfam">Entrar com código</button>
   <button class="red" data-act="sair">Sair</button></div>`;
+}
+
+
+function mobileGuide(view){
+  const guides={
+    planilha:{title:'Como usar os lançamentos',hint:'Entradas, despesas e pagamentos do mês.',intro:'Esta é a área de movimentações da família. Cada alteração é gravada na conta compartilhada.',steps:['Confira o mês selecionado logo acima.','Toque em “Novo lançamento” para registrar uma receita ou despesa. Informe data, descrição, categoria, valor e responsável.','Toque em uma movimentação para abrir os campos de edição. As alterações são salvas quando você sai do campo.','Use “Mais ações do mês” para importar, exportar, gerar recorrências ou fechar o período.']},
+    ano:{title:'Como usar a visão do ano',hint:'Compare os meses e abra qualquer período.',intro:'A visão anual reúne os resultados que já foram registrados. Os valores são calculados a partir dos lançamentos.',steps:['Escolha o ano no seletor do topo.','Compare receitas, despesas, saldo e poupança.','Toque em um mês para abrir os lançamentos daquele período.','Use as metas e os ajustes do fim da página para configurar o acompanhamento.']},
+    checape:{title:'Como usar o checape',hint:'Entenda as sugestões geradas pelos seus lançamentos.',intro:'O checape analisa os dados cadastrados e apresenta sugestões. Ele não altera seus lançamentos sozinho.',steps:['Registre receitas e despesas para alimentar a análise.','Toque em “Gerar checape” para atualizar as sugestões do mês.','Abra cada sugestão, leia a explicação e o comparativo.','Escolha “Aceitar” ou “Ignorar”. Você mantém o controle da decisão.']},
+    plan:{title:'Como usar o planejamento',hint:'Metas, dívidas e patrimônio em um só lugar.',intro:'Use esta área para acompanhar objetivos e compromissos de longo prazo da família.',steps:['Cadastre uma meta e informe o valor que pretende alcançar.','Registre dívidas com saldo, juros e pagamento mínimo.','Atualize os aportes das metas conforme guardar dinheiro.','Mantenha ativos e passivos atualizados para acompanhar o patrimônio.']},
+    'família':{title:'Como usar a área da família',hint:'Membros, convites, categorias e conta.',intro:'As informações desta área são compartilhadas com os membros que têm acesso à mesma família.',steps:['Confira quem participa e qual permissão cada pessoa possui.','Adicione um membro ou gere um convite para quem já tem login.','Ajuste categorias e grupos para organizar melhor as despesas.','Revise as configurações da conta antes de compartilhar o acesso.']},
+    relatorios:{title:'Como usar os relatórios',hint:'Tendências e comparativos dos dados registrados.',intro:'Os relatórios transformam os lançamentos em comparações e tendências. Quanto melhor o histórico, mais útil a leitura.',steps:['Escolha o ano que deseja analisar.','Compare as barras de receitas e despesas por mês.','Confira a distribuição dos gastos por categoria.','Toque em um mês para investigar os lançamentos que formaram o resultado.']},
+    admin:{title:'Como usar a administração',hint:'Acompanhamento operacional do serviço.',intro:'Esta área é restrita à administração e reúne informações operacionais da plataforma.',steps:['Confira os dados apresentados antes de tomar uma decisão.','Use apenas as ações correspondentes à tarefa administrativa.','Não compartilhe dados de acesso ou informações privadas com terceiros.']}
+  };
+  const g=guides[view];if(!g)return '';
+  const steps=g.steps.map(step=>'<li>'+step+'</li>').join('');
+  return '<details class="mobile-guide"><summary aria-controls="mobile-guide-content"><span class="mobile-guide-mark" aria-hidden="true">?</span><span class="mobile-guide-copy"><b>'+g.title+'</b><small>'+g.hint+'</small></span><span class="mobile-guide-action">Passo a passo</span></summary><div class="mobile-guide-content" id="mobile-guide-content"><p>'+g.intro+'</p><ol>'+steps+'</ol></div></details>';
+}
+function mobileNavigation(){
+  const activeMore=['família','relatorios','admin'].includes(S.view);
+  return '<nav class="mobile-bottom-nav" aria-label="Navegação principal do aplicativo">'+
+    '<button type="button" class="mobile-nav-item '+(S.view==='planilha'?'is-active':'')+'" data-act="view" data-v="planilha" data-mobile-nav="launches" aria-label="Abrir lançamentos" '+(S.view==='planilha'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5"/></svg><span>Lanç.</span></button>'+
+    '<button type="button" class="mobile-nav-item '+(S.view==='ano'?'is-active':'')+'" data-act="view" data-v="ano" data-mobile-nav="year" aria-label="Abrir visão do ano" '+(S.view==='ano'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17M7 15l4-4 3 2 5-7"/></svg><span>Ano</span></button>'+
+    '<button type="button" class="mobile-nav-item '+(S.view==='checape'?'is-active':'')+'" data-act="view" data-v="checape" data-mobile-nav="checkup" aria-label="Abrir checape financeiro" '+(S.view==='checape'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 4.6-3 8-8 10-5-2-8-5.4-8-10V6zM8.5 12l2.2 2.2 4.8-5"/></svg><span>Checape</span></button>'+
+    '<button type="button" class="mobile-nav-item '+(S.view==='plan'?'is-active':'')+'" data-act="view" data-v="plan" data-mobile-nav="planning" aria-label="Abrir planejamento" '+(S.view==='plan'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 2v3M22 12h-3"/></svg><span>Metas</span></button>'+
+    '<button type="button" class="mobile-nav-item '+(activeMore?'is-active':'')+'" data-act="mobilemore" data-mobile-nav="more" aria-label="Mais ferramentas" aria-expanded="'+(S.mobileMore?'true':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg><span>Mais</span></button>'+
+    '</nav>';
+}
+function mobileMoreMenu(){
+  let links='<button type="button" data-act="view" data-v="família"><span>Família e ajustes</span><span aria-hidden="true">›</span></button>';
+  if(planoTemRecurso('relatorios'))links+='<button type="button" data-act="view" data-v="relatorios"><span>Relatórios financeiros</span><span aria-hidden="true">›</span></button>';
+  if(S.admin)links+='<button type="button" data-act="view" data-v="admin"><span>Administração</span><span aria-hidden="true">›</span></button>';
+  links+='<button type="button" class="mobile-more-signout" data-act="sair"><span>Sair da conta</span><span aria-hidden="true">↗</span></button>';
+  return '<div class="mobile-more-panel" '+(S.mobileMore?'':'hidden')+'><div class="mobile-more-heading"><b>Mais ferramentas</b><button type="button" data-act="mobilemore" aria-label="Fechar menu">Fechar</button></div>'+links+'</div>';
 }
 
 /* ---------- app ---------- */
