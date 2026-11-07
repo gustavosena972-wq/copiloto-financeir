@@ -2019,6 +2019,60 @@ body:has(.landing-page){
 }
 
 
+/* 1.0.8 AI MESH — campo neural financeiro, sem imagens estáticas falsas */
+.cf-motion-world{
+  background:
+    radial-gradient(900px 520px at 12% 18%,rgba(75,210,139,.10),transparent 58%),
+    radial-gradient(760px 520px at 88% 72%,rgba(116,88,255,.09),transparent 60%),
+    radial-gradient(520px 360px at 52% 42%,rgba(214,176,91,.055),transparent 68%);
+}
+.cf-motion-image{
+  background-image:
+    radial-gradient(circle at 24% 32%,rgba(103,235,165,.30) 0 1.2%,transparent 1.8%),
+    radial-gradient(circle at 72% 26%,rgba(205,177,102,.24) 0 1%,transparent 1.6%),
+    radial-gradient(circle at 58% 72%,rgba(135,104,255,.20) 0 1.1%,transparent 1.8%),
+    linear-gradient(125deg,rgba(7,24,16,.20),rgba(67,45,117,.08) 48%,rgba(10,38,24,.18));
+  background-size:auto,auto,auto,100% 100%;
+  background-position:center;
+  mix-blend-mode:screen;
+  filter:saturate(1.08) contrast(1.04);
+}
+.cf-neural-mesh{
+  position:absolute;inset:0;pointer-events:none;opacity:.72;
+  background:
+    linear-gradient(118deg,transparent 0 34%,rgba(92,225,143,.075) 35%,transparent 36%),
+    linear-gradient(67deg,transparent 0 57%,rgba(190,157,88,.055) 58%,transparent 59%),
+    radial-gradient(ellipse at 50% 50%,transparent 0 32%,rgba(79,203,130,.035) 33%,transparent 55%);
+  background-size:100% 100%,100% 100%,100% 100%;
+  animation:cf-neural-breathe 12s ease-in-out infinite;
+}
+.cf-neural-mesh:before,.cf-neural-mesh:after{
+  content:"";position:absolute;border-radius:50%;border:1px solid rgba(105,222,145,.16);
+  width:clamp(260px,42vw,620px);height:clamp(160px,24vw,340px);
+  left:50%;top:50%;transform:translate(-50%,-50%) rotateX(64deg) rotateZ(-14deg);
+  box-shadow:0 0 80px rgba(77,205,130,.055),inset 0 0 55px rgba(77,205,130,.035);
+}
+.cf-neural-mesh:after{
+  width:clamp(180px,29vw,430px);height:clamp(110px,17vw,240px);
+  transform:translate(-50%,-50%) rotateX(64deg) rotateZ(19deg);
+  border-color:rgba(207,174,94,.13);
+  animation:cf-neural-orbit 18s linear infinite reverse;
+}
+@keyframes cf-neural-breathe{50%{opacity:.94;transform:scale(1.015)}} 
+@keyframes cf-neural-orbit{to{rotate:360deg}}
+.cf-ai-node{
+  position:absolute;width:6px;height:6px;border-radius:50%;
+  background:#78edaa;box-shadow:0 0 12px #63df97,0 0 30px rgba(82,216,135,.35);
+  animation:cf-ai-node-pulse 3.4s ease-in-out infinite;
+}
+.cf-ai-node.n1{left:22%;top:31%}.cf-ai-node.n2{left:38%;top:61%;animation-delay:-.8s}
+.cf-ai-node.n3{left:64%;top:26%;animation-delay:-1.6s;background:#d7b767;box-shadow:0 0 12px #d7b767}
+.cf-ai-node.n4{left:78%;top:66%;animation-delay:-2.4s}
+@keyframes cf-ai-node-pulse{50%{transform:scale(1.7);opacity:.58}}
+@media(prefers-reduced-motion:reduce){
+  .cf-neural-mesh,.cf-neural-mesh:after,.cf-ai-node{animation:none!important}
+}
+
 /* 1.0.8 — telas vivas: cada área do produto possui uma linguagem visual própria. */
 .cf-screen-transition{animation:cf-screen-in .52s cubic-bezier(.2,.8,.2,1) both}@keyframes cf-screen-in{from{opacity:0;transform:translateY(18px) scale(.985);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
 .cf-screen-stage{position:relative;min-height:250px;margin:0 0 18px;padding:24px 28px;border:1px solid rgba(116,216,145,.14);border-radius:24px;overflow:hidden;background:linear-gradient(120deg,rgba(7,26,16,.96),rgba(10,29,20,.72) 48%,rgba(6,16,11,.92));box-shadow:0 20px 70px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.05);isolation:isolate}
@@ -4204,7 +4258,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     world.className='cf-motion-world';
     world.setAttribute('aria-hidden','true');
     world.setAttribute('data-motion-mode','inicio');
-    world.innerHTML='<div class="cf-motion-camera"><div class="cf-motion-image cf-motion-image-a"></div><div class="cf-motion-image cf-motion-image-b"></div><div class="cf-motion-image cf-motion-image-c"></div><div class="cf-motion-orbit cf-motion-orbit-a"></div><div class="cf-motion-orbit cf-motion-orbit-b"></div><div class="cf-motion-light"></div><div class="cf-motion-liquid"></div><canvas class="cf-motion-canvas"></canvas></div>';
+    world.innerHTML='<div class="cf-motion-camera"><div class="cf-neural-mesh"><i class="cf-ai-node n1"></i><i class="cf-ai-node n2"></i><i class="cf-ai-node n3"></i><i class="cf-ai-node n4"></i></div><div class="cf-motion-image cf-motion-image-a"></div><div class="cf-motion-image cf-motion-image-b"></div><div class="cf-motion-image cf-motion-image-c"></div><div class="cf-motion-orbit cf-motion-orbit-a"></div><div class="cf-motion-orbit cf-motion-orbit-b"></div><div class="cf-motion-light"></div><div class="cf-motion-liquid"></div><canvas class="cf-motion-canvas"></canvas></div>';
     document.body.prepend(world);
     const canvas=world.querySelector('.cf-motion-canvas'),ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
     if(!ctx)return;
@@ -4239,6 +4293,16 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
         if(!media.matches){p.x+=p.speed*dt*1000*(p.depth+.25);p.y+=Math.sin(t*.32+p.phase)*.000014*dt*1000;if(p.x>1.04){p.x=-.04;p.y=(p.y+.27)%1}if(p.y>1.04)p.y=-.04;if(p.y<-.04)p.y=1.04}
         const x=p.x*width+Math.sin(t*.19+p.phase)*10*p.depth,y=p.y*height+Math.cos(t*.17+p.phase)*8*p.depth,pulse=.45+.55*Math.sin(t*.8+p.phase),radius=p.radius*(.65+p.depth*.7);
         ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fillStyle=i%5===0?'rgba(190,153,91,'+(.18+pulse*.24)+')':'rgba(54,126,87,'+(.12+pulse*.2)+')';ctx.fill();
+        if(i%4===0){
+          for(let j=i+1;j<particles.length;j++){
+            const q=particles[j],qx=q.x*width,qy=q.y*height,dx=qx-x,dy=qy-y,dist=Math.hypot(dx,dy);
+            if(dist<Math.min(width,height)*.16){
+              ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(qx,qy);
+              ctx.strokeStyle='rgba(91,205,137,'+Math.max(0,.045*(1-dist/(Math.min(width,height)*.16)))+')';
+              ctx.lineWidth=.55;ctx.stroke();
+            }
+          }
+        }
         if(i%6===0){ctx.beginPath();ctx.arc(x,y,radius*4.8,0,Math.PI*2);ctx.strokeStyle='rgba(78,145,103,'+(.035+pulse*.045)+')';ctx.lineWidth=.7;ctx.stroke()}
       });
     }
