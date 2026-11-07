@@ -55,7 +55,7 @@ tfoot td{font-weight:700;border-top:2px solid var(--bd)}
 #toast.err{border-color:var(--no)}
 @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes dot{0%,80%,100%{opacity:.25}40%{opacity:1}}
-.anim .card,.anim .sug,.anim .scroll{animation:up .5s both}.anim .cards .card:nth-child(2){animation-delay:.06s}.anim .cards .card:nth-child(3){animation-delay:.12s}.anim .cards .card:nth-child(4){animation-delay:.18s}.anim .cards .card:nth-child(n+5){animation-delay:.24s}
+.anim .card,.anim .sug{animation:up .5s both}.anim .cards .card:nth-child(2){animation-delay:.06s}.anim .cards .card:nth-child(3){animation-delay:.12s}.anim .cards .card:nth-child(4){animation-delay:.18s}.anim .cards .card:nth-child(n+5){animation-delay:.24s}
 .ring{display:flex;align-items:center;gap:12px}.ring svg{transform:rotate(-90deg);flex:none}
 .chips{display:flex;gap:6px;flex-wrap:wrap}.chip{font-weight:500;padding:6px 10px;font-size:12.5px}
 .modal{position:fixed;inset:0;background:#000a;display:grid;place-items:center;z-index:8;padding:14px}.box{max-width:560px;width:100%}
@@ -2089,6 +2089,61 @@ body:has(.landing-page){
 @media(max-width:800px){.cf-screen-stage{min-height:210px;padding:18px;border-radius:19px}.cf-stage-copy{max-width:230px}.cf-stage-copy h2{font-size:22px}.cf-stage-copy p{font-size:8px}.cf-ledger-lines{right:3%;width:48%;top:31%}.cf-floating-value{font-size:6px;padding:6px 8px}.cf-orbit-core{right:18%;width:82px;height:82px}.cf-orbit-ring.r1{width:260px;height:110px;right:4%}.cf-orbit-ring.r2{width:205px;height:90px;right:15%}.cf-health-ring{right:13%;width:110px;height:110px}.cf-health-ring b{font-size:27px}.cf-health-pulse{right:10%;width:125px;height:125px}.cf-health-chip{font-size:6px}.cf-goal-rings{right:9%;width:140px;height:140px}.cf-goal-rings .g1{width:140px;height:140px}.cf-goal-rings .g2{width:105px;height:105px}.cf-goal-rings .g3{width:72px;height:72px}.cf-goal-rings b{font-size:14px}.cf-data-bars{right:5%;width:50%;height:58%;gap:5px}.cf-report-pulse{font-size:13px;right:5%}.cf-family-core{right:16%;width:82px;height:82px}.cf-family-node{font-size:6px;padding:6px 8px}}@media(max-width:520px){.cf-screen-stage{min-height:190px;padding:15px}.cf-stage-copy{max-width:53%}.cf-stage-copy h2{font-size:18px}.cf-stage-copy p{font-size:7px}.cf-stage-visual{opacity:.88}.cf-screen-stage:before{background-size:auto,25px 25px,25px 25px}}@media(prefers-reduced-motion:reduce){.cf-screen-transition,.cf-screen-stage *{animation:none!important}}
 </style>
 </style>
+
+<style id="cf-mobile-launchamentos-stability">
+/* 1.0.12 — lançamentos estáveis, legíveis e sem tabela larga cortando texto no celular. */
+.cf-figma-family-ui .app-content{min-width:0}
+.cf-figma-family-ui .cf-real-content{min-width:0}
+.cf-figma-family-ui .scroll{overflow-x:auto;overflow-y:visible}
+.cf-figma-family-ui .scroll table{min-width:860px}
+.cf-figma-family-ui .meses{align-items:center;gap:7px}
+.cf-figma-family-ui .meses button{
+  min-height:38px;padding:8px 12px!important;white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+@media(max-width:760px){
+  .cf-figma-family-ui .app-main{padding:15px 12px 26px!important}
+  .cf-figma-family-ui .meses{
+    display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px!important;width:100%;
+  }
+  .cf-figma-family-ui .meses button{
+    width:100%;min-width:0;padding:9px 5px!important;font-size:11px;overflow:hidden;text-overflow:ellipsis;
+  }
+  .cf-figma-family-ui .scroll{overflow:visible!important;border:0!important;background:transparent!important;border-radius:0!important}
+  .cf-figma-family-ui .scroll table{
+    width:100%!important;min-width:0!important;border-collapse:separate;border-spacing:0 10px;display:block;
+  }
+  .cf-figma-family-ui .scroll thead{display:none}
+  .cf-figma-family-ui .scroll tbody,.cf-figma-family-ui .scroll tr{display:block;width:100%}
+  .cf-figma-family-ui .scroll tbody tr{
+    padding:10px 12px;margin:0;border:1px solid rgba(83,132,101,.20);border-radius:15px;
+    background:linear-gradient(145deg,#0d1812,#0a130f)!important;box-shadow:0 10px 26px rgba(0,0,0,.16);
+  }
+  .cf-figma-family-ui .scroll tbody tr:hover td{background:transparent!important}
+  .cf-figma-family-ui .scroll tbody td{
+    display:grid!important;grid-template-columns:88px minmax(0,1fr);gap:10px;align-items:center;
+    width:100%;min-width:0;padding:8px 0!important;border-top:1px solid rgba(83,132,101,.12)!important;color:#d8e5da!important;
+  }
+  .cf-figma-family-ui .scroll tbody td:first-child{border-top:0!important}
+  .cf-figma-family-ui .scroll tbody td::before{
+    content:attr(data-label);color:#819688;font-size:9px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;
+  }
+  .cf-figma-family-ui .scroll tbody td>input,
+  .cf-figma-family-ui .scroll tbody td>select{
+    width:100%!important;min-width:0!important;max-width:100%;box-sizing:border-box;
+  }
+  .cf-figma-family-ui .scroll tbody td:nth-child(2)>div{min-width:0!important;width:100%}
+  .cf-figma-family-ui .scroll tbody td:nth-child(2) small{overflow-wrap:anywhere}
+  .cf-figma-family-ui .scroll tbody td[data-label="Ações"] button{width:44px;justify-self:start}
+  .cf-figma-family-ui .scroll tbody tr.novo{padding:12px;background:#0b1510!important}
+  .cf-figma-family-ui .scroll tbody tr.novo td{padding:7px 0!important}
+  .cf-figma-family-ui .scroll tfoot{display:block;width:100%}
+  .cf-figma-family-ui .scroll tfoot tr,.cf-figma-family-ui .scroll tfoot td{display:block;width:100%;min-width:0}
+  .cf-figma-family-ui .scroll tfoot td{padding:10px 0!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .cf-figma-family-ui .scroll tbody tr{animation:none!important}
+}
+</style>
 <style id="cf-ultra-workspace">
 .cf-section{margin:20px 0 24px;padding:0 0 20px;border-bottom:1px solid #dfe4d9}.cf-section:last-child{border-bottom:0}
 .cf-section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:15px}
@@ -3849,7 +3904,7 @@ function render(){
   const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
   if(S.view==='planilha')body=viewCommandHero()+viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&planoTemRecurso('relatorios'))body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
-  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
+  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${String(m.mes).padStart(2,'0')}/${S.ano.ano}</button>`).join('')}</div>`;
   $('#app').innerHTML=`<div class="app-shell cf-figma-family-ui" data-ui="figma-family-model">
     <aside class="app-sidebar" aria-label="Navegação principal">
       <div class="sidebar-head">
@@ -4013,14 +4068,14 @@ function viewPlanilha(ed){
   const apagar=S.lanc.filter(l=>l.tipo==='despesa'&&l.status!=='pago').reduce((a,l)=>a+Number(l.valor),0);
   const d=ed?'':'disabled';
   const rows=S.lanc.map(l=>`<tr data-id="${l.id}">
-   <td><input type="date" data-f="data_vencimento" value="${l.data_vencimento||''}" ${d}></td>
-   <td><input data-f="descricao" value="${esc(l.descricao)}" ${d}>${l.parcelas_total?`<small class="mu" style="display:block">Parcela ${l.parcela_atual||1}/${l.parcelas_total} · ${l.natureza_compromisso==='financiamento'?'Prestação/financiamento':'Compra parcelada'}</small>`:''}</td>
-   <td><select data-f="tipo" ${d}>${tpOpts(l.tipo)}</select></td>
-   <td><select data-f="categoria_id" ${d}>${catOpts(l.tipo==='receita'?'receita':'despesa',l.categoria_id)}</select></td>
-   <td><input type="number" step="0.01" min="0" data-f="valor" value="${l.valor}" ${d}></td>
-   <td><select data-f="status" ${d}>${stOpts(l.status)}</select></td>
-   <td><select data-f="membro_id" ${d}>${memOpts(l.membro_id)}</select></td>
-   <td><button class="red" data-act="del" data-id="${l.id}" ${d}>✕</button></td></tr>`).join('');
+   <td data-label="Data"><input type="date" data-f="data_vencimento" value="${l.data_vencimento||''}" ${d}></td>
+   <td data-label="Descrição"><input data-f="descricao" value="${esc(l.descricao)}" ${d}>${l.parcelas_total?`<small class="mu" style="display:block">Parcela ${l.parcela_atual||1}/${l.parcelas_total} · ${l.natureza_compromisso==='financiamento'?'Prestação/financiamento':'Compra parcelada'}</small>`:''}</td>
+   <td data-label="Tipo"><select data-f="tipo" ${d}>${tpOpts(l.tipo)}</select></td>
+   <td data-label="Categoria"><select data-f="categoria_id" ${d}>${catOpts(l.tipo==='receita'?'receita':'despesa',l.categoria_id)}</select></td>
+   <td data-label="Valor"><input type="number" step="0.01" min="0" data-f="valor" value="${l.valor}" ${d}></td>
+   <td data-label="Status"><select data-f="status" ${d}>${stOpts(l.status)}</select></td>
+   <td data-label="Membro"><select data-f="membro_id" ${d}>${memOpts(l.membro_id)}</select></td>
+   <td data-label="Ações"><button class="red" data-act="del" data-id="${l.id}" ${d}>✕</button></td></tr>`).join('');
   const novo=ed?`<tr class="novo" id="novo"><td><input type="date" id="n_data"></td><td><div style="display:grid;gap:5px;min-width:210px"><input id="n_desc" placeholder="Descrição da compra ou compromisso" style="min-width:110px"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
    <td><select id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td><select id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
    <td><input type="number" step="0.01" min="0" id="n_valor" placeholder="Valor total (R$)"></td><td><select id="n_status">${stOpts('pendente')}</select></td>
@@ -5157,7 +5212,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
   function schedule(){clearTimeout(timer);timer=setTimeout(mount,20)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
   const app=document.getElementById('app');
-  if(app)new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+  if(app)new MutationObserver(schedule).observe(app,{childList:true});
 })();
 </script>
 </body>
