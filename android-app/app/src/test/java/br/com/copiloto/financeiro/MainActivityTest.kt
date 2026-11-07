@@ -641,4 +641,39 @@ class MainActivityTest {
         assertTrue(companion.contains("animation"))
         assertFalse(companion.contains("backdrop-filter:blur"))
     }
+
+    @Test
+    fun androidV023UsesShortNaturalTamanduaSpeechInsteadOfALargeGuidePanel() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-companion-speech"))
+        assertTrue(html.contains("function mobileCompanionSpeech"))
+        assertTrue(html.contains("Vamos conferir como está seu mês?"))
+        assertTrue(html.contains("Tem contas atrasadas aqui. Vale conferir antes de planejar novos gastos."))
+        assertTrue(html.contains("Encontrei alguns pontos para você revisar."))
+        assertFalse(html.contains("cf-companion-panel"))
+        assertFalse(html.contains("cf-companion-guide-row"))
+        assertFalse(html.contains("Guia rápido da área atual"))
+    }
+
+    @Test
+    fun androidV023SpeechIsContextualAndUsesRealFinancialState() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("S.lanc"))
+        assertTrue(html.contains("S.view"))
+        assertTrue(html.contains("data-v="planilha""))
+        assertTrue(html.contains("data-v="checape""))
+        assertTrue(html.contains("data-v="plan""))
+        assertTrue(html.contains("mobileCompanionSpeech"))
+        assertTrue(html.contains("Sem dados suficientes"))
+        assertTrue(html.contains("próximos vencimentos"))
+    }
+
+    @Test
+    fun androidV023CompanionSpeechDoesNotAddNavigationOrDelayStartup() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertFalse(html.contains("data-v="ajuda""))
+        assertFalse(html.contains("setTimeout(mobileCompanionSpeech"))
+        assertFalse(html.contains("await mobileCompanionSpeech"))
+        assertTrue(html.contains("mountMobileCompanion()"))
+    }
 }
