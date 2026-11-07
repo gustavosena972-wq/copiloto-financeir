@@ -2449,7 +2449,7 @@ body[data-ui="premium-fintech"] .landing-page{background:rgba(238,242,246,.76)!i
 const SB_URL='https://jlufubazlnrelrbsvsal.supabase.co';
 const SB_KEY='sb_publishable__CjlaAIa2w5F_7HhOhJKkA_HeDFWxNS';
 if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div class="auth"><h1>Não foi possível carregar</h1><div class="mu">O app precisa de internet para carregar suas bibliotecas. Abra este arquivo no Chrome com internet (não na pré-visualização do Claude).</div></div>';throw new Error('biblioteca supabase ausente')}
-const sb=supabase.createClient(SB_URL,SB_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
+const sb=supabase.createClient(SB_URL,SB_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl: false}});
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false};
@@ -2825,7 +2825,7 @@ function render(){
       </div>
     </aside>
     <main class="app-main">
-      ${S.internalTester?'<div class="cf-test-mode-banner" role="status"><span class="cf-test-mode-dot" aria-hidden="true"></span><div class="cf-test-mode-copy"><strong>AMBIENTE DE TESTE</strong><p>Seu acesso de avaliação está liberado. Nenhuma compra ou cobrança é necessária nesta etapa.</p></div><span class="cf-test-mode-tag">TESTE INTERNO</span></div>':''}
+      ${S.internalTester?'<div class="cf-test-mode-banner" role="status"><span class="cf-test-mode-dot" aria-hidden="true"></span><div class="cf-test-mode-copy"><strong>MODO DE TESTE · AMBIENTE DE AVALIAÇÃO</strong><p>Seu acesso de avaliação está liberado. Nenhuma compra ou cobrança é necessária nesta etapa.</p></div><span class="cf-test-mode-tag">TESTE INTERNO</span></div>':''}
       <header class="app-topbar">
         <div class="page-heading">
           <div class="page-eyebrow">COPILOTO FINANCEIRO · ${S.view==='admin'?'PAINEL ADMINISTRATIVO':'GESTÃO FAMILIAR'}</div>
