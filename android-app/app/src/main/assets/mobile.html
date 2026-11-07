@@ -2907,18 +2907,58 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 }
 </style>
 </style>
+<style id="cf-android-v0-mobile-1-0-18">
+@media(max-width:760px){
+  .app-main,.app-content,.v0-mobile-dashboard{contain:layout paint!important}
+  .v0-mobile-dashboard>*{content-visibility:auto;contain-intrinsic-size:0 180px}
+  .app-topbar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#f6f5ef!important}
+  .mobile-bottom-nav{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .v0-mobile-quick-nav-primary{box-shadow:0 12px 30px rgba(20,108,67,.18)!important}
+  .v0-mobile-quick-nav-item{box-shadow:0 7px 18px rgba(24,54,37,.06)!important}
+  .mobile-month-overview .card,.mobile-flow,.v0-mobile-transaction-list{box-shadow:0 10px 28px rgba(24,54,37,.07)!important}
+  .v0-mobile-section-divider{margin-top:6px!important}
+  .mobile-bottom-nav{min-height:72px!important}
+  .mobile-nav-item{min-height:54px!important}
+  .mobile-add-toggle button{min-height:56px!important;font-weight:800!important}
+}
+</style>
 </head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
 <div id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
 const SB_URL='https://jlufubazlnrelrbsvsal.supabase.co';
 const SB_KEY='sb_publishable__CjlaAIa2w5F_7HhOhJKkA_HeDFWxNS';
 if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div class="auth"><h1>Não foi possível carregar</h1><div class="mu">O app precisa de internet para carregar suas bibliotecas. Abra este arquivo no Chrome com internet (não na pré-visualização do Claude).</div></div>';throw new Error('biblioteca supabase ausente')}
 const sb=supabase.createClient(SB_URL,SB_KEY);
+let __xlsxLoader=null;
+let __qrLoader=null;
+function loadExternalScript(src,ready){
+  return new Promise((resolve,reject)=>{
+    if(ready())return resolve();
+    const existing=document.querySelector('script[data-cf-src="'+src+'"]');
+    if(existing){
+      existing.addEventListener('load',()=>resolve(),{once:true});
+      existing.addEventListener('error',()=>reject(new Error('Falha ao carregar biblioteca opcional')),{once:true});
+      return;
+    }
+    const s=document.createElement('script');
+    s.src=src;s.async=true;s.dataset.cfSrc=src;
+    s.onload=()=>resolve();s.onerror=()=>reject(new Error('Falha ao carregar biblioteca opcional'));
+    document.head.appendChild(s);
+  });
+}
+function ensureXlsx(){
+  if(window.XLSX)return Promise.resolve();
+  if(!__xlsxLoader)__xlsxLoader=loadExternalScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',()=>!!window.XLSX);
+  return __xlsxLoader;
+}
+function ensureQrCode(){
+  if(window.qrcode)return Promise.resolve();
+  if(!__qrLoader)__qrLoader=loadExternalScript('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js',()=>!!window.qrcode);
+  return __qrLoader;
+}
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false};
@@ -3698,6 +3738,7 @@ function catPara(grupo,desc){
 const lanc=(mid,tipo,desc,valor,grupo,i={})=>({familia_id:S.fam.id,mes_id:mid,tipo,descricao:desc,valor,categoria_id:catPara(grupo,desc),status:'pendente',parcela_atual:i.parcela_atual||null,parcelas_total:i.parcelas_total||null,observacao:i.obs||null,origem:'importacao_arquivo',criado_por:S.user.id});
 async function lerArquivo(file){
   try{
+    await ensureXlsx();
     const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});const meses=[];
     for(const n of wb.SheetNames){
       if(norm(n)==='instrucoes')continue;
@@ -3769,6 +3810,7 @@ async function importar(){
   }finally{S.importando=false;S.imp=null;render()}
 }
 async function exportXlsx(){
+  await ensureXlsx();
   const L=await q(sb.from('lancamentos').select('*').in('mes_id',S.meses.map(m=>m.id)).order('data_vencimento',{nullsFirst:false}).order('criado_em'));
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Mês','Receita','Fixas','Cartões','Retiradas','Outras','Total despesas','Saldo','Poupança acumulada','% Cartões']].concat((S.resumo||[]).map(r=>[MN[r.mes-1],+r.receita,+r.fixas,+r.cartoes,+r.retiradas,+r.outras,+r.total_despesas,+r.saldo,+r.poupanca_acumulada,+r.pct_cartoes/100]))),'Resumo '+S.ano.ano);
@@ -3999,7 +4041,7 @@ function pixPayload(p){
   return base+crc16(base);
 }
 /*END*/
-function qrSvg(t){const q=qrcode(0,'M');q.addData(t);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}
+function qrSvg(t){if(!window.qrcode)throw new Error("QR ainda não carregado");const q=qrcode(0,'M');q.addData(t);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}
 async function renderPaywall(){
   const dono=S.me?.papel==='dono';
   if(!dono){
