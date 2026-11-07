@@ -106,9 +106,9 @@ class MainActivityTest {
     fun bundledFinanceUiPinsCurrentSupabaseSdkAndSubresourceIntegrity() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("@supabase/supabase-js@2.119.0"))
-        assertTrue(html.contains("integrity=\"sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O\"'))
-        assertTrue(html.contains("integrity=\"sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT\"'))
-        assertTrue(html.contains("integrity=\"sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k\"'))
+        assertTrue(html.contains("integrity=\"sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O\""))
+        assertTrue(html.contains("integrity=\"sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT\""))
+        assertTrue(html.contains("integrity=\"sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k\""))
     }
 
     @Test
