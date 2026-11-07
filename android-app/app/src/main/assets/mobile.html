@@ -3049,6 +3049,38 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   .cf-family-editor{display:grid;grid-template-columns:1fr;gap:8px}
   .cf-family-editor>*{width:100%!important;min-height:48px}
 }
+</style><style id="cf-smart-mobile-1-0-22">
+.cf-smart-briefing{margin:14px 0 16px;padding:17px;border:1px solid rgba(54,82,65,.15);border-radius:22px;background:linear-gradient(145deg,#f7faf6 0%,#eef4ec 100%);box-shadow:0 14px 34px rgba(31,52,39,.10)}
+.cf-smart-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.cf-smart-kicker{font-size:10px;letter-spacing:.13em;font-weight:900;color:#557763}
+.cf-smart-head h2{margin:3px 0 4px;font-size:21px;letter-spacing:-.02em}
+.cf-smart-head p{margin:0;color:var(--mu);font-size:12px;max-width:620px}
+.cf-smart-score{min-width:74px;text-align:right}
+.cf-smart-score b{font-size:28px;line-height:1}
+.cf-smart-score span{font-size:12px;color:var(--mu)}
+.cf-smart-score small{display:block;font-size:10px;color:var(--mu);margin-top:3px}
+.cf-smart-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:14px}
+.cf-smart-metric{padding:12px;border-radius:15px;background:rgba(255,255,255,.76);border:1px solid rgba(54,82,65,.10)}
+.cf-smart-metric span,.cf-smart-metric small{display:block;color:var(--mu);font-size:10px}
+.cf-smart-metric b{display:block;font-size:17px;margin:4px 0 2px}
+.cf-smart-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:10px;margin-top:10px}
+.cf-smart-signal{padding:13px;border-radius:16px;background:#fff;border:1px solid rgba(54,82,65,.10)}
+.cf-smart-signal-tag{display:block;font-size:9px;font-weight:900;letter-spacing:.12em;color:#7a806f;margin-bottom:5px}
+.cf-smart-signal b{font-size:14px}
+.cf-smart-signal p{margin:5px 0 9px;color:var(--mu);font-size:11.5px;line-height:1.45}
+.cf-smart-foot{margin-top:10px;color:var(--mu);font-size:10px;line-height:1.4}
+@media(max-width:760px){
+  .cf-smart-briefing{margin:10px 0 14px;padding:14px;border-radius:20px}
+  .cf-smart-head{gap:10px}
+  .cf-smart-head h2{font-size:19px}
+  .cf-smart-score{min-width:66px}
+  .cf-smart-score b{font-size:25px}
+  .cf-smart-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .cf-smart-metric{padding:10px}
+  .cf-smart-metric b{font-size:15px}
+  .cf-smart-grid{grid-template-columns:1fr}
+  .cf-smart-signal .chip{min-height:44px}
+}
 </style></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
@@ -3495,7 +3527,7 @@ function render(){
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
   const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
-  if(S.view==='planilha')body=viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&planoTemRecurso('relatorios'))body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
+  if(S.view==='planilha')body=viewSmartBriefing()+viewPlanilha(ed);else if(S.view==='ano')body=viewAno();else if(S.view==='checape')body=viewChecape(ed);else if(S.view==='plan')body=viewPlan();else if(S.view==='relatorios'&&planoTemRecurso('relatorios'))body=viewRelatorios();else if(S.view==='admin')body=viewAdmin()+viewConfig();else body=viewFamilia()+viewCats2()+viewConta();
   const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
   $('#app').innerHTML=`<div class="app-shell">
     <aside class="app-sidebar" aria-label="Navegação principal">
@@ -3625,6 +3657,33 @@ const stOpts=sel=>['pendente','pago','atrasado'].map(s=>`<option ${s===sel?'sele
 const tpOpts=sel=>['despesa','receita'].map(s=>`<option ${s===sel?'selected':''}>${s}</option>`).join('');
 
 function quickEditButton(kind){return canEdit()&&mesAberto()?`<button type="button" class="sec chip cf-quick-edit" data-act="quickedit" data-kind="${kind}">Editar valores</button>`:''}
+function viewSmartBriefing(){
+  const lanc=S.lanc||[], hoje=new Date(), rec=lanc.filter(x=>x.tipo==='receita').reduce((a,x)=>a+Number(x.valor||0),0);
+  const des=lanc.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+Number(x.valor||0),0);
+  const pend=lanc.filter(x=>x.tipo==='despesa'&&x.status!=='pago'), atras=lanc.filter(x=>x.tipo==='despesa'&&x.status==='atrasado');
+  const saldo=rec-des, unpaid=pend.reduce((a,x)=>a+Number(x.valor||0),0);
+  const safeToSpend=Math.max(0,rec-unpaid), savingsRate=rec?((saldo/rec)*100):0;
+  const byCat={};lanc.filter(x=>x.tipo==='despesa').forEach(x=>{const n=S.cats.find(c=>c.id===x.categoria_id)?.nome||'Sem categoria';byCat[n]=(byCat[n]||0)+Number(x.valor||0)});
+  const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]), topCat=cats[0], concentration=des?((topCat?.[1]||0)/des*100):0;
+  const upcoming=pend.filter(x=>{if(!x.data_vencimento)return false;const d=new Date(x.data_vencimento+'T12:00:00');const diff=Math.ceil((d-hoje)/86400000);return diff>=0&&diff<=7}).sort((a,b)=>String(a.data_vencimento).localeCompare(String(b.data_vencimento)));
+  const overdue=atras.reduce((a,x)=>a+Number(x.valor||0),0);
+  let smartHealthScore=50;
+  if(rec)smartHealthScore=Math.max(0,Math.min(100,Math.round(50+(savingsRate*1.2)-(atras.length*8)-(concentration>55?10:0))));
+  const healthLabel=smartHealthScore>=75?'Saúde financeira forte':smartHealthScore>=55?'Saúde financeira estável':'Precisa de atenção';
+  const next=atras.length?{title:'Priorize contas atrasadas',desc:'Existem '+atras.length+' conta(s) atrasada(s), somando '+brl(overdue)+'.',go:'planilha'}:
+    upcoming.length?{title:'Prepare os próximos pagamentos',desc:upcoming.length+' conta(s) vencem nos próximos 7 dias.',go:'planilha'}:
+    savingsRate<10&&rec?{title:'Aumente sua margem',desc:'Sua sobra do mês está em '+savingsRate.toFixed(0)+'% da receita. Revise gastos variáveis.',go:'checape'}:
+    {title:'Continue acompanhando',desc:'Seu mês está sem alertas críticos. Use o Planejamento para metas e patrimônio.',go:'plan'};
+  const metric=(label,value,sub,cls)=>'<div class="cf-smart-metric"><span>'+label+'</span><b class="'+(cls||'')+'">'+value+'</b><small>'+sub+'</small></div>';
+  return '<section class="cf-smart-briefing" aria-label="Análise inteligente">'+
+    '<div class="cf-smart-head"><div><span class="cf-smart-kicker">COPILOTO · INTELIGÊNCIA FINANCEIRA</span><h2>Análise inteligente</h2><p>Leitura automática dos dados deste mês. Sem inventar valores e sem substituir sua decisão.</p></div><div class="cf-smart-score"><b>'+smartHealthScore+'</b><span>/100</span><small>'+healthLabel+'</small></div></div>'+
+    '<div class="cf-smart-metrics">'+metric('Saldo do mês',brl(saldo),rec?'Receitas '+brl(rec):'Sem receitas registradas',saldo>=0?'pos':'neg')+metric('Pode gastar*',brl(safeToSpend),'Após contas ainda não pagas',safeToSpend>0?'pos':'neg')+metric('Poupança',savingsRate.toFixed(0)+'%','Da receita do mês',savingsRate>=20?'pos':savingsRate<0?'neg':'')+metric('Em aberto',brl(unpaid),pend.length+' conta(s) ainda não pagas',unpaid?'neg':'pos')+'</div>'+
+    '<div class="cf-smart-grid"><div class="cf-smart-signal"><span class="cf-smart-signal-tag">PRÓXIMO PASSO</span><b>'+esc(next.title)+'</b><p>'+esc(next.desc)+'</p><button class="sec chip" data-act="smartgo" data-v="'+next.go+'">Abrir área relacionada →</button></div>'+
+    '<div class="cf-smart-signal"><span class="cf-smart-signal-tag">PADRÃO DO MÊS</span><b>'+ (topCat?esc(topCat[0]):'Sem dados suficientes') +'</b><p>'+ (topCat?'É a maior categoria de despesa, com '+brl(topCat[1])+' ('+concentration.toFixed(0)+'% das despesas).':'Registre algumas despesas para o Copiloto identificar padrões.') +'</p></div></div>'+
+    '<div class="cf-smart-foot">* Indicador simples: receita menos despesas ainda não pagas. Confira o calendário e seus compromissos antes de gastar.</div>'+
+    '</section>';
+}
+
 function viewPlanilha(ed){
   ed=!!ed&&S.mes.status==='aberto';
   const rec=S.lanc.filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor),0);
@@ -4398,6 +4457,7 @@ document.addEventListener('click',async e=>{
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));toast('Convite aceito! Abrindo a família…');await boot()}
   else if(a==='mobilemore'){S.mobileMore=!S.mobileMore;render()}
   else if(a==='mobileadd'){S.mobileAddOpen=!S.mobileAddOpen;render();if(S.mobileAddOpen)document.getElementById('n_desc')?.focus()}
+  else if(a==='smartgo'){S.mobileMore=false;S.mobileAddOpen=false;S.view=b.dataset.v||'planilha';if(S.view==='plan')await carregarPlan();render()}
   else if(a==='editfamily'||a==='editinvites'||a==='editcategories'||a==='editaccount'){const key={editfamily:'membros',editinvites:'convites',editcategories:'categorias',editaccount:'conta'}[a];S.familyAreas[key]=!S.familyAreas[key];render()}
   else if(a==='view'){
     S.mobileMore=false;S.mobileAddOpen=false;
