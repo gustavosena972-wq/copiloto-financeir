@@ -596,4 +596,13 @@ class MainActivityTest {
         assertTrue(gradle.contains("versionName = \"1.0.22\""))
     }
 
+    @Test
+    fun androidV022ReplacesBareLoadingTextWithBrandedMobileStartupFeedback() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-mobile-startup"))
+        assertTrue(html.contains("cf-mobile-startup-logo"))
+        assertTrue(html.contains("cf-mobile-startup-shimmer"))
+        assertTrue(html.contains("Preparando seu financeiro"))
+    }
+
 }
