@@ -372,6 +372,7 @@ class MainActivityTest {
         assertTrue(html.contains("S.mobileMore"))
         assertTrue(html.contains("S.mobileAddOpen"))
         assertTrue(html.contains("document.querySelectorAll('.app-main details[open]')"))
+        assertTrue(html.contains("if(S.view!=='planilha'&&S.fam)"))
         assertTrue(activity.contains("__copilotoHandleAndroidBack"))
         assertTrue(activity.contains("webView.evaluateJavascript"))
     }
