@@ -7,6 +7,7 @@ import org.junit.Test
 
 class MainActivityTest {
     // 1.0.12 visual stability contract
+    // Release artifact trigger: keep production APK/AAB build aligned with main.
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
