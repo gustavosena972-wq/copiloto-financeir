@@ -3096,7 +3096,24 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 .cf-mobile-startup p{margin:12px 0 0;color:#718078;font-size:12px}
 @keyframes cf-startup-pulse{0%,100%{transform:scale(.65);opacity:.35}50%{transform:scale(1);opacity:1}}
 @media(prefers-reduced-motion:reduce){.cf-mobile-startup-shimmer i{animation:none!important;opacity:.7}}
-</style></head>
+</style><style id="cf-android-v0-mobile-1-0-23-companion">
+.cf-companion{position:fixed;right:14px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:7;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
+.cf-companion-animal,.cf-companion-speech{pointer-events:auto}
+.cf-companion-animal{width:64px;height:64px;padding:0;border:2px solid #d9e8d7;border-radius:50%;display:grid;place-items:center;background:#173b2a;box-shadow:0 12px 28px rgba(20,55,38,.24);transition:transform .18s,box-shadow .18s}
+.cf-companion-animal:hover{transform:translateY(-2px) rotate(-2deg);box-shadow:0 16px 34px rgba(20,55,38,.30)}
+.cf-companion-animal:active{transform:scale(.95)}
+.cf-companion-animal svg{width:48px;height:48px;display:block}
+.cf-companion-face{transform-origin:50% 55%;transition:transform .18s}
+.cf-companion-tail{transform-origin:88% 64%;animation:cf-companion-tail 3.6s ease-in-out infinite}
+@keyframes cf-companion-tail{0%,100%{transform:rotate(0)}50%{transform:rotate(7deg)}}
+.cf-companion-speech{position:relative;max-width:min(280px,calc(100vw - 104px));padding:10px 12px;border:1px solid #d9e5db;border-radius:16px 16px 5px 16px;background:#fff;color:#244031;font-size:12px;line-height:1.45;box-shadow:0 10px 26px rgba(30,55,40,.14)}
+.cf-companion-speech:after{content:"";position:absolute;right:18px;bottom:-6px;width:10px;height:10px;background:#fff;border-right:1px solid #d9e5db;border-bottom:1px solid #d9e5db;transform:rotate(45deg)}
+.cf-companion-speech[hidden]{display:none}
+.cf-companion-speech b{display:block;margin-bottom:3px;font-size:10px;letter-spacing:.02em;color:#6a7b71}
+@media(max-width:640px){.cf-companion{right:12px;bottom:calc(78px + env(safe-area-inset-bottom))}.cf-companion-animal{width:58px;height:58px}.cf-companion-animal svg{width:44px;height:44px}.cf-companion-speech{max-width:min(260px,calc(100vw - 88px));font-size:11.5px}}
+@media(prefers-reduced-motion:reduce){.cf-companion-tail{animation:none}}
+</style>
+</head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
 <div id="toast"></div>
@@ -3934,6 +3951,7 @@ function parseGeneric(rows){
 /*END*/
 const saudacao=()=>{const h=new Date().getHours();return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'};
 function afterRender(){
+  mountMobileCompanion();
   const k=S.view+'|'+(S.mes&&S.mes.id)+'|'+(S.ano&&S.ano.id);
   if(k!==S.ak){S.ak=k;const a=$('#app');a.classList.add('anim');setTimeout(()=>a.classList.remove('anim'),900);
     document.querySelectorAll('.card b').forEach(el=>{if(el.children.length)return;const t=el.textContent;if(!/^-?R\$/.test(t))return;
@@ -4477,6 +4495,7 @@ document.addEventListener('click',async e=>{
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));await boot()}
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));toast('Convite aceito! Abrindo a família…');await boot()}
   else if(a==='mobilemore'){S.mobileMore=!S.mobileMore;render()}
+  else if(a==='companion'){mobileCompanionGuide()}
   else if(a==='mobileadd'){S.mobileAddOpen=!S.mobileAddOpen;render();if(S.mobileAddOpen)document.getElementById('n_desc')?.focus()}
   else if(a==='smartgo'){S.mobileMore=false;S.mobileAddOpen=false;S.view=b.dataset.v||'planilha';if(S.view==='plan')await carregarPlan();render()}
   else if(a==='editfamily'||a==='editinvites'||a==='editcategories'||a==='editaccount'){const key={editfamily:'membros',editinvites:'convites',editcategories:'categorias',editaccount:'conta'}[a];S.familyAreas[key]=!S.familyAreas[key];render()}
@@ -4777,5 +4796,71 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
   window.addEventListener('resize',enhanceMobileWorkspace,{passive:true});
 })();
 </script>
-</body>
+<script>
+function mobileCompanionMarkup(){
+  const speech=mobileCompanionSpeech();
+  return '<div class="cf-companion" id="cf-companion">'+
+    '<div class="cf-companion-speech" id="cf-companion-speech" role="status" aria-live="polite">'+
+      '<b>Copiloto</b><span>'+speech+'</span>'+
+    '</div>'+
+    '<button type="button" class="cf-companion-animal" data-act="companion" aria-label="Mostrar fala do Copiloto" title="Falar com o Copiloto">'+
+      '<svg viewBox="0 0 64 64" aria-hidden="true">'+
+        '<path class="cf-companion-tail" d="M49 42c9 3 12 10 8 15-3 4-9 2-10-3" fill="none" stroke="#9b6a38" stroke-width="7" stroke-linecap="round"/>'+
+        '<path d="M18 28c0-11 8-19 19-19 9 0 16 6 16 15 0 10-7 17-18 17H24c-7 0-12-5-12-11 0-5 2-9 6-12z" fill="#b9783f"/>'+
+        '<path d="M31 12c-5 4-8 9-8 16 0 7 4 11 9 13-8 1-15-3-15-11 0-9 6-16 14-18z" fill="#8f5c34" opacity=".65"/>'+
+        '<path d="M45 25c6 0 10 3 10 7s-4 7-10 7c-5 0-8-3-8-7s3-7 8-7z" fill="#d79b5f"/>'+
+        '<circle class="cf-companion-face" cx="47" cy="29" r="2.2" fill="#1d281f"/>'+
+        '<circle cx="54" cy="32" r="1.4" fill="#1d281f"/>'+
+        '<path d="M51 34c2 1 3 2 3 4" fill="none" stroke="#6f4325" stroke-width="1.5" stroke-linecap="round"/>'+
+        '<path d="M24 40c-3 5-2 9 1 11" fill="none" stroke="#744b2b" stroke-width="4" stroke-linecap="round"/>'+
+        '<path d="M35 41c-2 5-1 9 2 11" fill="none" stroke="#744b2b" stroke-width="4" stroke-linecap="round"/>'+
+      '</svg>'+
+    '</button>'+
+  '</div>';
+}
+
+function mobileCompanionSpeech(){
+  const lanc=Array.isArray(S.lanc)?S.lanc:[];
+  const hasData=lanc.length>0;
+  const today=new Date().toISOString().slice(0,10);
+  const overdue=lanc.some(x=>x.status!=='pago'&&x.data_vencimento&&x.data_vencimento<today);
+  const upcoming=lanc.some(x=>x.status!=='pago'&&x.data_vencimento&&x.data_vencimento>=today&&x.data_vencimento<=new Date(Date.now()+7*86400000).toISOString().slice(0,10));
+
+  if(!hasData)return 'Ainda não tenho dados suficientes para analisar este mês.';
+  if(overdue)return 'Tem contas atrasadas aqui. Vale conferir antes de planejar novos gastos.';
+  if(upcoming)return 'Você tem próximos vencimentos. Vale conferir o que vence primeiro.';
+
+  const speechByView={
+    planilha:'Vamos conferir como está seu mês?',
+    ano:'Vamos olhar o ano e entender onde seu dinheiro está indo.',
+    checape:'Encontrei alguns pontos para você revisar.',
+    plan:'Vamos organizar o próximo passo antes de decidir.',
+    família:'Aqui você organiza quem participa do seu financeiro.',
+    admin:'Vamos revisar as configurações com atenção.'
+  };
+  return speechByView[S.view]||speechByView.planilha;
+}
+
+function mobileCompanionGuide(){
+  const companion=document.getElementById('cf-companion');
+  if(!companion)return;
+  const speech=document.getElementById('cf-companion-speech');
+  if(!speech)return;
+  speech.hidden=!speech.hidden;
+  if(!speech.hidden){
+    const face=companion.querySelector('.cf-companion-face');
+    if(face){
+      face.setAttribute('transform','scale(1.06)');
+      setTimeout(()=>face.removeAttribute('transform'),180);
+    }
+  }
+}
+
+function mountMobileCompanion(){
+  if(!document.querySelector('.app-main'))return;
+  document.getElementById('cf-companion')?.remove();
+  document.body.insertAdjacentHTML('beforeend',mobileCompanionMarkup());
+}
+</script>
+
 </html>

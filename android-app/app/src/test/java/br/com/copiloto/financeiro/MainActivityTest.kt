@@ -590,10 +590,10 @@ class MainActivityTest {
     }
 
     @Test
-    fun releaseVersionAdvancesToTheSmartMobileIteration() {
+    fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 23"))
-        assertTrue(gradle.contains("versionName = \"1.0.22\""))
+        assertTrue(gradle.contains("versionCode = 24"))
+        assertTrue(gradle.contains("versionName = \"1.0.23\""))
     }
 
     @Test
@@ -605,4 +605,76 @@ class MainActivityTest {
         assertTrue(html.contains("Preparando seu financeiro"))
     }
 
+
+    @Test
+    fun androidV023ProvidesContextualGuidanceWithoutExpandingThePrimaryNavigation() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-companion"))
+        assertTrue(html.contains("cf-companion-speech"))
+        assertTrue(html.contains("function mobileCompanionSpeech"))
+        assertTrue(html.contains("Planilha mensal"))
+        assertTrue(html.contains("Checape"))
+        assertTrue(html.contains("Família"))
+        assertTrue(html.contains("aria-label=\"Mostrar fala do Copiloto\""))
+        assertFalse(html.contains("data-v=\"ajuda\""))
+    }
+
+    @Test
+    fun androidV023AddsAnInteractiveTamanduaCompanionUsingLocalAssetsOnly() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("Tamanduá"))
+        assertTrue(html.contains("cf-companion-animal"))
+        assertTrue(html.contains("cf-companion-tail"))
+        assertTrue(html.contains("cf-companion-face"))
+        assertTrue(html.contains("cf-companion-speech"))
+        assertFalse(html.contains("http://"))
+        val companionMarkup=html.substringAfter("function mobileCompanionMarkup()").substringBefore("function mobileCompanionGuide()")
+        assertFalse(companionMarkup.contains("http://"))
+        assertFalse(companionMarkup.contains("https://"))
+    }
+
+    @Test
+    fun androidV023DoesNotDelayStartupForTheCompanion() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val companion = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-23-companion\">").substringBefore("</style>")
+        assertTrue(companion.contains("pointer-events:none"))
+        assertTrue(companion.contains("min(280px,calc(100vw - 104px))"))
+        assertTrue(companion.contains("prefers-reduced-motion:reduce"))
+        assertFalse(companion.contains("backdrop-filter:blur"))
+    }
+
+    @Test
+    fun androidV023UsesShortNaturalTamanduaSpeechInsteadOfALargeGuidePanel() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-companion-speech"))
+        assertTrue(html.contains("function mobileCompanionSpeech"))
+        assertTrue(html.contains("Vamos conferir como está seu mês?"))
+        assertTrue(html.contains("Tem contas atrasadas aqui. Vale conferir antes de planejar novos gastos."))
+        assertTrue(html.contains("Encontrei alguns pontos para você revisar."))
+        assertFalse(html.contains("cf-companion-panel"))
+        assertFalse(html.contains("cf-companion-guide-row"))
+        assertFalse(html.contains("Guia rápido da área atual"))
+    }
+
+    @Test
+    fun androidV023SpeechIsContextualAndUsesRealFinancialState() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("S.lanc"))
+        assertTrue(html.contains("S.view"))
+        assertTrue(html.contains("data-v="planilha""))
+        assertTrue(html.contains("data-v="checape""))
+        assertTrue(html.contains("data-v="plan""))
+        assertTrue(html.contains("mobileCompanionSpeech"))
+        assertTrue(html.contains("Sem dados suficientes"))
+        assertTrue(html.contains("próximos vencimentos"))
+    }
+
+    @Test
+    fun androidV023CompanionSpeechDoesNotAddNavigationOrDelayStartup() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertFalse(html.contains("data-v="ajuda""))
+        assertFalse(html.contains("setTimeout(mobileCompanionSpeech"))
+        assertFalse(html.contains("await mobileCompanionSpeech"))
+        assertTrue(html.contains("mountMobileCompanion()"))
+    }
 }
