@@ -5056,7 +5056,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     window.addEventListener('scroll',()=>{scroll=window.scrollY||0},{passive:true});window.addEventListener('resize',resize,{passive:true});
     document.addEventListener('visibilitychange',()=>{visible=!document.hidden;if(visible)start();else stop()});
     media.addEventListener?.('change',onMotionPreference);
-    const app=document.getElementById('app');if(app)new MutationObserver(setMode).observe(app,{childList:true,subtree:true});
+    const app=document.getElementById('app');if(app)new MutationObserver(setMode).observe(app,{childList:true});
     resize();setMode();onMotionPreference();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installWholeScreenMotion,{once:true});else installWholeScreenMotion();
@@ -5105,7 +5105,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     revealTree(app);
     new MutationObserver(records=>{
       records.forEach(record=>record.addedNodes.forEach(node=>{if(node.nodeType===1)revealTree(node)}));
-    }).observe(app,{childList:true,subtree:true});
+    }).observe(app,{childList:true});
   }
   document.body.dataset.cfMotionReady='true';
   function resetTilt(){if(!currentTilt)return;currentTilt.style.removeProperty('--cf-tilt-x');currentTilt.style.removeProperty('--cf-tilt-y');currentTilt.style.removeProperty('--cf-glare-x');currentTilt.style.removeProperty('--cf-glare-y');currentTilt=null;}
