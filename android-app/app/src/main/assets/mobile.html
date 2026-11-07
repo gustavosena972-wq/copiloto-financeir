@@ -2821,7 +2821,7 @@ function render(){
   const ed=canEdit()&&mesAberto();
   const ultra=planoTemRecurso('relatorios');
   if(S.view==='espacos')S.view='planilha';
-  const TL={planilha:'Planilha mensal',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
+  const TL={planilha:'Lançamentos',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
   if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
   const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
   const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('planilha','Planilha mensal','▦')}${navItem('ano','Visão do ano','▤')}</section>
@@ -2830,7 +2830,7 @@ function render(){
     ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   const info={
-    planilha:['Lançamentos do mês','Registre receitas e despesas, organize categorias e acompanhe os pagamentos.'],
+    planilha:['Lançamentos do mês','Veja o saldo, registre entradas e despesas e acompanhe cada pagamento.'],
     ano:['Visão do ano','Acompanhe os resultados financeiros e compare os meses do ano.'],
     checape:['Checape financeiro','Revise as sugestões geradas a partir dos lançamentos do mês.'],
     plan:['Planejamento financeiro','Organize metas, dívidas e patrimônio em um só lugar.'],
@@ -2874,8 +2874,11 @@ function render(){
         </div>
       </header>
       <div class="period-toolbar">${meses}</div>
+      ${mobileGuide(S.view)}
       <section class="app-content">${body}${viewImport()}${viewModais()}</section>
     </main>
+    ${mobileMoreMenu()}
+    ${mobileNavigation()}
   </div>`;
   afterRender();
 }
