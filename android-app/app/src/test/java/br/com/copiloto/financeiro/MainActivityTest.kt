@@ -7,7 +7,7 @@ class MainActivityTest {
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
-            "file:///android_asset/mobile.html",
+            "https://appassets.androidplatform.net/assets/mobile.html",
             MainActivity.APP_ENTRY_URL
         )
     }
