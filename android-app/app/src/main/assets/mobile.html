@@ -2367,6 +2367,10 @@ body[data-ui="premium-fintech"] .cf-history-column i,body[data-ui="premium-finte
 .cf-motion-world[data-motion-mode*="planejamento"] .cf-motion-orbit,.cf-motion-world[data-motion-mode*="checape"] .cf-motion-orbit{border-color:rgba(189,144,69,.28)}
 .cf-motion-world[data-motion-mode*="relatorios"] .cf-motion-orbit,.cf-motion-world[data-motion-mode*="ano"] .cf-motion-orbit{border-color:rgba(76,133,173,.25)}
 .cf-motion-world[data-motion-mode*="pagamento"] .cf-motion-light{background:radial-gradient(circle,rgba(145,126,190,.23),rgba(145,126,190,0) 69%)}
+body[data-ui="premium-fintech"] .app-shell{background:rgba(245,247,250,.94)!important}
+body[data-ui="premium-fintech"] .app-main{background:rgba(245,247,250,.88)!important;backdrop-filter:saturate(1.12)}
+body[data-ui="premium-fintech"] .app-sidebar{background:rgba(23,43,67,.965)!important}
+body[data-ui="premium-fintech"] .landing-page{background:rgba(238,242,246,.84)!important}
 @media(max-width:640px){.cf-motion-image-a{width:115vw;right:-56%;top:8%;opacity:.13}.cf-motion-image-b{width:92vw;left:-43%;bottom:-8%;opacity:.07}.cf-motion-orbit-a{width:112vw;height:54vw;right:-48%;top:10%}.cf-motion-orbit-b{width:82vw;height:42vw;left:-45%;bottom:8%}.cf-motion-light{width:82vw;height:82vw;left:10%;top:24%;filter:blur(28px)}}
 @media(prefers-reduced-motion:reduce){.cf-motion-camera,.cf-motion-image,.cf-motion-orbit,.cf-motion-light{animation:none!important;transition:none!important}.cf-motion-camera{transform:none!important}.cf-motion-ripple{animation-duration:180ms}}
 </style></head>
@@ -3783,6 +3787,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     const world=document.createElement('div');
     world.className='cf-motion-world';
     world.setAttribute('aria-hidden','true');
+    world.setAttribute('data-motion-mode','inicio');
     world.innerHTML='<div class="cf-motion-camera"><div class="cf-motion-image cf-motion-image-a"></div><div class="cf-motion-image cf-motion-image-b"></div><div class="cf-motion-orbit cf-motion-orbit-a"></div><div class="cf-motion-orbit cf-motion-orbit-b"></div><div class="cf-motion-light"></div><canvas class="cf-motion-canvas"></canvas></div>';
     document.body.prepend(world);
     const canvas=world.querySelector('.cf-motion-canvas'),ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
@@ -3834,8 +3839,13 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
       }
       draw(now,dt);if(!media.matches)raf=requestAnimationFrame(frame);
     }
-    function start(){if(!visible||media.matches||raf)return;lastFrame=0;raf=requestAnimationFrame(frame)}
-    function stop(){if(raf){cancelAnimationFrame(raf);raf=0}}
+    function setAmbientMotion(running){
+      world.querySelectorAll('.cf-motion-camera,.cf-motion-image,.cf-motion-orbit,.cf-motion-light').forEach(node=>{
+        node.style.animationPlayState=running?'running':'paused';
+      });
+    }
+    function start(){if(!visible||media.matches||raf)return;setAmbientMotion(true);lastFrame=0;raf=requestAnimationFrame(frame)}
+    function stop(){if(raf){cancelAnimationFrame(raf);raf=0}setAmbientMotion(false)}
     function onMotionPreference(){if(media.matches){stop();draw(elapsed,0);world.style.setProperty('--cf-camera-rx','0deg');world.style.setProperty('--cf-camera-ry','0deg')}else start()}
     function addRipple(x,y){
       const ripple=document.createElement('span');ripple.className='cf-motion-ripple';ripple.style.left=x+'px';ripple.style.top=y+'px';
