@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MainActivityTest {
-    // 1.0.14 mobile visual cleanup contract
+    // 1.0.15 mobile-first workspace contract
     // Release artifact trigger: keep production APK/AAB build aligned with main.
     @Test
     fun appStartsFromBundledFinanceUi() {
@@ -115,8 +115,8 @@ class MainActivityTest {
     @Test
     fun releaseVersionMatchesTheAuditedAndroidPackage() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 15"))
-        assertTrue(gradle.contains("versionName = \"1.0.14\""))
+        assertTrue(gradle.contains("versionCode = 16"))
+        assertTrue(gradle.contains("versionName = \"1.0.15\""))
     }
 
     @Test
@@ -219,8 +219,8 @@ class MainActivityTest {
     fun releasePackageKeepsTheCurrentVersionAndPremiumFintechVisualContractTogether() {
         val html = File("src/main/assets/mobile.html").readText()
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 15"))
-        assertTrue(gradle.contains("versionName = \"1.0.14\""))
+        assertTrue(gradle.contains("versionCode = 16"))
+        assertTrue(gradle.contains("versionName = \"1.0.15\""))
         assertTrue(html.contains("body[data-ui=\"premium-fintech\"]"))
         assertTrue(html.contains("--surface:#ffffff"))
     }
