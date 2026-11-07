@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MainActivityTest {
-    // 1.0.12 visual stability contract
+    // 1.0.13 visual stability contract
     // Release artifact trigger: keep production APK/AAB build aligned with main.
     @Test
     fun appStartsFromBundledFinanceUi() {
@@ -231,7 +231,7 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         val gradle = File("build.gradle.kts").readText()
         assertTrue(gradle.contains("versionCode = 13"))
-        assertTrue(gradle.contains("versionName = \"1.0.12\""))
+        assertTrue(gradle.contains("versionName = \"1.0.13\""))
         assertTrue(html.contains("data-ui=\"figma-family-model\""))
         assertTrue(html.contains("cf-command-hero"))
     }
