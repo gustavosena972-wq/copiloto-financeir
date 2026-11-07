@@ -3014,7 +3014,7 @@ window.__copilotoHandleAndroidBack=()=>{
   if(S.mobileAddOpen){S.mobileAddOpen=false;render();return true}
   const openDetails=[...document.querySelectorAll('.app-main details[open]')];
   if(openDetails.length){openDetails[openDetails.length-1].open=false;return true}
-  if(S.view!=='planilha'){S.view='planilha';S.adm=null;render();return true}
+  if(S.view!=='planilha'&&S.fam){S.view='planilha';S.adm=null;render();return true}
   return false;
 };
 
