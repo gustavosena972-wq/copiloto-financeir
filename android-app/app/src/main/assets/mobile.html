@@ -3096,7 +3096,72 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 .cf-mobile-startup p{margin:12px 0 0;color:#718078;font-size:12px}
 @keyframes cf-startup-pulse{0%,100%{transform:scale(.65);opacity:.35}50%{transform:scale(1);opacity:1}}
 @media(prefers-reduced-motion:reduce){.cf-mobile-startup-shimmer i{animation:none!important;opacity:.7}}
-</style></head>
+</style><style id="cf-android-v0-mobile-1-0-24-tamandua-onboarding">
+.cf-tamandua-intro{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(145deg,#f5f8f4 0%,#e8f0e8 100%);color:#173225;overflow:auto}
+.cf-tamandua-intro-shell{width:min(100%,720px);display:grid;gap:16px}
+.cf-tamandua-intro-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cf-tamandua-intro-progress{font-size:10px;font-weight:900;letter-spacing:.12em;color:#668072}
+.cf-tamandua-intro-skip{min-height:44px!important;padding:8px 12px!important;border:0!important;background:transparent!important;color:#5f7166!important;font-size:11px!important}
+.cf-tamandua-intro-card{background:#fff;border:1px solid #dce6de;border-radius:24px;padding:22px;box-shadow:0 20px 55px rgba(30,65,43,.12)}
+.cf-tamandua-intro-character{display:grid;grid-template-columns:170px 1fr;gap:20px;align-items:center}
+.cf-tamandua-intro-portrait{width:170px;height:210px;border-radius:22px;background:linear-gradient(155deg,#173b2a,#285f45);display:grid;place-items:center;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.10)}
+.cf-tamandua-intro-portrait svg{width:150px;height:185px}
+.cf-tamandua-intro-copy{display:grid;gap:9px}
+.cf-tamandua-intro-copy .kicker{font-size:10px;font-weight:900;letter-spacing:.13em;color:#557763}
+.cf-tamandua-intro-copy h1{margin:0;font-size:29px;line-height:1.1;letter-spacing:-.025em}
+.cf-tamandua-intro-copy p{margin:0;color:#607169;font-size:13px;line-height:1.55}
+.cf-tamandua-intro-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:2px}
+.cf-tamandua-intro-card-text{padding:13px;border:1px solid #e0e8e1;border-radius:15px;background:#f8faf8}
+.cf-tamandua-intro-card-text b{display:block;font-size:12px;margin-bottom:4px}
+.cf-tamandua-intro-card-text span{display:block;font-size:10.5px;line-height:1.45;color:#6a786f}
+.cf-tamandua-intro-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:17px}
+.cf-tamandua-intro-actions button{min-height:50px!important}
+.cf-tamandua-question-list{display:grid;gap:11px;margin-top:13px}
+.cf-tamandua-question{padding:14px;border:1px solid #dce6de;border-radius:17px;background:#fff}
+.cf-tamandua-question h2{margin:0;font-size:14px;line-height:1.35;color:#1d3026}
+.cf-tamandua-question p{margin:4px 0 10px;color:#708078;font-size:10.5px}
+.cf-tamandua-options{display:grid;gap:7px}
+.cf-tamandua-option{display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 10px;border:1px solid #e0e7e1;border-radius:12px;background:#fbfcfb;color:#32483b;font-size:11.5px;cursor:pointer}
+.cf-tamandua-option:has(input:checked){border-color:#8db89e;background:#eff7f0;box-shadow:0 0 0 2px rgba(20,108,67,.07)}
+.cf-tamandua-option input{width:20px!important;height:20px!important;min-height:20px!important;accent-color:#146c43;flex:none}
+.cf-tamandua-note{margin:10px 0 0;color:#78857e;font-size:10px;line-height:1.45}
+.cf-tamandua-profile-pill{display:inline-flex;align-items:center;gap:6px;width:max-content;padding:5px 8px;border-radius:999px;background:#edf5ef;color:#3c634d;font-size:9px;font-weight:900;letter-spacing:.04em}
+@media(max-width:640px){
+  .cf-tamandua-intro{align-items:flex-start;padding:14px 12px}
+  .cf-tamandua-intro-shell{padding-top:2px}
+  .cf-tamandua-intro-card{padding:16px;border-radius:20px}
+  .cf-tamandua-intro-character{grid-template-columns:92px 1fr;gap:12px}
+  .cf-tamandua-intro-portrait{width:92px;height:126px;border-radius:18px}
+  .cf-tamandua-intro-portrait svg{width:86px;height:116px}
+  .cf-tamandua-intro-copy h1{font-size:22px}
+  .cf-tamandua-intro-copy p{font-size:12px}
+  .cf-tamandua-intro-cards{grid-template-columns:1fr;gap:7px}
+  .cf-tamandua-intro-card-text{padding:11px}
+  .cf-tamandua-intro-actions{flex-direction:column}
+  .cf-tamandua-intro-actions button{width:100%}
+  .cf-tamandua-question{padding:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .cf-tamandua-intro *{scroll-behavior:auto!important;transition:none!important}
+}
+</style><style id="cf-android-v0-mobile-1-0-23-companion">
+.cf-companion{position:fixed;right:14px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:7;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
+.cf-companion-animal,.cf-companion-speech{pointer-events:auto}
+.cf-companion-animal{width:64px;height:64px;padding:0;border:2px solid #d9e8d7;border-radius:50%;display:grid;place-items:center;background:#173b2a;box-shadow:0 12px 28px rgba(20,55,38,.24);transition:transform .18s,box-shadow .18s}
+.cf-companion-animal:hover{transform:translateY(-2px) rotate(-2deg);box-shadow:0 16px 34px rgba(20,55,38,.30)}
+.cf-companion-animal:active{transform:scale(.95)}
+.cf-companion-animal svg{width:48px;height:48px;display:block}
+.cf-companion-face{transform-origin:50% 55%;transition:transform .18s}
+.cf-companion-tail{transform-origin:88% 64%;animation:cf-companion-tail 3.6s ease-in-out infinite}
+@keyframes cf-companion-tail{0%,100%{transform:rotate(0)}50%{transform:rotate(7deg)}}
+.cf-companion-speech{position:relative;max-width:min(280px,calc(100vw - 104px));padding:10px 12px;border:1px solid #d9e5db;border-radius:16px 16px 5px 16px;background:#fff;color:#244031;font-size:12px;line-height:1.45;box-shadow:0 10px 26px rgba(30,55,40,.14)}
+.cf-companion-speech:after{content:"";position:absolute;right:18px;bottom:-6px;width:10px;height:10px;background:#fff;border-right:1px solid #d9e5db;border-bottom:1px solid #d9e5db;transform:rotate(45deg)}
+.cf-companion-speech[hidden]{display:none}
+.cf-companion-speech b{display:block;margin-bottom:3px;font-size:10px;letter-spacing:.02em;color:#6a7b71}
+@media(max-width:640px){.cf-companion{right:12px;bottom:calc(78px + env(safe-area-inset-bottom))}.cf-companion-animal{width:58px;height:58px}.cf-companion-animal svg{width:44px;height:44px}.cf-companion-speech{max-width:min(260px,calc(100vw - 88px));font-size:11.5px}}
+@media(prefers-reduced-motion:reduce){.cf-companion-tail{animation:none}}
+</style>
+</head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
 <div id="toast"></div>
@@ -3135,13 +3200,14 @@ function ensureQrCode(){
 }
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false}};
+const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false},tamanduaProfile:null,tamanduaIntroStep:0};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let tt;function toast(m,e){const t=$('#toast');t.textContent=m;t.className=e?'err':'';t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',3800)}
 async function q(p){const r=await p;if(r.error){toast(r.error.message,1);throw r.error}return r.data}
+loadTamanduaProfile();
 const canEdit=()=>S.me&&S.me.papel!=='leitor';
 const mesAberto=()=>S.mes&&S.mes.status==='aberto';
 
@@ -3149,6 +3215,109 @@ const mesAberto=()=>S.mes&&S.mes.status==='aberto';
 function mobileStartupMarkup(){
   return '<div class="cf-mobile-startup" role="status" aria-live="polite"><div class="cf-mobile-startup-logo">'+LOGO+'</div><div class="cf-mobile-startup-brand"><b>Copiloto Financeiro</b><span>GESTÃO FINANCEIRA FAMILIAR</span></div><div class="cf-mobile-startup-shimmer"><i></i><i></i><i></i></div><p>Preparando seu financeiro</p></div>';
 }
+function loadTamanduaProfile(){
+  try{
+    const raw=localStorage.getItem('copiloto_tamandua_profile_v1');
+    S.tamanduaProfile=raw?JSON.parse(raw):null;
+  }catch(e){S.tamanduaProfile=null}
+}
+function tamanduaIntroCompleted(){
+  try{return localStorage.getItem('copiloto_tamandua_intro_v1')==='1'}catch(e){return false}
+}
+function tamanduaCharacterSvg(){
+  return '<svg viewBox="0 0 180 220" aria-hidden="true">'+
+    '<path d="M124 158c28 8 39 23 31 38-6 12-23 10-28-2" fill="none" stroke="#9b6a38" stroke-width="13" stroke-linecap="round"/>'+
+    '<path d="M38 92c0-39 25-65 61-65 32 0 57 22 57 53 0 34-25 56-58 56H57c-22 0-37-15-37-34 0-16 7-27 18-36z" fill="#b9783f"/>'+
+    '<path d="M69 36c-17 14-24 31-22 50 2 21 14 34 31 43-27 5-49-10-49-34 0-31 19-54 40-59z" fill="#8f5c34" opacity=".72"/>'+
+    '<path d="M115 84c25 0 43 11 43 27s-17 26-43 26c-20 0-33-10-33-26s13-27 33-27z" fill="#d89d61"/>'+
+    '<circle cx="128" cy="99" r="4" fill="#1e281f"/><circle cx="154" cy="108" r="2.8" fill="#1e281f"/>'+
+    '<path d="M142 118c7 2 10 6 10 11" fill="none" stroke="#6e4325" stroke-width="3" stroke-linecap="round"/>'+
+    '<path d="M69 139c-9 16-7 28 3 37M100 142c-6 17-3 28 8 36" fill="none" stroke="#744b2b" stroke-width="9" stroke-linecap="round"/>'+
+    '<path d="M54 145c15 3 32 3 50-1l10 32H43z" fill="#173b2a"/>'+
+    '<path d="M75 147l17 4-9 22-12-7z" fill="#d8f24a" opacity=".95"/>'+
+    '<path d="M105 148l17-5 6 20-14 8z" fill="#2f7c59"/>'+
+    '<path d="M72 177h52" stroke="#d9e8d7" stroke-width="3" stroke-linecap="round"/>'+
+    '<path d="M87 181v20M110 181v20" stroke="#173b2a" stroke-width="10" stroke-linecap="round"/>'+
+    '<path d="M82 201h13M105 201h13" stroke="#9b6a38" stroke-width="5" stroke-linecap="round"/>'+
+  '</svg>';
+}
+function tamanduaIntroMarkup(step=0){
+  if(step===0){
+    return '<div class="cf-tamandua-intro" role="dialog" aria-modal="true" aria-labelledby="cf-tamandua-title">'+
+      '<div class="cf-tamandua-intro-shell">'+
+        '<div class="cf-tamandua-intro-top"><span class="cf-tamandua-intro-progress">1 DE 2 · PRIMEIRO CONTATO</span><button class="cf-tamandua-intro-skip" type="button" data-act="tamandua-intro-skip">Agora não</button></div>'+
+        '<section class="cf-tamandua-intro-card">'+
+          '<div class="cf-tamandua-intro-character">'+
+            '<div class="cf-tamandua-intro-portrait">'+tamanduaCharacterSvg()+'</div>'+
+            '<div class="cf-tamandua-intro-copy"><span class="kicker">COPILOTO FINANCEIRO</span><h1 id="cf-tamandua-title">Oi, eu sou o Tamanduá.</h1><p>Eu sou seu ajudante das finanças. Eu te explico o que está acontecendo, mostro o que merece atenção e te ajudo a entender melhor cada área do aplicativo.</p><span class="cf-tamandua-profile-pill">PERSONAGEM · GUIA FINANCEIRO</span></div>'+
+          '</div>'+
+          '<div class="cf-tamandua-intro-cards">'+
+            '<div class="cf-tamandua-intro-card-text"><b>Eu explico</b><span>Traduzo as informações do app em frases simples.</span></div>'+
+            '<div class="cf-tamandua-intro-card-text"><b>Eu acompanho</b><span>Ajudo você a perceber contas, metas e pontos de atenção.</span></div>'+
+            '<div class="cf-tamandua-intro-card-text"><b>Eu me adapto</b><span>Suas respostas ajudam a definir o que merece mais destaque para você.</span></div>'+
+          '</div>'+
+          '<div class="cf-tamandua-intro-actions"><button class="sec" type="button" data-act="tamandua-intro-skip">Pular por enquanto</button><button type="button" data-act="tamandua-intro-next">Conhecer o Copiloto →</button></div>'+
+        '</section>'+
+      '</div>'+
+    '</div>';
+  }
+  const check=(name,value,label)=>'<label class="cf-tamandua-option"><input type="checkbox" name="'+name+'" value="'+esc(value)+'"><span>'+label+'</span></label>';
+  return '<div class="cf-tamandua-intro" role="dialog" aria-modal="true" aria-labelledby="cf-tamandua-question-title">'+
+    '<div class="cf-tamandua-intro-shell">'+
+      '<div class="cf-tamandua-intro-top"><span class="cf-tamandua-intro-progress">2 DE 2 · VAMOS PERSONALIZAR</span><button class="cf-tamandua-intro-skip" type="button" data-act="tamandua-intro-skip">Agora não</button></div>'+
+      '<section class="cf-tamandua-intro-card">'+
+        '<div class="cf-tamandua-intro-copy"><span class="kicker">UMA PERGUNTA DE CADA VEZ, SEM PRESSA</span><h1 id="cf-tamandua-question-title">Quero entender o que você precisa.</h1><p>Você pode marcar mais de uma opção. Essas respostas ficam salvas neste aparelho e servem para adaptar as falas e orientações do Tamanduá. Não precisamos de valores ou dados bancários.</p></div>'+
+        '<div class="cf-tamandua-question-list">'+
+          '<section class="cf-tamandua-question"><h2>Tem alguma área da sua vida que você quer melhorar porque baixou o app?</h2><p>Marque tudo que fizer sentido.</p><div class="cf-tamandua-options">'+
+            check('melhorar','organizar','Organizar melhor minhas finanças')+
+            check('melhorar','economizar','Aprender a economizar')+
+            check('melhorar','dividas','Entender e reduzir dívidas')+
+            check('melhorar','contas','Acompanhar contas e vencimentos')+
+            check('melhorar','metas','Planejar metas e objetivos')+
+            check('melhorar','familia','Organizar as finanças em família')+
+          '</div></section>'+
+          '<section class="cf-tamandua-question"><h2>Qual é a sua principal necessidade hoje?</h2><p>Escolha uma ou mais se houver mais de uma.</p><div class="cf-tamandua-options">'+
+            check('necessidade','controle','Ter mais controle do meu dinheiro')+
+            check('necessidade','clareza','Entender para onde meu dinheiro está indo')+
+            check('necessidade','planejamento','Planejar melhor os próximos meses')+
+            check('necessidade','disciplina','Criar mais disciplina para acompanhar as finanças')+
+          '</div></section>'+
+          '<section class="cf-tamandua-question"><h2>Você tem dificuldade para controlar e organizar suas finanças?</h2><p>Isso ajuda o Tamanduá a saber quanto deve explicar e simplificar.</p><div class="cf-tamandua-options">'+
+            check('organizacao','sim','Sim, tenho bastante dificuldade')+
+            check('organizacao','as-vezes','Às vezes')+
+            check('organizacao','nao','Não, consigo me organizar')+
+          '</div></section>'+
+          '<section class="cf-tamandua-question"><h2>Você tem dificuldade para economizar?</h2><p>Se quiser, o Tamanduá pode dar mais atenção a esse tema.</p><div class="cf-tamandua-options">'+
+            check('economia','sim','Sim')+
+            check('economia','as-vezes','Às vezes')+
+            check('economia','nao','Não')+
+          '</div></section>'+
+        '</div>'+
+        '<p class="cf-tamandua-note">Você poderá mudar essas preferências depois. O Tamanduá não toma decisões financeiras por você; ele ajuda a entender e acompanhar o que o aplicativo mostra.</p>'+
+        '<div class="cf-tamandua-intro-actions"><button class="sec" type="button" data-act="tamandua-intro-back">← Voltar</button><button type="button" data-act="tamandua-intro-finish">Concluir e entrar no app</button></div>'+
+      '</section>'+
+    '</div>'+
+  '</div>';
+}
+function renderTamanduaIntro(step=0){
+  S.tamanduaIntroStep=step;
+  $('#app').innerHTML=tamanduaIntroMarkup(step);
+}
+function finishTamanduaIntro(){
+  const groups=['melhorar','necessidade','organizacao','economia'];
+  const profile={};
+  groups.forEach(name=>profile[name]=[...document.querySelectorAll('input[name="'+name+'"]:checked')].map(x=>x.value));
+  profile.version=1;
+  profile.savedAt=new Date().toISOString();
+  try{
+    localStorage.setItem('copiloto_tamandua_profile_v1',JSON.stringify(profile));
+    localStorage.setItem('copiloto_tamandua_intro_v1','1');
+  }catch(e){}
+  S.tamanduaProfile=profile;
+  S.tamanduaIntroStep=0;
+  render();
+}
+
 function mostrarErroInicial(e){
   console.error('Falha ao iniciar o Copiloto Financeiro:',e);
   const app=document.getElementById('app');
@@ -3232,7 +3401,7 @@ async function loadMes(rd=true,refreshAggregates=true){
       q(sb.from('v_resumo_anual').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano).order('mes')),
       q(sb.from('v_meta_cartao').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano))]);
     S.resumo=rs;S.meta=mc;S._aggregateYearId=S.ano.id;
-    if(rd)render();
+    if(rd){if(!tamanduaIntroCompleted())renderTamanduaIntro();else render();}
   }
 }
 
@@ -3934,6 +4103,7 @@ function parseGeneric(rows){
 /*END*/
 const saudacao=()=>{const h=new Date().getHours();return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'};
 function afterRender(){
+  mountMobileCompanion();
   const k=S.view+'|'+(S.mes&&S.mes.id)+'|'+(S.ano&&S.ano.id);
   if(k!==S.ak){S.ak=k;const a=$('#app');a.classList.add('anim');setTimeout(()=>a.classList.remove('anim'),900);
     document.querySelectorAll('.card b').forEach(el=>{if(el.children.length)return;const t=el.textContent;if(!/^-?R\$/.test(t))return;
@@ -4476,7 +4646,12 @@ document.addEventListener('click',async e=>{
   else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));await boot()}
   else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));await boot()}
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));toast('Convite aceito! Abrindo a família…');await boot()}
+  else if(a==='tamandua-intro-next'){renderTamanduaIntro(1)}
+  else if(a==='tamandua-intro-back'){renderTamanduaIntro(0)}
+  else if(a==='tamandua-intro-skip'){try{localStorage.setItem('copiloto_tamandua_intro_v1','1')}catch(e){};render()}
+  else if(a==='tamandua-intro-finish'){finishTamanduaIntro()}
   else if(a==='mobilemore'){S.mobileMore=!S.mobileMore;render()}
+  else if(a==='companion'){mobileCompanionGuide()}
   else if(a==='mobileadd'){S.mobileAddOpen=!S.mobileAddOpen;render();if(S.mobileAddOpen)document.getElementById('n_desc')?.focus()}
   else if(a==='smartgo'){S.mobileMore=false;S.mobileAddOpen=false;S.view=b.dataset.v||'planilha';if(S.view==='plan')await carregarPlan();render()}
   else if(a==='editfamily'||a==='editinvites'||a==='editcategories'||a==='editaccount'){const key={editfamily:'membros',editinvites:'convites',editcategories:'categorias',editaccount:'conta'}[a];S.familyAreas[key]=!S.familyAreas[key];render()}
@@ -4777,5 +4952,77 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
   window.addEventListener('resize',enhanceMobileWorkspace,{passive:true});
 })();
 </script>
-</body>
+<script>
+function mobileCompanionMarkup(){
+  const speech=mobileCompanionSpeech();
+  return '<div class="cf-companion" id="cf-companion">'+
+    '<div class="cf-companion-speech" id="cf-companion-speech" role="status" aria-live="polite">'+
+      '<b>Copiloto</b><span>'+speech+'</span>'+
+    '</div>'+
+    '<button type="button" class="cf-companion-animal" data-act="companion" aria-label="Mostrar fala do Copiloto" title="Falar com o Copiloto">'+
+      '<svg viewBox="0 0 64 64" aria-hidden="true">'+
+        '<path class="cf-companion-tail" d="M49 42c9 3 12 10 8 15-3 4-9 2-10-3" fill="none" stroke="#9b6a38" stroke-width="7" stroke-linecap="round"/>'+
+        '<path d="M18 28c0-11 8-19 19-19 9 0 16 6 16 15 0 10-7 17-18 17H24c-7 0-12-5-12-11 0-5 2-9 6-12z" fill="#b9783f"/>'+
+        '<path d="M31 12c-5 4-8 9-8 16 0 7 4 11 9 13-8 1-15-3-15-11 0-9 6-16 14-18z" fill="#8f5c34" opacity=".65"/>'+
+        '<path d="M45 25c6 0 10 3 10 7s-4 7-10 7c-5 0-8-3-8-7s3-7 8-7z" fill="#d79b5f"/>'+
+        '<circle class="cf-companion-face" cx="47" cy="29" r="2.2" fill="#1d281f"/>'+
+        '<circle cx="54" cy="32" r="1.4" fill="#1d281f"/>'+
+        '<path d="M51 34c2 1 3 2 3 4" fill="none" stroke="#6f4325" stroke-width="1.5" stroke-linecap="round"/>'+
+        '<path d="M24 40c-3 5-2 9 1 11" fill="none" stroke="#744b2b" stroke-width="4" stroke-linecap="round"/>'+
+        '<path d="M35 41c-2 5-1 9 2 11" fill="none" stroke="#744b2b" stroke-width="4" stroke-linecap="round"/>'+
+      '</svg>'+
+    '</button>'+
+  '</div>';
+}
+
+function mobileCompanionSpeech(){
+  const lanc=Array.isArray(S.lanc)?S.lanc:[];
+  const hasData=lanc.length>0;
+  const profile=S.tamanduaProfile||{};
+  const needs=Array.isArray(profile.melhorar)?profile.melhorar:[];
+  const today=new Date().toISOString().slice(0,10);
+  const overdue=lanc.some(x=>x.status!=='pago'&&x.data_vencimento&&x.data_vencimento<today);
+  const upcoming=lanc.some(x=>x.status!=='pago'&&x.data_vencimento&&x.data_vencimento>=today&&x.data_vencimento<=new Date(Date.now()+7*86400000).toISOString().slice(0,10));
+
+  if(!hasData)return needs.includes('economizar')?'Ainda não tenho dados suficientes. Quando você registrar seus primeiros gastos, vou acompanhar a parte de economia com você.':'Ainda não tenho dados suficientes para analisar este mês.';
+  if(overdue)return 'Tem contas atrasadas aqui. Vale conferir antes de planejar novos gastos.';
+  if(upcoming)return 'Você tem próximos vencimentos. Vale conferir o que vence primeiro.';
+  if(needs.includes('economizar'))return 'Você me contou que quer economizar. Vamos observar seus gastos e acompanhar essa evolução.';
+  if(needs.includes('organizar'))return 'Você quer organizar melhor suas finanças. Vamos por partes, sem complicar.';
+  if(needs.includes('metas'))return 'Você quer avançar nas suas metas. Vamos acompanhar o que já foi planejado.';
+  if(needs.includes('contas'))return 'Você quer acompanhar contas e vencimentos. Vamos deixar isso bem claro por aqui.';
+
+  const speechByView={
+    planilha:'Vamos conferir como está seu mês?',
+    ano:'Vamos olhar o ano e entender onde seu dinheiro está indo.',
+    checape:'Encontrei alguns pontos para você revisar.',
+    plan:'Vamos organizar o próximo passo antes de decidir.',
+    família:'Aqui você organiza quem participa do seu financeiro.',
+    admin:'Vamos revisar as configurações com atenção.'
+  };
+  return speechByView[S.view]||speechByView.planilha;
+}
+
+function mobileCompanionGuide(){
+  const companion=document.getElementById('cf-companion');
+  if(!companion)return;
+  const speech=document.getElementById('cf-companion-speech');
+  if(!speech)return;
+  speech.hidden=!speech.hidden;
+  if(!speech.hidden){
+    const face=companion.querySelector('.cf-companion-face');
+    if(face){
+      face.setAttribute('transform','scale(1.06)');
+      setTimeout(()=>face.removeAttribute('transform'),180);
+    }
+  }
+}
+
+function mountMobileCompanion(){
+  if(!document.querySelector('.app-main'))return;
+  document.getElementById('cf-companion')?.remove();
+  document.body.insertAdjacentHTML('beforeend',mobileCompanionMarkup());
+}
+</script>
+
 </html>
