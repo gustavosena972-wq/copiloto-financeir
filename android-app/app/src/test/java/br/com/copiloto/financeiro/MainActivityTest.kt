@@ -45,9 +45,39 @@ class MainActivityTest {
         assertTrue(html.contains("cf-motion-camera"))
         assertTrue(html.contains("cf-motion-orbit"))
         assertTrue(html.contains("cf-motion-ripple"))
+        assertTrue(html.contains("cf-neural-mesh"))
+        assertTrue(html.contains("cf-ai-node"))
+        assertTrue(html.contains("rgba(91,205,137"))
         assertTrue(html.contains("visibilitychange"))
         assertTrue(html.contains("prefers-reduced-motion: reduce"))
         assertTrue(html.contains("setAttribute('data-motion-mode','inicio')"))
+    }
+
+    @Test
+    fun bundledFinanceUiProvidesAnImmersiveOpeningHero() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-opening-scene"))
+        assertTrue(html.contains("cf-holo-dashboard"))
+        assertTrue(html.contains("cf-finance-orbit"))
+        assertTrue(html.contains("cf-data-stream"))
+        assertTrue(html.contains("cf-cursor-light"))
+        assertTrue(html.contains("data-opening-interactive"))
+        assertTrue(html.contains("cf-opening-reveal"))
+    }
+
+    @Test
+    fun bundledFinanceUiProvidesAnimatedProductScreens() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("viewAnimatedScene"))
+        assertTrue(html.contains("cf-screen-stage"))
+        assertTrue(html.contains("cf-screen-ledger"))
+        assertTrue(html.contains("cf-screen-orbit"))
+        assertTrue(html.contains("cf-screen-health"))
+        assertTrue(html.contains("cf-screen-goals"))
+        assertTrue(html.contains("cf-screen-reports"))
+        assertTrue(html.contains("cf-screen-family"))
+        assertTrue(html.contains("cf-stage-scan"))
+        assertTrue(html.contains("cf-screen-transition"))
     }
 
     @Test
@@ -98,8 +128,8 @@ class MainActivityTest {
     @Test
     fun releaseVersionMatchesTheAuditedAndroidPackage() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 8"))
-        assertTrue(gradle.contains("versionName = \"1.0.7\""))
+        assertTrue(gradle.contains("versionCode = 9"))
+        assertTrue(gradle.contains("versionName = \"1.0.8\""))
     }
 
     @Test
