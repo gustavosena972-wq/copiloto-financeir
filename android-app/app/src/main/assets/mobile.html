@@ -3193,7 +3193,7 @@ function viewPlanilha(ed){
       '<label class="mobile-entry-owner">Responsável<select data-f="membro_id" '+d+'>'+memOpts(l.membro_id)+'</select></label>'+
       '</div><div class="mobile-entry-actions"><span>As alterações são salvas ao sair de cada campo.</span><button type="button" class="red" data-act="del" data-id="'+esc(l.id)+'" '+d+'>Excluir lançamento</button></div></details></td></tr>';
   }).join('');
-  const mobileAddToggle=ed?'<div class="mobile-add-toggle"><button type="button" data-act="mobileadd" aria-expanded="'+(S.mobileAddOpen?'true':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+(S.mobileAddOpen?'Fechar formulário':'Novo lançamento')+'</button></div>':'';
+  const mobileAddToggle=ed?'<div class="mobile-add-toggle"><button id="mobile-add-launch" type="button" data-act="mobileadd" aria-expanded="'+(S.mobileAddOpen?'true':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+(S.mobileAddOpen?'Fechar formulário':'Novo lançamento')+'</button></div>':'';
   const novo=ed?`<tr class="novo ${S.mobileAddOpen?'is-open':''}" id="novo"><td data-label="Vencimento"><input aria-label="Vencimento" type="date" id="n_data"></td><td data-label="Descrição"><div style="display:grid;gap:5px;min-width:0"><input id="n_desc" placeholder="Descrição da compra ou compromisso" style="min-width:0"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
    <td data-label="Tipo"><select aria-label="Tipo" id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td data-label="Categoria"><select aria-label="Categoria" id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
    <td data-label="Valor"><input aria-label="Valor" type="number" step="0.01" min="0" id="n_valor" placeholder="Valor total (R$)"></td><td data-label="Status"><select aria-label="Status" id="n_status">${stOpts('pendente')}</select></td>
@@ -3274,7 +3274,7 @@ function viewAno(){
     const mes=MN[r.mes-1];
     const saldoClass=Number(r.saldo)>=0?'pos':'neg';
     const status=r.status==='fechado'?' · Fechado':'';
-    return '<article class="mobile-year-item"><button type="button" class="mobile-year-open" data-act="irmes" data-m="'+r.mes+'" aria-label="Abrir lançamentos de '+mes+'"><span class="mobile-year-month"><b>'+mes+status+'</b><small>Ver lançamentos</small></span><span class="mobile-year-balance '+saldoClass+'"><small>Saldo</small><strong>'+brl(r.saldo)+'</strong></span></button><div class="mobile-year-facts"><div><small>Receitas</small><b class="pos">'+brl(r.receita)+'</b></div><div><small>Despesas</small><b class="neg">'+brl(r.total_despesas)+'</b></div><div><small>Poupança acumulada</small><b>'+brl(r.poupanca_acumulada)+'</b></div><div><small>Meta cartão</small><b>'+r.pct_cartoes+'%</b></div></div></article>';
+    return '<article class="mobile-year-item"><button type="button" class="mobile-year-open" data-act="irmes" data-m="'+r.mes+'" aria-label="Abrir lançamentos de '+mes+'"><span class="mobile-year-month"><b>'+mes+status+'</b><small>Ver lançamentos</small></span><span class="mobile-year-balance '+saldoClass+'"><small>Saldo</small><strong>'+brl(r.saldo)+'</strong></span></button><div class="mobile-year-facts"><div><small>Receitas</small><b class="pos">'+brl(r.receita)+'</b></div><div><small>Despesas</small><b class="neg">'+brl(r.total_despesas)+'</b></div><div><small>Poupança acumulada</small><b>'+brl(r.poupanca_acumulada)+'</b></div><div data-label="Meta cartão"><small>Meta cartão</small><b>'+r.pct_cartoes+'%</b></div></div></article>';
   }).join('');
   return `${viewStatus()}${barraAno()}<div class="cards"><div class="card"><small>Receita prevista no ano</small><b class="pos">${brl(T('receita'))}</b></div>
   <div class="card"><small>Despesas no ano</small><b class="neg">${brl(T('total_despesas'))}</b></div>
@@ -3462,7 +3462,6 @@ async function importar(){
         if(!primeiroImportado)primeiroImportado={ano:m.ano,mes:m.mes};
       }catch(err){pul.push(MN[m.mes-1]+' '+m.ano+': '+(err?.message||'falha ao gravar'))}
     }
-    S.mobileAddOpen=false;
     S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));
     if(primeiroImportado){
       S.ano=S.anos.find(x=>x.ano===primeiroImportado.ano)||S.ano;
@@ -3950,6 +3949,7 @@ document.addEventListener('click',async e=>{
     S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));
     S.ano=S.anos.find(x=>x.ano===yy)||S.ano;
     toast(parcelas>1?(natureza==='financiamento'?`Compromisso criado: ${parcelas} prestações mensais de ${brl(valorBase)}.`:`Compra dividida em ${parcelas} parcelas. Valor total: ${brl(valorBase)}.`):'Lançamento adicionado.');
+    S.mobileAddOpen=false;
     await loadAno(mm)}
   else if(a==='del'){
     const lanc=S.lanc.find(x=>x.id===b.dataset.id);
