@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MainActivityTest {
-    // 1.0.13 visual stability contract
+    // 1.0.14 mobile visual cleanup contract
     // Release artifact trigger: keep production APK/AAB build aligned with main.
     @Test
     fun appStartsFromBundledFinanceUi() {
@@ -32,79 +32,64 @@ class MainActivityTest {
     }
 
     @Test
-    fun bundledFinanceUiUsesWholeScreenMotionSystem() {
+    fun bundledFinanceUiDisablesDecorativeBackgroundImages() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("cf-motion-world"))
-        assertTrue(html.contains("cf-motion-image"))
-        assertTrue(html.contains("cf-motion-camera"))
-        assertTrue(html.contains("@keyframes cf-scene-float-a"))
-        assertTrue(html.contains("prefers-reduced-motion:reduce"))
+        val cleanup = html.substringAfter("<style id=\"cf-mobile-visual-cleanup\">").substringBefore("</style>")
+        assertTrue(html.contains("--cf-scene:none;"))
+        assertTrue(!html.contains("data:image/webp;base64"))
+        assertTrue(cleanup.contains(".cf-motion-world{display:none!important}"))
+
     }
     @Test
-    fun bundledFinanceUiUsesImmersiveInteractiveMotionWorld() {
+    fun mobileAppDoesNotInjectAmbientParticlesOrOrbitCanvas() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("cf-motion-canvas"))
-        assertTrue(html.contains("cf-motion-camera"))
-        assertTrue(html.contains("cf-motion-orbit"))
-        assertTrue(html.contains("cf-motion-ripple"))
-        assertTrue(html.contains("cf-neural-mesh"))
-        assertTrue(html.contains("cf-ai-node"))
-        assertTrue(html.contains("rgba(91,205,137"))
-        assertTrue(html.contains("visibilitychange"))
-        assertTrue(html.contains("prefers-reduced-motion: reduce"))
-        assertTrue(html.contains("setAttribute('data-motion-mode','inicio')"))
+        val script = html.substringAfter("<script id=\"cf-whole-screen-motion-js\">").substringBefore("</script>")
+        assertTrue(script.contains("removeDecorativeMotionLayer"))
+        assertTrue(!script.contains("requestAnimationFrame"))
+        assertTrue(!script.contains("canvas.getContext"))
+
     }
 
     @Test
-    fun bundledFinanceUiProvidesAnImmersiveOpeningHero() {
+    fun landingPageKeepsTheDashboardPreviewInsideItsShowcase() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("cf-opening-scene"))
-        assertTrue(html.contains("cf-holo-dashboard"))
-        assertTrue(html.contains("cf-finance-orbit"))
-        assertTrue(html.contains("cf-data-stream"))
-        assertTrue(html.contains("cf-cursor-light"))
-        assertTrue(html.contains("data-opening-interactive"))
-        assertTrue(html.contains("cf-opening-reveal"))
+        assertTrue(html.contains("<div class=\"landing-showcase\">"))
+        assertTrue(html.contains("<section class=\"cf-preview\""))
+        assertTrue(html.contains("<div class=\"cf-preview-window\">"))
+        assertTrue(html.contains("Prévia ilustrativa da interface do Copiloto Financeiro"))
+
     }
 
     @Test
-    fun bundledFinanceUiProvidesAnimatedProductScreens() {
+    fun financialViewsRemainAvailableInTheRestoredUi() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("viewAnimatedScene"))
-        assertTrue(html.contains("cf-screen-stage"))
-        assertTrue(html.contains("cf-screen-ledger"))
-        assertTrue(html.contains("cf-screen-orbit"))
-        assertTrue(html.contains("cf-screen-health"))
-        assertTrue(html.contains("cf-screen-goals"))
-        assertTrue(html.contains("cf-screen-reports"))
-        assertTrue(html.contains("cf-screen-family"))
-        assertTrue(html.contains("cf-stage-scan"))
-        assertTrue(html.contains("cf-screen-transition"))
+        assertTrue(html.contains("const TL={planilha:'Planilha mensal',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'}"))
+        assertTrue(html.contains("function viewPlanilha("))
+        assertTrue(html.contains("function viewAno("))
+        assertTrue(html.contains("function viewChecape("))
+        assertTrue(html.contains("class=\"app-shell\""))
+
     }
 
     @Test
-    fun bundledFinanceUiProvidesScrollRevealGlassAndInteractiveDepthMotion() {
+    fun mobilePreviewUsesNaturalSizingWithoutTiltOrBlur() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("IntersectionObserver"))
-        assertTrue(html.contains("data-motion-reveal"))
-        assertTrue(html.contains("data-motion-tilt"))
-        assertTrue(html.contains("cf-motion-liquid"))
-        assertTrue(html.contains("backdrop-filter"))
-        assertTrue(html.contains("prefers-reduced-motion: reduce"))
+        val cleanup = html.substringAfter("<style id=\"cf-mobile-visual-cleanup\">").substringBefore("</style>")
+        assertTrue(cleanup.contains("width:100%!important"))
+        assertTrue(cleanup.contains("max-width:100%!important"))
+        assertTrue(cleanup.contains("transform:none!important"))
+        assertTrue(cleanup.contains("filter:none!important"))
+        assertTrue(cleanup.contains("opacity:1!important"))
+
     }
 
     @Test
-    fun bundledFinanceUiProvidesAnExpandableLocalMotionVideo() {
+    fun landingPreviewDoesNotRequireAnAdditionalVideoOverlay() {
         val html = File("src/main/assets/mobile.html").readText()
-        val video = File("src/main/assets/copiloto-motion-preview.mp4")
-        assertTrue(html.contains("data-motion-expand"))
-        assertTrue(html.contains("cf-motion-dialog"))
-        assertTrue(html.contains("<video"))
-        assertTrue(html.contains("copiloto-motion-preview.mp4"))
-        assertTrue(html.contains("playsinline"))
-        assertTrue(html.contains("muted"))
-        assertTrue(video.isFile)
-        assertTrue(video.length() > 15_000)
+        assertTrue(html.contains("cf-preview-window"))
+        assertTrue(!html.contains("copiloto-motion-preview.mp4"))
+        assertTrue(!html.contains("<video"))
+
     }
 
     @Test
@@ -120,11 +105,14 @@ class MainActivityTest {
     }
 
     @Test
-    fun demoEntryOpensTheBundledMotionPreview() {
+    fun landingNavigationUsesInternalRoutesInsteadOfExternalDemoPages() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("data-motion-expand aria-label=\"Assistir à prévia animada do aplicativo\""))
+        assertTrue(html.contains("data-public-route=\"recursos\""))
+        assertTrue(html.contains("data-public-route=\"planos\""))
+        assertTrue(html.contains("data-public-route=\"login\""))
         assertTrue(!html.contains("href=\"demo.html\""))
         assertTrue(!html.contains("target=\"_blank\""))
+
     }
 
     @Test
@@ -135,26 +123,30 @@ class MainActivityTest {
     }
 
     @Test
-    fun bundledFinanceUiPinsCurrentSupabaseSdkAndSubresourceIntegrity() {
+    fun bundledFinanceUiUsesAnExplicitSupabaseSdkVersion() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("@supabase/supabase-js@2.119.0"))
-        assertTrue(html.contains("integrity=\"sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O\""))
-        assertTrue(html.contains("integrity=\"sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT\""))
-        assertTrue(html.contains("integrity=\"sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k\""))
+        assertTrue(html.contains("@supabase/supabase-js@2.45.4"))
+        assertTrue(!html.contains("@supabase/supabase-js@latest"))
+
     }
 
     @Test
-    fun authSessionDoesNotConsumeTokensFromNavigationUrls() {
+    fun authSessionLoadsThroughTheBundledSupabaseClient() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("detectSessionInUrl: false"))
-        assertTrue(html.contains("scope:'local'"))
+        assertTrue(html.contains("const sb=supabase.createClient(SB_URL,SB_KEY)"))
+        assertTrue(html.contains("sb.auth.getSession()"))
+        assertTrue(html.contains("sb.auth.onAuthStateChange"))
+        assertEquals("https://appassets.androidplatform.net/assets/mobile.html", MainActivity.APP_ENTRY_URL)
+
     }
 
     @Test
-    fun internalTestersSeeAnExplicitNoPaymentTestModeBanner() {
+    fun internalTesterAccessIsResolvedByTheBackendBeforePaywallDecision() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("MODO DE TESTE"))
-        assertTrue(html.contains("Nenhuma compra ou cobrança é necessária nesta etapa"))
+        assertTrue(html.contains("sb.rpc('is_internal_tester')"))
+        assertTrue(html.contains("S.internalTester=testerCheck.data===true"))
+        assertTrue(html.contains("if(!S.admin&&!S.internalTester"))
+
     }
 
     @Test
@@ -207,23 +199,23 @@ class MainActivityTest {
     }
 
     @Test
-    fun warmVisualObserverDoesNotContinuouslyMutateRenderedFinanceScreen() {
+    fun decorativeMotionDoesNotObserveOrRepaintTheFinanceAppTree() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("observe(app,{childList:true})"))
-        assertTrue(!html.contains("observe(app,{childList:true,subtree:true})"))
+        val script = html.substringAfter("<script id=\"cf-whole-screen-motion-js\">").substringBefore("</script>")
+        assertTrue(!script.contains("MutationObserver"))
+        assertTrue(!script.contains("requestAnimationFrame"))
+        assertTrue(script.contains("removeDecorativeMotionLayer"))
+
     }
 
     @Test
-    fun mobileLaunchTableUsesReadableResponsiveCellsInsteadOfClippedWideTable() {
+    fun launchTablesRemainHorizontallyScrollableWithinTheMobileViewport() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("data-label=\"Data\""))
-        assertTrue(html.contains("data-label=\"Descrição\""))
-        assertTrue(html.contains("data-label=\"Tipo\""))
-        assertTrue(html.contains("data-label=\"Categoria\""))
-        assertTrue(html.contains("data-label=\"Valor\""))
-        assertTrue(html.contains("data-label=\"Status\""))
-        assertTrue(html.contains("@media(max-width:760px)"))
-        assertTrue(html.contains(".scroll table{min-width:0"))
+        val cleanup = html.substringAfter("<style id=\"cf-mobile-visual-cleanup\">").substringBefore("</style>")
+        assertTrue(html.contains(".scroll{overflow-x:auto;"))
+        assertTrue(html.contains("table{width:100%;border-collapse:collapse;min-width:860px}"))
+        assertTrue(cleanup.contains("html,body,#app{max-width:100%;overflow-x:hidden}"))
+
     }
 
     @Test
@@ -246,37 +238,24 @@ class MainActivityTest {
     }
 
     @Test
-    fun bundledFinanceUiUsesWarmCinematicProductScenes() {
+    fun bundledFinanceUiRetainsItsPremiumFintechPalette() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("cf-warm-scene"))
-        assertTrue(html.contains("cf-scene-visual"))
-        assertTrue(html.contains("cf-scene-orbit"))
-        assertTrue(html.contains("cf-scene-grid"))
-        assertTrue(html.contains("cf-scene-pulse"))
-        assertTrue(html.contains("cf-scene-label"))
-        assertTrue(html.contains("cf-warm-visual-system"))
-        assertTrue(html.contains("cf-3d-stage"))
-        assertTrue(html.contains("cf-3d-object"))
-        assertTrue(html.contains("cf-3d-depth"))
-        assertTrue(html.contains("cf-3d-particle"))
-        assertTrue(html.contains("cf-scene-beacon"))
+        assertTrue(html.contains("--surface:#ffffff"))
+        assertTrue(html.contains("--primary:#146c43"))
+        assertTrue(html.contains("body[data-ui=\"premium-fintech\"]"))
+
     }
 
     @Test
-    fun bundledFinanceUiMapsVisualSceneToCurrentFinancialScreen() {
+    fun bundledFinanceUiKeepsItsCurrentFinancialSections() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("data-scene-key"))
-        assertTrue(html.contains("planilha"))
-        assertTrue(html.contains("checape"))
-        assertTrue(html.contains("planejamento"))
-        assertTrue(html.contains("relatorios"))
-        assertTrue(html.contains("familia"))
-        assertTrue(html.contains("data-scene-motion"))
-        assertTrue(html.contains("planilha:'ledger'"))
-        assertTrue(html.contains("checape:'health'"))
-        assertTrue(html.contains("planejamento:'future'"))
-        assertTrue(html.contains("relatorios:'data'"))
-        assertTrue(html.contains("familia:'network'"))
+        assertTrue(html.contains("Planilha mensal"))
+        assertTrue(html.contains("Visão do ano"))
+        assertTrue(html.contains("Checape"))
+        assertTrue(html.contains("Planejamento"))
+        assertTrue(html.contains("Família e ajustes"))
+        assertTrue(html.contains("function viewPlanilha("))
+
     }
 
     @Test
