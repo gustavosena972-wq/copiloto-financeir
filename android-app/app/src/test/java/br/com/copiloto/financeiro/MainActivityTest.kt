@@ -476,4 +476,24 @@ class MainActivityTest {
         assertTrue(html.contains("data-v=\"família\""))
     }
 
+    @Test
+    fun androidV018DefersHeavyOptionalLibrariesUntilTheyAreNeeded() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertFalse(html.contains("cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js</script>"))
+        assertFalse(html.contains("cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js</script>"))
+        assertTrue(html.contains("function ensureXlsx()"))
+        assertTrue(html.contains("function ensureQrCode()"))
+        assertTrue(html.contains("await ensureXlsx()"))
+    }
+
+    @Test
+    fun androidV018UsesMobileFirstPerformanceDefaults() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val mobile = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-18\">").substringBefore("</style>")
+        assertTrue(mobile.contains("content-visibility:auto"))
+        assertTrue(mobile.contains("backdrop-filter:none!important"))
+        assertTrue(mobile.contains(".v0-mobile-quick-nav-grid{grid-template-columns:1fr!important}"))
+        assertTrue(mobile.contains("min-height:52px!important"))
+    }
+
 }
