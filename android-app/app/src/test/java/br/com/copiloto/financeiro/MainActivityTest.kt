@@ -586,7 +586,7 @@ class MainActivityTest {
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
         assertTrue(gradle.contains("versionCode = 26"))
-        assertTrue(gradle.contains("versionName = \"1.0.23\""))
+        assertTrue(gradle.contains("versionName = \"1.0.25\""))
     }
 
     @Test
@@ -665,7 +665,7 @@ class MainActivityTest {
     @Test
     fun androidV023CompanionSpeechDoesNotAddNavigationOrDelayStartup() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertFalse(html.contains("data-v="ajuda""))
+        assertFalse(html.contains("data-v=\"ajuda\""))
         assertFalse(html.contains("setTimeout(mobileCompanionSpeech"))
         assertFalse(html.contains("await mobileCompanionSpeech"))
         assertTrue(html.contains("mountMobileCompanion()"))
