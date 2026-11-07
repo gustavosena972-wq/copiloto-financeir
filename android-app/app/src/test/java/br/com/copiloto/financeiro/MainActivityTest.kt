@@ -38,4 +38,15 @@ class MainActivityTest {
         assertTrue(html.contains("@keyframes cf-image-float"))
         assertTrue(html.contains("prefers-reduced-motion:reduce"))
     }
+    @Test
+    fun bundledFinanceUiUsesImmersiveInteractiveMotionWorld() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-motion-canvas"))
+        assertTrue(html.contains("cf-motion-camera"))
+        assertTrue(html.contains("cf-motion-orbit"))
+        assertTrue(html.contains("cf-motion-ripple"))
+        assertTrue(html.contains("visibilitychange"))
+        assertTrue(html.contains("prefers-reduced-motion: reduce"))
+        assertTrue(html.contains("data-motion-mode"))
+    }
 }
