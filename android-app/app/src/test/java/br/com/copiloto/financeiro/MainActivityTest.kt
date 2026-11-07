@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MainActivityTest {
+    // 1.0.12 visual stability contract
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
