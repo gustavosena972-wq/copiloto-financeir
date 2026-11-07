@@ -2011,7 +2011,7 @@ if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div
 const sb=supabase.createClient(SB_URL,SB_KEY);
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set()};
+const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -2061,6 +2061,9 @@ async function boot(){
   const adminCheck=await sb.rpc('eh_admin');
   if(adminCheck.error)throw adminCheck.error;
   S.admin=adminCheck.data===true;
+  const testerCheck=await sb.rpc('is_internal_tester');
+  if(testerCheck.error)throw testerCheck.error;
+  S.internalTester=testerCheck.data===true;
   const rows=await q(sb.from('membros').select('id,papel,nome,familias(id,nome,meta_reducao_cartao,acesso_ate,plano)').eq('usuario_id',S.user.id).order('criado_em',{ascending:false}));
   if(!rows.length){
     S.adm=null;
@@ -2069,7 +2072,7 @@ async function boot(){
   }
   // Cada conta possui uma única família. A associação vem do banco; não há seletor local de família.
   S.me=rows[0];S.fam=S.me.familias;
-  if(!S.admin&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
+  if(!S.admin&&!S.internalTester&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
   try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);S.notifs=nr.data||[]}catch(e){S.notifs=[]}
   if(S.admin){const rr=await sb.rpc('admin_resumo');S.admPend=rr.data?rr.data.pendentes:0}
