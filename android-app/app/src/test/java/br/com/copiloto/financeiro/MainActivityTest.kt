@@ -203,4 +203,27 @@ class MainActivityTest {
         assertTrue(!isAllowedBillingCommand("deleteAccount", null))
         assertTrue(!isAllowedBillingCommand("queryProducts", "copiloto_pro_30d"))
     }
+
+    @Test
+    fun bundledFinanceUiUsesWarmCinematicProductScenes() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-warm-scene"))
+        assertTrue(html.contains("cf-scene-visual"))
+        assertTrue(html.contains("cf-scene-orbit"))
+        assertTrue(html.contains("cf-scene-grid"))
+        assertTrue(html.contains("cf-scene-pulse"))
+        assertTrue(html.contains("cf-scene-label"))
+        assertTrue(html.contains("cf-warm-visual-system"))
+    }
+
+    @Test
+    fun bundledFinanceUiMapsVisualSceneToCurrentFinancialScreen() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("data-scene-key"))
+        assertTrue(html.contains("planilha"))
+        assertTrue(html.contains("checape"))
+        assertTrue(html.contains("planejamento"))
+        assertTrue(html.contains("relatorios"))
+        assertTrue(html.contains("familia"))
+    }
 }
