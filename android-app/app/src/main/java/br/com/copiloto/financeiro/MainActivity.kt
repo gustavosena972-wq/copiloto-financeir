@@ -74,10 +74,10 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             }
 
             override fun shouldOverrideUrlLoading(
-                view: WebView?,
-                request: WebResourceRequest?
+                view: WebView,
+                request: WebResourceRequest
             ): Boolean {
-                val uri = request?.url ?: return true
+                val uri = request.url
                 if (isTrustedAppUrl(uri)) return false
 
                 // Links externos são abertos fora do contexto privilegiado do WebView.
