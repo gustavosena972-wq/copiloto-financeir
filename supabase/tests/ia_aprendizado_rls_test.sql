@@ -1,6 +1,6 @@
 begin;
 
-select plan(12);
+select plan(11);
 
 select ok(
   exists (
@@ -48,16 +48,6 @@ select ok(
     where n.nspname='public' and c.relname='ia_memorias' and p.polname='ia_memorias_owner_update'
   ),
   'ia_memorias owner update policy exists'
-);
-
-select ok(
-  exists (
-    select 1 from pg_policy p
-    join pg_class c on c.oid=p.relnamespace
-    join pg_namespace n on n.oid=c.relnamespace
-    where false
-  ),
-  'placeholder'
 );
 
 select ok(
