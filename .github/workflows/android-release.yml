@@ -2,6 +2,11 @@ name: Android production release
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "android-app/app/build.gradle.kts"
+      - ".github/workflows/android-release.yml"
 
 permissions:
   contents: read
@@ -62,7 +67,18 @@ jobs:
         run: |
           BUNDLE="app/build/outputs/bundle/release/app-release.aab"
           test -s "$BUNDLE"
-          jarsigner -verify -verbose -certs "$BUNDLE" >/dev/null
+          grep -Eq '^[[:space:]]*minSdk[[:space:]]*=[[:space:]]*24[[:space:]]*
+      - name: Upload production AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: copiloto-financeiro-play-production
+          path: android-app/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 30
+ app/build.gradle.kts
+          jarsigner -verify -verbose -certs "$BUNDLE" > "$RUNNER_TEMP/aab-signature.log" 2>&1
+          grep -q 'jar verified' "$RUNNER_TEMP/aab-signature.log"
+          keytool -printcert -jarfile "$BUNDLE" | grep 'SHA256:'
 
       - name: Upload production AAB
         uses: actions/upload-artifact@v4
