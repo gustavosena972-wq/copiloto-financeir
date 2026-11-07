@@ -231,10 +231,10 @@ class MainActivityTest {
         assertTrue(html.contains("relatorios"))
         assertTrue(html.contains("familia"))
         assertTrue(html.contains("data-scene-motion"))
-        assertTrue(html.contains("planilha:ledger"))
-        assertTrue(html.contains("checape:health"))
-        assertTrue(html.contains("planejamento:future"))
-        assertTrue(html.contains("relatorios:data"))
-        assertTrue(html.contains("familia:network"))
+        assertTrue(html.contains("planilha:'ledger'"))
+        assertTrue(html.contains("checape:'health'"))
+        assertTrue(html.contains("planejamento:'future'"))
+        assertTrue(html.contains("relatorios:'data'"))
+        assertTrue(html.contains("familia:'network'"))
     }
 }
