@@ -686,7 +686,8 @@ class MainActivityTest {
         assertTrue(html.contains("Oi, eu sou o Tamanduá."))
         assertTrue(html.contains("Eu sou seu ajudante das finanças."))
         assertTrue(html.contains("Conhecer o Copiloto"))
-        assertTrue(html.contains("copiloto_tamandua_intro_v1"))
+        assertTrue(html.contains("function tamanduaStorageKey"))
+        assertTrue(html.contains("tamanduaStorageKey('intro')")
     }
 
         @Test
