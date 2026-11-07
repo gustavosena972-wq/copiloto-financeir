@@ -2443,7 +2443,7 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   --mobile-muted:#64746a;--mobile-line:#e2e9e3;--mobile-primary:#1e6543;
   --mobile-primary-dark:#174b34;--mobile-soft:#e9f2eb;--mobile-danger:#a23d3d;
 }
-.mobile-bottom-nav,.mobile-more-panel,.mobile-guide,.mobile-add-toggle,.mobile-entry-list-wrap,.mobile-year-list{display:none}
+.mobile-bottom-nav,.mobile-more-panel,.mobile-guide,.mobile-add-toggle,.mobile-entry-list-wrap,.mobile-year-list,.mobile-flow{display:none}
 @media(max-width:760px){
   html,body{width:100%;max-width:100%;overflow-x:hidden}
   body{min-height:100dvh;background:var(--mobile-bg)!important;color:var(--mobile-ink)!important}
@@ -2505,6 +2505,21 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   .app-main .mobile-month-overview .card:nth-child(3) b{font-size:31px!important;font-weight:800!important;letter-spacing:-.035em!important}
   .app-main .mobile-month-overview .card:nth-child(1){padding-left:2px!important}
   .app-main .mobile-month-overview .card:nth-child(2){padding-right:2px!important;border-right:0!important}
+  .mobile-flow{display:block!important;margin:0 0 16px!important;padding:12px 0 15px!important;border-bottom:1px solid var(--mobile-line)!important}
+  .mobile-flow-header{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:12px!important;margin-bottom:11px!important}
+  .mobile-flow-header>div{display:grid!important;gap:3px!important}
+  .mobile-flow-header small,.mobile-flow-values small,.mobile-flow-empty small{font-size:9px!important;font-weight:800!important;letter-spacing:.1em!important;color:var(--mobile-muted)!important}
+  .mobile-flow-header b,.mobile-flow-empty b{font-size:14px!important;color:var(--mobile-ink)!important}
+  .mobile-flow-header>span{font-size:10px!important;color:var(--mobile-muted)!important;white-space:nowrap!important}
+  .mobile-flow-track{display:flex!important;width:100%!important;height:9px!important;overflow:hidden!important;border-radius:20px!important;background:#e8eee9!important}
+  .mobile-flow-track .income{display:block!important;height:100%!important;background:#24744b!important}
+  .mobile-flow-track .expense{display:block!important;height:100%!important;background:#d18b80!important}
+  .mobile-flow-values{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;margin-top:10px!important}
+  .mobile-flow-values>div{display:grid!important;gap:3px!important;min-width:0!important}
+  .mobile-flow-values b{font-size:13px!important;overflow-wrap:anywhere!important}
+  .mobile-flow-empty{padding:3px 0 13px!important}
+  .mobile-flow-empty>div{display:grid!important;gap:5px!important}
+  .mobile-flow-empty p{margin:0!important;font-size:11px!important;line-height:1.45!important;color:var(--mobile-muted)!important}
   .app-main .card{min-width:0!important;max-width:100%!important;margin:0 0 15px!important;padding:14px 0!important;border:0!important;border-bottom:1px solid var(--mobile-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
   .app-main .modal .card,.app-main .modal .box{margin:0!important;padding:16px!important;border:1px solid var(--mobile-line)!important;border-radius:14px!important;background:#fff!important;box-shadow:0 12px 30px rgba(24,48,33,.14)!important}
   .app-main .card>b:first-child{display:block!important;margin-bottom:7px!important;font-size:15px!important;color:var(--mobile-ink)!important}
@@ -3204,6 +3219,13 @@ function viewPlanilha(ed){
       '</div><div class="mobile-entry-actions"><span>As alterações são salvas ao sair de cada campo.</span><button type="button" class="red" data-act="del" data-id="'+esc(l.id)+'" '+d+'>Excluir lançamento</button></div></details></td></tr>';
   }).join('');
   const mobileAddToggle=ed?'<div class="mobile-add-toggle"><button id="mobile-add-launch" type="button" data-act="mobileadd" aria-expanded="'+(S.mobileAddOpen?'true':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+(S.mobileAddOpen?'Fechar formulário':'Novo lançamento')+'</button></div>':'';
+
+  const totalFluxo=rec+des;
+  const percentualEntradas=totalFluxo>0?rec/totalFluxo*100:0;
+  const percentualSaidas=totalFluxo>0?des/totalFluxo*100:0;
+  const mobileFlow=totalFluxo>0
+    ?'<section class="mobile-flow" aria-label="Comparativo de entradas e saídas do mês"><div class="mobile-flow-header"><div><small>FLUXO DO MÊS</small><b>Entradas e saídas</b></div><span>'+S.lanc.length+' movimentações</span></div><div class="mobile-flow-track" role="img" aria-label="Entradas representam '+percentualEntradas.toFixed(0)+'% e saídas '+percentualSaidas.toFixed(0)+'% do volume registrado"><i class="income" style="width:'+percentualEntradas+'%"></i><i class="expense" style="width:'+percentualSaidas+'%"></i></div><div class="mobile-flow-values"><div><small>Entradas</small><b class="pos">'+brl(rec)+'</b></div><div><small>Saídas</small><b class="neg">'+brl(des)+'</b></div></div></section>'
+    :'<section class="mobile-flow mobile-flow-empty"><div><small>FLUXO DO MÊS</small><b>Seu movimento financeiro começa aqui</b><p>Registre uma receita ou despesa para acompanhar entradas e saídas neste comparativo.</p></div></section>';
   const novo=ed?`<tr class="novo ${S.mobileAddOpen?'is-open':''}" id="novo"><td data-label="Vencimento"><input aria-label="Vencimento" type="date" id="n_data"></td><td data-label="Descrição"><div style="display:grid;gap:5px;min-width:0"><input id="n_desc" placeholder="Descrição da compra ou compromisso" style="min-width:0"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
    <td data-label="Tipo"><select aria-label="Tipo" id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td data-label="Categoria"><select aria-label="Categoria" id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
    <td data-label="Valor"><input aria-label="Valor" type="number" step="0.01" min="0" id="n_valor" placeholder="Valor total (R$)"></td><td data-label="Status"><select aria-label="Status" id="n_status">${stOpts('pendente')}</select></td>
@@ -3213,7 +3235,7 @@ function viewPlanilha(ed){
   return `${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
-  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div><details class="mobile-analysis"><summary>Ver análise e categorias do mês</summary><div class="mobile-analysis-content">${viewGrupos()}${viewCats()}</div></details>
+  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>${mobileFlow}<details class="mobile-analysis"><summary>Ver análise e categorias do mês</summary><div class="mobile-analysis-content">${viewGrupos()}${viewCats()}</div></details>
   <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
    <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
