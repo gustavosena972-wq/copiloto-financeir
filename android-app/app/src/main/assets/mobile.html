@@ -4605,7 +4605,8 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
       let visible=0;
       rows().forEach(row=>{
         const match=!q||row.textContent.toLocaleLowerCase('pt-BR').includes(q);
-        row.hidden=!match;
+        const hidden=!match;
+        row.hidden=hidden;
         if(match)visible++;
       });
       const total=rows().length;
