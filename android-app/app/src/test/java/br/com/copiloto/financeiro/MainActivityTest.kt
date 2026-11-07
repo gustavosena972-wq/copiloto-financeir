@@ -719,4 +719,57 @@ class MainActivityTest {
         assertFalse(html.contains('data-mobile-nav="tamandua"'))
     }
 
+    @Test
+    fun androidV026AddsPersistentAdaptiveLearningWithoutStoringRawFinancialSecrets() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileLoadLearning()"))
+        assertTrue(html.contains("function mobileLearnFromInteraction("))
+        assertTrue(html.contains("function mobileRecordCopilotFeedback("))
+        assertTrue(html.contains("ia_memorias"))
+        assertTrue(html.contains("ia_feedback"))
+        assertTrue(html.contains("copiloto_adaptive_memory_v1"))
+        assertFalse(html.contains("localStorage.setItem('copiloto_raw_conversation"))
+    }
+
+    @Test
+    fun androidV026AddsARealMobileCopilotConversationSurface() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function viewCopiloto()"))
+        assertTrue(html.contains("cf-copilot-chat"))
+        assertTrue(html.contains("data-act="copilot-send""))
+        assertTrue(html.contains("data-act="copilot-feedback""))
+        assertTrue(html.contains("Cada resposta considera seu contexto financeiro e seu histórico de preferências."))
+    }
+
+    @Test
+    fun androidV026RemovesContactUiFromTheMobileExperience() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertFalse(html.contains("contato: gustavosena972@gmail.com"))
+        assertFalse(html.contains("Entre em contato com o suporte"))
+        assertFalse(html.contains("WhatsApp"))
+        assertFalse(html.contains("mailto:"))
+    }
+
+    @Test
+    fun androidV026PlansDescribeOnlyImplementedValueAndDifferentiateAccess() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("Pro"))
+        assertTrue(html.contains("Max"))
+        assertTrue(html.contains("Ultra"))
+        assertTrue(html.contains("Até 2 pessoas"))
+        assertTrue(html.contains("Até 6 pessoas"))
+        assertTrue(html.contains("Membros ilimitados"))
+        assertTrue(html.contains("Inteligência adaptativa"))
+        assertTrue(html.contains("Relatórios avançados"))
+    }
+
+    @Test
+    fun androidV026KeepsAdaptiveLearningScopedToTheAuthenticatedUserAndFamily() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("eq('usuario_id',S.user.id)"))
+        assertTrue(html.contains("eq('familia_id',S.fam.id)"))
+        assertTrue(html.contains("S.user?.id"))
+        assertTrue(html.contains("S.fam?.id"))
+    }
+
 }
