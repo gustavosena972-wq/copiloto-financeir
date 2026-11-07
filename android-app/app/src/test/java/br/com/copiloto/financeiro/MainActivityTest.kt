@@ -128,8 +128,8 @@ class MainActivityTest {
     @Test
     fun releaseVersionMatchesTheAuditedAndroidPackage() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 11"))
-        assertTrue(gradle.contains("versionName = \"1.0.9\""))
+        assertTrue(gradle.contains("versionCode = 12"))
+        assertTrue(gradle.contains("versionName = \"1.0.11\""))
     }
 
     @Test
@@ -202,6 +202,20 @@ class MainActivityTest {
         assertTrue(!isAllowedBillingCommand("purchase", "unknown_product"))
         assertTrue(!isAllowedBillingCommand("deleteAccount", null))
         assertTrue(!isAllowedBillingCommand("queryProducts", "copiloto_pro_30d"))
+    }
+
+    @Test
+    fun bundledFinanceUiUsesFigmaFamilyCommandCenterVisualLanguage() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-figma-family-ui"))
+        assertTrue(html.contains("cf-command-hero"))
+        assertTrue(html.contains("cf-command-orbit"))
+        assertTrue(html.contains("cf-command-pulse"))
+        assertTrue(html.contains("cf-command-glow"))
+        assertTrue(html.contains("--cf-figma-emerald"))
+        assertTrue(html.contains("--cf-figma-gold"))
+        assertTrue(html.contains("data-ui="figma-family-model""))
+        assertTrue(html.contains("cf-command-reveal"))
     }
 
     @Test
