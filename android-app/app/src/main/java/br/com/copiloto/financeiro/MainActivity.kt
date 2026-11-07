@@ -2,12 +2,16 @@ package br.com.copiloto.financeiro
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import android.webkit.WebViewClient
+import androidx.webkit.WebViewAssetLoader
+import androidx.webkit.WebViewClientCompat
 import org.json.JSONArray
 import org.json.JSONObject
 import com.android.billingclient.api.BillingClient
@@ -23,9 +27,8 @@ import com.android.billingclient.api.QueryPurchasesParams
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     private lateinit var webView: WebView
+    private lateinit var assetLoader: WebViewAssetLoader
     private lateinit var billingClient: BillingClient
-    private val allowedHost = "gustavosena972-wq.github.io"
-    private val allowedPathPrefix = "/copiloto-financeir/"
     private val productIds = listOf(
         "copiloto_pro_30d",
         "copiloto_max_30d",
@@ -46,39 +49,66 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             .enableAutoServiceReconnection()
             .build()
 
+        assetLoader = WebViewAssetLoader.Builder()
+            .addPathHandler(
+                AppContentPolicy.ASSET_PATH_PREFIX,
+                WebViewAssetLoader.AssetsPathHandler(this)
+            )
+            .build()
+
         webView = WebView(this)
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = false
         webView.settings.allowContentAccess = false
+        webView.settings.javaScriptCanOpenWindowsAutomatically = false
+        webView.settings.setSupportMultipleWindows(false)
         webView.webChromeClient = WebChromeClient()
         webView.addJavascriptInterface(PlayBillingBridge(), "CopilotoPlayBilling")
-        webView.webViewClient = object : WebViewClient() {
+        webView.webViewClient = object : WebViewClientCompat() {
+            override fun shouldInterceptRequest(
+                view: WebView?,
+                request: WebResourceRequest
+            ): WebResourceResponse? {
+                return assetLoader.shouldInterceptRequest(request.url)
+            }
+
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 request: WebResourceRequest?
             ): Boolean {
                 val uri = request?.url ?: return true
-                return !isTrustedAppUrl(uri.scheme, uri.host, uri.path)
+                if (isTrustedAppUrl(uri)) return false
+
+                // Links externos são abertos fora do contexto privilegiado do WebView.
+                if (
+                    request.isForMainFrame &&
+                    uri.scheme == "https" &&
+                    !uri.host.isNullOrBlank()
+                ) {
+                    runCatching { startActivity(Intent(Intent.ACTION_VIEW, uri)) }
+                }
+                return true
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                val parsed = runCatching { android.net.Uri.parse(url) }.getOrNull()
-                if (parsed != null && isTrustedAppUrl(parsed.scheme, parsed.host, parsed.path)) {
+                val uri = url?.let(Uri::parse)
+                if (uri != null && isTrustedAppUrl(uri)) {
                     dispatchToWeb("copiloto:play-bridge-ready", JSONObject().put("ready", true))
                 }
             }
         }
         setContentView(webView)
-        webView.loadUrl(BuildConfig.WEB_APP_URL)
+
+        // A interface financeira faz parte do APK/AAB; a vitrine institucional é separada.
+        webView.loadUrl(AppContentPolicy.START_URL)
 
         connectBilling()
     }
 
-    private fun isTrustedAppUrl(scheme: String?, host: String?, path: String?): Boolean {
-        return scheme == "https" && host == allowedHost &&
-            (path == allowedPathPrefix.removeSuffix("/") || path?.startsWith(allowedPathPrefix) == true)
+    private fun isTrustedAppUrl(uri: Uri): Boolean {
+        return AppContentPolicy.isTrustedUrl(uri.scheme, uri.host, uri.path)
     }
 
     private fun connectBilling() {
