@@ -63,6 +63,21 @@ class MainActivityTest {
     }
 
     @Test
+    fun bundledFinanceUiProvidesAnimatedProductScreens() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("viewAnimatedScene"))
+        assertTrue(html.contains("cf-screen-stage"))
+        assertTrue(html.contains("cf-screen-ledger"))
+        assertTrue(html.contains("cf-screen-orbit"))
+        assertTrue(html.contains("cf-screen-health"))
+        assertTrue(html.contains("cf-screen-goals"))
+        assertTrue(html.contains("cf-screen-reports"))
+        assertTrue(html.contains("cf-screen-family"))
+        assertTrue(html.contains("cf-stage-scan"))
+        assertTrue(html.contains("cf-screen-transition"))
+    }
+
+    @Test
     fun bundledFinanceUiProvidesScrollRevealGlassAndInteractiveDepthMotion() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("IntersectionObserver"))
