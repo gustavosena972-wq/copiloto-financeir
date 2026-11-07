@@ -604,14 +604,14 @@ class MainActivityTest {
         assertTrue(html.contains("Cadastrar primeira receita"))
         assertTrue(html.contains("Registrar uma despesa"))
         assertTrue(html.contains("Criar uma meta"))
-        assertTrue(html.contains("data-act="mobilefirststep""))
+        assertTrue(html.contains("data-act=\\\"mobilefirststep\\\""))
     }
 
     @Test
     fun androidV023RemovesDuplicatedMobileQuickNavigationAndKeepsBottomNavigationAsPrimary() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("function mobileNavigation()"))
-        assertTrue(html.contains("class="mobile-bottom-nav""))
+        assertTrue(html.contains("class=\\\"mobile-bottom-nav\\\""))
         assertTrue(!html.contains("v0-mobile-quick-nav-primary"))
         assertTrue(!html.contains("v0-mobile-quick-nav-grid"))
     }
