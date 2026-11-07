@@ -3,7 +3,7 @@ name: Android production release
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, fix/android-load-bundled-finance-app]
     paths:
       - "android-app/app/build.gradle.kts"
       - ".github/workflows/android-release.yml"
