@@ -4562,6 +4562,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
 <script id="cf-warm-visual-system">
 (function(){
   'use strict';
+  const sceneMotion={planilha:'ledger',ano:'orbit',checape:'health',planejamento:'future',relatorios:'data',familia:'network',inicio:'core',pagamento:'payment'};
   const labels={
     planilha:['Controle vivo','Seu dinheiro, em movimento'],
     ano:['Visão anual','O ano inteiro em uma leitura'],
@@ -4600,6 +4601,7 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     }
     const key=sceneKey();
     scene.dataset.sceneKey=key;
+    scene.dataset.sceneMotion=sceneMotion[key]||sceneMotion.inicio;
     const copy=labels[key]||labels.inicio;
     scene.querySelector('.cf-scene-caption b').textContent=copy[0];
     scene.querySelector('.cf-scene-caption span').textContent=copy[1];
