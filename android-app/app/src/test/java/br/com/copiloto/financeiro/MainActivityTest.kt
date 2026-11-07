@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MainActivityTest {
+    // 1.0.12 visual stability contract
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
@@ -128,7 +129,7 @@ class MainActivityTest {
     @Test
     fun releaseVersionMatchesTheAuditedAndroidPackage() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 12"))
+        assertTrue(gradle.contains("versionCode = 13"))
         assertTrue(gradle.contains("versionName = \"1.0.11\""))
     }
 
@@ -205,11 +206,31 @@ class MainActivityTest {
     }
 
     @Test
+    fun warmVisualObserverDoesNotContinuouslyMutateRenderedFinanceScreen() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("observe(app,{childList:true})"))
+        assertTrue(!html.contains("observe(app,{childList:true,subtree:true})"))
+    }
+
+    @Test
+    fun mobileLaunchTableUsesReadableResponsiveCellsInsteadOfClippedWideTable() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("data-label=\"Data\""))
+        assertTrue(html.contains("data-label=\"Descrição\""))
+        assertTrue(html.contains("data-label=\"Tipo\""))
+        assertTrue(html.contains("data-label=\"Categoria\""))
+        assertTrue(html.contains("data-label=\"Valor\""))
+        assertTrue(html.contains("data-label=\"Status\""))
+        assertTrue(html.contains("@media(max-width:760px)"))
+        assertTrue(html.contains(".scroll table{min-width:0"))
+    }
+
+    @Test
     fun releasePackageKeepsTheCurrentVersionAndFigmaVisualContractTogether() {
         val html = File("src/main/assets/mobile.html").readText()
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 12"))
-        assertTrue(gradle.contains("versionName = \"1.0.11\""))
+        assertTrue(gradle.contains("versionCode = 13"))
+        assertTrue(gradle.contains("versionName = \"1.0.12\""))
         assertTrue(html.contains("data-ui=\"figma-family-model\""))
         assertTrue(html.contains("cf-command-hero"))
     }
