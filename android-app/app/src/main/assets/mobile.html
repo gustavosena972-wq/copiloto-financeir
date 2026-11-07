@@ -2645,6 +2645,179 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 }
 </style>
 
+
+<style id="cf-android-v0-mobile-1-0-16">
+:root{
+  --v0-bg:#f6f5ef;
+  --v0-surface:#ffffff;
+  --v0-green:#146c43;
+  --v0-green-dark:#0e5132;
+  --v0-lime:#d8f24a;
+  --v0-ink:#17231c;
+  --v0-muted:#6b766f;
+  --v0-line:#e5e8e3;
+  --v0-soft:#eef3ee;
+}
+@media(max-width:760px){
+  html,body{background:var(--v0-bg)!important;color:var(--v0-ink)!important;overflow-x:hidden!important}
+  body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+  #app{background:var(--v0-bg)!important}
+  .app-shell{background:var(--v0-bg)!important}
+  .app-sidebar{
+    position:sticky!important;top:0!important;z-index:20!important;
+    background:rgba(255,255,255,.96)!important;color:var(--v0-ink)!important;
+    border-bottom:1px solid var(--v0-line)!important;
+    padding:13px 16px!important;box-shadow:0 2px 12px rgba(20,108,67,.05)!important;
+  }
+  .sidebar-brand strong{color:var(--v0-green)!important;font-size:16px!important;letter-spacing:.02em!important}
+  .sidebar-brand small{color:var(--v0-muted)!important}
+  .sidebar-family{background:var(--v0-soft)!important;border:1px solid #dfe7df!important;color:var(--v0-green)!important;border-radius:999px!important}
+  .sidebar-family small{color:var(--v0-muted)!important}
+  .sidebar-family strong{color:var(--v0-green)!important}
+  .app-main{background:var(--v0-bg)!important}
+  .app-topbar{
+    background:var(--v0-bg)!important;border:0!important;padding:20px 16px 8px!important;
+  }
+  .page-eyebrow,.date-line{display:none!important}
+  .page-heading h1{
+    color:var(--v0-ink)!important;font-size:25px!important;line-height:1.1!important;
+    letter-spacing:-.035em!important;margin:0!important
+  }
+  .page-heading p{color:var(--v0-muted)!important;font-size:13px!important;margin:6px 0 0!important}
+  .top-actions{gap:6px!important}
+  .notification-button{background:var(--v0-surface)!important;color:var(--v0-green)!important;border:1px solid var(--v0-line)!important;box-shadow:none!important}
+  .year-control{background:var(--v0-surface)!important;border:1px solid var(--v0-line)!important;border-radius:12px!important}
+  .year-control .utility-button,.year-control select{color:var(--v0-ink)!important;background:transparent!important;box-shadow:none!important}
+  .session-button{display:none!important}
+  .period-toolbar{
+    background:var(--v0-bg)!important;border:0!important;padding:4px 16px 10px!important;
+    overflow-x:auto!important;white-space:nowrap!important;scrollbar-width:none!important;
+  }
+  .period-toolbar::-webkit-scrollbar{display:none}
+  .period-toolbar .meses{flex-wrap:nowrap!important;margin:0!important}
+  .period-toolbar .meses button{
+    min-height:40px!important;padding:0 13px!important;border:1px solid var(--v0-line)!important;
+    background:var(--v0-surface)!important;color:var(--v0-muted)!important;border-radius:999px!important;
+    box-shadow:none!important;font-size:11px!important
+  }
+  .period-toolbar .meses button.on{
+    background:var(--v0-green)!important;color:#fff!important;border-color:var(--v0-green)!important
+  }
+  .app-content{padding:0 16px!important}
+  .v0-mobile-dashboard{width:100%!important;max-width:680px!important;margin:0 auto!important;padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
+  .mobile-guide{background:var(--v0-surface)!important;border:1px solid var(--v0-line)!important;color:var(--v0-muted)!important;border-radius:16px!important;box-shadow:none!important}
+  .mobile-guide summary{min-height:48px!important;color:var(--v0-green)!important}
+  .mobile-month-overview{
+    display:grid!important;grid-template-columns:1fr 1fr!important;gap:12px!important;margin:8px 0 16px!important
+  }
+  .mobile-month-overview .card{
+    background:var(--v0-surface)!important;border:1px solid var(--v0-line)!important;border-radius:18px!important;
+    padding:17px!important;margin:0!important;min-width:0!important;box-shadow:0 8px 24px rgba(24,54,37,.05)!important
+  }
+  .mobile-month-overview .card:first-child{order:2}
+  .mobile-month-overview .card:nth-child(2){order:3}
+  .mobile-month-overview .card:nth-child(3){
+    order:1;grid-column:1/-1;min-height:138px!important;
+    display:flex!important;flex-direction:column!important;justify-content:center!important;
+    background:var(--v0-green)!important;border-color:var(--v0-green)!important;color:#fff!important
+  }
+  .mobile-month-overview .card:nth-child(4){order:4}
+  .mobile-month-overview .card small{color:var(--v0-muted)!important;font-size:11px!important;letter-spacing:.03em!important}
+  .mobile-month-overview .card b{font-size:22px!important;color:var(--v0-ink)!important;letter-spacing:-.025em!important}
+  .mobile-month-overview .card:nth-child(3) small{color:#cde1d5!important}
+  .mobile-month-overview .card:nth-child(3) b{color:#fff!important;font-size:32px!important}
+  .mobile-month-overview .card .cf-quick-edit{margin-top:8px!important}
+  .mobile-month-overview .pos{color:var(--v0-green)!important}
+  .mobile-month-overview .neg{color:#a63f3f!important}
+  .mobile-month-overview .card:nth-child(3) .pos,
+  .mobile-month-overview .card:nth-child(3) .neg{color:#fff!important}
+  .mobile-flow{
+    background:var(--v0-surface)!important;border:1px solid var(--v0-line)!important;border-radius:18px!important;
+    padding:17px!important;box-shadow:0 8px 24px rgba(24,54,37,.04)!important
+  }
+  .mobile-flow-header b,.mobile-flow-values b{color:var(--v0-ink)!important}
+  .mobile-flow-track{background:#e9eee9!important;height:10px!important;border-radius:99px!important}
+  .mobile-flow-track .income{background:var(--v0-green)!important}
+  .mobile-flow-track .expense{background:#d8a24c!important}
+  .mobile-analysis,.mobile-actions-menu{
+    background:var(--v0-surface)!important;border:1px solid var(--v0-line)!important;border-radius:16px!important;
+    margin:12px 0!important;box-shadow:0 6px 20px rgba(24,54,37,.035)!important
+  }
+  .mobile-analysis summary,.mobile-actions-menu summary{
+    min-height:52px!important;padding:15px!important;color:var(--v0-green)!important;font-weight:700!important
+  }
+  .mobile-analysis-content{padding:0 15px 15px!important}
+  .mobile-actions-menu .bar{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:12px!important;margin:0!important}
+  .v0-mobile-action-grid button{min-height:48px!important;background:var(--v0-soft)!important;color:var(--v0-green)!important;border:1px solid #dce7de!important;box-shadow:none!important;border-radius:12px!important}
+  .v0-mobile-action-grid button.red{color:#9f3e3e!important;background:#fff5f3!important;border-color:#f0d9d5!important}
+  .mobile-add-toggle{display:block!important;margin:14px 0!important}
+  .mobile-add-toggle button{
+    width:100%!important;min-height:52px!important;border-radius:14px!important;
+    background:var(--v0-lime)!important;color:#1b281c!important;box-shadow:0 10px 24px rgba(160,183,45,.24)!important
+  }
+  .v0-mobile-transaction-list{
+    background:var(--v0-surface)!important;border:1px solid var(--v0-line)!important;border-radius:18px!important;
+    padding:16px!important;box-shadow:0 8px 24px rgba(24,54,37,.04)!important
+  }
+  .v0-mobile-section-title{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:10px!important}
+  .v0-mobile-section-title h2{color:var(--v0-ink)!important;font-size:18px!important;letter-spacing:-.02em!important}
+  .v0-mobile-section-title p{color:var(--v0-muted)!important;font-size:12px!important}
+  .v0-mobile-transaction-list .scroll{border:0!important;background:transparent!important}
+  .v0-mobile-transaction-list .mobile-entry-table{border-collapse:separate!important;border-spacing:0 8px!important}
+  .v0-mobile-transaction-list .mobile-entry-row td{padding:0!important;border:0!important}
+  .v0-mobile-transaction-list .mobile-entry-details{
+    background:#fbfcfa!important;border:1px solid var(--v0-line)!important;border-radius:14px!important;overflow:hidden!important
+  }
+  .v0-mobile-transaction-list .mobile-entry-summary{
+    min-height:64px!important;padding:12px!important;display:flex!important;align-items:center!important
+  }
+  .v0-mobile-transaction-list .mobile-entry-main strong{color:var(--v0-ink)!important;font-size:13px!important}
+  .v0-mobile-transaction-list .mobile-entry-main small{color:var(--v0-muted)!important}
+  .v0-mobile-transaction-list .mobile-entry-aside b{color:var(--v0-ink)!important;font-size:14px!important}
+  .v0-mobile-transaction-list .mobile-entry-status{background:#eef3ee!important;color:var(--v0-green)!important;border-radius:999px!important;padding:4px 7px!important}
+  .v0-mobile-transaction-list .mobile-entry-status.is-late{background:#fff0ef!important;color:#a23d3d!important}
+  .v0-mobile-transaction-list .mobile-entry-fields{background:#fff!important;border-top:1px solid var(--v0-line)!important;padding:12px!important}
+  .v0-mobile-transaction-list input,.v0-mobile-transaction-list select{
+    background:#fff!important;border:1px solid #dfe5df!important;color:var(--v0-ink)!important;border-radius:10px!important;min-height:48px!important
+  }
+  .v0-mobile-transaction-list .mobile-entry-actions{background:#fff!important;border-top:1px solid var(--v0-line)!important;padding:12px!important}
+  .mobile-bottom-nav{
+    position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:50!important;
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;
+    background:rgba(255,255,255,.97)!important;border-top:1px solid var(--v0-line)!important;
+    box-shadow:0 -10px 28px rgba(24,54,37,.08)!important
+  }
+  .mobile-nav-item{
+    min-height:52px!important;border-radius:14px!important;background:transparent!important;color:#8a948d!important;
+    box-shadow:none!important;display:grid!important;place-items:center!important;gap:2px!important
+  }
+  .mobile-nav-item svg{width:21px!important;height:21px!important;stroke:currentColor!important}
+  .mobile-nav-item.is-active{color:var(--v0-green)!important;background:var(--v0-soft)!important}
+  .mobile-nav-item.is-active span{font-weight:800!important}
+  .mobile-more-panel{
+    position:fixed!important;left:12px!important;right:12px!important;bottom:78px!important;z-index:49!important;
+    background:#fff!important;border:1px solid var(--v0-line)!important;border-radius:20px!important;
+    box-shadow:0 20px 50px rgba(19,43,29,.18)!important;padding:10px!important
+  }
+  .mobile-more-panel button{min-height:50px!important;background:#fff!important;color:var(--v0-ink)!important;border-bottom:1px solid var(--v0-line)!important;box-shadow:none!important;border-radius:12px!important}
+  .mobile-more-panel .mobile-more-signout{color:#a23d3d!important;border-bottom:0!important}
+  .v0-mobile-dashboard .sug{background:#fff!important;border:1px solid var(--v0-line)!important;border-left:4px solid var(--v0-green)!important;border-radius:14px!important;box-shadow:none!important}
+  .v0-mobile-dashboard .grid2{grid-template-columns:1fr!important}
+  .v0-mobile-dashboard .card{box-shadow:none!important}
+  .v0-mobile-dashboard .scroll{overflow-x:auto!important}
+  .v0-mobile-dashboard button,.v0-mobile-dashboard input,.v0-mobile-dashboard select{font-size:14px!important}
+}
+@media(max-width:390px){
+  .app-content{padding-left:12px!important;padding-right:12px!important}
+  .app-topbar{padding-left:12px!important;padding-right:12px!important}
+  .period-toolbar{padding-left:12px!important;padding-right:12px!important}
+  .mobile-month-overview{gap:9px!important}
+  .mobile-month-overview .card{padding:14px!important}
+  .mobile-month-overview .card:nth-child(3) b{font-size:29px!important}
+}
+</style>
+
 </head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
@@ -3093,7 +3266,7 @@ function render(){
       </header>
       <div class="period-toolbar">${meses}</div>
       ${mobileGuide(S.view)}
-      <section class="app-content">${body}${viewImport()}${viewModais()}</section>
+      <section class="app-content"><div class="v0-mobile-dashboard">${body}${viewImport()}${viewModais()}</div></section>
     </main>
     ${mobileMoreMenu()}
     ${mobileNavigation()}
@@ -3234,9 +3407,9 @@ function viewPlanilha(ed){
   const fe=S.mes.status==='fechado';
   return `${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
-  <div class="card"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
+  <div class="card v0-mobile-balance"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
   <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>${mobileFlow}<details class="mobile-analysis"><summary>Ver análise e categorias do mês</summary><div class="mobile-analysis-content">${viewGrupos()}${viewCats()}</div></details>
-  <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar">
+  <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar v0-mobile-action-grid">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
    <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
    <button class="sec" data-act="recorr" ${ed?'':'disabled'}>Gerar recorrentes</button>
@@ -3250,7 +3423,7 @@ function viewPlanilha(ed){
   ${mobileAddToggle}
   <div class="scroll desktop-transactions"><table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Tipo</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Quem</th><th></th></tr></thead>
   <tbody>${novo}${rows||'<tr><td colspan="8" class="mu" style="padding:16px">Nenhum lançamento neste mês.</td></tr>'}</tbody></table></div>
-  <section class="mobile-entry-list-wrap"><div class="mobile-list-heading"><div><h2>Movimentações</h2><p>Toque em uma linha para consultar ou editar.</p></div><span>${S.lanc.length}</span></div><div class="scroll"><table class="mobile-entry-table"><tbody>${mobileRows||'<tr class="mobile-entry-empty"><td colspan="8"><strong>Nenhum lançamento neste mês</strong><p>Comece registrando uma receita ou despesa. Depois, toque nela para editar ou acompanhar o pagamento.</p></td></tr>'}</tbody></table></div></section>`;
+  <section class="mobile-entry-list-wrap v0-mobile-transaction-list"><div class="mobile-list-heading v0-mobile-section-title"><div><h2>Movimentações</h2><p>Toque em uma linha para consultar ou editar.</p></div><span>${S.lanc.length}</span></div><div class="scroll"><table class="mobile-entry-table"><tbody>${mobileRows||'<tr class="mobile-entry-empty"><td colspan="8"><strong>Nenhum lançamento neste mês</strong><p>Comece registrando uma receita ou despesa. Depois, toque nela para editar ou acompanhar o pagamento.</p></td></tr>'}</tbody></table></div></section>`;
 }
 function viewCats(){
   const g={};S.lanc.filter(l=>l.tipo==='despesa').forEach(l=>{const c=S.cats.find(x=>x.id===l.categoria_id);const p=c&&c.parent_id?S.cats.find(x=>x.id===c.parent_id):c;const n=p?p.nome:'Sem categoria';g[n]=(g[n]||0)+Number(l.valor)});
