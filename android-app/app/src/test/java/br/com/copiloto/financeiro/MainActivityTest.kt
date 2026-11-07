@@ -610,13 +610,12 @@ class MainActivityTest {
     fun androidV023ProvidesContextualGuidanceWithoutExpandingThePrimaryNavigation() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-companion"))
-        assertTrue(html.contains("cf-companion-guide"))
-        assertTrue(html.contains("function mobileCompanionGuide"))
+        assertTrue(html.contains("cf-companion-speech"))
+        assertTrue(html.contains("function mobileCompanionSpeech"))
         assertTrue(html.contains("Planilha mensal"))
         assertTrue(html.contains("Checape"))
-        assertTrue(html.contains("Metas"))
         assertTrue(html.contains("Família"))
-        assertTrue(html.contains("aria-label=\"Abrir ajuda do Copiloto\""))
+        assertTrue(html.contains("aria-label=\"Mostrar fala do Copiloto\""))
         assertFalse(html.contains("data-v=\"ajuda\""))
     }
 
@@ -627,6 +626,7 @@ class MainActivityTest {
         assertTrue(html.contains("cf-companion-animal"))
         assertTrue(html.contains("cf-companion-tail"))
         assertTrue(html.contains("cf-companion-face"))
+        assertTrue(html.contains("cf-companion-speech"))
         assertFalse(html.contains("http://"))
         val companionMarkup=html.substringAfter("function mobileCompanionMarkup()").substringBefore("function mobileCompanionGuide()")
         assertFalse(companionMarkup.contains("http://"))
@@ -638,7 +638,8 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         val companion = html.substringAfter("<style id=\"cf-android-v0-mobile-1-0-23-companion\">").substringBefore("</style>")
         assertTrue(companion.contains("pointer-events:none"))
-        assertTrue(companion.contains("animation"))
+        assertTrue(companion.contains("min(280px,calc(100vw - 104px))"))
+        assertTrue(companion.contains("prefers-reduced-motion:reduce"))
         assertFalse(companion.contains("backdrop-filter:blur"))
     }
 
