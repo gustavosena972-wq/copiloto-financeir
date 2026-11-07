@@ -542,3 +542,39 @@ class MainActivityTest {
         assertTrue(gradle.contains("versionName = \"1.0.19\""))
     }
 
+
+    @Test
+    fun androidV020LoadsCriticalMonthDataBeforeSecondaryAnnualAggregates() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("async function loadMes(rd=true,refreshAggregates=true)"))
+        assertTrue(html.contains("const[l,s]=await Promise.all(["))
+        assertTrue(html.contains("if(rd)render();"))
+        assertTrue(html.contains("if(refreshAggregates)"))
+    }
+
+    @Test
+    fun androidV020ReusesAnnualAggregatesWhenSwitchingMonthsInTheSameYear() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("S._aggregateYearId"))
+        assertTrue(html.contains("const refreshAggregates=!S._aggregateYearId||S._aggregateYearId!==S.ano.id;"))
+        assertTrue(html.contains("await loadMes(true,refreshAggregates);"))
+        assertTrue(html.contains("else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes(true,false)}"))
+    }
+
+    @Test
+    fun androidV020KeepsAnnualAndCardDataRefreshableAfterFinancialMutations() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("async function loadMes(rd=true,refreshAggregates=true)"))
+        assertTrue(html.contains("if(refreshAggregates){"))
+        assertTrue(html.contains("S.resumo=rs;S.meta=mc;S._aggregateYearId=S.ano.id"))
+        assertTrue(html.contains("await loadMes()"))
+    }
+
+    @Test
+    fun releaseVersionAdvancesToThePerformanceIteration() {
+        val gradle = File("build.gradle.kts").readText()
+        assertTrue(gradle.contains("versionCode = 21"))
+        assertTrue(gradle.contains("versionName = \"1.0.20\""))
+    }
+
+}
