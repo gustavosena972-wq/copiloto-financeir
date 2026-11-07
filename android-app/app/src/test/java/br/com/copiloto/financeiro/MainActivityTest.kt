@@ -561,24 +561,17 @@ class MainActivityTest {
     }
 
     @Test
-    fun androidV022AddsAnIntelligentFinancialBriefingToTheMobileWorkspace() {
+    fun androidV025ReplacesArtificialFinancialScoringWithContextualRealData() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("cf-smart-briefing"))
-        assertTrue(html.contains("function viewSmartBriefing()"))
-        assertTrue(html.contains("safeToSpend"))
-        assertTrue(html.contains("smartHealthScore"))
-        assertTrue(html.contains("Próximo passo"))
-        assertTrue(html.contains("Análise inteligente"))
-    }
-
-    @Test
-    fun androidV022AddsSmartSignalsForBillsGoalsAndSpendingWithoutInventingData() {
-        val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("Contas próximas"))
-        assertTrue(html.contains("Metas"))
-        assertTrue(html.contains("maior categoria"))
-        assertTrue(html.contains("Sem dados suficientes"))
+        assertTrue(html.contains("function mobileSmartContext()"))
+        assertTrue(html.contains("cf-mobile-insight"))
+        assertTrue(html.contains("contas atrasadas"))
+        assertTrue(html.contains("próximos vencimentos"))
         assertTrue(html.contains("smartgo"))
+        assertFalse(html.contains("smartHealthScore"))
+        assertFalse(html.contains("safeToSpend"))
+        assertFalse(html.contains("Pode gastar*"))
+        assertFalse(html.contains("Indicador de organização"))
     }
 
     @Test
@@ -693,7 +686,7 @@ class MainActivityTest {
     fun androidV025UsesRealFinancialContextWithoutArtificialScoresOrSpendLimits() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("function mobileSmartContext()"))
-        assertTrue(html.contains("cf-smart-context"))
+        assertTrue(html.contains("cf-mobile-insight"))
         assertTrue(html.contains("Contas atrasadas"))
         assertTrue(html.contains("Próximos vencimentos"))
         assertFalse(html.contains("smartHealthScore"))
