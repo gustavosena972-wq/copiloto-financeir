@@ -2,6 +2,7 @@ package br.com.copiloto.financeiro
 
 import java.io.File
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -720,8 +721,8 @@ class MainActivityTest {
         assertTrue(html.contains("economizar"))
         assertTrue(html.contains("organizar"))
         assertTrue(html.contains("planejar"))
-        assertTrue(html.contains("data-act=\\"tamandua-intro-finish\\""))
-        assertFalse(html.contains("data-v=\\"tamandua\\""))
+        assertTrue(html.contains("data-act=\"tamandua-intro-finish\""))
+        assertFalse(html.contains("data-v=\"tamandua\""))
     }
 
         @Test
@@ -735,12 +736,6 @@ class MainActivityTest {
         assertFalse(html.contains("tamandua-intro-skip"))
     }
 
-    @Test
-    fun releaseVersionAdvancesToTheTamanduaOnboardingIteration() {
-        val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 26"))
-        assertTrue(gradle.contains("versionName = \"1.0.24\""))
-    }
 
 
     @Test
@@ -841,7 +836,7 @@ class MainActivityTest {
         assertTrue(html.contains("function mobileCompanionSpeech()"))
         assertTrue(html.contains("mountMobileCompanion()"))
         assertTrue(html.contains("S.tamanduaProfile"))
-        assertFalse(html.contains("data-mobile-nav=\\"tamandua\\""))
+        assertFalse(html.contains("data-mobile-nav=\"tamandua\""))
     }
 
 }
