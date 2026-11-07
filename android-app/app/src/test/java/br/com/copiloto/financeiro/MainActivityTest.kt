@@ -605,4 +605,15 @@ class MainActivityTest {
         assertTrue(html.contains("Preparando seu financeiro"))
     }
 
+    @Test
+    fun androidV022UsesStandardFinancialInsightsInsteadOfArtificialScoresOrSpendLimits() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("Insights do mês"))
+        assertTrue(html.contains("Próximo passo"))
+        assertTrue(!html.contains("smartHealthScore"))
+        assertTrue(!html.contains("safeToSpend"))
+        assertTrue(!html.contains("Saúde financeira forte"))
+        assertTrue(!html.contains("Pode gastar"))
+    }
+
 }
