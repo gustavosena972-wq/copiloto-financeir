@@ -69,18 +69,7 @@ jobs:
           APK="app/build/outputs/apk/release/app-release.apk"
           test -s "$BUNDLE"
           test -s "$APK"
-          grep -Eq '^[[:space:]]*minSdk[[:space:]]*=[[:space:]]*24[[:space:]]*
-
-      - name: Upload production AAB and APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: copiloto-financeiro-play-production
-          path: |
-            android-app/app/build/outputs/bundle/release/app-release.aab
-            android-app/app/build/outputs/apk/release/app-release.apk
-          if-no-files-found: error
-          retention-days: 30
- app/build.gradle.kts
+          grep -Eq '^[[:space:]]*minSdk[[:space:]]*=[[:space:]]*24[[:space:]]*$' app/build.gradle.kts
           jarsigner -verify -verbose -certs "$BUNDLE"
           jarsigner -verify -verbose -certs "$APK"
           keytool -printcert -jarfile "$BUNDLE"
