@@ -3008,6 +3008,15 @@ function mobileMoreMenu(){
   return '<div class="mobile-more-panel" '+(S.mobileMore?'':'hidden')+'><div class="mobile-more-heading"><b>Mais ferramentas</b><button type="button" data-act="mobilemore" aria-label="Fechar menu">Fechar</button></div>'+links+'</div>';
 }
 
+window.__copilotoHandleAndroidBack=()=>{
+  if(S.mobileMore){S.mobileMore=false;render();return true}
+  if(S.mobileAddOpen){S.mobileAddOpen=false;render();return true}
+  const openDetails=[...document.querySelectorAll('.app-main details[open]')];
+  if(openDetails.length){openDetails[openDetails.length-1].open=false;return true}
+  if(S.view!=='planilha'){S.view='planilha';S.adm=null;render();return true}
+  return false;
+};
+
 /* ---------- app ---------- */
 function render(){
   if(S.view==='admin'&&!S.admin){S.view='planilha';S.adm=null;S.admPend=0;}
