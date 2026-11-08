@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { buildTamanduaInstructions, buildTamanduaMemoryUpdates, normalizeBotInput, trimModelOutput } from "./bot-core.ts";
+import { buildTamanduaInstructions, buildTamanduaMemoryKey, buildTamanduaMemoryUpdates, normalizeBotInput, trimModelOutput } from "./bot-core.ts";
+import { getTamanduaMemory, setTamanduaMemory } from "./redis.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://gustavosena972-wq.github.io",
@@ -126,9 +127,23 @@ Deno.serve(async (request) => {
       .join(" — ")
   );
 
+  let cachedMemory: Record<string, unknown> | null = null;
+  try {
+    cachedMemory = await getTamanduaMemory(
+      buildTamanduaMemoryKey(member.familia_id, user.id),
+    );
+  } catch (error) {
+    console.error("Tamanduá Redis read error", error instanceof Error ? error.message : error);
+  }
+
+  const memoryFromDatabase = (learnings ?? []).map((item) => ({ key: item.chave, value: item.valor }));
+  const memoryFromRedis = cachedMemory
+    ? Object.entries(cachedMemory).map(([key, value]) => ({ key, value }))
+    : [];
+
   const instructions = buildTamanduaInstructions({
     knowledge: knowledgeText,
-    learnings: (learnings ?? []).map((item) => ({ key: item.chave, value: item.valor })),
+    learnings: [...memoryFromDatabase, ...memoryFromRedis].slice(0, 16),
     history: (historyRows ?? [])
       .slice()
       .reverse()
@@ -188,6 +203,19 @@ Deno.serve(async (request) => {
 
     if (memoryError) {
       console.error("Tamanduá memory persistence error", memoryError.message);
+    } else {
+      const redisMemory = Object.fromEntries(
+        memoryUpdates.map((item) => [item.key, item.value]),
+      );
+      try {
+        await setTamanduaMemory(
+          buildTamanduaMemoryKey(member.familia_id, user.id),
+          redisMemory,
+          86400,
+        );
+      } catch (error) {
+        console.error("Tamanduá Redis write error", error instanceof Error ? error.message : error);
+      }
     }
   }
 
