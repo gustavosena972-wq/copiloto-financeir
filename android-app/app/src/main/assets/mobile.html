@@ -3358,7 +3358,7 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 @keyframes cf-tamandua-proactive-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(max-width:640px){.cf-tamandua-proactive{margin:0 0 10px;padding:12px;border-radius:16px}.cf-tamandua-proactive-actions{display:grid;grid-template-columns:1fr}.cf-tamandua-proactive-action{width:100%}}
 @media(prefers-reduced-motion:reduce){.cf-tamandua-proactive{animation:none}}
-.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style></head>
+.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"><div class="cf-mobile-startup" role="status" aria-live="polite"><div class="cf-mobile-startup-mark">CF</div><div><b>Copiloto Financeiro</b><span>Preparando seu financeiro…</span></div></div></div>
 <div id="toast"></div>
@@ -3464,22 +3464,9 @@ function tamanduaIntroCompleted(){
   if(!introKey)return false;
   try{return localStorage.getItem(introKey)==='1'}catch(e){return false}
 }
-function tamanduaCharacterSvg(){
-  return '<svg viewBox="0 0 180 220" aria-hidden="true">'+
-    '<path d="M124 158c28 8 39 23 31 38-6 12-23 10-28-2" fill="none" stroke="#9b6a38" stroke-width="13" stroke-linecap="round"/>'+
-    '<path d="M38 92c0-39 25-65 61-65 32 0 57 22 57 53 0 34-25 56-58 56H57c-22 0-37-15-37-34 0-16 7-27 18-36z" fill="#b9783f"/>'+
-    '<path d="M69 36c-17 14-24 31-22 50 2 21 14 34 31 43-27 5-49-10-49-34 0-31 19-54 40-59z" fill="#8f5c34" opacity=".72"/>'+
-    '<path d="M115 84c25 0 43 11 43 27s-17 26-43 26c-20 0-33-10-33-26s13-27 33-27z" fill="#d89d61"/>'+
-    '<circle cx="128" cy="99" r="4" fill="#1e281f"/><circle cx="154" cy="108" r="2.8" fill="#1e281f"/>'+
-    '<path d="M142 118c7 2 10 6 10 11" fill="none" stroke="#6e4325" stroke-width="3" stroke-linecap="round"/>'+
-    '<path d="M69 139c-9 16-7 28 3 37M100 142c-6 17-3 28 8 36" fill="none" stroke="#744b2b" stroke-width="9" stroke-linecap="round"/>'+
-    '<path d="M54 145c15 3 32 3 50-1l10 32H43z" fill="#173b2a"/>'+
-    '<path d="M75 147l17 4-9 22-12-7z" fill="#d8f24a" opacity=".95"/>'+
-    '<path d="M105 148l17-5 6 20-14 8z" fill="#2f7c59"/>'+
-    '<path d="M72 177h52" stroke="#d9e8d7" stroke-width="3" stroke-linecap="round"/>'+
-    '<path d="M87 181v20M110 181v20" stroke="#173b2a" stroke-width="10" stroke-linecap="round"/>'+
-    '<path d="M82 201h13M105 201h13" stroke="#9b6a38" stroke-width="5" stroke-linecap="round"/>'+
-  '</svg>';
+function tamanduaCharacterSvg(plan=S.fam?.plano||'pro'){
+  const tier=['pro','max','ultra'].includes(plan)?plan:'pro';
+  return '<span class="cf-mascot cf-mascot-'+tier+'" role="img" aria-label="Tamanduá, seu companheiro financeiro no plano '+tier+'"></span>';
 }
 function tamanduaIntroMarkup(step=0){
   if(step===0){
@@ -3772,7 +3759,7 @@ function renderAuth(){
     <section class="landing-plans-section" id="landing-plans" aria-labelledby="landing-plans-title">
       <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Uma assinatura por família. Os membros convidados não precisam contratar outro plano.</p></div>
       <div class="landing-plan-grid">
-        <article class="landing-plan-card">
+        <article class="landing-plan-card"><div class="cf-plan-character">${tamanduaCharacterSvg('pro')}</div>
           <div class="landing-plan-top"><span class="landing-plan-label">CONTROLE FINANCEIRO</span><h3>Pro</h3><p>Para organizar as finanças do dia a dia.</p></div>
           <div class="landing-price"><strong>${precoPro}</strong><span>/ 30 dias</span></div>
           <div class="landing-limit">Até 2 pessoas na família</div>
@@ -3790,7 +3777,7 @@ function renderAuth(){
           <div class="landing-plan-status current">Disponível</div>
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="pro">Escolher Pro <span>↗</span></button>
         </article>
-        <article class="landing-plan-card recommended">
+        <article class="landing-plan-card recommended"><div class="cf-plan-character">${tamanduaCharacterSvg('max')}</div>
           <div class="landing-ribbon">FAMÍLIA AMPLIADA</div>
           <div class="landing-plan-top"><span class="landing-plan-label">FAMÍLIA AMPLIADA</span><h3>Max</h3><p>Para famílias que precisam organizar as finanças com mais pessoas.</p></div>
           <div class="landing-price"><strong>${precoMax}</strong><span>/ 30 dias</span></div>
@@ -3806,7 +3793,7 @@ function renderAuth(){
           <div class="landing-plan-status current">Disponível</div>
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="max">Escolher Max <span>↗</span></button>
         </article>
-        <article class="landing-plan-card ultra">
+        <article class="landing-plan-card ultra"><div class="cf-plan-character">${tamanduaCharacterSvg('ultra')}</div>
           <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO AVANÇADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e espaços familiares já vinculados à sua conta.</p></div>
           <div class="landing-price"><strong>${precoUltra}</strong><span>/ 30 dias</span></div>
           <div class="landing-limit">Ferramentas avançadas de gestão financeira</div>
@@ -3929,17 +3916,11 @@ function mobileGuide(view){
   return '<details class="mobile-guide"><summary aria-controls="mobile-guide-content"><span class="mobile-guide-mark" aria-hidden="true">?</span><span class="mobile-guide-copy"><b>'+g.title+'</b><small>'+g.hint+'</small></span><span class="mobile-guide-action">Passo a passo</span></summary><div class="mobile-guide-content" id="mobile-guide-content"><p>'+g.intro+'</p><ol>'+steps+'</ol></div></details>';
 }
 function mobileNavigation(){
-  const activeMore=['família','relatorios','admin'].includes(S.view);
-  return '<nav class="mobile-bottom-nav" aria-label="Navegação principal do aplicativo">'+
-    '<button type="button" class="mobile-nav-item '+(S.view==='planilha'?'is-active':'')+'" data-act="view" data-v="planilha" data-mobile-nav="launches" aria-label="Abrir lançamentos" '+(S.view==='planilha'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5"/></svg><span>Lanç.</span></button>'+
-    '<button type="button" class="mobile-nav-item '+(S.view==='ano'?'is-active':'')+'" data-act="view" data-v="ano" data-mobile-nav="year" aria-label="Abrir visão do ano" '+(S.view==='ano'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17M7 15l4-4 3 2 5-7"/></svg><span>Ano</span></button>'+
-    '<button type="button" class="mobile-nav-item '+(S.view==='checape'?'is-active':'')+'" data-act="view" data-v="checape" data-mobile-nav="checkup" aria-label="Abrir checape financeiro" '+(S.view==='checape'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 4.6-3 8-8 10-5-2-8-5.4-8-10V6zM8.5 12l2.2 2.2 4.8-5"/></svg><span>Checape</span></button>'+
-    '<button type="button" class="mobile-nav-item '+(S.view==='plan'?'is-active':'')+'" data-act="view" data-v="plan" data-mobile-nav="planning" aria-label="Abrir planejamento" '+(S.view==='plan'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 2v3M22 12h-3"/></svg><span>Metas</span></button>'+
-    '<button type="button" class="mobile-nav-item '+(activeMore?'is-active':'')+'" data-act="mobilemore" data-mobile-nav="more" aria-label="Mais ferramentas" aria-expanded="'+(S.mobileMore?'true':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg><span>Mais</span></button>'+
-    '</nav>';
+ const items=[['inicio','Início','M3 10 12 3l9 7v11h-6v-7H9v7H3z'],['planilha','Planilha','M5 4h14v16H5zM8 8h8M8 12h8M8 16h5'],['tamandua','Tamanduá','M4 4h16v12H9l-5 4zM8 8h8M8 12h5'],['plan','Metas','M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M12 8v8M8 12h8']];
+ return '<nav class="mobile-bottom-nav" aria-label="Navegação principal do aplicativo">'+items.map(([v,label,path])=>'<button type="button" class="mobile-nav-item '+(S.view===v?'is-active':'')+'" data-act="view" data-v="'+v+'" aria-label="Abrir '+label+'" '+(S.view===v?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+path+'"/></svg><span>'+label+'</span></button>').join('')+'<button type="button" class="mobile-nav-item" data-act="mobilemore" aria-label="Mais ferramentas" aria-expanded="'+!!S.mobileMore+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h2M11 12h2M17 12h2"/></svg><span>Mais</span></button></nav>';
 }
 function mobileMoreMenu(){
-  let links='<button type="button" data-act="view" data-v="família"><span>Família e ajustes</span><span aria-hidden="true">›</span></button>';
+  let links='<button type="button" data-act="view" data-v="checape">Checape financeiro</button><button type="button" data-act="view" data-v="ano">Visão do ano</button><button type="button" data-act="view" data-v="família"><span>Família e ajustes</span><span aria-hidden="true">›</span></button>';
   if(planoTemRecurso('relatorios'))links+='<button type="button" data-act="view" data-v="relatorios"><span>Relatórios financeiros</span><span aria-hidden="true">›</span></button>';
   if(S.admin)links+='<button type="button" data-act="view" data-v="admin"><span>Administração</span><span aria-hidden="true">›</span></button>';
   links+='<button type="button" class="mobile-more-signout" data-act="sair"><span>Sair da conta</span><span aria-hidden="true">↗</span></button>';
@@ -3970,13 +3951,15 @@ function render(){
   const TL={planilha:'Lançamentos',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
   if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
   const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
-  const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('planilha','Planilha mensal','▦')}${navItem('ano','Visão do ano','▤')}</section>
+  const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('inicio','Início','⌂')}${navItem('planilha','Planilha mensal','▦')}${navItem('tamandua','Tamanduá','◎')}${navItem('ano','Visão do ano','▤')}</section>
     <section class="nav-section"><span class="nav-section-title">ANÁLISE E PLANEJAMENTO</span>${navItem('checape','Checape','◈')}${navItem('plan','Planejamento','◎')}${ultra?navItem('relatorios','Relatórios','▥'):''}</section>
     <section class="nav-section"><span class="nav-section-title">FAMÍLIA</span>${navItem('família','Família e ajustes','♧')}</section>
     ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   const info={
-    planilha:['Lançamentos do mês','Veja o saldo, registre entradas e despesas e acompanhe cada pagamento.'],
+    inicio:['Vamos cuidar do seu mês.','Um passo de cada vez, com sua família.'],
+    tamandua:['Tamanduá','Um espaço para conversar e cuidar das suas finanças.'],
+    planilha:['Sua planilha','Consulte, edite, importe e exporte seus lançamentos.'],
     ano:['Visão do ano','Acompanhe os resultados financeiros e compare os meses do ano.'],
     checape:['Checape financeiro','Revise as sugestões geradas a partir dos lançamentos do mês.'],
     plan:['Planejamento financeiro','Organize metas, dívidas e patrimônio em um só lugar.'],
@@ -3987,9 +3970,9 @@ function render(){
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
   const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
-  body=mobileTamanduaProactiveCard()+(S.view==='planilha'?mobileSmartContext()+viewPlanilha(ed):S.view==='ano'?viewAno():S.view==='checape'?viewChecape(ed):S.view==='plan'?viewPlan():S.view==='relatorios'&&planoTemRecurso('relatorios')?viewRelatorios():S.view==='admin'?viewAdmin()+viewConfig():viewFamilia()+viewCats2()+viewConta());
+  body=(S.view==='inicio'?mobileSmartContext()+`<details class="mobile-analysis"><summary>Análise do mês</summary>${viewGrupos()}${viewCats()}</details><button class="sec" data-act="view" data-v="planilha">Abrir planilha do mês</button>`:S.view==='tamandua'?`<section class="cf-chat-destination" aria-label="Conversa com o Tamanduá"><h2>Seu Tamanduá</h2><p>Converse sobre as finanças da sua família. Seu histórico e sua memória ficam neste espaço.</p></section>`:S.view==='planilha'?viewPlanilha(ed):S.view==='ano'?viewAno():S.view==='checape'?viewChecape(ed):S.view==='plan'?viewPlan():S.view==='relatorios'&&planoTemRecurso('relatorios')?viewRelatorios():S.view==='admin'?viewAdmin()+viewConfig():viewFamilia()+viewCats2()+viewConta());
   const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
-  $('#app').innerHTML=`<div class="app-shell">
+  $('#app').innerHTML=`<div class="app-shell" data-current-view="${esc(S.view)}">
     <aside class="app-sidebar" aria-label="Navegação principal">
       <div class="sidebar-head">
         <div class="sidebar-brand">${LOGO}<div><strong>Copiloto</strong><small>FINANCEIRO</small></div></div>
@@ -4020,7 +4003,7 @@ function render(){
         </div>
       </header>
       <div class="period-toolbar">${meses}</div>
-      ${mobileGuide(S.view)}
+      ${S.view==='planilha'||S.view==='tamandua'||S.view==='inicio'?'':mobileGuide(S.view)}
       <section class="v0-mobile-quick-nav" aria-label="Áreas do Copiloto"><button type="button" class="v0-mobile-quick-nav-primary" data-act="view" data-v="planilha"><strong>Planilha mensal</strong><small>Lançamentos, receitas, despesas e saldo</small></button><div class="v0-mobile-quick-nav-grid"><button type="button" class="v0-mobile-quick-nav-item ${S.view==='ano'?'is-current':''}" data-act="view" data-v="ano"><span class="nav-copy"><strong>Visão do ano</strong><small>Resultados dos meses</small></span><span class="nav-arrow">›</span></button><button type="button" class="v0-mobile-quick-nav-item ${S.view==='checape'?'is-current':''}" data-act="view" data-v="checape"><span class="nav-copy"><strong>Checape</strong><small>Análise financeira</small></span><span class="nav-arrow">›</span></button><button type="button" class="v0-mobile-quick-nav-item ${S.view==='plan'?'is-current':''}" data-act="view" data-v="plan"><span class="nav-copy"><strong>Planejamento</strong><small>Metas e patrimônio</small></span><span class="nav-arrow">›</span></button><button type="button" class="v0-mobile-quick-nav-item ${S.view==='família'?'is-current':''}" data-act="view" data-v="família"><span class="nav-copy"><strong>Família</strong><small>Membros e ajustes</small></span><span class="nav-arrow">›</span></button>${planoTemRecurso('relatorios')?`<button type="button" class="v0-mobile-quick-nav-item" data-act="view" data-v="relatorios"><span class="nav-copy"><strong>Relatórios</strong><small>Indicadores e tendências</small></span><span class="nav-arrow">›</span></button>`:''}${S.admin?`<button type="button" class="v0-mobile-quick-nav-item" data-act="view" data-v="admin"><span class="nav-copy"><strong>Administração</strong><small>Controle do serviço</small></span><span class="nav-arrow">›</span></button>`:''}</div></section>
       <section class="app-content"><div class="v0-mobile-dashboard">${body}${viewImport()}${viewModais()}</div></section>
     </main>
@@ -4117,60 +4100,28 @@ const stOpts=sel=>['pendente','pago','atrasado'].map(s=>`<option ${s===sel?'sele
 const tpOpts=sel=>['despesa','receita'].map(s=>`<option ${s===sel?'selected':''}>${s}</option>`).join('');
 
 function quickEditButton(kind){return canEdit()&&mesAberto()?`<button type="button" class="sec chip cf-quick-edit" data-act="quickedit" data-kind="${kind}">Editar valores</button>`:''}
+function localFinancialDate(){
+  return new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+}
+function monthlyFinancialSnapshot(){
+  return CFMoney.summarize((S.lanc||[]).map(row=>({...row,categoria:S.cats?.find(c=>c.id===row.categoria_id)?.nome||'Sem categoria'})),localFinancialDate());
+}
 function mobileSmartContext(){
-  const lanc=Array.isArray(S.lanc)?S.lanc:[];
-  const hoje=new Date();
-  const hojeIso=hoje.toISOString().slice(0,10);
-  const limiteIso=new Date(hoje.getTime()+7*86400000).toISOString().slice(0,10);
-  const receitas=lanc.filter(x=>x.tipo==='receita').reduce((a,x)=>a+Number(x.valor||0),0);
-  const despesas=lanc.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+Number(x.valor||0),0);
-  const abertas=lanc.filter(x=>x.tipo==='despesa'&&x.status!=='pago');
-  const atrasadas=abertas.filter(x=>x.status==='atrasado'||(x.data_vencimento&&x.data_vencimento<hojeIso));
-  const proximas=abertas.filter(x=>x.data_vencimento&&x.data_vencimento>=hojeIso&&x.data_vencimento<=limiteIso)
-    .sort((a,b)=>String(a.data_vencimento).localeCompare(String(b.data_vencimento)));
-  const categorias={};
-  lanc.filter(x=>x.tipo==='despesa').forEach(x=>{
-    const categoria=S.cats.find(c=>c.id===x.categoria_id);
-    const nome=categoria?categoria.nome:'Sem categoria';
-    categorias[nome]=(categorias[nome]||0)+Number(x.valor||0);
-  });
-  const maior=Object.entries(categorias).sort((a,b)=>b[1]-a[1])[0];
-  let next;
-  if(atrasadas.length){
-    next={title:'Revise as contas atrasadas',desc:atrasadas.length+' lançamento(s) precisam de atenção antes de planejar novos gastos.',go:'planilha'};
-  }else if(proximas.length){
-    next={title:'Confira os próximos vencimentos',desc:proximas.length+' lançamento(s) vencem nos próximos 7 dias.',go:'planilha'};
-  }else if(!lanc.length){
-    next={title:'Comece pelo primeiro lançamento',desc:'Registre uma receita ou despesa para o Copiloto começar a organizar seu mês.',go:'planilha'};
-  }else if(despesas>receitas&&receitas>0){
-    next={title:'Compare entradas e saídas',desc:'As despesas registradas estão acima das receitas deste mês. Vale revisar os lançamentos.',go:'checape'};
-  }else{
-    next={title:'Continue acompanhando',desc:'Não há alertas de vencimento nos próximos 7 dias. Use o Planejamento quando quiser organizar objetivos.',go:'plan'};
-  }
-  const saldo=receitas-despesas;
-  const metric=(label,value,sub,cls)=>'<div class="cf-mobile-balance-metric"><small>'+label+'</small><b class="'+(cls||'')+'">'+value+'</b><span>'+sub+'</span></div>';
-  const status=atrasadas.length?'Atenção em contas atrasadas':proximas.length?'Próximos vencimentos':'Mês em acompanhamento';
-  return '<section class="cf-mobile-v025" aria-label="Resumo inteligente do mês">'+
-    '<div class="cf-mobile-balance">'+
-      '<div class="cf-mobile-balance-head"><div><span class="cf-mobile-kicker">RESUMO DO MÊS</span><b>'+esc(status)+'</b></div><span class="cf-mobile-count">'+lanc.length+' movimentações</span></div>'+
-      '<div class="cf-mobile-balance-value"><small>Saldo registrado</small><strong class="'+(saldo>=0?'pos':'neg')+'">'+brl(saldo)+'</strong></div>'+
-      '<div class="cf-mobile-balance-metrics">'+
-        metric('Receitas',brl(receitas),'registradas','pos')+
-        metric('Despesas',brl(despesas),'registradas','neg')+
-        metric('Em aberto',String(abertas.length),'lançamento(s)',abertas.length?'neg':'pos')+
-      '</div>'+
-    '</div>'+
-    '<div class="cf-mobile-command" aria-label="Ações rápidas">'+
-      '<button type="button" data-act="mobileadd" '+(canEdit()&&mesAberto()?'':'disabled')+'><span>＋</span><b>Adicionar</b><small>lançamento</small></button>'+
-      '<button type="button" data-act="view" data-v="checape"><span>✓</span><b>Checape</b><small>revisar mês</small></button>'+
-      '<button type="button" data-act="mobilemore"><span>⋯</span><b>Mais</b><small>ferramentas</small></button>'+
-    '</div>'+
-    '<div class="cf-mobile-insight">'+
-      '<div class="cf-mobile-insight-copy"><span class="cf-mobile-kicker">PRÓXIMO PASSO</span><b>'+esc(next.title)+'</b><p>'+esc(next.desc)+'</p></div>'+
-      '<button type="button" class="cf-mobile-insight-action" data-act="smartgo" data-v="'+next.go+'">Abrir →</button>'+
-    '</div>'+
-    (maior?'<div class="cf-mobile-pattern"><span>Maior categoria</span><b>'+esc(maior[0])+'</b><small>'+brl(maior[1])+' em despesas registradas</small></div>':'')+
-  '</section>';
+  const d=monthlyFinancialSnapshot(), format=value=>brl(value/100);
+  return '<section class="cf-mobile-v025 cf-month-desk" aria-label="Resumo inteligente do mês">'+
+    '<div class="cf-month-title"><h2>Seu mês, com clareza.</h2><span>'+d.rows.length+' movimentações</span></div>'+
+    '<dl class="cf-money-ledger"><div><dt>Receitas registradas</dt><dd>'+format(d.income)+'</dd></div>'+
+    '<div><dt>Despesas registradas</dt><dd>'+format(d.expense)+'</dd></div>'+
+    '<div class="cf-ledger-result"><dt>Resultado do mês</dt><dd class="'+(d.competence<0?'neg':'')+'">'+format(d.competence)+'</dd></div></dl>'+
+    '<div class="cf-cash-notes"><span>Recebido menos pago <b>'+format(d.cash)+'</b></span><span>Contas a pagar <b>'+format(d.payable)+'</b></span></div>'+
+    '<p class="cf-amount-note">Valores dos lançamentos deste período. Não representam o saldo da sua conta bancária.</p>'+
+    (d.ignored?'<p role="status" class="cf-validation-note">'+d.ignored+' registro(s) precisam de revisão para entrar no cálculo.</p>':'')+
+    '<div class="cf-mobile-command cf-month-actions" aria-label="Ações rápidas">'+
+    '<button type="button" data-act="mobileadd" '+(canEdit()&&mesAberto()?'':'disabled')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><b>Adicionar</b></button>'+
+    '<button type="button" data-act="view" data-v="checape"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><b>Checape</b></button>'+
+    '<button type="button" data-act="mobilemore"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"/></svg><b>Mais</b></button></div>'+
+    (!d.rows.length?'<p class="cf-empty-welcome">Vamos começar pelo primeiro lançamento. O Tamanduá acompanha você a partir dos seus dados.</p>':'')+
+    '</section>';
 }
 function viewPlanilha(ed){
   ed=!!ed&&S.mes.status==='aberto';
@@ -4216,10 +4167,10 @@ function viewPlanilha(ed){
    <td data-label="Responsável"><select aria-label="Responsável" id="n_mem">${memOpts(S.me.id)}</select></td><td data-label="Ações"><button data-act="add" aria-label="Salvar novo lançamento">Adicionar</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
-  return `${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
+  return `<div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button></div>${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card v0-mobile-balance"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
-  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>${mobileFlow}<details class="mobile-analysis"><summary>Ver análise e categorias do mês</summary><div class="mobile-analysis-content">${viewGrupos()}${viewCats()}</div></details>
+  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>
   <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar v0-mobile-action-grid">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
    <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
@@ -5267,7 +5218,7 @@ function mobileTamanduaProactiveInsights(){
   const lanc=Array.isArray(S.lanc)?S.lanc:[];
   const resumo=Array.isArray(S.resumo)?S.resumo:[];
   const hoje=new Date();
-  const hojeISO=hoje.toISOString().slice(0,10);
+  const hojeISO=localFinancialDate();
   const limite7=new Date(hoje.getTime()+7*86400000).toISOString().slice(0,10);
   const unpaid=lanc.filter(x=>x.tipo==='despesa'&&x.status!=='pago');
   const overdue=unpaid.filter(x=>x.data_vencimento&&x.data_vencimento<hojeISO);
@@ -5381,4 +5332,4 @@ function mountMobileCompanion(){
 }
 </script>
 
-</html>
+<script src="mobile-polish.js"></script></html>
