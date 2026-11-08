@@ -3377,7 +3377,7 @@ function ensureQrCode(){
 }
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false},tamanduaProfile:null,tamanduaIntroStep:0};
+const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false},tamanduaProfile:null,tamanduaIntroStep:0,tamanduaProactive:null};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -3637,6 +3637,7 @@ async function loadMes(rd=true,refreshAggregates=true){
     q(sb.from('sugestoes').select('*').eq('mes_id',S.mes.id).order('criado_em'))]);
   S.lanc=l;S.sug=s;
   if(rd)renderWorkspaceOrKeepTamandua();
+  if(S.user&&S.fam)void mobileTamanduaProactiveCheck('loadMes');
   if(refreshAggregates){
     const[rs,mc]=await Promise.all([
       q(sb.from('v_resumo_anual').select('*').eq('familia_id',S.fam.id).eq('ano',S.ano.ano).order('mes')),
@@ -4574,6 +4575,7 @@ async function atualizarAoVivo(){
       if(S.mes)await loadMes(false);
       if(S.view==='plan')await carregarPlan(false);
       render();
+      if(S.user&&S.fam)void mobileTamanduaProactiveCheck('realtime');
     }while(rtAgain);
   }finally{rtRunning=false}
 }
@@ -5235,8 +5237,8 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
 function mobileCompanionMarkup(){
   const speech=mobileCompanionSpeech();
   return '<div class="cf-companion" id="cf-companion">'+
-    '<div class="cf-companion-speech" id="cf-companion-speech" role="status" aria-live="polite">'+
-      '<b>Copiloto</b><span>'+speech+'</span>'+
+    '<div class="cf-companion-speech" id="cf-companion-speech" role="status" aria-live="polite" data-tamandua-proactive="false">'+
+      '<b>Tamanduá</b><span data-tamandua-proactive-body>'+esc(speech)+'</span>'+
     '</div>'+
     '<button type="button" class="cf-companion-animal" data-act="companion" aria-label="Mostrar fala do Copiloto" title="Falar com o Copiloto">'+
       '<svg viewBox="0 0 64 64" aria-hidden="true">'+
@@ -5252,6 +5254,122 @@ function mobileCompanionMarkup(){
       '</svg>'+
     '</button>'+
   '</div>';
+}
+
+
+const MOBILE_TAMANDUA_PROACTIVE_COOLDOWN_MS=5*60*1000;
+
+function mobileTamanduaLiveContext(){
+  const lanc=Array.isArray(S.lanc)?S.lanc:[];
+  const today=new Date().toISOString().slice(0,10);
+  const next7=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+  const receitas=lanc.filter(x=>x.tipo==='receita').reduce((t,x)=>t+Number(x.valor||0),0);
+  const despesas=lanc.filter(x=>x.tipo!=='receita').reduce((t,x)=>t+Number(x.valor||0),0);
+  const pendentes=lanc.filter(x=>x.status!=='pago').length;
+  const atrasadas=lanc.filter(x=>x.status!=='pago'&&x.data_vencimento&&x.data_vencimento<today).length;
+  const proximas=lanc.filter(x=>x.status!=='pago'&&x.data_vencimento&&x.data_vencimento>=today&&x.data_vencimento<=next7).length;
+  const saldo=receitas-despesas;
+  const principais=lanc
+    .filter(x=>x.tipo!=='receita')
+    .sort((a,b)=>Number(b.valor||0)-Number(a.valor||0))
+    .slice(0,3)
+    .map(x=>({
+      descricao:String(x.descricao||x.nome||'Lançamento').slice(0,60),
+      valor:Number(x.valor||0),
+      vencimento:x.data_vencimento||null,
+      status:x.status||null
+    }));
+  return {
+    view:S.view||'planilha',
+    mes:S.mes?.mes||new Date().getMonth()+1,
+    ano:S.ano?.ano||new Date().getFullYear(),
+    saldo:Number(saldo.toFixed(2)),
+    receitas:Number(receitas.toFixed(2)),
+    despesas:Number(despesas.toFixed(2)),
+    pendentes,
+    atrasadas,
+    proximas,
+    lancamentos:JSON.stringify(principais)
+  };
+}
+
+function mobileTamanduaProactiveSignature(context){
+  const urgency=context.atrasadas>0
+    ? 'atrasadas:'+context.atrasadas
+    : context.proximas>0
+      ? 'proximas:'+context.proximas
+      : context.saldo<0
+        ? 'saldo-negativo'
+        : context.despesas>context.receitas&&context.receitas>0
+          ? 'despesas-maiores'
+          : context.pendentes>0
+            ? 'pendentes:'+Math.min(context.pendentes,5)
+            : 'acompanhamento';
+  return [context.ano,context.mes,urgency].join('|');
+}
+
+function mobileTamanduaShowProactive(message){
+  const companion=document.getElementById('cf-companion');
+  if(!companion)return;
+  const speech=document.getElementById('cf-companion-speech');
+  if(!speech)return;
+  const body=speech.querySelector('[data-tamandua-proactive-body]');
+  if(body)body.textContent=message;
+  else speech.innerHTML='<b>Tamanduá</b><span data-tamandua-proactive-body>'+esc(message)+'</span>';
+  speech.hidden=false;
+  speech.dataset.tamanduaProactive='true';
+  const face=companion.querySelector('.cf-companion-face');
+  if(face){
+    face.setAttribute('transform','scale(1.06)');
+    setTimeout(()=>face.removeAttribute('transform'),180);
+  }
+}
+
+async function callTamanduaBot(message,context){
+  if(!S.user?.id)return null;
+  const session=await sb.auth.getSession();
+  const accessToken=session.data.session?.access_token;
+  if(!accessToken)return null;
+  const response=await fetch(SB_URL+'/functions/v1/tamandua-bot',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'apikey':SB_KEY,
+      'Authorization':'Bearer '+accessToken
+    },
+    body:JSON.stringify({message,context})
+  });
+  if(!response.ok)return null;
+  const payload=await response.json().catch(()=>null);
+  return typeof payload?.answer==='string'&&payload.answer.trim()?payload.answer.trim():null;
+}
+
+async function mobileTamanduaProactiveCheck(reason='manual'){
+  if(!S.user?.id||!S.fam?.id||!Array.isArray(S.lanc))return;
+  const context=mobileTamanduaLiveContext();
+  if(!context.atrasadas&&!context.proximas&&context.saldo>=0&&!(context.despesas>context.receitas&&context.receitas>0)&&!context.pendentes)return;
+  const signature=mobileTamanduaProactiveSignature(context);
+  const state=S.tamanduaProactive||(S.tamanduaProactive={lastSignature:'',lastAt:0,inFlight:false});
+  const now=Date.now();
+  if(state.inFlight||signature===state.lastSignature||(now-state.lastAt)<MOBILE_TAMANDUA_PROACTIVE_COOLDOWN_MS)return;
+  state.inFlight=true;
+  state.lastAt=now;
+  try{
+    const answer=await callTamanduaBot(
+      'Você está acompanhando o financeiro em tempo real. Esta é uma atualização proativa, não uma pergunta do usuário. Analise os dados atuais e envie uma única mensagem curta, natural e útil, dizendo o que você percebeu e qual é o próximo passo mais importante. Não invente dados. Não repita uma mensagem anterior. Não use listas longas, títulos ou avisos genéricos.',
+      context
+    );
+    if(answer){
+      state.lastSignature=signature;
+      mobileTamanduaShowProactive(answer);
+    }else{
+      state.lastSignature=signature;
+    }
+  }catch(error){
+    console.warn('Tamanduá proativo indisponível:',error);
+  }finally{
+    state.inFlight=false;
+  }
 }
 
 function mobileCompanionSpeech(){
