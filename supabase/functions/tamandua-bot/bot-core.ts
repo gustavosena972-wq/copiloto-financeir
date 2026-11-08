@@ -47,6 +47,10 @@ export function normalizeBotInput(input: unknown): BotInput {
   return { message, context };
 }
 
+export function buildTamanduaMemoryKey(familiaId: string, usuarioId: string): string {
+  return `tamandua:memory:${familiaId}:${usuarioId}`;
+}
+
 export type TamanduaMemoryUpdate = {
   key: string;
   value: Record<string, unknown>;
