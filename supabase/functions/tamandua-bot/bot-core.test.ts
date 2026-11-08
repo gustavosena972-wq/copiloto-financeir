@@ -101,3 +101,28 @@ Deno.test("normaliza memória do Tamanduá para uma chave Redis determinística"
     "tamandua:memory:fam-123:user-456",
   );
 });
+
+
+Deno.test("preserva contexto financeiro limitado e id da conversa sem persistir campos arbitrários", () => {
+  const result = normalizeBotInput({
+    message: "Quanto gastei com alimentação?",
+    context: {
+      conversa_id: "00000000-0000-0000-0000-000000000001",
+      lancamentos: [
+        { data: "2026-11-08", tipo: "despesa", valor: 120, categoria: "Alimentação", descricao: "Mercado", status: "pago" },
+      ],
+      segredo: "não deve entrar",
+    },
+  });
+
+  assertEquals(result.context.conversa_id, "00000000-0000-0000-0000-000000000001");
+  assertEquals(result.context.lancamentos, [{
+    data: "2026-11-08",
+    tipo: "despesa",
+    valor: 120,
+    categoria: "Alimentação",
+    descricao: "Mercado",
+    status: "pago",
+  }]);
+  assertEquals(result.context.segredo, undefined);
+});
