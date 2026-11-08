@@ -49,3 +49,7 @@
 - Disabled WebView cookies because the Android app uses Supabase local storage for its session and does not rely on cookies.
 - Disabled automatic URL-based session detection and made ordinary sign-out local to the current device.
 - Added a visible internal-test banner explaining that evaluation access is already granted and no purchase is required during this phase.
+
+### 1.0.36 — correção final de build
+- Corrigido o guard nativo de TTS para evitar `return` inválido dentro do `Runnable` Kotlin.
+- Mantido o acesso de teste interno sem cobrança; Billing permanece preservado para produção.
