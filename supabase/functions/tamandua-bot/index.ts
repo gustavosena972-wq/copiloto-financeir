@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { buildTamanduaInstructions, normalizeBotInput, trimModelOutput } from "./bot-core.ts";
+import { buildTamanduaInstructions, buildTamanduaMemoryUpdates, normalizeBotInput, trimModelOutput } from "./bot-core.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://gustavosena972-wq.github.io",
@@ -169,6 +169,28 @@ Deno.serve(async (request) => {
     return json({ error: "A inteligência retornou uma resposta vazia." }, 502, origin);
   }
 
+  const memoryUpdates = buildTamanduaMemoryUpdates(input.context);
+  if (memoryUpdates.length) {
+    const { error: memoryError } = await userClient
+      .from("ia_aprendizados")
+      .upsert(
+        memoryUpdates.map((item) => ({
+          familia_id: member.familia_id,
+          usuario_id: user.id,
+          chave: item.key,
+          valor: item.value,
+          confianca: item.confidence,
+          evidencia: item.evidence,
+          ultima_evidencia_em: new Date().toISOString(),
+        })),
+        { onConflict: "familia_id,usuario_id,chave" },
+      );
+
+    if (memoryError) {
+      console.error("Tamanduá memory persistence error", memoryError.message);
+    }
+  }
+
   await userClient.from("ia_eventos").insert({
     familia_id: member.familia_id,
     usuario_id: user.id,
@@ -178,6 +200,7 @@ Deno.serve(async (request) => {
       view: input.context.view ?? null,
       message_length: input.message.length,
       knowledge_count: knowledge?.length ?? 0,
+      memory_updates: memoryUpdates.map((item) => item.key),
     },
     resultado: "resposta_gerada",
   });
