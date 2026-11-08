@@ -37,7 +37,7 @@ Deno.test("limita contexto e mantém instruções financeiras do Tamanduá", () 
   });
 
   assert(instructions.includes("Tamanduá"));
-  assert(instructions.includes("não invente números"));
+  assert(instructions.includes("Nunca invente números"));
   assert(instructions.includes("organizar despesas"));
   assert(instructions.includes("Orçamento deve refletir renda e despesas reais."));
 });
