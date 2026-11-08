@@ -7,7 +7,9 @@ on:
       - "index.html"
       - "privacidade.html"
       - "termos.html"
-      - "exclusao-conta.html"
+      - "excluir-conta.html"
+      - "scripts/build_web_showcase.py"
+      - "tests/web_showcase_test.py"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -30,13 +32,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Test institutional web
+        run: python3 tests/web_showcase_test.py
+
+      - name: Build institutional web
+        run: python3 scripts/build_web_showcase.py
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment

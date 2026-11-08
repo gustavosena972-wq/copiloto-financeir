@@ -1,0 +1,21 @@
+name: Web showcase checks
+on:
+  pull_request:
+    paths:
+      - "*.html"
+      - "scripts/build_web_showcase.py"
+      - "tests/web_showcase_test.py"
+      - ".github/workflows/pages.yml"
+      - ".github/workflows/web-showcase-check.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test public pages and package isolation
+        run: python3 tests/web_showcase_test.py
+      - name: Build institutional package
+        run: python3 scripts/build_web_showcase.py
