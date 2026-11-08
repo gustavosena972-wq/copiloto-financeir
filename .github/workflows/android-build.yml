@@ -6,6 +6,10 @@ on:
     paths:
       - "android-app/**"
       - ".github/workflows/android-build.yml"
+      - ".github/workflows/android-play-publish.yml"
+      - ".github/workflows/android-release.yml"
+      - "tests/android_webview_assets_test.py"
+      - "tests/android_render_test.cjs"
   workflow_dispatch:
 
 permissions:
@@ -23,6 +27,22 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Bundle Supabase WebView runtime
+        run: |
+          npm install @supabase/supabase-js@2.45.4 --prefix "$RUNNER_TEMP/supabase-runtime" --no-save
+          cp "$RUNNER_TEMP/supabase-runtime/node_modules/@supabase/supabase-js/dist/umd/supabase.js" android-app/app/src/main/assets/supabase.js
+          test -s android-app/app/src/main/assets/supabase.js
+
+      - name: Validate Android WebView assets
+        run: |
+          python3 tests/android_webview_assets_test.py
+          node --test tests/android_render_test.cjs
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4

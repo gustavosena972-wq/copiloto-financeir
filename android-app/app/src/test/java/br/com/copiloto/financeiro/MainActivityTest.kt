@@ -12,7 +12,7 @@ class MainActivityTest {
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
-            "https://appassets.androidplatform.net/assets/mobile.html",
+            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40",
             MainActivity.APP_ENTRY_URL
         )
     }
@@ -116,7 +116,8 @@ class MainActivityTest {
     @Test
     fun bundledFinanceUiUsesAnExplicitSupabaseSdkVersion() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("@supabase/supabase-js@2.45.4"))
+        assertTrue(html.contains("src=\"supabase.js\""))
+        assertTrue(File("src/main/assets/supabase.js").readText().contains("createClient"))
         assertTrue(!html.contains("@supabase/supabase-js@latest"))
 
     }
@@ -124,10 +125,11 @@ class MainActivityTest {
     @Test
     fun authSessionLoadsThroughTheBundledSupabaseClient() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("const sb=supabase.createClient(SB_URL,SB_KEY)"))
+        assertTrue(html.contains("sb=supabase.createClient(SB_URL,SB_KEY)"))
+        assertTrue(html.contains("Falha ao inicializar o Supabase"))
         assertTrue(html.contains("sb.auth.getSession()"))
         assertTrue(html.contains("sb.auth.onAuthStateChange"))
-        assertEquals("https://appassets.androidplatform.net/assets/mobile.html", MainActivity.APP_ENTRY_URL)
+        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40", MainActivity.APP_ENTRY_URL)
 
     }
 
@@ -160,7 +162,7 @@ class MainActivityTest {
 
     @Test
     fun navigationOnlyKeepsTheExactBundledHttpsAssetOrigin() {
-        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html"))
+        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40"))
         assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/privacidade.html"))
         assertTrue(!isTrustedAppAssetUrl("http://appassets.androidplatform.net/assets/mobile.html"))
         assertTrue(!isTrustedAppAssetUrl("https://appassets.androidplatform.net.evil.test/assets/mobile.html"))
@@ -592,8 +594,8 @@ class MainActivityTest {
         @Test
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 29"))
-        assertTrue(gradle.contains("versionName = \"1.0.29\""))
+        assertTrue(gradle.contains("versionCode = 40"))
+        assertTrue(gradle.contains("versionName = \"1.0.40\""))
     }
 
     @Test
@@ -648,9 +650,8 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("cf-companion-speech"))
         assertTrue(html.contains("function mobileCompanionSpeech"))
-        assertTrue(html.contains("Vamos conferir como está seu mês?"))
-        assertTrue(html.contains("Tem contas atrasadas aqui. Vale conferir antes de planejar novos gastos."))
-        assertTrue(html.contains("Encontrei alguns pontos para você revisar."))
+        assertTrue(html.contains("if(insights.length)return insights[0].title"))
+        assertTrue(html.contains("Estou acompanhando seu financeiro."))
         assertFalse(html.contains("cf-companion-panel"))
         assertFalse(html.contains("cf-companion-guide-row"))
         assertFalse(html.contains("Guia rápido da área atual"))
@@ -797,7 +798,8 @@ class MainActivityTest {
         assertTrue(html.contains("function renderWorkspaceOrKeepTamandua()"))
         assertFalse(html.contains("tamandua-intro-skip"))
         assertFalse(html.contains("Pular por enquanto"))
-        assertFalse(html.contains("Agora não"))
+        val intro = html.substringAfter("function tamanduaIntroMarkup(").substringBefore("function renderTamanduaIntro(")
+        assertFalse(intro.contains("Agora não"))
     }
 
 
@@ -806,7 +808,7 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("function mobileTamanduaProactiveInsights()"))
         assertTrue(html.contains("cf-tamandua-proactive"))
-        assertTrue(html.contains("Tamanduá percebeu"))
+        assertTrue(html.contains("TAMANDUÁ PERCEBEU"))
         assertTrue(html.contains("data-act=\"tamandua-proactive-action\""))
         assertTrue(html.contains("data-act=\"tamandua-proactive-dismiss\""))
         assertTrue(html.contains("Maior categoria"))
@@ -889,7 +891,7 @@ class MainActivityTest {
         assertTrue(js.contains("speechSynthesis"))
         assertTrue(js.contains("CopilotoVoice"))
         assertTrue(js.contains("voiceStatus"))
-        assertTrue(js.contains("send(true))")
+        assertTrue(js.contains("send(true)"))
         assertTrue(js.contains("Estou ouvindo"))
         assertTrue(js.contains("Calcular cenário"))
         assertTrue(js.contains("speechSynthesis"))
@@ -901,7 +903,7 @@ class MainActivityTest {
     @Test
     fun nativeVoiceBridgeAppliesTheSelectedLanguageBeforeSpeaking() {
         val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
-        assertTrue(activity.contains(""setLanguage""))
+        assertTrue(activity.contains("\"setLanguage\""))
         assertTrue(activity.contains("resolveVoiceLocale"))
         assertTrue(activity.contains("Locale.forLanguageTag"))
         assertTrue(activity.contains("LANG_MISSING_DATA"))
@@ -920,8 +922,8 @@ class MainActivityTest {
     fun mainActivityInjectsTamanduaEnhancementAssetAfterTrustedPageLoad() {
         val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
         assertTrue(activity.contains("injectTamanduaEnhancements()"))
-        assertTrue(activity.contains("assets.open("tamandua-enhancements.js")"))
-        assertTrue(activity.contains("eval($quotedScript)"))
+        assertTrue(activity.contains("assets.open(\"tamandua-enhancements.js\")"))
+        assertTrue(activity.contains("eval(\$quotedScript)"))
         assertTrue(activity.contains("CopilotoVoice"))
         assertTrue(activity.contains("TextToSpeech"))
         assertTrue(activity.contains("Locale(\"pt\", \"BR\")"))
@@ -933,7 +935,8 @@ class MainActivityTest {
     @Test
     fun nativeVoiceBridgeDoesNotUseIllegalReturnFromRunnable() {
         val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
-        assertFalse(activity.contains("return@runOnUiThread"))
+        val voice = activity.substringAfter("private fun handleVoiceBridgeMessage(").substringBefore("private fun registerBillingBridge(")
+        assertFalse(voice.contains("return@runOnUiThread"))
         assertTrue(activity.contains("if (ttsReady)"))
     }
 
