@@ -907,6 +907,8 @@ class MainActivityTest {
         assertTrue(activity.contains("CopilotoVoice"))
         assertTrue(activity.contains("TextToSpeech"))
         assertTrue(activity.contains("Locale(\"pt\", \"BR\")"))
+        assertTrue(activity.contains("language"))
+        assertTrue(activity.contains("setSpeechRate"))
     }
 
 }
