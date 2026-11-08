@@ -42,6 +42,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     private var nativeBillingBridgeAvailable = false
     private var textToSpeech: TextToSpeech? = null
     private var nativeVoiceBridgeAvailable = false
+    private var ttsReady = false
 
     private val productIds = listOf(
         "copiloto_pro_30d",
@@ -164,9 +165,12 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     private fun initializeNativeVoice() {
         textToSpeech = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
+                ttsReady = true
                 textToSpeech?.language = Locale("pt", "BR")
                 textToSpeech?.setSpeechRate(0.94f)
                 textToSpeech?.setPitch(1.0f)
+            } else {
+                ttsReady = false
             }
         }
     }
@@ -201,6 +205,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 val text = payload.optString("text").trim().take(5000)
                 if (text.isNotBlank()) {
                     runOnUiThread {
+                        if (!ttsReady) return
                         textToSpeech?.stop()
                         textToSpeech?.speak(
                             text,
