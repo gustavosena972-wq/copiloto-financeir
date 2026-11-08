@@ -5,7 +5,7 @@ window.__cfTamanduaPro=true;
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])), brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const VOICE_LANGS={pt:'pt-BR',en:'en-US',es:'es-ES',fr:'fr-FR',de:'de-DE',it:'it-IT',ja:'ja-JP',ko:'ko-KR',zh:'zh-CN',ar:'ar-SA',hi:'hi-IN',ru:'ru-RU',nl:'nl-NL',pl:'pl-PL',tr:'tr-TR',id:'id-ID'};
 function voiceLanguage(){try{return localStorage.getItem('copiloto_voice_language')||'pt'}catch(_){return'pt'}}
-function setVoiceLanguage(code){if(!VOICE_LANGS[code])return;try{localStorage.setItem('copiloto_voice_language',code)}catch(_){} }
+function setVoiceLanguage(code){if(!VOICE_LANGS[code])return;try{localStorage.setItem('copiloto_voice_language',code)}catch(_){} if(window.CopilotoVoice?.postMessage){try{window.CopilotoVoice.postMessage(JSON.stringify({action:'setLanguage',language:code}))}catch(_){}}}
 const sbc=()=>{try{if(window.__copilotoSupabase)return window.__copilotoSupabase}catch(_){}try{if(typeof sb!=='undefined')return sb}catch(_){}return window.sb||null};
 const app=()=>document.getElementById('app'), data=()=>{
  let s=null;try{if(typeof S!=='undefined')s=S}catch(_){}s=s||window.S||{};

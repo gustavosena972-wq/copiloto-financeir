@@ -899,6 +899,21 @@ class MainActivityTest {
     }
 
     @Test
+    fun nativeVoiceBridgeAppliesTheSelectedLanguageBeforeSpeaking() {
+        val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
+        assertTrue(activity.contains(""setLanguage""))
+        assertTrue(activity.contains("resolveVoiceLocale"))
+        assertTrue(activity.contains("Locale.forLanguageTag"))
+    }
+
+    @Test
+    fun tamanduaVoiceSelectorSyncsItsLanguageWithTheNativeBridge() {
+        val asset = File("src/main/assets/tamandua-enhancements.js").readText()
+        assertTrue(asset.contains("action:'setLanguage'"))
+        assertTrue(asset.contains("language:code"))
+    }
+
+    @Test
     fun mainActivityInjectsTamanduaEnhancementAssetAfterTrustedPageLoad() {
         val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
         assertTrue(activity.contains("injectTamanduaEnhancements()"))
