@@ -206,8 +206,8 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             "setLanguage" -> {
                 val locale = resolveVoiceLocale(payload.optString("language")) ?: return
                 runOnUiThread {
-                    if (!ttsReady) return@runOnUiThread
-                    val result = textToSpeech?.setLanguage(Locale.forLanguageTag(locale))
+                    if (ttsReady) {
+                        val result = textToSpeech?.setLanguage(Locale.forLanguageTag(locale))
                     val supported = result != TextToSpeech.LANG_MISSING_DATA &&
                         result != TextToSpeech.LANG_NOT_SUPPORTED
                     if (!supported) {
