@@ -886,7 +886,7 @@ class MainActivityTest {
         assertTrue(js.contains("mensagens_ia"))
         assertTrue(js.contains("tamandua-bot"))
         assertTrue(js.contains("SpeechRecognition"))
-        assertTrue(js.contains("SpeechSynthesis"))
+        assertTrue(js.contains("speechSynthesis"))
         assertTrue(js.contains("Calcular cenário"))
         assertTrue(js.contains("Principais categorias"))
     }
