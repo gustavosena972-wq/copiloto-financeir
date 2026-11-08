@@ -904,6 +904,9 @@ class MainActivityTest {
         assertTrue(activity.contains(""setLanguage""))
         assertTrue(activity.contains("resolveVoiceLocale"))
         assertTrue(activity.contains("Locale.forLanguageTag"))
+        assertTrue(activity.contains("LANG_MISSING_DATA"))
+        assertTrue(activity.contains("LANG_NOT_SUPPORTED"))
+        assertTrue(activity.contains("voice-language-fallback"))
     }
 
     @Test
