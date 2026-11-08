@@ -86,7 +86,16 @@ Deno.serve(async (request) => {
     return json({ error: "Não foi possível identificar a família da conta." }, 403, origin);
   }
 
-  const [{ data: knowledge }, { data: learnings }] = await Promise.all([
+  const { data: latestConversation } = await userClient
+    .from("conversas_ia")
+    .select("id")
+    .eq("usuario_id", user.id)
+    .eq("familia_id", member.familia_id)
+    .order("criado_em", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const [{ data: knowledge }, { data: learnings }, { data: historyRows }] = await Promise.all([
     userClient
       .from("ia_conhecimento")
       .select("titulo,categoria,conteudo,fonte,confianca")
@@ -100,6 +109,15 @@ Deno.serve(async (request) => {
       .eq("familia_id", member.familia_id)
       .order("atualizado_em", { ascending: false })
       .limit(12),
+    latestConversation?.id
+      ? userClient
+          .from("mensagens_ia")
+          .select("papel,conteudo,criado_em")
+          .eq("conversa_id", latestConversation.id)
+          .eq("familia_id", member.familia_id)
+          .order("criado_em", { ascending: false })
+          .limit(8)
+      : Promise.resolve({ data: [] }),
   ]);
 
   const knowledgeText = (knowledge ?? []).map((item) =>
@@ -111,6 +129,10 @@ Deno.serve(async (request) => {
   const instructions = buildTamanduaInstructions({
     knowledge: knowledgeText,
     learnings: (learnings ?? []).map((item) => ({ key: item.chave, value: item.valor })),
+    history: (historyRows ?? [])
+      .slice()
+      .reverse()
+      .map((item) => ({ role: item.papel, content: item.conteudo })),
   });
 
   const context = JSON.stringify(input.context).slice(0, 6000);
