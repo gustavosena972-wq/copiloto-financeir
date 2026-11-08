@@ -6,6 +6,7 @@ export type BotInput = {
 const MAX_MESSAGE = 2000;
 const MAX_CONTEXT_KEYS = 24;
 const MAX_STRING = 300;
+const ALLOWED_CONTEXT_KEYS = new Set(["view","mes","ano","saldo","receitas","despesas","pendentes","atrasadas","lancamentos","intencao"]);
 
 function cleanString(value: unknown, max = MAX_STRING): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -38,7 +39,7 @@ export function normalizeBotInput(input: unknown): BotInput {
 
   const context: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(sourceContext).slice(0, MAX_CONTEXT_KEYS)) {
-    if (!/^[a-zA-Z0-9_]{1,40}$/.test(key)) continue;
+    if (!/^[a-zA-Z0-9_]{1,40}$/.test(key) || !ALLOWED_CONTEXT_KEYS.has(key)) continue;
     const cleaned = cleanScalar(value);
     if (cleaned !== undefined) context[key] = cleaned;
   }
