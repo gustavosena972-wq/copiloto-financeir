@@ -3358,16 +3358,20 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 @keyframes cf-tamandua-proactive-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(max-width:640px){.cf-tamandua-proactive{margin:0 0 10px;padding:12px;border-radius:16px}.cf-tamandua-proactive-actions{display:grid;grid-template-columns:1fr}.cf-tamandua-proactive-action{width:100%}}
 @media(prefers-reduced-motion:reduce){.cf-tamandua-proactive{animation:none}}
-</style></head>
+.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style></head>
 <body data-ui="premium-fintech">
-<div id="app" class="wrap"></div>
+<div id="app" class="wrap"><div class="cf-mobile-startup" role="status" aria-live="polite"><div class="cf-mobile-startup-mark">CF</div><div><b>Copiloto Financeiro</b><span>Preparando seu financeiro…</span></div></div></div>
 <div id="toast"></div>
+<script>
+window.addEventListener('error',function(event){if(event&&event.filename&&/supabase\.js/.test(event.filename)){const app=document.getElementById('app');if(app)app.innerHTML='<div class="auth"><h1>Não foi possível carregar o aplicativo</h1><p class="mu">A biblioteca financeira não carregou corretamente. Feche e abra o aplicativo novamente.</p><button type="button" onclick="location.reload()">Tentar novamente</button></div>';}},{once:true});
+</script>
 <script src="supabase.js"></script>
 <script>
 const SB_URL='https://jlufubazlnrelrbsvsal.supabase.co';
 const SB_KEY='sb_publishable__CjlaAIa2w5F_7HhOhJKkA_HeDFWxNS';
-if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div class="auth"><h1>Não foi possível carregar</h1><div class="mu">O app precisa de internet para carregar suas bibliotecas. Abra este arquivo no Chrome com internet (não na pré-visualização do Claude).</div></div>';throw new Error('biblioteca supabase ausente')}
-const sb=supabase.createClient(SB_URL,SB_KEY);
+if(typeof supabase==='undefined'){document.getElementById('app').innerHTML='<div class="auth"><h1>Não foi possível carregar</h1><div class="mu">A biblioteca financeira não carregou. Feche e abra o aplicativo novamente.</div><button type="button" onclick="location.reload()">Tentar novamente</button></div>';throw new Error('biblioteca supabase ausente')}
+let sb;
+try{sb=supabase.createClient(SB_URL,SB_KEY)}catch(error){console.error('Falha ao inicializar o Supabase:',error);document.getElementById('app').innerHTML='<div class="auth"><h1>Não foi possível iniciar o aplicativo</h1><p class="mu">O mecanismo financeiro não conseguiu iniciar. Feche e abra o aplicativo novamente.</p><button type="button" onclick="location.reload()">Tentar novamente</button></div>';throw error}
 let __xlsxLoader=null;
 let __qrLoader=null;
 function loadExternalScript(src,ready){
