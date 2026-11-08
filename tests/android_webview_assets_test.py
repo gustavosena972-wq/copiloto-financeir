@@ -23,3 +23,5 @@ assert html.count("function mostrarErroInicial(e)") == 1
 print("PASS: Android startup JavaScript parses past the initial error handler declaration.")
 
 # Release contract: the tested Android package is 1.0.39/versionCode 39.\ngradle = (ROOT / "android-app/app/build.gradle.kts").read_text(encoding="utf-8")\nassert "versionCode = 39" in gradle\nassert 'versionName = "1.0.39"' in gradle\nprint("PASS: Android release is pinned to 1.0.39/versionCode 39.")
+
+# CI release trigger marker: 1.0.39
