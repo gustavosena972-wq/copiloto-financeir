@@ -800,6 +800,30 @@ class MainActivityTest {
         assertFalse(html.contains("Agora não"))
     }
 
+
+    @Test
+    fun androidV028MakesTamanduaProactiveInsteadOfWaitingForChatMessages() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileTamanduaProactiveInsights()"))
+        assertTrue(html.contains("cf-tamandua-proactive"))
+        assertTrue(html.contains("Tamanduá percebeu"))
+        assertTrue(html.contains("data-act="tamandua-proactive-action""))
+        assertTrue(html.contains("data-act="tamandua-proactive-dismiss""))
+        assertTrue(html.contains("Maior categoria"))
+        assertTrue(html.contains("próximo passo"))
+    }
+
+    @Test
+    fun androidV028ProactiveTamanduaUsesRealFinancialSignalsAndAvoidsFakeScores() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("S.lanc"))
+        assertTrue(html.contains("S.resumo"))
+        assertTrue(html.contains("status!=='pago'"))
+        assertTrue(html.contains("data-signal="))
+        assertFalse(html.contains("smartHealthScore"))
+        assertFalse(html.contains("safeToSpend"))
+    }
+
     @Test
     fun androidV027PersistsTamanduaLearningInTheSharedIntelligenceDatabase() {
         val html = File("src/main/assets/mobile.html").readText()
