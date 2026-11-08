@@ -31,6 +31,20 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Bundle Supabase WebView runtime
+        run: |
+          npm install @supabase/supabase-js@2.45.4 --prefix "$RUNNER_TEMP/supabase-runtime" --no-save
+          cp "$RUNNER_TEMP/supabase-runtime/node_modules/@supabase/supabase-js/dist/umd/supabase.js" android-app/app/src/main/assets/supabase.js
+          test -s android-app/app/src/main/assets/supabase.js
+
+      - name: Validate Android WebView assets
+        run: python3 tests/android_webview_assets_test.py
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -67,7 +81,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: gradle bundleRelease
+        run: gradle testDebugUnitTest bundleRelease
 
       - name: Verify AAB
         working-directory: android-app

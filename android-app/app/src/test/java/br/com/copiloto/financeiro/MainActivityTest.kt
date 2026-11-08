@@ -12,7 +12,7 @@ class MainActivityTest {
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
-            "https://appassets.androidplatform.net/assets/mobile.html",
+            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.38",
             MainActivity.APP_ENTRY_URL
         )
     }
@@ -127,7 +127,7 @@ class MainActivityTest {
         assertTrue(html.contains("const sb=supabase.createClient(SB_URL,SB_KEY)"))
         assertTrue(html.contains("sb.auth.getSession()"))
         assertTrue(html.contains("sb.auth.onAuthStateChange"))
-        assertEquals("https://appassets.androidplatform.net/assets/mobile.html", MainActivity.APP_ENTRY_URL)
+        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.38", MainActivity.APP_ENTRY_URL)
 
     }
 
@@ -160,7 +160,7 @@ class MainActivityTest {
 
     @Test
     fun navigationOnlyKeepsTheExactBundledHttpsAssetOrigin() {
-        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html"))
+        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.38"))
         assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/privacidade.html"))
         assertTrue(!isTrustedAppAssetUrl("http://appassets.androidplatform.net/assets/mobile.html"))
         assertTrue(!isTrustedAppAssetUrl("https://appassets.androidplatform.net.evil.test/assets/mobile.html"))
@@ -592,8 +592,8 @@ class MainActivityTest {
         @Test
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 29"))
-        assertTrue(gradle.contains("versionName = \"1.0.29\""))
+        assertTrue(gradle.contains("versionCode = 39"))
+        assertTrue(gradle.contains("versionName = \"1.0.39\""))
     }
 
     @Test
@@ -901,7 +901,7 @@ class MainActivityTest {
     @Test
     fun nativeVoiceBridgeAppliesTheSelectedLanguageBeforeSpeaking() {
         val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
-        assertTrue(activity.contains(""setLanguage""))
+        assertTrue(activity.contains("\"setLanguage\""))
         assertTrue(activity.contains("resolveVoiceLocale"))
         assertTrue(activity.contains("Locale.forLanguageTag"))
         assertTrue(activity.contains("LANG_MISSING_DATA"))
@@ -920,8 +920,8 @@ class MainActivityTest {
     fun mainActivityInjectsTamanduaEnhancementAssetAfterTrustedPageLoad() {
         val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
         assertTrue(activity.contains("injectTamanduaEnhancements()"))
-        assertTrue(activity.contains("assets.open("tamandua-enhancements.js")"))
-        assertTrue(activity.contains("eval($quotedScript)"))
+        assertTrue(activity.contains("assets.open(\"tamandua-enhancements.js\")"))
+        assertTrue(activity.contains("eval(\$quotedScript)"))
         assertTrue(activity.contains("CopilotoVoice"))
         assertTrue(activity.contains("TextToSpeech"))
         assertTrue(activity.contains("Locale(\"pt\", \"BR\")"))
