@@ -96,4 +96,4 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-# Release trigger for the restored 1.0.13 tester build.
+# Release trigger for Android 1.0.37 test build.
