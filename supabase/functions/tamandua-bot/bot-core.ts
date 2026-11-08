@@ -6,7 +6,7 @@ export type BotInput = {
 const MAX_MESSAGE = 2000;
 const MAX_CONTEXT_KEYS = 24;
 const MAX_STRING = 300;
-const ALLOWED_CONTEXT_KEYS = new Set(["view","mes","ano","saldo","receitas","despesas","pendentes","atrasadas","lancamentos","intencao"]);
+const ALLOWED_CONTEXT_KEYS = new Set(["view","mes","ano","saldo","receitas","despesas","pendentes","atrasadas","lancamentos","intencao","conversa_id"]);
 
 function cleanString(value: unknown, max = MAX_STRING): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -14,12 +14,26 @@ function cleanString(value: unknown, max = MAX_STRING): string | undefined {
   return cleaned ? cleaned.slice(0, max) : undefined;
 }
 
-function cleanScalar(value: unknown): unknown {
+function cleanScalar(value: unknown, key?: string): unknown {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : undefined;
   }
   if (typeof value === "boolean") return value;
   if (typeof value === "string") return cleanString(value);
+  if (key === "lancamentos" && Array.isArray(value)) {
+    return value.slice(-40).map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+      const row = item as Record<string, unknown>;
+      return {
+        data: cleanString(row.data, 30),
+        tipo: cleanString(row.tipo, 20),
+        valor: typeof row.valor === "number" && Number.isFinite(row.valor) ? row.valor : undefined,
+        categoria: cleanString(row.categoria, 80),
+        descricao: cleanString(row.descricao, 160),
+        status: cleanString(row.status, 30),
+      };
+    }).filter(Boolean);
+  }
   return undefined;
 }
 
@@ -40,7 +54,7 @@ export function normalizeBotInput(input: unknown): BotInput {
   const context: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(sourceContext).slice(0, MAX_CONTEXT_KEYS)) {
     if (!/^[a-zA-Z0-9_]{1,40}$/.test(key) || !ALLOWED_CONTEXT_KEYS.has(key)) continue;
-    const cleaned = cleanScalar(value);
+    const cleaned = cleanScalar(value, key);
     if (cleaned !== undefined) context[key] = cleaned;
   }
 
