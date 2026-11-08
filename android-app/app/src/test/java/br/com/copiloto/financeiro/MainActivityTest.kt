@@ -593,7 +593,7 @@ class MainActivityTest {
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
         assertTrue(gradle.contains("versionCode = 27"))
-        assertTrue(gradle.contains("versionName = \"1.0.26\""))
+        assertTrue(gradle.contains("versionName = \"1.0.27\""))
     }
 
     @Test
@@ -799,15 +799,25 @@ class MainActivityTest {
     }
 
     @Test
-    fun androidV026StoresTamanduaProfileAndCompletionSeparatelyForEachAuthenticatedUser() {
+    fun androidV027PersistsTamanduaLearningInTheSharedIntelligenceDatabase() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("function tamanduaStorageKey"))
-        assertTrue(html.contains("S.user?.id"))
-        assertTrue(html.contains("localStorage.getItem(profileKey)"))
-        assertTrue(html.contains("localStorage.getItem(introKey)"))
-        assertTrue(html.contains("localStorage.setItem(profileKey"))
+        assertTrue(html.contains("async function loadTamanduaProfile()"))
+        assertTrue(html.contains("ia_aprendizados"))
+        assertTrue(html.contains("ia_eventos"))
+        assertTrue(html.contains("upsert(payload,{onConflict:'familia_id,usuario_id,chave'})"))
+        assertTrue(html.contains("await mobileLearnFromInteraction(profile)"))
         assertTrue(html.contains("localStorage.setItem(introKey"))
-        assertFalse(html.contains("localStorage.getItem('copiloto_tamandua_intro_v1')"))
+        assertFalse(html.contains("localStorage.getItem(profileKey)"))
+        assertFalse(html.contains("localStorage.setItem(profileKey"))
+    }
+
+    @Test
+    fun androidV027ScopesTamanduaLearningToTheAuthenticatedUserAndFamily() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains(".eq('usuario_id',S.user.id)"))
+        assertTrue(html.contains(".eq('familia_id',S.fam.id)"))
+        assertTrue(html.contains("familia_id:S.fam.id"))
+        assertTrue(html.contains("usuario_id:S.user.id"))
     }
 
     @Test
