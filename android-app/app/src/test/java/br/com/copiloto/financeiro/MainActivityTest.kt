@@ -593,7 +593,7 @@ class MainActivityTest {
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
         assertTrue(gradle.contains("versionCode = 27"))
-        assertTrue(gradle.contains("versionName = \"1.0.26\""))
+        assertTrue(gradle.contains("versionName = \"1.0.27\""))
     }
 
     @Test
