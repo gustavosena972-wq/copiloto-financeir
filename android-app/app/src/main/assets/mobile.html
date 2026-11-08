@@ -3317,6 +3317,27 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   .cf-plan-tamandua-character{width:112px;height:138px}
 }
 @media(prefers-reduced-motion:reduce){.cf-plan-tamandua-character{transition:none}}
+</style><style id="cf-tamandua-bot-ui">
+.cf-tamandua-chat{position:fixed;right:18px;bottom:94px;width:min(390px,calc(100vw - 28px));z-index:140;background:#fff;border:1px solid #d9e4dc;border-radius:22px;box-shadow:0 24px 70px rgba(20,55,35,.24);overflow:hidden;color:#20382b}
+.cf-tamandua-chat[hidden]{display:none}
+.cf-tamandua-chat-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 15px;border-bottom:1px solid #e5ece7;background:linear-gradient(145deg,#f4f8f4,#fff)}
+.cf-tamandua-chat-brand{display:flex;align-items:center;gap:9px}.cf-tamandua-chat-brand .avatar{width:38px;height:38px;border-radius:12px;background:#173b2a;display:grid;place-items:center;overflow:hidden}.cf-tamandua-chat-brand svg{width:34px;height:34px}
+.cf-tamandua-chat-brand b{display:block;font-size:12px}.cf-tamandua-chat-brand span{display:block;font-size:9.5px;color:#708078;margin-top:2px}
+.cf-tamandua-chat-close{background:#edf3ee!important;color:#365443!important;box-shadow:none!important;padding:7px 10px!important;min-height:36px!important}
+.cf-tamandua-chat-messages{height:300px;overflow:auto;padding:14px;background:#f7faf8;display:grid;align-content:start;gap:9px}
+.cf-tamandua-msg{max-width:86%;padding:10px 12px;border-radius:14px;font-size:11.5px;line-height:1.5;white-space:pre-wrap}
+.cf-tamandua-msg.bot{justify-self:start;background:#fff;border:1px solid #e0e8e2}.cf-tamandua-msg.user{justify-self:end;background:#173b2a;color:#fff}
+.cf-tamandua-msg.loading{opacity:.65}
+.cf-tamandua-chat-compose{display:grid;grid-template-columns:1fr auto;gap:8px;padding:11px;border-top:1px solid #e5ece7;background:#fff}
+.cf-tamandua-chat-compose textarea{min-height:46px;max-height:110px;resize:none;border:1px solid #d6e1da;border-radius:13px;padding:10px;font-size:11.5px;color:#24382c;background:#fff}
+.cf-tamandua-chat-compose textarea:focus{outline:0;border-color:#79a98a;box-shadow:0 0 0 3px rgba(20,108,67,.08)}
+.cf-tamandua-chat-compose button{min-width:72px;min-height:46px;background:#173b2a;box-shadow:none!important;padding:8px 12px}
+.cf-tamandua-chat-note{padding:0 12px 10px;font-size:8.5px;color:#819087;background:#fff}
+@media(max-width:640px){
+  .cf-tamandua-chat{right:10px;left:10px;bottom:82px;width:auto;border-radius:20px}
+  .cf-tamandua-chat-messages{height:min(48vh,340px)}
+}
+@media(prefers-reduced-motion:reduce){.cf-tamandua-chat *{scroll-behavior:auto!important;transition:none!important}}
 </style></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
