@@ -227,14 +227,15 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 val text = payload.optString("text").trim().take(5000)
                 if (text.isNotBlank()) {
                     runOnUiThread {
-                        if (!ttsReady) return
-                        textToSpeech?.stop()
-                        textToSpeech?.speak(
-                            text,
-                            TextToSpeech.QUEUE_FLUSH,
-                            null,
-                            "tamandua-response"
-                        )
+                        if (ttsReady) {
+                            textToSpeech?.stop()
+                            textToSpeech?.speak(
+                                text,
+                                TextToSpeech.QUEUE_FLUSH,
+                                null,
+                                "tamandua-response"
+                            )
+                        }
                     }
                 }
             }
