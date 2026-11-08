@@ -3344,14 +3344,45 @@ function tamanduaStorageKey(kind){
   const userId=S.user?.id;
   return userId?'copiloto_tamandua_'+kind+'_v1_'+encodeURIComponent(userId):null;
 }
-function loadTamanduaProfile(){
+async function loadTamanduaProfile(){
   S.tamanduaProfile=null;
-  const profileKey=tamanduaStorageKey('profile');
-  if(!profileKey)return;
-  try{
-    const raw=localStorage.getItem(profileKey);
-    S.tamanduaProfile=raw?JSON.parse(raw):null;
-  }catch(e){S.tamanduaProfile=null}
+  if(!S.user?.id||!S.fam?.id)return;
+  const{data,error}=await sb.from('ia_aprendizados')
+    .select('valor,confianca,evidencia,atualizado_em')
+    .eq('usuario_id',S.user.id)
+    .eq('familia_id',S.fam.id)
+    .eq('chave','perfil_tamandua')
+    .maybeSingle();
+  if(error){console.warn('Não foi possível carregar o perfil adaptativo do Tamanduá.',error);return}
+  S.tamanduaProfile=data?.valor||null;
+}
+async function mobileLearnFromInteraction(profile){
+  if(!S.user?.id||!S.fam?.id||!profile)return;
+  const payload={
+    familia_id:S.fam.id,
+    usuario_id:S.user.id,
+    chave:'perfil_tamandua',
+    valor:profile,
+    confianca:0.70,
+    evidencia:1,
+    ultima_evidencia_em:new Date().toISOString(),
+    atualizado_em:new Date().toISOString()
+  };
+  const{error}=await sb.from('ia_aprendizados').upsert(payload,{onConflict:'familia_id,usuario_id,chave'});
+  if(error)throw error;
+  await sb.from('ia_eventos').insert({
+    familia_id:S.fam.id,
+    usuario_id:S.user.id,
+    tipo:'perfil_tamandua_atualizado',
+    intencao:'personalizacao',
+    contexto:{
+      melhorar:Array.isArray(profile.melhorar)?profile.melhorar:[],
+      necessidade:Array.isArray(profile.necessidade)?profile.necessidade:[],
+      organizacao:Array.isArray(profile.organizacao)?profile.organizacao:[],
+      economia:Array.isArray(profile.economia)?profile.economia:[]
+    },
+    resultado:'preferencias_salvas'
+  });
 }
 function tamanduaIntroCompleted(){
   const introKey=tamanduaStorageKey('intro');
@@ -3457,17 +3488,17 @@ function finishTamanduaIntro(){
   groups.forEach(name=>profile[name]=[...document.querySelectorAll('input[name="'+name+'"]:checked')].map(x=>x.value));
   profile.version=1;
   profile.savedAt=new Date().toISOString();
-  const profileKey=tamanduaStorageKey('profile');
   const introKey=tamanduaStorageKey('intro');
-  if(!profileKey||!introKey){
+  if(!introKey||!S.user?.id||!S.fam?.id){
     toast('Entre novamente na sua conta para salvar suas preferências.',1);
     return;
   }
   try{
-    localStorage.setItem(profileKey,JSON.stringify(profile));
+    await mobileLearnFromInteraction(profile);
     localStorage.setItem(introKey,'1');
   }catch(e){
-    toast('Não foi possível salvar suas respostas neste aparelho. Tente novamente.',1);
+    console.error('Falha ao persistir o perfil adaptativo:',e);
+    toast('Não foi possível salvar suas preferências agora. Tente novamente.',1);
     return;
   }
   S.tamanduaProfile=profile;
@@ -3511,7 +3542,6 @@ async function boot(){
   if(S.rt){try{sb.removeChannel(S.rt)}catch(e){}S.rt=null}
   await carregarConfig();
   if(!S.user){S.tamanduaProfile=null;renderAuth();checarServidor();return}
-  loadTamanduaProfile();
   $('#app').innerHTML='<div class="auth mu">Carregando…</div>';
   const adminCheck=await sb.rpc('eh_admin');
   if(adminCheck.error)throw adminCheck.error;
@@ -3527,6 +3557,7 @@ async function boot(){
   }
   // Cada conta possui uma única família. A associação vem do banco; não há seletor local de família.
   S.me=rows[0];S.fam=S.me.familias;
+  await loadTamanduaProfile();
   if(!S.admin&&!S.internalTester&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
   try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);S.notifs=nr.data||[]}catch(e){S.notifs=[]}
