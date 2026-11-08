@@ -6,6 +6,7 @@ on:
       - "supabase/functions/autenticacao-usuario/**"
       - "supabase/functions/google-play-purchase/**"
       - "supabase/functions/google-play-admin/**"
+      - "supabase/functions/tamandua-bot/**"
       - ".github/workflows/supabase-functions-check.yml"
   push:
     branches:
@@ -33,3 +34,7 @@ jobs:
         run: deno check supabase/functions/google-play-purchase/index.ts
       - name: Type-check Google Play admin function
         run: deno check supabase/functions/google-play-admin/index.ts
+      - name: Type-check Tamandua bot
+        run: deno check supabase/functions/tamandua-bot/index.ts
+      - name: Test Tamandua bot core
+        run: deno test supabase/functions/tamandua-bot/bot-core.test.ts
