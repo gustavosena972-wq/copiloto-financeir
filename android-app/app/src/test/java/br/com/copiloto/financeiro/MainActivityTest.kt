@@ -888,6 +888,9 @@ class MainActivityTest {
         assertTrue(js.contains("SpeechRecognition"))
         assertTrue(js.contains("speechSynthesis"))
         assertTrue(js.contains("Calcular cenário"))
+        assertTrue(js.contains("speechSynthesis"))
+        assertTrue(js.contains("Compromissos financeiros"))
+        assertTrue(js.contains("Após em aberto"))
         assertTrue(js.contains("Principais categorias"))
     }
 
