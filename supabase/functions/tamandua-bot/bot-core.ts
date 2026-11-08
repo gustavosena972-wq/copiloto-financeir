@@ -50,11 +50,21 @@ export function normalizeBotInput(input: unknown): BotInput {
 export function buildTamanduaInstructions(input: {
   knowledge: Array<string>;
   learnings: Array<{ key: string; value: unknown }>;
+  history?: Array<{ role: string; content: string }>;
 }): string {
   const knowledge = input.knowledge
     .map((item) => cleanString(item, 900))
     .filter(Boolean)
     .slice(0, 8);
+
+  const history = (input.history ?? [])
+    .slice(-8)
+    .map((item) => {
+      const role = cleanString(item.role, 20);
+      const content = cleanString(item.content, 500);
+      return role && content ? `- ${role}: ${content}` : null;
+    })
+    .filter(Boolean);
 
   const learnings = input.learnings
     .slice(0, 12)
@@ -79,6 +89,7 @@ export function buildTamanduaInstructions(input: {
     "Responda em português do Brasil, de forma curta, prática e natural.",
     knowledge.length ? "Conhecimento validado:\n" + knowledge.map((x) => "- " + x).join("\n") : "",
     learnings.length ? "Memória adaptativa do usuário:\n" + learnings.join("\n") : "",
+    history.length ? "Histórico recente da conversa:\n" + history.join("\n") : "",
   ].filter(Boolean).join("\n\n");
 }
 
