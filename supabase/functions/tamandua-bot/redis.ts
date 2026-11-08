@@ -2,7 +2,8 @@ const URL_ENV = "UPSTASH_REDIS_REST_URL";
 const TOKEN_ENV = "UPSTASH_REDIS_REST_TOKEN";
 
 function credentials() {
-  const rawUrl = Deno.env.get(URL_ENV);\n  const url = rawUrl?.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
+  const rawUrl = Deno.env.get(URL_ENV);
+  const url = rawUrl?.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
   const token = Deno.env.get(TOKEN_ENV);
   return url && token ? { url, token } : null;
 }
