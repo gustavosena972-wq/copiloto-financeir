@@ -710,8 +710,10 @@ class MainActivityTest {
         assertTrue(html.contains("Tem alguma área da sua vida que você quer melhorar porque baixou o app?"))
         assertTrue(html.contains("Você tem dificuldade para controlar e organizar suas finanças?"))
         assertTrue(html.contains("Você tem dificuldade para economizar?"))
-        assertTrue(html.contains("localStorage.setItem(profileKey"))
+        assertTrue(html.contains("sb.from('ia_aprendizados')"))
+        assertTrue(html.contains("chave:'perfil_tamandua'"))
         assertTrue(html.contains("S.tamanduaProfile"))
+        assertFalse(html.contains("localStorage.setItem(profileKey"))
     }
 
         @Test
