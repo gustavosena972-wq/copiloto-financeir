@@ -4,6 +4,7 @@ import android.app.Activity
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -26,6 +27,7 @@ import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Locale
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     companion object {
@@ -201,6 +203,14 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     private fun handleVoiceBridgeMessage(rawMessage: String) {
         val payload = runCatching { JSONObject(rawMessage) }.getOrNull() ?: return
         when (payload.optString("action")) {
+            "setLanguage" -> {
+                val locale = resolveVoiceLocale(payload.optString("language")) ?: return
+                runOnUiThread {
+                    if (!ttsReady) return@runOnUiThread
+                    textToSpeech?.language = Locale.forLanguageTag(locale)
+                }
+            }
+
             "speak" -> {
                 val text = payload.optString("text").trim().take(5000)
                 if (text.isNotBlank()) {
