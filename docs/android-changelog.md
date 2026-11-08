@@ -1,3 +1,10 @@
+## 1.0.36 — código 36
+
+- Nova versão Android preparada para teste interno na Google Play.
+- Testadores internos continuam com acesso de avaliação sem exigir pagamento ou assinatura.
+- Mantida a integração Google Play Billing para o fluxo de produção; o teste interno não depende de compra.
+- Mantidas as melhorias de voz multilíngue do Tamanduá da versão 1.0.35.
+
 ## 1.0.7 — Performance pass
 
 - Preserved the original canvas particle/curve density and animation cadence.
