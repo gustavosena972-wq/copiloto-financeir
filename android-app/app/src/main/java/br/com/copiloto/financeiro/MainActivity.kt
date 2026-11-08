@@ -133,6 +133,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 if (url?.let(::isTrustedAppAssetUrl) == true) {
+                    injectTamanduaEnhancements()
                     dispatchToWeb(
                         "copiloto:play-bridge-ready",
                         JSONObject().put("ready", nativeBillingBridgeAvailable)
@@ -144,6 +145,15 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         setContentView(webView)
         webView.loadUrl(APP_ENTRY_URL)
         connectBilling()
+    }
+
+    private fun injectTamanduaEnhancements() {
+        val script = runCatching {
+            assets.open("tamandua-enhancements.js").bufferedReader().use { it.readText() }
+        }.getOrNull() ?: return
+
+        val quotedScript = JSONObject.quote(script)
+        webView.evaluateJavascript("eval($quotedScript)", null)
     }
 
     private fun registerBillingBridge() {
