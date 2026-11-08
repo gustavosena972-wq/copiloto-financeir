@@ -207,7 +207,18 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 val locale = resolveVoiceLocale(payload.optString("language")) ?: return
                 runOnUiThread {
                     if (!ttsReady) return@runOnUiThread
-                    textToSpeech?.language = Locale.forLanguageTag(locale)
+                    val result = textToSpeech?.setLanguage(Locale.forLanguageTag(locale))
+                    val supported = result != TextToSpeech.LANG_MISSING_DATA &&
+                        result != TextToSpeech.LANG_NOT_SUPPORTED
+                    if (!supported) {
+                        textToSpeech?.setLanguage(Locale.forLanguageTag("pt-BR"))
+                        dispatchToWeb(
+                            "copiloto:voice-language-fallback",
+                            JSONObject()
+                                .put("requestedLanguage", payload.optString("language"))
+                                .put("fallbackLanguage", "pt")
+                        )
+                    }
                 }
             }
 
