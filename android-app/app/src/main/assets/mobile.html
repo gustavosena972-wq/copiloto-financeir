@@ -3552,7 +3552,7 @@ function renderWorkspaceOrKeepTamandua(){
   }
   render();
 }
-function finishTamanduaIntro(){
+async function finishTamanduaIntro(){
   const groups=['melhorar','necessidade','organizacao','economia'];
   const unanswered=groups.filter(name=>!document.querySelector('input[name="'+name+'"]:checked'));
   if(unanswered.length){
@@ -3782,8 +3782,8 @@ function renderAuth(){
             ${feature('Categorias, histórico e controle de contas')}
             ${feature('Visão do ano e comparativo mensal')}
             ${feature('Importação e exportação de Excel e CSV')}
-            ${feature('Checape financeiro e sugestões')
-            ${feature('Análise inteligente do mês e indicadores de saúde financeira')}}
+            ${feature('Checape financeiro e sugestões')}
+            ${feature('Análise inteligente do mês e indicadores de saúde financeira')}
             ${feature('Metas, dívidas e cadastro de bens')}
             ${feature('Acesso familiar e permissões por perfil')}
           </ul>
@@ -3800,7 +3800,7 @@ function renderAuth(){
             ${feature('Todos os recursos do plano Pro')}
             ${feature('Até 6 pessoas no mesmo espaço familiar')}
             ${feature('Um único pagamento mensal para a família inteira')}
-            ${feature('Cada membro acessa com seu próprio usuário e permissões')
+            ${feature('Cada membro acessa com seu próprio usuário e permissões')}
             ${feature('Leitura inteligente dos padrões financeiros da família')}
           </ul>
           <div class="landing-plan-status current">Disponível</div>
@@ -3816,7 +3816,7 @@ function renderAuth(){
             ${feature('Relatórios anuais e comparativos avançados')}
             ${feature('Histórico da evolução patrimonial')}
             ${feature('Simulador de objetivos de longo prazo')}
-            ${feature('Cadastro e acompanhamento de bens e obrigações')
+            ${feature('Cadastro e acompanhamento de bens e obrigações')}
             ${feature('Copiloto inteligente avançado para cenários e decisões',true)}
           </ul>
           <div class="landing-plan-status current">Disponível para contratação</div>

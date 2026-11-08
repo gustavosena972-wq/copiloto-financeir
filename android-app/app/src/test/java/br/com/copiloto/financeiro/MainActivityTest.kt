@@ -12,7 +12,7 @@ class MainActivityTest {
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
-            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.38",
+            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40",
             MainActivity.APP_ENTRY_URL
         )
     }
@@ -127,7 +127,7 @@ class MainActivityTest {
         assertTrue(html.contains("const sb=supabase.createClient(SB_URL,SB_KEY)"))
         assertTrue(html.contains("sb.auth.getSession()"))
         assertTrue(html.contains("sb.auth.onAuthStateChange"))
-        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.38", MainActivity.APP_ENTRY_URL)
+        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40", MainActivity.APP_ENTRY_URL)
 
     }
 
@@ -160,7 +160,7 @@ class MainActivityTest {
 
     @Test
     fun navigationOnlyKeepsTheExactBundledHttpsAssetOrigin() {
-        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.38"))
+        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40"))
         assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/privacidade.html"))
         assertTrue(!isTrustedAppAssetUrl("http://appassets.androidplatform.net/assets/mobile.html"))
         assertTrue(!isTrustedAppAssetUrl("https://appassets.androidplatform.net.evil.test/assets/mobile.html"))
@@ -592,8 +592,8 @@ class MainActivityTest {
         @Test
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 39"))
-        assertTrue(gradle.contains("versionName = \"1.0.39\""))
+        assertTrue(gradle.contains("versionCode = 40"))
+        assertTrue(gradle.contains("versionName = \"1.0.40\""))
     }
 
     @Test
@@ -889,7 +889,7 @@ class MainActivityTest {
         assertTrue(js.contains("speechSynthesis"))
         assertTrue(js.contains("CopilotoVoice"))
         assertTrue(js.contains("voiceStatus"))
-        assertTrue(js.contains("send(true))")
+        assertTrue(js.contains("send(true)"))
         assertTrue(js.contains("Estou ouvindo"))
         assertTrue(js.contains("Calcular cenário"))
         assertTrue(js.contains("speechSynthesis"))
