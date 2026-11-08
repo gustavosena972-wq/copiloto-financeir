@@ -30,6 +30,21 @@ Deno.test("rejeita mensagem vazia", () => {
   );
 });
 
+Deno.test("inclui histórico recente sem permitir contexto ilimitado", () => {
+  const instructions = buildTamanduaInstructions({
+    knowledge: [],
+    learnings: [],
+    history: [
+      { role: "user", content: "Quero organizar minhas despesas." },
+      { role: "assistant", content: "Vamos começar pelas despesas do mês." },
+    ],
+  });
+
+  assert(instructions.includes("Histórico recente da conversa"));
+  assert(instructions.includes("Quero organizar minhas despesas."));
+  assert(instructions.includes("Vamos começar pelas despesas do mês."));
+});
+
 Deno.test("limita contexto e mantém instruções financeiras do Tamanduá", () => {
   const instructions = buildTamanduaInstructions({
     knowledge: ["Orçamento deve refletir renda e despesas reais."],
