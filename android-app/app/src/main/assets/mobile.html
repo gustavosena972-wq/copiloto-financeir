@@ -3287,7 +3287,58 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   .cf-tamandua-intro *{scroll-behavior:auto!important;transition:none!important}
 }
 </style>
-</head>
+<style id="cf-android-v0-1-0-28-tamandua-plans">
+.cf-plan-grid-premium{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+.cf-plan-card{position:relative;overflow:hidden;display:flex!important;flex-direction:column;gap:8px!important;text-align:left!important;padding:0!important;min-height:100%;background:linear-gradient(180deg,#fff 0%,#f8fbf8 100%)!important;border:1px solid #dce7df!important;box-shadow:0 14px 34px rgba(23,59,42,.08)!important}
+.cf-plan-card.selected{border-color:#146c43!important;box-shadow:0 18px 42px rgba(20,108,67,.16)!important}
+.cf-plan-card .pix-plan-head,.cf-plan-card>strong,.cf-plan-card .pix-plan-cap,.cf-plan-card .pix-plan-detail{margin-left:16px;margin-right:16px}
+.cf-plan-card .pix-plan-head{margin-top:2px}
+.cf-plan-card>strong{font-size:25px!important;letter-spacing:-.03em;color:#173b2a}
+.cf-plan-card .pix-plan-cap{margin-top:1px}
+.cf-plan-tamandua{padding:10px 10px 0;display:grid;gap:7px}
+.cf-plan-tamandua-stage{position:relative;min-height:185px;border-radius:18px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,#edf5ef 0%,#dcebe1 100%);border:1px solid #d7e4da}
+.cf-plan-tamandua-stage.tier-pro{background:linear-gradient(145deg,#f1f6f1,#e4eee6)}
+.cf-plan-tamandua-stage.tier-max{background:linear-gradient(145deg,#eef5f1,#dcebe5)}
+.cf-plan-tamandua-stage.tier-ultra{background:linear-gradient(145deg,#eaf3ed,#d5e6db)}
+.cf-plan-tamandua-character{position:relative;z-index:2;width:132px;height:162px;filter:drop-shadow(0 13px 12px rgba(28,57,40,.20));transition:transform .22s ease}
+.cf-plan-card:hover .cf-plan-tamandua-character,.cf-plan-card.selected .cf-plan-tamandua-character{transform:translateY(-3px) scale(1.025)}
+.cf-plan-tamandua-character svg{width:100%;height:100%}
+.cf-plan-tamandua-glow{position:absolute;width:130px;height:55px;border-radius:50%;bottom:13px;background:rgba(20,108,67,.13);filter:blur(12px)}
+.cf-plan-tamandua-mark{position:absolute;right:9px;top:9px;z-index:3;padding:5px 7px;border-radius:999px;background:rgba(255,255,255,.84);border:1px solid rgba(20,108,67,.12);font-size:8px;font-weight:900;letter-spacing:.08em;color:#37634d}
+.tier-max:after,.tier-ultra:after{content:"";position:absolute;inset:13px;border:1px solid rgba(20,108,67,.12);border-radius:14px;transform:rotate(-4deg)}
+.tier-ultra:before{content:"";position:absolute;width:88px;height:88px;border-radius:50%;border:1px solid rgba(216,242,74,.72);top:15px;left:50%;transform:translateX(-50%);box-shadow:0 0 0 8px rgba(216,242,74,.07)}
+.cf-plan-tamandua-copy{display:grid;gap:2px;padding:0 5px}
+.cf-plan-tamandua-copy span{font-size:8px;font-weight:950;letter-spacing:.11em;color:#146c43}
+.cf-plan-tamandua-copy small{font-size:9.5px;line-height:1.35;color:#6b7b71}
+@media(max-width:760px){
+  .cf-plan-grid-premium{grid-template-columns:1fr}
+  .cf-plan-card{min-height:0}
+  .cf-plan-tamandua-stage{min-height:155px}
+  .cf-plan-tamandua-character{width:112px;height:138px}
+}
+@media(prefers-reduced-motion:reduce){.cf-plan-tamandua-character{transition:none}}
+</style><style id="cf-tamandua-bot-ui">
+.cf-tamandua-chat{position:fixed;right:18px;bottom:94px;width:min(390px,calc(100vw - 28px));z-index:140;background:#fff;border:1px solid #d9e4dc;border-radius:22px;box-shadow:0 24px 70px rgba(20,55,35,.24);overflow:hidden;color:#20382b}
+.cf-tamandua-chat[hidden]{display:none}
+.cf-tamandua-chat-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 15px;border-bottom:1px solid #e5ece7;background:linear-gradient(145deg,#f4f8f4,#fff)}
+.cf-tamandua-chat-brand{display:flex;align-items:center;gap:9px}.cf-tamandua-chat-brand .avatar{width:38px;height:38px;border-radius:12px;background:#173b2a;display:grid;place-items:center;overflow:hidden}.cf-tamandua-chat-brand svg{width:34px;height:34px}
+.cf-tamandua-chat-brand b{display:block;font-size:12px}.cf-tamandua-chat-brand span{display:block;font-size:9.5px;color:#708078;margin-top:2px}
+.cf-tamandua-chat-close{background:#edf3ee!important;color:#365443!important;box-shadow:none!important;padding:7px 10px!important;min-height:36px!important}
+.cf-tamandua-chat-messages{height:300px;overflow:auto;padding:14px;background:#f7faf8;display:grid;align-content:start;gap:9px}
+.cf-tamandua-msg{max-width:86%;padding:10px 12px;border-radius:14px;font-size:11.5px;line-height:1.5;white-space:pre-wrap}
+.cf-tamandua-msg.bot{justify-self:start;background:#fff;border:1px solid #e0e8e2}.cf-tamandua-msg.user{justify-self:end;background:#173b2a;color:#fff}
+.cf-tamandua-msg.loading{opacity:.65}
+.cf-tamandua-chat-compose{display:grid;grid-template-columns:1fr auto;gap:8px;padding:11px;border-top:1px solid #e5ece7;background:#fff}
+.cf-tamandua-chat-compose textarea{min-height:46px;max-height:110px;resize:none;border:1px solid #d6e1da;border-radius:13px;padding:10px;font-size:11.5px;color:#24382c;background:#fff}
+.cf-tamandua-chat-compose textarea:focus{outline:0;border-color:#79a98a;box-shadow:0 0 0 3px rgba(20,108,67,.08)}
+.cf-tamandua-chat-compose button{min-width:72px;min-height:46px;background:#173b2a;box-shadow:none!important;padding:8px 12px}
+.cf-tamandua-chat-note{padding:0 12px 10px;font-size:8.5px;color:#819087;background:#fff}
+@media(max-width:640px){
+  .cf-tamandua-chat{right:10px;left:10px;bottom:82px;width:auto;border-radius:20px}
+  .cf-tamandua-chat-messages{height:min(48vh,340px)}
+}
+@media(prefers-reduced-motion:reduce){.cf-tamandua-chat *{scroll-behavior:auto!important;transition:none!important}}
+</style></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"></div>
 <div id="toast"></div>
@@ -3344,14 +3395,45 @@ function tamanduaStorageKey(kind){
   const userId=S.user?.id;
   return userId?'copiloto_tamandua_'+kind+'_v1_'+encodeURIComponent(userId):null;
 }
-function loadTamanduaProfile(){
+async function loadTamanduaProfile(){
   S.tamanduaProfile=null;
-  const profileKey=tamanduaStorageKey('profile');
-  if(!profileKey)return;
-  try{
-    const raw=localStorage.getItem(profileKey);
-    S.tamanduaProfile=raw?JSON.parse(raw):null;
-  }catch(e){S.tamanduaProfile=null}
+  if(!S.user?.id||!S.fam?.id)return;
+  const{data,error}=await sb.from('ia_aprendizados')
+    .select('valor,confianca,evidencia,atualizado_em')
+    .eq('usuario_id',S.user.id)
+    .eq('familia_id',S.fam.id)
+    .eq('chave','perfil_tamandua')
+    .maybeSingle();
+  if(error){console.warn('Não foi possível carregar o perfil adaptativo do Tamanduá.',error);return}
+  S.tamanduaProfile=data?.valor||null;
+}
+async function mobileLearnFromInteraction(profile){
+  if(!S.user?.id||!S.fam?.id||!profile)return;
+  const payload={
+    familia_id:S.fam.id,
+    usuario_id:S.user.id,
+    chave:'perfil_tamandua',
+    valor:profile,
+    confianca:0.70,
+    evidencia:1,
+    ultima_evidencia_em:new Date().toISOString(),
+    atualizado_em:new Date().toISOString()
+  };
+  const{error}=await sb.from('ia_aprendizados').upsert(payload,{onConflict:'familia_id,usuario_id,chave'});
+  if(error)throw error;
+  await sb.from('ia_eventos').insert({
+    familia_id:S.fam.id,
+    usuario_id:S.user.id,
+    tipo:'perfil_tamandua_atualizado',
+    intencao:'personalizacao',
+    contexto:{
+      melhorar:Array.isArray(profile.melhorar)?profile.melhorar:[],
+      necessidade:Array.isArray(profile.necessidade)?profile.necessidade:[],
+      organizacao:Array.isArray(profile.organizacao)?profile.organizacao:[],
+      economia:Array.isArray(profile.economia)?profile.economia:[]
+    },
+    resultado:'preferencias_salvas'
+  });
 }
 function tamanduaIntroCompleted(){
   const introKey=tamanduaStorageKey('intro');
@@ -3400,7 +3482,7 @@ function tamanduaIntroMarkup(step=0){
     '<div class="cf-tamandua-intro-shell">'+
       '<div class="cf-tamandua-intro-top"><span class="cf-tamandua-intro-progress">2 DE 2 · VAMOS PERSONALIZAR</span></div>'+
       '<section class="cf-tamandua-intro-card">'+
-        '<div class="cf-tamandua-intro-copy"><span class="kicker">UMA PERGUNTA DE CADA VEZ, SEM PRESSA</span><h1 id="cf-tamandua-question-title">Quero entender o que você precisa.</h1><p>Você pode marcar mais de uma opção em cada pergunta. Marque pelo menos uma resposta em cada bloco para continuar. Suas preferências ficam salvas neste aparelho e adaptam as falas do Tamanduá; não precisamos de valores nem dados bancários.</p></div>'+
+        '<div class="cf-tamandua-intro-copy"><span class="kicker">UMA PERGUNTA DE CADA VEZ, SEM PRESSA</span><h1 id="cf-tamandua-question-title">Quero entender o que você precisa.</h1><p>Você pode marcar mais de uma opção em cada pergunta. Marque pelo menos uma resposta em cada bloco para continuar. Suas preferências ficam salvas na sua conta, com acesso protegido por família e usuário, e adaptam as falas do Tamanduá; não precisamos de valores nem dados bancários.</p></div>'+
         '<div class="cf-tamandua-question-list">'+
           '<section class="cf-tamandua-question"><h2>Tem alguma área da sua vida que você quer melhorar porque baixou o app?</h2><p>Marque tudo que fizer sentido.</p><div class="cf-tamandua-options">'+
             check('melhorar','organizar','Organizar melhor minhas finanças')+
@@ -3457,17 +3539,17 @@ function finishTamanduaIntro(){
   groups.forEach(name=>profile[name]=[...document.querySelectorAll('input[name="'+name+'"]:checked')].map(x=>x.value));
   profile.version=1;
   profile.savedAt=new Date().toISOString();
-  const profileKey=tamanduaStorageKey('profile');
   const introKey=tamanduaStorageKey('intro');
-  if(!profileKey||!introKey){
+  if(!introKey||!S.user?.id||!S.fam?.id){
     toast('Entre novamente na sua conta para salvar suas preferências.',1);
     return;
   }
   try{
-    localStorage.setItem(profileKey,JSON.stringify(profile));
+    await mobileLearnFromInteraction(profile);
     localStorage.setItem(introKey,'1');
   }catch(e){
-    toast('Não foi possível salvar suas respostas neste aparelho. Tente novamente.',1);
+    console.error('Falha ao persistir o perfil adaptativo:',e);
+    toast('Não foi possível salvar suas preferências agora. Tente novamente.',1);
     return;
   }
   S.tamanduaProfile=profile;
@@ -3511,7 +3593,6 @@ async function boot(){
   if(S.rt){try{sb.removeChannel(S.rt)}catch(e){}S.rt=null}
   await carregarConfig();
   if(!S.user){S.tamanduaProfile=null;renderAuth();checarServidor();return}
-  loadTamanduaProfile();
   $('#app').innerHTML='<div class="auth mu">Carregando…</div>';
   const adminCheck=await sb.rpc('eh_admin');
   if(adminCheck.error)throw adminCheck.error;
@@ -3527,6 +3608,7 @@ async function boot(){
   }
   // Cada conta possui uma única família. A associação vem do banco; não há seletor local de família.
   S.me=rows[0];S.fam=S.me.familias;
+  await loadTamanduaProfile();
   if(!S.admin&&!S.internalTester&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
   try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);S.notifs=nr.data||[]}catch(e){S.notifs=[]}
@@ -4584,10 +4666,22 @@ async function fecharAno(){
 const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button><button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>`;
 /*PIX*/
 const PLANOS={
-  pro:{nome:'Pro',valor:23.90,limite:2,produto:'copiloto_pro_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
-  max:{nome:'Max',valor:35.90,limite:6,produto:'copiloto_max_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
-  ultra:{nome:'Ultra',valor:59.90,limite:null,produto:'copiloto_ultra_30d',recursos:{relatorios:true,patrimonioHistorico:true,simulador:true}}
+  pro:{nome:'Pro',valor:30.00,limite:2,produto:'copiloto_pro_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
+  max:{nome:'Max',valor:40.00,limite:6,produto:'copiloto_max_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
+  ultra:{nome:'Ultra',valor:60.00,limite:null,produto:'copiloto_ultra_30d',recursos:{relatorios:true,patrimonioHistorico:true,simulador:true}}
 };
+function tamanduaPlanMarkup(tier){
+  const labels={
+    pro:{kicker:'TAMANDUÁ PRO',tag:'ORGANIZAÇÃO',desc:'O mesmo Tamanduá, com a base da inteligência financeira.'},
+    max:{kicker:'TAMANDUÁ MAX',tag:'CONTEXTO',desc:'Mais presença, contexto e acompanhamento para a rotina.'},
+    ultra:{kicker:'TAMANDUÁ ULTRA',tag:'INTELIGÊNCIA',desc:'A expressão máxima do personagem dentro do Copiloto.'}
+  };
+  const m=labels[tier]||labels.pro;
+  return '<div class="cf-plan-tamandua" data-tamandua-tier="'+tier+'"><div class="cf-plan-tamandua-stage tier-'+tier+'">'+
+    '<div class="cf-plan-tamandua-glow"></div><div class="cf-plan-tamandua-character">'+tamanduaCharacterSvg()+'</div>'+
+    '<span class="cf-plan-tamandua-mark">'+m.tag+'</span></div><div class="cf-plan-tamandua-copy"><span>'+m.kicker+'</span><small>'+m.desc+'</small></div></div>';
+}
+
 const planoAtual=()=>PLANOS[S.planoEscolhido||S.fam?.plano||'pro']||PLANOS.pro;
 const planoTemRecurso=(recurso)=>Boolean(PLANOS[S.fam?.plano||'pro']?.recursos?.[recurso]);
 const limiteMembros=()=>PLANOS[S.fam?.plano||'pro']?.limite??Infinity;
@@ -4615,10 +4709,25 @@ async function renderPaywall(){
     <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>COMPRA E ACESSO FAMILIAR</small></div></header>
     <div class="pix-layout"><section class="pix-card">
       <div class="pix-heading"><span class="pix-kicker">COMPRA PELA GOOGLE PLAY</span><h1>${S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date()?'Renove o acesso':'Escolha o plano da família'}</h1><p>Selecione um plano. A compra é única, concede 30 dias após a aprovação manual e não tem renovação automática.</p></div>
-      <div class="pix-plan-grid">
-        <button type="button" class="pix-plan ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro"><span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span><strong>${S.playProducts?.copiloto_pro_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span></button>
-        <button type="button" class="pix-plan ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max"><span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span><strong>${S.playProducts?.copiloto_max_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas.</span></button>
-        <button type="button" class="pix-plan ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra"><span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span><strong>${S.playProducts?.copiloto_ultra_30d?.formattedPrice||"Preço na Google Play"}</strong><span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span></button>
+      <div class="pix-plan-grid cf-plan-grid-premium">
+        <button type="button" class="pix-plan cf-plan-card ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro" data-plan-price="30.00">
+          ${tamanduaPlanMarkup('pro')}
+          <span class="pix-plan-head"><b>Pro</b><small>CONTROLE FINANCEIRO</small></span>
+          <strong>${S.playProducts?.copiloto_pro_30d?.formattedPrice||brl(PLANOS.pro.valor)}</strong>
+          <span class="pix-plan-cap">Até 2 pessoas</span><span class="pix-plan-detail">Planilha mensal, categorias, visão anual, importação e exportação.</span>
+        </button>
+        <button type="button" class="pix-plan cf-plan-card ${S.planoEscolhido==='max'?'selected':''}" data-act="plano" data-plano="max" data-plan-price="40.00">
+          ${tamanduaPlanMarkup('max')}
+          <span class="pix-plan-head"><b>Max</b><small>PLANEJAMENTO</small></span>
+          <strong>${S.playProducts?.copiloto_max_30d?.formattedPrice||brl(PLANOS.max.valor)}</strong>
+          <span class="pix-plan-cap">Até 6 pessoas</span><span class="pix-plan-detail">Tudo do Pro, com espaço para até 6 pessoas.</span>
+        </button>
+        <button type="button" class="pix-plan cf-plan-card ${S.planoEscolhido==='ultra'?'selected':''}" data-act="plano" data-plano="ultra" data-plan-price="60.00">
+          ${tamanduaPlanMarkup('ultra')}
+          <span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span>
+          <strong>${S.playProducts?.copiloto_ultra_30d?.formattedPrice||brl(PLANOS.ultra.valor)}</strong>
+          <span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span>
+        </button>
       </div>
       <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${precoSelecionado}</strong></div>
         <div class="pix-payment" hidden><b>Pagamento processado pela Google Play</b></div>
