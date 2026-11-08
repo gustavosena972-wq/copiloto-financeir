@@ -34,11 +34,14 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         const val ACCEPT_WEBVIEW_COOKIES = false
         const val ACCEPT_THIRD_PARTY_COOKIES = false
         private const val BILLING_BRIDGE_NAME = "CopilotoPlayBilling"
+        private const val VOICE_BRIDGE_NAME = "CopilotoVoice"
     }
 
     private lateinit var webView: WebView
     private lateinit var billingClient: BillingClient
     private var nativeBillingBridgeAvailable = false
+    private var textToSpeech: TextToSpeech? = null
+    private var nativeVoiceBridgeAvailable = false
 
     private val productIds = listOf(
         "copiloto_pro_30d",
@@ -95,6 +98,8 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
 
         webView.webChromeClient = WebChromeClient()
         registerBillingBridge()
+        initializeNativeVoice()
+        registerVoiceBridge()
 
         webView.webViewClient = object : WebViewClientCompat() {
             override fun shouldInterceptRequest(
@@ -154,6 +159,63 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
 
         val quotedScript = JSONObject.quote(script)
         webView.evaluateJavascript("eval($quotedScript)", null)
+    }
+
+    private fun initializeNativeVoice() {
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                textToSpeech?.language = Locale("pt", "BR")
+                textToSpeech?.setSpeechRate(0.94f)
+                textToSpeech?.setPitch(1.0f)
+            }
+        }
+    }
+
+    private fun registerVoiceBridge() {
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) return
+
+        WebViewCompat.addWebMessageListener(
+            webView,
+            VOICE_BRIDGE_NAME,
+            setOf(APP_ASSET_ORIGIN)
+        ) { _, message: WebMessageCompat, sourceOrigin, isMainFrame, _ ->
+            if (!isTrustedBillingOrigin(
+                    sourceOrigin.scheme,
+                    sourceOrigin.host,
+                    sourceOrigin.port,
+                    isMainFrame
+                )
+            ) {
+                return@addWebMessageListener
+            }
+            if (message.type != WebMessageCompat.TYPE_STRING) return@addWebMessageListener
+            message.data?.let(::handleVoiceBridgeMessage)
+        }
+        nativeVoiceBridgeAvailable = true
+    }
+
+    private fun handleVoiceBridgeMessage(rawMessage: String) {
+        val payload = runCatching { JSONObject(rawMessage) }.getOrNull() ?: return
+        when (payload.optString("action")) {
+            "speak" -> {
+                val text = payload.optString("text").trim().take(5000)
+                if (text.isNotBlank()) {
+                    runOnUiThread {
+                        textToSpeech?.stop()
+                        textToSpeech?.speak(
+                            text,
+                            TextToSpeech.QUEUE_FLUSH,
+                            null,
+                            "tamandua-response"
+                        )
+                    }
+                }
+            }
+
+            "stop" -> runOnUiThread {
+                textToSpeech?.stop()
+            }
+        }
     }
 
     private fun registerBillingBridge() {
@@ -462,6 +524,10 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         if (::billingClient.isInitialized) {
             billingClient.endConnection()
         }
+
+        textToSpeech?.stop()
+        textToSpeech?.shutdown()
+        textToSpeech = null
 
         super.onDestroy()
     }
