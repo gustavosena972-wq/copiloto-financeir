@@ -47,6 +47,37 @@ export function normalizeBotInput(input: unknown): BotInput {
   return { message, context };
 }
 
+export type TamanduaMemoryUpdate = {
+  key: string;
+  value: Record<string, unknown>;
+  confidence: number;
+  evidence: number;
+};
+
+export function buildTamanduaMemoryUpdates(context: Record<string, unknown>): TamanduaMemoryUpdate[] {
+  const financialKeys = ["mes", "ano", "saldo", "receitas", "despesas", "pendentes", "atrasadas"];
+  const financial: Record<string, unknown> = {};
+
+  for (const key of financialKeys) {
+    const value = context[key];
+    if (typeof value === "string") {
+      const cleaned = cleanString(value, 40);
+      if (cleaned) financial[key] = cleaned;
+    } else if (typeof value === "number" && Number.isFinite(value)) {
+      financial[key] = value;
+    }
+  }
+
+  if (Object.keys(financial).length < 2) return [];
+
+  return [{
+    key: "estado_financeiro_atual",
+    value: financial,
+    confidence: 0.7,
+    evidence: 1,
+  }];
+}
+
 export function buildTamanduaInstructions(input: {
   knowledge: Array<string>;
   learnings: Array<{ key: string; value: unknown }>;
