@@ -852,4 +852,44 @@ class MainActivityTest {
         assertFalse(html.contains("data-mobile-nav=\"tamandua\""))
     }
 
+
+    @Test
+    fun androidV029TamanduaProactivelyMonitorsLiveFinancialChanges() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("function mobileTamanduaLiveContext()"))
+        assertTrue(html.contains("function mobileTamanduaProactiveSignature()"))
+        assertTrue(html.contains("function mobileTamanduaProactiveCheck("))
+        assertTrue(html.contains("async function callTamanduaBot("))
+        assertTrue(html.contains("tamandua-bot"))
+        assertTrue(html.contains("S.tamanduaProactive"))
+    }
+
+    @Test
+    fun androidV029TamanduaProactiveMessageIsVisualAndDoesNotAddNavigation() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("cf-companion-speech"))
+        assertTrue(html.contains("aria-live="polite""))
+        assertTrue(html.contains("data-tamandua-proactive"))
+        assertTrue(html.contains("mobileTamanduaShowProactive"))
+        assertFalse(html.contains("data-mobile-nav="tamandua""))
+    }
+
+    @Test
+    fun androidV029TamanduaProactiveMonitorIsTriggeredByRealtimeRefreshes() {
+        val html = File("src/main/assets/mobile.html").readText()
+        val realtime = html.substringAfter("function atualizarAoVivo()").substringBefore("document.addEventListener('focusout'")
+        assertTrue(realtime.contains("mobileTamanduaProactiveCheck"))
+        assertTrue(html.contains("mobileTamanduaProactiveCheck('initial')"))
+        assertTrue(html.contains("mobileTamanduaProactiveCheck('realtime')"))
+    }
+
+    @Test
+    fun androidV029TamanduaDoesNotSpamTheUserWithRepeatedIdenticalSignals() {
+        val html = File("src/main/assets/mobile.html").readText()
+        assertTrue(html.contains("lastSignature"))
+        assertTrue(html.contains("cooldownMs"))
+        assertTrue(html.contains("MOBILE_TAMANDUA_PROACTIVE_COOLDOWN_MS"))
+        assertTrue(html.contains("signature===state.lastSignature"))
+    }
+
 }
