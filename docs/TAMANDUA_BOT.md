@@ -47,3 +47,10 @@ O bot não pode:
 - gravar conhecimento global diretamente a partir de uma mensagem do usuário.
 
 A evolução da inteligência ocorre por conhecimento validado, memória adaptativa, eventos e feedback. Isso não significa retreinamento automático do modelo a cada conversa.
+
+
+## Evolução recente
+- O bot usa até 8 mensagens da conversa mais recente do usuário/família como contexto, com conteúdo truncado no servidor.
+- O histórico é recuperado por conversas_ia + mensagens_ia sob a sessão autenticada; não é armazenado em localStorage.
+- A camada de inteligência mantém memória adaptativa em ia_aprendizados e conhecimento validado em ia_conhecimento.
+- As políticas RLS da camada de inteligência foram endurecidas e receberam índices para família, conversa e mensagem.
