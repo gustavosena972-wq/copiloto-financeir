@@ -87,14 +87,19 @@ Deno.serve(async (request) => {
     return json({ error: "Não foi possível identificar a família da conta." }, 403, origin);
   }
 
-  const { data: latestConversation } = await userClient
-    .from("conversas_ia")
-    .select("id")
-    .eq("usuario_id", user.id)
-    .eq("familia_id", member.familia_id)
-    .order("criado_em", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const requestedConversationId = typeof input.context.conversa_id === "string"
+    ? input.context.conversa_id
+    : null;
+
+  const { data: latestConversation } = requestedConversationId
+    ? await userClient
+        .from("conversas_ia")
+        .select("id")
+        .eq("id", requestedConversationId)
+        .eq("usuario_id", user.id)
+        .eq("familia_id", member.familia_id)
+        .maybeSingle()
+    : { data: null };
 
   const [{ data: knowledge }, { data: learnings }, { data: historyRows }] = await Promise.all([
     userClient
@@ -219,6 +224,50 @@ Deno.serve(async (request) => {
     }
   }
 
+  let conversationId = latestConversation?.id ?? null;
+
+  if (!conversationId) {
+    const title = input.message.replace(/\s+/g, " ").trim().slice(0, 80);
+    const { data: conversation, error: conversationError } = await userClient
+      .from("conversas_ia")
+      .insert({
+        familia_id: member.familia_id,
+        usuario_id: user.id,
+        titulo: title || "Conversa com Tamanduá",
+      })
+      .select("id")
+      .single();
+
+    if (conversationError || !conversation?.id) {
+      console.error("Tamanduá conversation persistence error", conversationError?.message);
+    } else {
+      conversationId = conversation.id;
+    }
+  }
+
+  if (conversationId) {
+    const { error: messageError } = await userClient
+      .from("mensagens_ia")
+      .insert([
+        {
+          familia_id: member.familia_id,
+          conversa_id: conversationId,
+          papel: "usuario",
+          conteudo: input.message,
+        },
+        {
+          familia_id: member.familia_id,
+          conversa_id: conversationId,
+          papel: "assistente",
+          conteudo: answer,
+        },
+      ]);
+
+    if (messageError) {
+      console.error("Tamanduá message persistence error", messageError.message);
+    }
+  }
+
   await userClient.from("ia_eventos").insert({
     familia_id: member.familia_id,
     usuario_id: user.id,
@@ -237,5 +286,6 @@ Deno.serve(async (request) => {
     answer,
     model,
     knowledgeUsed: knowledge?.length ?? 0,
+    conversationId,
   }, 200, origin);
 });
