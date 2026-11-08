@@ -19,8 +19,8 @@ android {
         applicationId = "br.com.copiloto.financeiro"
         minSdk = 24
         targetSdk = 36
-        versionCode = 28
-        versionName = "1.0.28"
+        versionCode = 29
+        versionName = "1.0.29"
     }
 
     buildFeatures {
