@@ -31,7 +31,7 @@ import java.util.Locale
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     companion object {
-        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html"
+        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.38"
         private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
         const val ACCEPT_WEBVIEW_COOKIES = false
         const val ACCEPT_THIRD_PARTY_COOKIES = false
@@ -85,6 +85,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             allowFileAccessFromFileURLs = false
             allowUniversalAccessFromFileURLs = false
             mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
             javaScriptCanOpenWindowsAutomatically = false
             setSupportMultipleWindows(false)
             mediaPlaybackRequiresUserGesture = true
