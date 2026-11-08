@@ -807,8 +807,8 @@ class MainActivityTest {
         assertTrue(html.contains("function mobileTamanduaProactiveInsights()"))
         assertTrue(html.contains("cf-tamandua-proactive"))
         assertTrue(html.contains("Tamanduá percebeu"))
-        assertTrue(html.contains("data-act="tamandua-proactive-action""))
-        assertTrue(html.contains("data-act="tamandua-proactive-dismiss""))
+        assertTrue(html.contains("data-act=\"tamandua-proactive-action\""))
+        assertTrue(html.contains("data-act=\"tamandua-proactive-dismiss\""))
         assertTrue(html.contains("Maior categoria"))
         assertTrue(html.contains("próximo passo"))
     }
