@@ -43,7 +43,9 @@ jobs:
           test -s android-app/app/src/main/assets/supabase.js
 
       - name: Validate Android WebView assets
-        run: python3 tests/android_webview_assets_test.py
+        run: |
+          python3 tests/android_webview_assets_test.py
+          node --test tests/android_render_test.cjs
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4

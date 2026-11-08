@@ -4254,7 +4254,7 @@ function viewGrupos(){
 
   return `<div class="cards">${Object.entries(G).map(([k,[n,v]])=>`<div class="card"><small>${n}</small><b>${brl(v)}</b>${quickEditButton(k)}</div>`).join('')}
   <div class="card"><small>Total de despesas</small><b class="neg">${brl(tot)}</b>${quickEditButton('despesas')}</div>
-  <div class="card"><small>Saldo → vai para a poupança</small><b class="${rec-tot>=0?'pos':'neg'}">${brl(rec-tot)}</b></div>${ring}${indicadorCard}</div>`;
+  <div class="card"><small>Saldo → vai para a poupança</small><b class="${rec-tot>=0?'pos':'neg'}">${brl(rec-tot)}</b></div>${ring}</div>`;
 }
 function viewAno(){
   const R=S.resumo||[];const MC=Object.fromEntries((S.meta||[]).map(m=>[m.mes,m]));const T=k=>R.reduce((a,r)=>a+Number(r[k]),0);
@@ -4267,6 +4267,8 @@ function viewAno(){
     return `<tr data-act="irmes" data-m="${r.mes}" style="cursor:pointer"><td>${MN[r.mes-1]} ${r.status==='fechado'?'🔒':''}</td><td class="pos">${brl(r.receita)}</td><td>${brl(r.fixas)}</td><td>${brl(r.cartoes)}</td><td>${brl(r.retiradas)}</td><td>${brl(r.outras)}</td><td class="neg">${brl(r.total_despesas)}</td><td class="${r.saldo>=0?'pos':'neg'}">${brl(r.saldo)}</td><td>${brl(r.poupanca_acumulada)}</td><td>${r.pct_cartoes}%</td><td>${mc}</td></tr>`}).join('');
 
   const mobileRows=R.map(r=>{
+    const m=MC[r.mes];
+    const mc=!m||m.meta==null?'—':(Number(m.real)<=Number(m.meta)?`<span class="pos">✔ ${brl(m.meta)}</span>`:`<span class="neg">▲ meta ${brl(m.meta)}</span>`);
     const mes=MN[r.mes-1];
     const saldoClass=Number(r.saldo)>=0?'pos':'neg';
     const status=r.status==='fechado'?' · Fechado':'';
