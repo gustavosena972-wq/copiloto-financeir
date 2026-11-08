@@ -15,3 +15,9 @@ print("PASS: Android WebView uses a bundled Supabase runtime asset.")
 assert '<div id="app" class="wrap"><div class="cf-mobile-startup"' in html
 assert 'mobile.html?v=1.0.38' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
 print("PASS: Android startup has visible fallback and cache-busted app entry.")
+
+
+# Regression: the startup script must not contain duplicate function declarations that
+# leave the WebView on the static startup screen because the main script cannot parse.
+assert html.count("function mostrarErroInicial(e)") == 1
+print("PASS: Android startup JavaScript parses past the initial error handler declaration.")
