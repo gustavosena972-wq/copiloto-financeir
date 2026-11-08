@@ -1,6 +1,7 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
   buildTamanduaInstructions,
+  buildTamanduaMemoryUpdates,
   normalizeBotInput,
   trimModelOutput,
 } from "./bot-core.ts";
@@ -60,4 +61,34 @@ Deno.test("limita contexto e mantém instruções financeiras do Tamanduá", () 
 Deno.test("limpa saída do modelo sem devolver estrutura interna", () => {
   assertEquals(trimModelOutput("  Olá!  "), "Olá!");
   assertThrows(() => trimModelOutput(""), Error, "Resposta vazia");
+});
+
+
+Deno.test("constrói memória financeira somente com sinais permitidos do contexto", () => {
+  const memory = buildTamanduaMemoryUpdates({
+    mes: "novembro",
+    ano: 2026,
+    saldo: 1200,
+    receitas: 5000,
+    despesas: 3200,
+    pendentes: 400,
+    atrasadas: 100,
+    intencao: "organizar_despesas",
+    lancamentos: "não deve ser persistido",
+  });
+
+  assertEquals(memory, [{
+    key: "estado_financeiro_atual",
+    value: {
+      mes: "novembro",
+      ano: 2026,
+      saldo: 1200,
+      receitas: 5000,
+      despesas: 3200,
+      pendentes: 400,
+      atrasadas: 100,
+    },
+    confidence: 0.7,
+    evidence: 1,
+  }]);
 });
