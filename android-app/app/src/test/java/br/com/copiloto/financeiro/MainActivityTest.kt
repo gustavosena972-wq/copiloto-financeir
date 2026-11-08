@@ -887,6 +887,10 @@ class MainActivityTest {
         assertTrue(js.contains("tamandua-bot"))
         assertTrue(js.contains("SpeechRecognition"))
         assertTrue(js.contains("speechSynthesis"))
+        assertTrue(js.contains("CopilotoVoice"))
+        assertTrue(js.contains("voiceStatus"))
+        assertTrue(js.contains("send(true))")
+        assertTrue(js.contains("Estou ouvindo"))
         assertTrue(js.contains("Calcular cenário"))
         assertTrue(js.contains("speechSynthesis"))
         assertTrue(js.contains("Compromissos financeiros"))
@@ -900,6 +904,9 @@ class MainActivityTest {
         assertTrue(activity.contains("injectTamanduaEnhancements()"))
         assertTrue(activity.contains("assets.open("tamandua-enhancements.js")"))
         assertTrue(activity.contains("eval($quotedScript)"))
+        assertTrue(activity.contains("CopilotoVoice"))
+        assertTrue(activity.contains("TextToSpeech"))
+        assertTrue(activity.contains("Locale(\"pt\", \"BR\")"))
     }
 
 }
