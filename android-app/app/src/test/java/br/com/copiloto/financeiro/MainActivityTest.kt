@@ -929,4 +929,12 @@ class MainActivityTest {
         assertTrue(activity.contains("setSpeechRate"))
     }
 
+
+    @Test
+    fun nativeVoiceBridgeDoesNotUseIllegalReturnFromRunnable() {
+        val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
+        assertFalse(activity.contains("return@runOnUiThread"))
+        assertTrue(activity.contains("if (ttsReady)"))
+    }
+
 }
