@@ -1,6 +1,7 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
   buildTamanduaInstructions,
+  buildTamanduaMemoryKey,
   buildTamanduaMemoryUpdates,
   normalizeBotInput,
   trimModelOutput,
@@ -91,4 +92,12 @@ Deno.test("constrói memória financeira somente com sinais permitidos do contex
     confidence: 0.7,
     evidence: 1,
   }]);
+});
+
+
+Deno.test("normaliza memória do Tamanduá para uma chave Redis determinística", () => {
+  assertEquals(
+    buildTamanduaMemoryKey("fam-123", "user-456"),
+    "tamandua:memory:fam-123:user-456",
+  );
 });
