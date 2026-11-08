@@ -876,4 +876,27 @@ class MainActivityTest {
         assertFalse(html.contains("data-mobile-nav=\"tamandua\""))
     }
 
+
+    @Test
+    fun tamanduaEnhancementAssetProvidesChatHistoryVoiceAndSimulation() {
+        val asset = File("src/main/assets/tamandua-enhancements.js")
+        assertTrue(asset.isFile)
+        val js = asset.readText()
+        assertTrue(js.contains("conversas_ia"))
+        assertTrue(js.contains("mensagens_ia"))
+        assertTrue(js.contains("tamandua-bot"))
+        assertTrue(js.contains("SpeechRecognition"))
+        assertTrue(js.contains("SpeechSynthesis"))
+        assertTrue(js.contains("Calcular cenário"))
+        assertTrue(js.contains("Principais categorias"))
+    }
+
+    @Test
+    fun mainActivityInjectsTamanduaEnhancementAssetAfterTrustedPageLoad() {
+        val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
+        assertTrue(activity.contains("injectTamanduaEnhancements()"))
+        assertTrue(activity.contains("assets.open("tamandua-enhancements.js")"))
+        assertTrue(activity.contains("eval($quotedScript)"))
+    }
+
 }
