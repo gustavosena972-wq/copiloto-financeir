@@ -796,7 +796,247 @@ body[data-ui="premium-fintech"]
   display: none !important;
 }
 
-body[data-ui="premium-fintech"] #app .landing-page .landing-intro:before {display:none!important}
-body[data-ui="premium-fintech"] #app .landing-page .landing-hero {padding-top:48px!important}
-body[data-ui="premium-fintech"] #app .landing-page .landing-section-heading {padding:36px 0 20px!important}
-body[data-ui="premium-fintech"] #app .landing-page .landing-login-intro {padding:32px 0 12px!important}
+body[data-ui="premium-fintech"] #app .landing-page .landing-intro:before {
+  display: none !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-hero {
+  padding-top: 48px !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-section-heading {
+  padding: 36px 0 20px !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-login-intro {
+  padding: 32px 0 12px !important;
+}
+
+/* Image one: a connected midnight scene, with our own finance geometry. */
+body:has(.landing-page) {
+  background: #090e1c !important;
+}
+body:has(.landing-page):before {
+  background:
+    radial-gradient(ellipse at 75% 10%, #0ea6c440, transparent 48%),
+    radial-gradient(ellipse at 8% 62%, #6334be52, transparent 48%),
+    radial-gradient(ellipse at 94% 78%, #df873622, transparent 44%) !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-showcase {
+  display: grid !important;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: center !important;
+  gap: 45px !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-intro h1 {
+  max-width: none !important;
+  font-family: Roboto, system-ui, sans-serif !important;
+  font-size: unset !important;
+  line-height: 1.1 !important;
+}
+.cf-brand-reveal {
+  display: grid;
+  gap: 0;
+  perspective: 900px;
+  font-size: clamp(44px, 5.3vw, 70px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  margin-bottom: 24px;
+  color: #f7f7ff;
+}
+.cf-brand-reveal > span {
+  display: block;
+}
+.cf-brand-reveal > span:last-child {
+  color: #9cdcf5;
+}
+.cf-brand-benefit {
+  display: block;
+  font-size: clamp(25px, 2.5vw, 34px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.17;
+  max-width: 22ch;
+  color: #eef0fc;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-hero-primary,
+body[data-ui="premium-fintech"]
+  #app
+  .landing-page
+  .landing-nav
+  .landing-nav-cta {
+  background: #a0e3f1 !important;
+  color: #102c43 !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-hero-secondary {
+  border-color: #7588ae !important;
+  color: #e9ebff !important;
+  background: #26345548 !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-intro > p,
+body[data-ui="premium-fintech"] #app .landing-page .landing-section-heading p,
+body[data-ui="premium-fintech"] #app .landing-page .landing-login-intro p {
+  color: #c9d1eb !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-cta,
+body[data-ui="premium-fintech"] #app .landing-page .landing-primary {
+  background: #5546ac !important;
+  color: #fff !important;
+}
+.cf-finance-orbit {
+  height: 390px;
+  position: relative;
+  perspective: 1000px;
+  isolation: isolate;
+  min-width: 0;
+}
+.cf-orbit-shadow {
+  position: absolute;
+  inset: 30% 2% 0;
+  background: radial-gradient(ellipse, #6e4ee940, transparent 66%);
+  transform: rotateX(60deg);
+}
+.cf-finance-disc {
+  position: absolute;
+  top: 42px;
+  left: calc(50% - 105px);
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 30deg,
+    #66c6ed 0 43%,
+    #b69cef 43% 72%,
+    #ffbc75 72% 100%
+  );
+  transform: rotateX(54deg) rotateZ(-25deg);
+  box-shadow:
+    0 12px 0 #304a70,
+    0 20px 0 #172840,
+    0 35px 44px #0005;
+}
+.cf-finance-disc i {
+  position: absolute;
+  inset: 25%;
+  border-radius: 50%;
+  background: #10172b;
+  box-shadow: inset 0 12px 0 #040b17;
+}
+.cf-orbit-card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 19px;
+  background: #263451b8;
+  border: 1px solid #8cc5f138;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 32px #0004;
+  color: #e6f6ff;
+  font-size: 14px;
+  transform: rotateY(-10deg) rotateX(5deg);
+}
+.cf-orbit-card svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: #a5e6f7;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cf-orbit-in {
+  top: 29px;
+  left: 4%;
+}
+.cf-orbit-out {
+  right: 0;
+  top: 155px;
+}
+.cf-orbit-out svg {
+  stroke: #ffc78d;
+}
+.cf-orbit-graph {
+  position: absolute;
+  bottom: 20px;
+  left: 8%;
+  width: 78%;
+  padding: 19px 24px 14px;
+  background: linear-gradient(120deg, #4e3d6ec7, #8d65325e);
+  border: 1px solid #b6b5ff3d;
+  border-radius: 16px;
+  box-shadow: 0 20px 45px #03071670;
+  transform: rotateY(-11deg) rotateX(5deg);
+  backdrop-filter: blur(14px);
+}
+.cf-orbit-graph > span {
+  color: #f7f2ff;
+  font-size: 14px;
+  font-weight: 500;
+}
+.cf-orbit-graph svg {
+  width: 100%;
+  height: 95px;
+  display: block;
+  margin: 8px 0;
+}
+.cf-orbit-graph small {
+  color: #d5d7ed;
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  body[data-ui="premium-fintech"] #app .landing-page .landing-showcase {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+  body[data-ui="premium-fintech"] #app .landing-page .landing-hero {
+    padding-top: 30px !important;
+  }
+  .cf-brand-reveal {
+    font-size: 46px;
+    margin-bottom: 22px;
+  }
+  .cf-brand-benefit {
+    font-size: 27px;
+    max-width: 20ch;
+  }
+  .cf-finance-orbit {
+    height: 295px;
+    margin: 12px 0 0;
+  }
+  .cf-finance-disc {
+    top: 0;
+    width: 174px;
+    height: 174px;
+    left: calc(50% - 87px);
+  }
+  .cf-orbit-in {
+    top: 2px;
+    left: 0;
+  }
+  .cf-orbit-out {
+    top: 110px;
+    right: 0;
+  }
+  .cf-orbit-card {
+    font-size: 12px;
+    padding: 12px 14px;
+  }
+  .cf-orbit-graph {
+    bottom: 0;
+    padding: 15px 18px;
+    left: 6%;
+    width: 84%;
+  }
+  .cf-orbit-graph svg {
+    height: 70px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cf-brand-reveal > span,
+  .cf-finance-orbit * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+body[data-ui="premium-fintech"] #app .landing-page[data-screen="inicio"] .landing-benefits{display:none!important}

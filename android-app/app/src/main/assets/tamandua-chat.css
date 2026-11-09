@@ -354,7 +354,62 @@ body:has([data-current-view="tamandua"]) #cf-tm-root .cf-tm-panel {
   display: none !important;
 }
 
-body[data-ui="premium-fintech"] #app .app-shell[data-current-view="tamandua"] .app-sidebar,
-body[data-ui="premium-fintech"] #app .app-shell[data-current-view="tamandua"] .app-topbar {display:none!important}
-body:has([data-current-view="tamandua"]) #cf-tm-root {z-index:1000!important;background:#f6f8f4!important}
-body[data-ui="premium-fintech"] #app .app-shell[data-current-view="tamandua"] .app-main {backdrop-filter:none!important}
+body[data-ui="premium-fintech"]
+  #app
+  .app-shell[data-current-view="tamandua"]
+  .app-sidebar,
+body[data-ui="premium-fintech"]
+  #app
+  .app-shell[data-current-view="tamandua"]
+  .app-topbar {
+  display: none !important;
+}
+body:has([data-current-view="tamandua"]) #cf-tm-root {
+  z-index: 1000 !important;
+  background: #f6f8f4 !important;
+}
+body[data-ui="premium-fintech"]
+  #app
+  .app-shell[data-current-view="tamandua"]
+  .app-main {
+  backdrop-filter: none !important;
+}
+
+body:has([data-current-view="tamandua"]) #cf-tm-root,
+body:has([data-current-view="tamandua"]) #cf-tm-root .cf-tm-panel,
+#cf-tm-root .cf-tm-head,
+#cf-tm-root .cf-tm-tabs,
+#cf-tm-root .cf-tm-body,
+#cf-tm-root .cf-tm-compose {
+  background: #f8f5ef !important;
+}
+#cf-tm-root .cf-tm-head-copy b,
+#cf-tm-root .cf-chat-welcome h2,
+#cf-tm-root .cf-tm-bubble,
+#cf-tm-root .cf-tm-input {
+  color: #342f2a !important;
+}
+#cf-tm-root .cf-tm-head-copy span,
+#cf-tm-root .cf-chat-welcome > p,
+#cf-tm-root .cf-voice-settings summary {
+  color: #6a6053 !important;
+}
+#cf-tm-root .cf-tm-back,
+#cf-tm-root .cf-tm-new,
+#cf-tm-root .cf-tm-icon,
+#cf-tm-root .cf-chat-suggestions button {
+  background: #eee7dd !important;
+  color: #594c3d !important;
+}
+#cf-tm-root .cf-tm-tabs button.on,
+#cf-tm-root .cf-tm-bubble.user {
+  background: #dceff6 !important;
+  color: #174c64 !important;
+}
+#cf-tm-root .cf-tm-send {
+  background: #147fae !important;
+  color: #fff !important;
+}
+#cf-tm-root .cf-tm-inputrow {
+  border-color: #d9cfc1 !important;
+}
