@@ -49,7 +49,7 @@
   const header=panel.querySelector('.cf-tm-head');
   const back=document.createElement('button');back.type='button';back.className='cf-tm-back';back.dataset.act='view';back.dataset.v='inicio';back.setAttribute('aria-label','Voltar ao início');back.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>';header.prepend(back);
   const fresh=document.createElement('button');fresh.type='button';fresh.className='cf-tm-new';fresh.setAttribute('aria-label','Nova conversa');fresh.title='Nova conversa';fresh.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';fresh.onclick=()=>window.dispatchEvent(new Event('copiloto:tamandua-new'));header.append(fresh);
-  const composer=panel.querySelector('.cf-tm-input');composer.placeholder='Converse com seu Tamanduá';composer.addEventListener('input',()=>{composer.style.height='auto';composer.style.height=Math.min(150,composer.scrollHeight)+'px';});
+  const composer=panel.querySelector('.cf-tm-input');composer.placeholder='Converse com seu Tamanduá';composer.maxLength=2000;composer.addEventListener('input',()=>{composer.style.height='auto';composer.style.height=Math.min(150,composer.scrollHeight)+'px';});
   const mic=panel.querySelector('.cf-tm-icon');mic.setAttribute('aria-label','Ditar mensagem');mic.title='Ditar uma mensagem e revisar antes de enviar';mic.setAttribute('aria-pressed','false');
   panel.querySelector('[data-t="history"]').textContent='Histórico';
   panel.setAttribute('aria-label','Conversa com o Tamanduá');const log=panel.querySelector('.cf-tm-messages');log?.setAttribute('role','log');log?.setAttribute('aria-live','polite');log?.setAttribute('aria-relevant','additions text');

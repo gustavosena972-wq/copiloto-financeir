@@ -56,6 +56,7 @@ async function send(fromVoice=false){
  fromVoice=fromVoice===true||window.__cfTamanduaVoiceMode===true;window.__cfTamanduaVoiceMode=false;
  const input=$('.cf-tm-input'),message=input?.value.trim(),state=currentState(),ticket=sessionGate.ticket(state);
  if(!message||!ticket||$('.cf-tm-send')?.disabled)return;
+ if(message.length>2000){voiceStatus('Use até 2.000 caracteres por mensagem. Seu texto foi mantido para revisão.',true);return;}
  const c=sbc();if(!c){add('bot','Entre novamente para continuar a conversa.');return;}
  input.value='';add('user',message);
  const context={view:state.view,mes:state.mes?.mes,ano:state.ano?.ano,intencao:'conversa_financeira'};

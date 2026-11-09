@@ -3603,6 +3603,7 @@ function clearPrivateWorkspace(){
 }
 async function boot(){
   const epoch=(S.bootEpoch||0)+1;S.bootEpoch=epoch;clearPrivateWorkspace();
+  $('#app').innerHTML='<div class="auth mu" role="status">Carregando sua sessão…</div>';
   // Isola permissões e dados entre sessões diferentes.
   S.admin=false;S.adm=null;S.admPend=0;S.me=null;S.fam=null;
   if(S.rt){try{sb.removeChannel(S.rt)}catch(e){}S.rt=null}
