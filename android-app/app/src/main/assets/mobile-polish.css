@@ -641,3 +641,12 @@ html[data-screen-motion="off"] .cf-chat-portrait {
   pointer-events: auto !important;
   touch-action: none;
 }
+body:has([data-current-view="tamandua"]) #cf-tm-root {
+  position: fixed !important;
+  top: var(--cf-chat-top, 210px) !important;
+  left: var(--cf-chat-left, 16px) !important;
+  width: var(--cf-chat-width, calc(100vw - 32px)) !important;
+  height: var(--cf-chat-height, calc(100dvh - 300px)) !important;
+  right: auto !important;
+  bottom: auto !important;
+}

@@ -568,7 +568,8 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("function mobileSmartContext()"))
         assertTrue(html.contains("cf-mobile-insight"))
-        assertTrue(html.contains("Próximo passo") || html.contains("PRÓXIMO PASSO"))
+        assertTrue(html.contains("Resultado do mês"))
+        assertTrue(html.contains("Não representam o saldo da sua conta bancária."))
         assertFalse(html.contains("smartHealthScore"))
         assertFalse(html.contains("safeToSpend"))
     }
@@ -578,8 +579,9 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("contas atrasadas"))
         assertTrue(html.contains("próximos vencimentos"))
-        assertTrue(html.contains("Maior categoria"))
-        assertTrue(html.contains("Sem dados suficientes") || html.contains("Comece pelo primeiro lançamento"))
+        assertTrue(html.contains("monthlyFinancialSnapshot()"))
+        assertTrue(html.contains("d.categories"))
+        assertTrue(html.contains("Vamos começar pelo primeiro lançamento"))
         assertTrue(html.contains("smartgo"))
     }
 
@@ -810,7 +812,8 @@ class MainActivityTest {
         assertTrue(html.contains("TAMANDUÁ PERCEBEU"))
         assertTrue(html.contains("data-act=\"tamandua-proactive-action\""))
         assertTrue(html.contains("data-act=\"tamandua-proactive-dismiss\""))
-        assertTrue(html.contains("Maior categoria"))
+        assertTrue(html.contains("monthlyFinancialSnapshot()"))
+        assertTrue(html.contains("d.categories"))
         assertTrue(html.contains("próximo passo"))
     }
 
@@ -922,7 +925,7 @@ class MainActivityTest {
         val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
         assertTrue(activity.contains("injectTamanduaEnhancements()"))
         assertTrue(activity.contains("assets.open(\"tamandua-enhancements.js\")"))
-        assertTrue(activity.contains("eval(\$quotedScript)"))
+        assertTrue(activity.contains("webView.evaluateJavascript(script, null)"))
         assertTrue(activity.contains("CopilotoVoice"))
         assertTrue(activity.contains("TextToSpeech"))
         assertTrue(activity.contains("Locale(\"pt\", \"BR\")"))

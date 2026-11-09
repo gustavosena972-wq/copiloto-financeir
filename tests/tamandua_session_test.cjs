@@ -16,3 +16,10 @@ test('welcome starts only after login in the financial workspace',()=>{
  assert.equal(api.shouldIntroduce({user:{id:'one'},fam:{id:'family'}},true,true),false);
  assert.notEqual(api.onboardingKey({user:{id:'one'},fam:{id:'family'}}),api.onboardingKey({user:{id:'two'},fam:{id:'family'}}));
 });
+test('starting a new conversation rejects a previous in-flight reply',()=>{
+ const api=require('../android-app/app/src/main/assets/tamandua-session.js');
+ const gate=api.createSessionGate(),state={user:{id:'user'},fam:{id:'family'}};
+ const old=gate.ticket(state);gate.invalidate();
+ assert.equal(gate.accepts(old,state),false);
+ assert.equal(gate.accepts(gate.ticket(state),state),true);
+});

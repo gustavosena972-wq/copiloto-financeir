@@ -29,7 +29,8 @@
         candidate.epoch === epoch
       );
     }
-    return { update, ticket, accepts };
+    function invalidate() { epoch++; onReset(); }
+    return { update, ticket, accepts, invalidate };
   }
   function onboardingKey(state) {
     const user = state?.user?.id, family = state?.fam?.id;

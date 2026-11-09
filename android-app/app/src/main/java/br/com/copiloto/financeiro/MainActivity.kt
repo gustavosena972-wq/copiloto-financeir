@@ -40,6 +40,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     }
 
     private lateinit var webView: WebView
+    private lateinit var voiceInput: VoiceInput
     private lateinit var spreadsheetFiles: SpreadsheetFiles
     private lateinit var billingClient: BillingClient
     private var nativeBillingBridgeAvailable = false
@@ -101,6 +102,9 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             setAcceptThirdPartyCookies(webView, ACCEPT_THIRD_PARTY_COOKIES)
         }
 
+        voiceInput = VoiceInput(this) { event, payload ->
+            if (isTrustedAppAssetUrl(webView.url.orEmpty())) dispatchToWeb(event, payload)
+        }
         spreadsheetFiles = SpreadsheetFiles(this, webView)
         webView.webChromeClient = spreadsheetFiles.chromeClient
         spreadsheetFiles.register()
@@ -148,7 +152,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                     injectTamanduaEnhancements()
                     dispatchToWeb(
                         "copiloto:play-bridge-ready",
-                        JSONObject().put("ready", nativeBillingBridgeAvailable)
+                        JSONObject().put("ready", nativeBillingBridgeAvailable).put("internalTest", BuildConfig.INTERNAL_TESTING)
                     )
                 }
             }
@@ -164,8 +168,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             assets.open("tamandua-enhancements.js").bufferedReader().use { it.readText() }
         }.getOrNull() ?: return
 
-        val quotedScript = JSONObject.quote(script)
-        webView.evaluateJavascript("eval($quotedScript)", null)
+        webView.evaluateJavascript(script, null)
     }
 
     private fun initializeNativeVoice() {
@@ -207,6 +210,10 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     private fun handleVoiceBridgeMessage(rawMessage: String) {
         val payload = runCatching { JSONObject(rawMessage) }.getOrNull() ?: return
         when (payload.optString("action")) {
+            "recognize" -> runOnUiThread {
+                val locale = resolveVoiceLocale(payload.optString("language")) ?: "pt-BR"
+                voiceInput.start(payload.optString("requestId"), locale)
+            }
             "setLanguage" -> {
                 val locale = resolveVoiceLocale(payload.optString("language")) ?: return
                 runOnUiThread {
@@ -278,11 +285,11 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         val action = payload.optString("action")
         val productId = payload.optString("productId").takeIf { it.isNotBlank() }
 
-        if (!isAllowedBillingCommand(action, productId)) {
+        if (!isAllowedBillingCommandForMode(action, productId, BuildConfig.INTERNAL_TESTING)) {
             if (action == "purchase") {
                 dispatchToWeb(
                     "copiloto:play-error",
-                    JSONObject().put("message", "Produto não reconhecido.")
+                    JSONObject().put("message", if (BuildConfig.INTERNAL_TESTING) "Pagamentos desativados nesta versão de teste." else "Produto não reconhecido.")
                 )
             }
             return
@@ -316,6 +323,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     }
 
     private fun connectBilling() {
+        if (BuildConfig.INTERNAL_TESTING) return
         if (billingClient.isReady) {
             loadProducts()
             queryExistingPurchases()
@@ -549,11 +557,13 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        if (::voiceInput.isInitialized && voiceInput.handleResult(requestCode, resultCode, data)) return
         if (spreadsheetFiles.handleResult(requestCode, resultCode, data)) return
         super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onDestroy() {
+        if (::voiceInput.isInitialized) voiceInput.close()
         if (::spreadsheetFiles.isInitialized) spreadsheetFiles.close()
         if (::webView.isInitialized) {
             webView.destroy()
@@ -604,3 +614,6 @@ internal fun isAllowedBillingCommand(action: String, productId: String?): Boolea
         )
         else -> false
     }
+
+internal fun isAllowedBillingCommandForMode(action: String, productId: String?, internalTest: Boolean): Boolean =
+    isAllowedBillingCommand(action, productId) && !(internalTest && action == "purchase")

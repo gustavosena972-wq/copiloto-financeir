@@ -1,28 +1,17 @@
 import {
   TextureLoader,
   Scene,
-  Color,
   Vector3,
   PerspectiveCamera,
   WebGLRenderer,
   ACESFilmicToneMapping,
   SRGBColorSpace,
   Group,
-  Mesh,
   Box3,
   MathUtils,
   AmbientLight,
   DirectionalLight,
   PointLight,
-  PlaneGeometry,
-  MeshStandardMaterial,
-  Shape,
-  ExtrudeGeometry,
-  TorusGeometry,
-  BufferGeometry,
-  Float32BufferAttribute,
-  Points,
-  PointsMaterial,
   GLTFLoader,
   OrbitControls,
   RoomEnvironment,
@@ -59,30 +48,6 @@ try {
   enabled = localStorage.getItem("cf_android_screen_motion") !== "off";
 } catch (_) {}
 
-function roundedCard(width, height, color) {
-  const radius = 0.09,
-    s = new Shape();
-  s.moveTo(-width / 2 + radius, -height / 2);
-  s.lineTo(width / 2 - radius, -height / 2);
-  s.quadraticCurveTo(width / 2, -height / 2, width / 2, -height / 2 + radius);
-  s.lineTo(width / 2, height / 2 - radius);
-  s.quadraticCurveTo(width / 2, height / 2, width / 2 - radius, height / 2);
-  s.lineTo(-width / 2 + radius, height / 2);
-  s.quadraticCurveTo(-width / 2, height / 2, -width / 2, height / 2 - radius);
-  s.lineTo(-width / 2, -height / 2 + radius);
-  s.quadraticCurveTo(-width / 2, -height / 2, -width / 2 + radius, -height / 2);
-  return new Mesh(
-    new ExtrudeGeometry(s, {
-      depth: 0.025,
-      bevelEnabled: true,
-      bevelThickness: 0.018,
-      bevelSize: 0.012,
-      bevelSegments: 2,
-      steps: 1,
-    }),
-    new MeshStandardMaterial({ color, metalness: 0.22, roughness: 0.36 }),
-  );
-}
 function resize() {
   if (!renderer) return;
   const host = dialog?.querySelector(".cf-model-stage"),
@@ -266,7 +231,7 @@ function draw(now, force = false) {
 }
 function sync() {
   const shell = document.querySelector(".landing-page");
-  visible = !!shell;
+  visible = false; // The character is available only when explicitly opened.
   view = shell?.dataset.screen || "inicio";
   if (renderer) {
     renderer.domElement.style.display = visible || dialog ? "block" : "none";

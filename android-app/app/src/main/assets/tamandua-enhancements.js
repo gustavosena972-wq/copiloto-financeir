@@ -8,7 +8,9 @@ function voiceLanguage(){try{return localStorage.getItem('copiloto_voice_languag
 function setVoiceLanguage(code){if(!VOICE_LANGS[code])return;try{localStorage.setItem('copiloto_voice_language',code)}catch(_){} if(window.CopilotoVoice?.postMessage){try{window.CopilotoVoice.postMessage(JSON.stringify({action:'setLanguage',language:code}))}catch(_){}}}
 const sbc=()=>{try{if(window.__copilotoSupabase)return window.__copilotoSupabase}catch(_){}try{if(typeof sb!=='undefined')return sb}catch(_){}return window.sb||null};
 function currentState(){try{return typeof S!=='undefined'?S:window.S||{}}catch(_){return {}}}
+let nativeVoiceTicket=null,nativeVoiceSerial=0;
 const sessionGate=window.CFTamanduaSession.createSessionGate(()=>{
+ nativeVoiceTicket=null;window.__cfTamanduaVoiceMode=false;
  window.__cfTamanduaConversation=null;
  document.querySelector('#cf-tm-root')?.remove();
  window.__cfTamanduaRecognition?.abort?.();
@@ -51,7 +53,7 @@ async function openConv(id){
  $('.cf-tm-tabs button:first-child').click();window.__cfTamanduaConversation=id;
 }
 async function send(fromVoice=false){
- fromVoice=fromVoice===true;
+ fromVoice=fromVoice===true||window.__cfTamanduaVoiceMode===true;window.__cfTamanduaVoiceMode=false;
  const input=$('.cf-tm-input'),message=input?.value.trim(),state=currentState(),ticket=sessionGate.ticket(state);
  if(!message||!ticket||$('.cf-tm-send')?.disabled)return;
  const c=sbc();if(!c){add('bot','Entre novamente para continuar a conversa.');return;}
@@ -59,7 +61,7 @@ async function send(fromVoice=false){
  const context={view:state.view,mes:state.mes?.mes,ano:state.ano?.ano,intencao:'conversa_financeira'};
  if(window.__cfTamanduaConversation)context.conversa_id=window.__cfTamanduaConversation;
  const button=$('.cf-tm-send');button.disabled=true;button.textContent='…';$('.cf-tm-panel')?.setAttribute('aria-busy','true');
- if(fromVoice)voiceStatus('Analisando os dados da sua família…');
+ voiceStatus('Analisando os dados deste mês…');
  try{
   const r=await c.functions.invoke('tamandua-bot',{body:{message,context}});
   if(!sessionGate.accepts(ticket,currentState()))return;
@@ -73,7 +75,17 @@ async function send(fromVoice=false){
   if(sessionGate.accepts(ticket,currentState())&&button.isConnected){button.disabled=false;button.textContent='→';$('.cf-tm-panel')?.setAttribute('aria-busy','false');voiceStatus('');}
  }
 }
-function voice(){window.__cfTamanduaVoiceMode=true;if(window.CopilotoVoice?.postMessage){try{window.CopilotoVoice.postMessage(JSON.stringify({action:'stop'}));}catch(_){}}if(window.speechSynthesis?.speaking){window.__cfTamanduaVoiceMode=false;window.speechSynthesis.cancel();if(window.CopilotoVoice?.postMessage){try{window.CopilotoVoice.postMessage(JSON.stringify({action:'stop'}));}catch(_){}}voiceStatus('');return}const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){voiceStatus('O reconhecimento de voz não está disponível neste dispositivo.',true);return}const r=new R();window.__cfTamanduaRecognition=r;r.lang=VOICE_LANGS[voiceLanguage()]||'pt-BR';r.continuous=false;r.interimResults=false;r.maxAlternatives=1;const b=$('.cf-tm-icon');b.textContent='●';voiceStatus('Estou ouvindo… fale sua pergunta.');r.onresult=e=>{const text=String(e.results?.[0]?.[0]?.transcript||'').trim();const i=$('.cf-tm-input');if(!text){voiceStatus('Não consegui identificar a fala.',true);return}i.value=text;voiceStatus('Entendi. Vou responder…');send(true)};r.onerror=e=>{const msg=e?.error==='not-allowed'?'Permissão de microfone não concedida.':'Não consegui entender a fala. Tente novamente.';voiceStatus(msg,true)};r.onend=()=>{b.textContent='◉';window.__cfTamanduaRecognition=null;if(!window.__cfTamanduaVoiceMode)voiceStatus('')};try{r.start()}catch(_){voiceStatus('O microfone está ocupado. Tente novamente.',true);b.textContent='◉'}}
+window.addEventListener('copiloto:tamandua-new',()=>{sessionGate.invalidate();boot();});
+window.addEventListener('copiloto:voice-input',event=>{
+ const pending=nativeVoiceTicket,detail=event.detail||{};
+ if(!pending||pending.id!==detail.requestId||!sessionGate.accepts(pending.ticket,currentState()))return;
+ nativeVoiceTicket=null;$('.cf-tm-icon')?.setAttribute('aria-pressed','false');
+ if(detail.status==='recognized'){
+  const input=$('.cf-tm-input');if(input){input.value=String(detail.text||'').slice(0,4000);input.dispatchEvent(new Event('input'));input.focus();}
+  voiceStatus('Texto pronto. Revise e toque em Enviar.');
+ }else voiceStatus(detail.status==='cancelled'?'Ditado cancelado.':'O ditado não está disponível agora. Você pode digitar sua mensagem.',detail.status!=='cancelled');
+});
+function voice(){if(window.CopilotoVoice?.postMessage){const ticket=sessionGate.ticket(currentState());if(!ticket)return;const id='voice_'+Date.now()+'_'+(++nativeVoiceSerial);nativeVoiceTicket={id,ticket};$('.cf-tm-icon')?.setAttribute('aria-pressed','true');voiceStatus('Abrindo o ditado do Android…');try{window.CopilotoVoice.postMessage(JSON.stringify({action:'recognize',requestId:id,language:voiceLanguage()}));}catch(_){nativeVoiceTicket=null;voiceStatus('Não foi possível abrir o ditado.',true);}return;}window.__cfTamanduaVoiceMode=true;if(window.CopilotoVoice?.postMessage){try{window.CopilotoVoice.postMessage(JSON.stringify({action:'stop'}));}catch(_){}}if(window.speechSynthesis?.speaking){window.__cfTamanduaVoiceMode=false;window.speechSynthesis.cancel();if(window.CopilotoVoice?.postMessage){try{window.CopilotoVoice.postMessage(JSON.stringify({action:'stop'}));}catch(_){}}voiceStatus('');return}const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){voiceStatus('O reconhecimento de voz não está disponível neste dispositivo.',true);return}const r=new R();window.__cfTamanduaRecognition=r;r.lang=VOICE_LANGS[voiceLanguage()]||'pt-BR';r.continuous=false;r.interimResults=false;r.maxAlternatives=1;const b=$('.cf-tm-icon');b.textContent='●';voiceStatus('Estou ouvindo… fale sua pergunta.');r.onresult=e=>{const text=String(e.results?.[0]?.[0]?.transcript||'').trim();const i=$('.cf-tm-input');if(!text){voiceStatus('Não consegui identificar a fala.',true);return}i.value=text;voiceStatus('Texto pronto. Revise e toque em Enviar.');i.focus()};r.onerror=e=>{const msg=e?.error==='not-allowed'?'Permissão de microfone não concedida.':'Não consegui entender a fala. Tente novamente.';voiceStatus(msg,true)};r.onend=()=>{b.textContent='◉';window.__cfTamanduaRecognition=null;if(!window.__cfTamanduaVoiceMode)voiceStatus('')};try{r.start()}catch(_){voiceStatus('O microfone está ocupado. Tente novamente.',true);b.textContent='◉'}}
 function simulate(){
  const input=$('#cf-tm-sim-value'),out=$('.cf-tm-sim-output');if(!out)return;
  try{

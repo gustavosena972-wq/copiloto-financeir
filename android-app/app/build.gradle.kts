@@ -19,6 +19,7 @@ android {
         applicationId = "br.com.copiloto.financeiro"
         minSdk = 24
         targetSdk = 36
+        buildConfigField("boolean", "INTERNAL_TESTING", providers.gradleProperty("copilotoInternalTest").getOrElse("false").toBooleanStrict().toString())
         versionCode = 40
         versionName = "1.0.40"
     }

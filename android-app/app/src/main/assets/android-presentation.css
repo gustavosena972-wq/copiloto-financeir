@@ -795,3 +795,8 @@ body[data-ui="premium-fintech"]
   .landing-benefits {
   display: none !important;
 }
+
+body[data-ui="premium-fintech"] #app .landing-page .landing-intro:before {display:none!important}
+body[data-ui="premium-fintech"] #app .landing-page .landing-hero {padding-top:48px!important}
+body[data-ui="premium-fintech"] #app .landing-page .landing-section-heading {padding:36px 0 20px!important}
+body[data-ui="premium-fintech"] #app .landing-page .landing-login-intro {padding:32px 0 12px!important}

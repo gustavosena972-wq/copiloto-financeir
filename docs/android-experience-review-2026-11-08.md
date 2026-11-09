@@ -4,24 +4,25 @@
 
 As alterações de interface ficam em `android-app/`. O site público, o Cloudflare Workers e o repositório de vitrine não são alterados.
 
-- Apresentação, recursos, planos, login e cadastro usam uma cena Three.js contínua, tipografia local e uma paleta verde, creme e dourada. O personagem pode ser examinado em um diálogo com rotação e aproximação.
+- Apresentação, recursos, planos, login e cadastro usam tipografia local e uma paleta verde, creme e dourada. O Tamanduá foi retirado do fundo a pedido do usuário; suas imagens continuam nos planos e o modelo 3D pode ser aberto explicitamente para rotação e aproximação.
 - A área financeira mantém navegação estável: Início, Planilha, Tamanduá, Metas e Mais. A análise mensal vem antes da abertura da planilha.
 - Boas-vindas opcionais depois do login/cadastro e antes de usar a área financeira, com configuração ou opção de pular. Nome e objetivo informados são associados à própria conta autenticada; não são guardados em armazenamento local compartilhado.
-- Chat com área própria, sugestões editáveis, histórico filtrado pelo usuário e família atuais, e descarte de respostas iniciadas em outra sessão.
+- Chat em tela inteira, sem cabeçalho de família, filtros ou avisos de teste por cima. Mensagens em coluna central, sugestões editáveis, nova conversa, histórico filtrado pelo usuário e família atuais, e descarte de respostas iniciadas em outra sessão ou conversa.
 - Cálculos em centavos, datas reais e simulação explicitamente ilustrativa. Despesas pendentes são descontadas uma vez; saldo de lançamentos não é apresentado como saldo bancário.
+- Ditado pelo serviço de reconhecimento do Android, iniciado pelo usuário, com texto revisável antes de enviar. Solicitações e retornos são vinculados à sessão; ditado de uma conversa anterior é descartado. Disponibilidade de idiomas depende do aparelho.
 - Importação pelo seletor de documentos do Android e exportação CSV/XLSX/JSON com confirmação de gravação, limite de 8 MB e neutralização de fórmulas em CSV.
 
 ## Arte e desempenho
 
 Imagem de planos em alta densidade, marca vetorial e personagem original com pelagem geométrica, roupa e texturas locais. O modelo usa quantização de 16 bits e cerca de 192 mil polígonos; o GLB tem aproximadamente 10,6 MB antes da compressão do APK. O formato não exige Draco, WebAssembly ou `unsafe-eval`. A tentativa anterior com Draco ficou presa no carregamento e foi descartada.
 
-Uma única cena é reutilizada entre as telas de apresentação e o diálogo do personagem. Ela para fora da apresentação, com o aplicativo oculto e durante edição. Redução de movimento e um controle de movimento são respeitados. Há fallback estático em caso de falha do 3D. A roupa do modelo giratório é única nesta etapa; as imagens dos planos apresentam as variantes existentes.
+O modelo 3D só é carregado ao tocar em Ver personagem 3D. Não ocupa o fundo do produto nem roda durante o uso da planilha. O desenho abstrato de cartões flutuantes foi removido. Redução de movimento e um controle de movimento são respeitados. A roupa do modelo giratório é única nesta etapa; as imagens dos planos apresentam as variantes existentes.
 
 ## Evidências e limites
 
-30 testes Node verificam cálculos, navegação, descarte de respostas de sessão/período anterior e exportação. O verificador Python analisa os cinco scripts inline, arquivos externos e orçamento dos assets. O validador glTF não encontrou erros nem avisos no modelo final. A apresentação foi inspecionada no navegador com dados fictícios, sem sessão Supabase.
+34 testes Node verificam cálculos, navegação, descarte de respostas de sessão/período anterior e exportação. O verificador Python analisa os cinco scripts inline, arquivos externos e orçamento dos assets. O validador glTF não encontrou erros nem avisos no modelo final. A apresentação foi inspecionada no navegador com dados fictícios, sem sessão Supabase.
 
-O workflow `android-signed-review.yml` executa essas verificações e os testes Kotlin, gera APK e AAB com a chave já configurada no repositório, verifica as assinaturas e publica somente um artefato de revisão. Não envia a versão à Google Play.
+O workflow `android-signed-review.yml` executa essas verificações e os testes Kotlin, gera APK e AAB com a chave já configurada no repositório, verifica as assinaturas e publica somente um artefato de revisão. Não envia a versão à Google Play. O artefato interno usa `-PcopilotoInternalTest=true`: o código nativo bloqueia compras e a interface não abre checkout. A liberação de acesso continua dependendo da lista autenticada de testadores do servidor; o modo de teste não concede acesso a contas desconhecidas. Para a versão pública, gerar outro pacote sem essa propriedade. Os produtos e preços continuam configurados.
 
 Ainda requer teste em Android físico: seletor de arquivos, teclado, TalkBack, voz, desempenho térmico/GPU e fluxo real de autenticação. Não foi atribuída uma nota artificial de 8,5. Os testes existentes e os novos testes são evidência parcial, não uma garantia absoluta de ausência de falhas.
 
