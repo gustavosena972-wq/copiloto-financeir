@@ -274,10 +274,10 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("class=\"mobile-bottom-nav\""))
         assertTrue(html.contains("aria-label=\"Navegação principal do aplicativo\""))
-        assertTrue(html.contains("data-mobile-nav=\"launches\""))
-        assertTrue(html.contains("data-mobile-nav=\"year\""))
-        assertTrue(html.contains("data-mobile-nav=\"checkup\""))
-        assertTrue(html.contains("data-mobile-nav=\"planning\""))
+        assertTrue(html.contains("['inicio','Início'"))
+        assertTrue(html.contains("['planilha','Planilha'"))
+        assertTrue(html.contains("['tamandua','Tamanduá'"))
+        assertTrue(html.contains("['plan','Metas'"))
         assertTrue(html.contains("data-act=\"mobilemore\""))
         assertTrue(html.contains("class=\"mobile-more-panel\""))
         assertTrue(html.contains("data-v=\"família\""))
@@ -782,26 +782,25 @@ class MainActivityTest {
     }
 
     @Test
-    fun androidV025KeepsTheTamanduaAsContextualAssistanceWithoutAddingANewTab() {
+    fun tamanduaHasADedicatedDestinationAlongsideTheFinancialLedger() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("function mobileCompanionSpeech()"))
         assertTrue(html.contains("function mountMobileCompanion()"))
-        assertFalse(html.contains("data-mobile-nav=\"tamandua\""))
+        assertTrue(html.contains("S.view==='tamandua'"))
     }
 
 
     @Test
-    fun androidV026MakesTamanduaOnboardingMandatoryBeforeShowingTheFinanceWorkspace() {
+    fun tamanduaSetupIsOptionalAndDoesNotBlockTheFinanceWorkspace() {
         val html = File("src/main/assets/mobile.html").readText()
-        val loadMes = html.substringAfter("async function loadMes").substringBefore("/* ---------- telas de entrada ----------")
-        assertTrue(loadMes.contains("renderWorkspaceOrKeepTamandua()"))
-        assertTrue(html.contains("function renderWorkspaceOrKeepTamandua()"))
-        assertFalse(html.contains("tamandua-intro-skip"))
-        assertFalse(html.contains("Pular por enquanto"))
-        val intro = html.substringAfter("function tamanduaIntroMarkup(").substringBefore("function renderTamanduaIntro(")
-        assertFalse(intro.contains("Agora não"))
+        val setup = File("src/main/assets/mobile-polish.js").readText()
+        val entry = html.substringAfter("function renderWorkspaceOrKeepTamandua(){").substringBefore("async function finishTamanduaIntro")
+        assertTrue(entry.contains("render();"))
+        assertFalse(entry.contains("renderTamanduaIntro("))
+        assertTrue(setup.contains("Configurar meu Tamanduá"))
+        assertTrue(setup.contains("Pular por enquanto"))
+        assertTrue(setup.contains("form.hidden=true"))
     }
-
 
     @Test
     fun androidV028MakesTamanduaProactiveInsteadOfWaitingForChatMessages() {
@@ -875,7 +874,7 @@ class MainActivityTest {
         assertTrue(html.contains("function mobileCompanionSpeech()"))
         assertTrue(html.contains("mountMobileCompanion()"))
         assertTrue(html.contains("S.tamanduaProfile"))
-        assertFalse(html.contains("data-mobile-nav=\"tamandua\""))
+        assertTrue(html.contains("S.view==='tamandua'"))
     }
 
 
@@ -895,8 +894,8 @@ class MainActivityTest {
         assertTrue(js.contains("Estou ouvindo"))
         assertTrue(js.contains("Calcular cenário"))
         assertTrue(js.contains("speechSynthesis"))
-        assertTrue(js.contains("Compromissos financeiros"))
-        assertTrue(js.contains("Após em aberto"))
+        assertTrue(js.contains("sessionGate.accepts"))
+        assertTrue(js.contains("familia_id"))
         assertTrue(js.contains("Principais categorias"))
     }
 

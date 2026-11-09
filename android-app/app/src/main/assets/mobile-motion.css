@@ -1,0 +1,64 @@
+html {
+  color-scheme: light;
+  scrollbar-color: #8d9c83 #f6f3eb;
+}
+body {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+img {
+  image-rendering: auto;
+}
+html[data-screen-motion="on"] .app-main {
+  view-transition-name: workspace;
+}
+html[data-screen-motion="on"] .mobile-bottom-nav {
+  view-transition-name: app-navigation;
+}
+::view-transition-group(workspace) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+::view-transition-old(workspace) {
+  animation: cf-page-out 180ms ease-in both;
+  transform-origin: 10% 50%;
+}
+::view-transition-new(workspace) {
+  animation: cf-page-in 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: 90% 50%;
+}
+::view-transition-group(app-navigation),
+::view-transition-old(app-navigation),
+::view-transition-new(app-navigation) {
+  animation: none;
+}
+@keyframes cf-page-in {
+  from {
+    transform: translateY(8px);
+    clip-path: inset(0 0 0 8%);
+    opacity: 0.85;
+  }
+  to {
+    transform: translateY(0);
+    clip-path: inset(0);
+    opacity: 1;
+  }
+}
+@keyframes cf-page-out {
+  to {
+    transform: translateY(-4px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

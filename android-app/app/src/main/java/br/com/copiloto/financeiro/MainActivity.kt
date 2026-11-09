@@ -40,6 +40,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     }
 
     private lateinit var webView: WebView
+    private lateinit var spreadsheetFiles: SpreadsheetFiles
     private lateinit var billingClient: BillingClient
     private var nativeBillingBridgeAvailable = false
     private var textToSpeech: TextToSpeech? = null
@@ -100,7 +101,9 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             setAcceptThirdPartyCookies(webView, ACCEPT_THIRD_PARTY_COOKIES)
         }
 
-        webView.webChromeClient = WebChromeClient()
+        spreadsheetFiles = SpreadsheetFiles(this, webView)
+        webView.webChromeClient = spreadsheetFiles.chromeClient
+        spreadsheetFiles.register()
         registerBillingBridge()
         initializeNativeVoice()
         registerVoiceBridge()
@@ -545,7 +548,13 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        if (spreadsheetFiles.handleResult(requestCode, resultCode, data)) return
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
     override fun onDestroy() {
+        if (::spreadsheetFiles.isInitialized) spreadsheetFiles.close()
         if (::webView.isInitialized) {
             webView.destroy()
         }

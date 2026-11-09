@@ -3358,7 +3358,7 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 @keyframes cf-tamandua-proactive-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(max-width:640px){.cf-tamandua-proactive{margin:0 0 10px;padding:12px;border-radius:16px}.cf-tamandua-proactive-actions{display:grid;grid-template-columns:1fr}.cf-tamandua-proactive-action{width:100%}}
 @media(prefers-reduced-motion:reduce){.cf-tamandua-proactive{animation:none}}
-.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"></head>
+.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"><link rel="stylesheet" href="mobile-motion.css"><script src="file-export.js"></script><link rel="stylesheet" href="android-presentation.css"></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"><div class="cf-mobile-startup" role="status" aria-live="polite"><div class="cf-mobile-startup-mark">CF</div><div><b>Copiloto Financeiro</b><span>Preparando seu financeiro…</span></div></div></div>
 <div id="toast"></div>
@@ -3401,13 +3401,18 @@ function ensureQrCode(){
 }
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false},tamanduaProfile:null,tamanduaIntroStep:0};
+const S={view:'inicio',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false},tamanduaProfile:null,tamanduaIntroStep:0};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let tt;function toast(m,e){const t=$('#toast');t.textContent=m;t.className=e?'err':'';t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',3800)}
-async function q(p){const r=await p;if(r.error){toast(r.error.message,1);throw r.error}return r.data}
+function accountRequestScope(){return JSON.stringify([S.user?.id,S.fam?.id,S.ano?.id,S.mes?.id,S.bootEpoch]);}
+async function q(p){
+  const scope=accountRequestScope(),r=await p;
+  if(scope!==accountRequestScope()){const error=new Error('A conta ou o período mudou. Atualize a tela.');error.name='AbortError';throw error;}
+  if(r.error){toast(r.error.message,1);throw r.error}return r.data;
+}
 const canEdit=()=>S.me&&S.me.papel!=='leitor';
 const mesAberto=()=>S.mes&&S.mes.status==='aberto';
 
@@ -3420,6 +3425,7 @@ function tamanduaStorageKey(kind){
   return userId?'copiloto_tamandua_'+kind+'_v1_'+encodeURIComponent(userId):null;
 }
 async function loadTamanduaProfile(){
+  const scope=accountRequestScope();
   S.tamanduaProfile=null;
   if(!S.user?.id||!S.fam?.id)return;
   const{data,error}=await sb.from('ia_aprendizados')
@@ -3429,6 +3435,7 @@ async function loadTamanduaProfile(){
     .eq('chave','perfil_tamandua')
     .maybeSingle();
   if(error){console.warn('Não foi possível carregar o perfil adaptativo do Tamanduá.',error);return}
+  if(scope!==accountRequestScope())return;
   S.tamanduaProfile=data?.valor||null;
 }
 async function mobileLearnFromInteraction(profile){
@@ -3530,15 +3537,7 @@ function renderTamanduaIntro(step=0){
   S.tamanduaIntroStep=step;
   $('#app').innerHTML=tamanduaIntroMarkup(step);
 }
-function renderWorkspaceOrKeepTamandua(){
-  if(S.user&&S.fam&&!tamanduaIntroCompleted()){
-    if(!document.querySelector('.cf-tamandua-intro')){
-      renderTamanduaIntro(S.tamanduaIntroStep||0);
-    }
-    return;
-  }
-  render();
-}
+function renderWorkspaceOrKeepTamandua(){render();}
 async function finishTamanduaIntro(){
   const groups=['melhorar','necessidade','organizacao','economia'];
   const unanswered=groups.filter(name=>!document.querySelector('input[name="'+name+'"]:checked'));
@@ -3597,17 +3596,26 @@ function scheduleBoot(){
   },0);
 }
 
+function clearPrivateWorkspace(){
+  for(const key of ['lanc','sug','cats','contas','membros','anos','meses','resumo','meta','notifs'])S[key]=[];
+  for(const key of ['fam','me','ano','mes','plan','tamanduaProfile','imp','adm'])S[key]=null;
+  S.internalTester=false;S.mobileMore=false;S.mobileAddOpen=false;
+}
 async function boot(){
+  const epoch=(S.bootEpoch||0)+1;S.bootEpoch=epoch;clearPrivateWorkspace();
   // Isola permissões e dados entre sessões diferentes.
   S.admin=false;S.adm=null;S.admPend=0;S.me=null;S.fam=null;
   if(S.rt){try{sb.removeChannel(S.rt)}catch(e){}S.rt=null}
   await carregarConfig();
+  if(epoch!==S.bootEpoch)return;
   if(!S.user){S.tamanduaProfile=null;renderAuth();checarServidor();return}
   $('#app').innerHTML='<div class="auth mu">Carregando…</div>';
   const adminCheck=await sb.rpc('eh_admin');
+  if(epoch!==S.bootEpoch)return;
   if(adminCheck.error)throw adminCheck.error;
   S.admin=adminCheck.data===true;
   const testerCheck=await sb.rpc('is_internal_tester');
+  if(epoch!==S.bootEpoch)return;
   if(testerCheck.error)throw testerCheck.error;
   S.internalTester=testerCheck.data===true;
   const rows=await q(sb.from('membros').select('id,papel,nome,familias(id,nome,meta_reducao_cartao,acesso_ate,plano)').eq('usuario_id',S.user.id).order('criado_em',{ascending:false}));
@@ -3621,8 +3629,9 @@ async function boot(){
   await loadTamanduaProfile();
   if(!S.admin&&!S.internalTester&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
-  try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);S.notifs=nr.data||[]}catch(e){S.notifs=[]}
-  if(S.admin){const rr=await sb.rpc('admin_resumo');S.admPend=rr.data?rr.data.pendentes:0}
+  try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);if(epoch===S.bootEpoch)S.notifs=nr.data||[]}catch(e){if(epoch===S.bootEpoch)S.notifs=[]}
+  if(epoch!==S.bootEpoch)return;
+  if(S.admin){const rr=await sb.rpc('admin_resumo');if(epoch!==S.bootEpoch)return;S.admPend=rr.data?rr.data.pendentes:0}
   const[c,ct,m,a]=await Promise.all([
     q(sb.from('categorias').select('*').eq('familia_id',S.fam.id).order('nome')),
     q(sb.from('contas_cartoes').select('*').eq('familia_id',S.fam.id)),
@@ -3747,7 +3756,7 @@ function renderAuth(){
     </section>
     <section class="landing-benefits" id="recursos" aria-label="Conheça o aplicativo">
       <div class="app-page-section-heading"><span>O QUE VOCÊ ENCONTRA</span><h2>Tudo conectado à vida financeira da sua família.</h2><p>Recursos para sair das anotações espalhadas e ter uma visão mais completa das finanças.</p></div>
-      <div class="app-feature-cards">
+      <div class="app-feature-cards landing-feature-grid">
         <article><span>▦</span><div><small>01 · DIA A DIA</small><h3>Controle do mês</h3><p>Registre receitas, despesas, contas, vencimentos e pagamentos. Saiba o que entrou, o que saiu e o que ainda precisa ser pago.</p></div></article>
         <article><span>▥</span><div><small>02 · VISÃO GERAL</small><h3>Evolução financeira</h3><p>Acompanhe os resultados mês a mês, compare períodos e entenda como a organização financeira da família está evoluindo.</p></div></article>
         <article><span>◈</span><div><small>03 · ATENÇÃO</small><h3>Resumo e pontos de atenção</h3><p>Consulte resumos e sugestões com base nos lançamentos registrados para perceber despesas e compromissos que merecem atenção.</p></div></article>
@@ -4438,9 +4447,10 @@ async function exportXlsx(){
     });
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),MN[m.mes-1].slice(0,3)+' '+S.ano.ano);
   });
-  XLSX.writeFile(wb,S.fam.nome+'-'+S.ano.ano+'.xlsx');
+  const result=await CFFileExport.save(XLSX.write(wb,{bookType:'xlsx',type:'base64'}),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',S.fam.nome+'-'+S.ano.ano+'.xlsx');
+  toast(result==='saved'?'Planilha salva.':result==='cancelled'?'Exportação cancelada.':'Download iniciado.');
 }
-const LOGO='<span class="cf-mark" role="img" aria-label="Copiloto Financeiro">CF</span>';
+const LOGO='<img class="cf-mark" src="tamandua-mark.svg" alt="Tamanduá do Copiloto Financeiro">';
 const MSG=[['Invalid login','E-mail ou senha incorretos.'],['Email not confirmed','Confirme seu e-mail antes de entrar: abra o e-mail que enviamos (veja também o spam).'],['already registered','Esse e-mail já tem conta. Use "Entrar".'],['rate limit','Muitos e-mails em pouco tempo. Aguarde alguns minutos e tente de novo.'],['Failed to fetch','Sem conexão com o servidor. Se você abriu o arquivo dentro do Claude ou de uma pré-visualização, baixe-o e abra no Chrome (ou publique na Netlify/Vercel).'],['Password should','A senha precisa ter pelo menos 6 caracteres.'],['invalid format','Digite um e-mail válido.']];
 function aviso(t,ok){const a=$('#aviso');if(a){a.textContent=t;a.className='aviso '+(ok?'ok':'err')}}
 function normalizarUsuario(nome){
@@ -4849,10 +4859,10 @@ function viewConfig(){
   <div class="grid2">${f('operador_nome','Nome ou razão social do responsável','')}${f('operador_cnpj','CNPJ (se tiver)','')}${f('contato_email','E-mail de contato e privacidade','')}</div>
   <div class="row" style="margin-top:10px"><button data-act="salvarcfg">Salvar configurações</button></div></div>`;
 }
-function csv(){
-  const rows=[['Vencimento','Descrição','Tipo','Categoria','Valor','Status']].concat(S.lanc.map(l=>[l.data_vencimento||'',l.descricao,l.tipo,(S.cats.find(c=>c.id===l.categoria_id)||{}).nome||'',String(l.valor).replace('.',','),l.status]));
-  const t='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(';')).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download=`${S.fam.nome}-${S.ano.ano}-${String(S.mes.mes).padStart(2,'0')}.csv`;a.click();
+async function csv(){
+ const rows=[['Vencimento','Descrição','Tipo','Categoria','Valor','Status']].concat(S.lanc.map(l=>[l.data_vencimento||'',l.descricao,l.tipo,(S.cats.find(c=>c.id===l.categoria_id)||{}).nome||'',String(l.valor).replace('.',','),l.status]));
+ const result=await CFFileExport.save(CFFileExport.encode(CFFileExport.csv(rows)),'text/csv',S.fam.nome+'-'+S.ano.ano+'-'+String(S.mes.mes).padStart(2,'0')+'.csv');
+ toast(result==='saved'?'CSV salvo.':result==='cancelled'?'Exportação cancelada.':'Download iniciado.');
 }
 function viewChecape(ed){
   const cards=S.sug.map(s=>{
@@ -5034,7 +5044,7 @@ document.addEventListener('click',async e=>{
     S.cats=await q(sb.from('categorias').select('*').eq('familia_id',S.fam.id).order('nome'));await loadMes()}
   else if(a==='legal')showLegal(b.dataset.t);
   else if(a==='fecharlegal'){const d=document.getElementById('legalov');if(d)d.remove()}
-  else if(a==='expjson'){const d=await q(sb.rpc('exportar_tudo',{p_familia:S.fam.id}));const l=document.createElement('a');l.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));l.download='meus-dados-'+S.fam.nome.replace(/\s+/g,'-')+'.json';l.click();toast('Arquivo com todos os seus dados baixado')}
+  else if(a==='expjson'){const d=await q(sb.rpc('exportar_tudo',{p_familia:S.fam.id}));const result=await CFFileExport.save(CFFileExport.encode(JSON.stringify(d,null,2)),'application/json','meus-dados-'+S.fam.nome.replace(/\s+/g,'-')+'.json');toast(result==='saved'?'Arquivo salvo.':result==='cancelled'?'Exportação cancelada.':'Download iniciado.')}
   else if(a==='delconta'){const t=prompt('Isto apaga a sua conta e os dados da sua família, para sempre. Para confirmar, digite EXCLUIR:');if(t!=='EXCLUIR')return;await q(sb.rpc('excluir_minha_conta'));try{await sb.auth.signOut()}catch(e){}S.user=null;toast('Conta excluída.');boot()}
   else if(a==='salvarcfg'){const k=['pix_chave','pix_dias','pix_nome','pix_cidade','operador_nome','operador_cnpj','contato_email'],o={};k.forEach(x=>{const v=$('#cfg_'+x).value.trim();if(v!==''||x.startsWith('operador')||x==='contato_email')o[x]=v});
     await q(sb.rpc('admin_salvar_config',{p_itens:o}));await carregarConfig();toast('Configurações salvas');render()}
@@ -5048,7 +5058,7 @@ document.addEventListener('click',async e=>{
   else if(a==='impno'){S.imp=null;render()}
   else if(a==='xlsx')await exportXlsx();
   else if(a==='irmes'){S.view='planilha';S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
-  else if(a==='csv')csv();
+  else if(a==='csv')await csv();
   else if(a==='reset'){const area=$('#recuperacao');area.hidden=!area.hidden;if(!area.hidden){$('#codigo-recuperacao').focus();aviso('Informe seu usuário, o código de recuperação e a nova senha. Não é necessário e-mail.')}}
   else if(a==='recuperar')await recuperarConta();
   else if(a==='copiarcodigo'){if(!S.codigoRecuperacao)return;try{await navigator.clipboard.writeText(S.codigoRecuperacao);toast('Código copiado. Guarde-o em local seguro.')}catch(e){const i=$('#codigo-recuperacao-exibido');if(i){i.select();toast('Selecione e copie o código manualmente.')}}}
@@ -5332,4 +5342,4 @@ function mountMobileCompanion(){
 }
 </script>
 
-<script src="mobile-polish.js"></script></html>
+<script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script type="module" src="financial-world.js"></script></html>
