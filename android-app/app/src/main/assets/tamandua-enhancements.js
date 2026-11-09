@@ -76,6 +76,7 @@ async function send(fromVoice=false){
   if(sessionGate.accepts(ticket,currentState())&&button.isConnected){button.disabled=false;button.textContent='→';$('.cf-tm-panel')?.setAttribute('aria-busy','false');voiceStatus('');}
  }
 }
+window.addEventListener('copiloto:tamandua-history-refresh',()=>history().catch(()=>{}));
 window.addEventListener('copiloto:tamandua-new',()=>{sessionGate.invalidate();boot();});
 window.addEventListener('copiloto:voice-input',event=>{
  const pending=nativeVoiceTicket,detail=event.detail||{};

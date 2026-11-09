@@ -66,7 +66,7 @@ for number, script in enumerate(parser.scripts, 1):
     assert result.returncode == 0, f"Inline script {number}: {result.stderr}"
 print(f"PASS: {len(parser.scripts)} Android inline scripts parse successfully.")
 
-for asset in ("presentation-art.js", "file-export.js", "tamandua-session.js", "tamandua-enhancements.js", "mobile-polish.js", "mobile-motion.js", "tamandua-3d.js", "finance-core.js"):
+for asset in ("reminder-plan.js", "tamandua-preferences.js", "tamandua-workspace.js", "presentation-art.js", "file-export.js", "tamandua-session.js", "tamandua-enhancements.js", "mobile-polish.js", "mobile-motion.js", "tamandua-3d.js", "finance-core.js"):
     subprocess.run(["node", "--check", str(HTML.parent / asset)], check=True)
 print("PASS: injected Android scripts parse successfully.")
 
@@ -84,4 +84,7 @@ assert 'tamandua-session.js' in html and 'tamandua-enhancements.js' in html
 print("PASS: high-density PNG and valid local GLB are packaged within the asset budget.")
 
 module = (HTML.parent / "financial-world.js").read_text(encoding="utf-8")
+subprocess.run(["node", "--input-type=module", "--check"], input=module, text=True, check=True)
+
+module = (HTML.parent / "presentation-world.js").read_text(encoding="utf-8")
 subprocess.run(["node", "--input-type=module", "--check"], input=module, text=True, check=True)

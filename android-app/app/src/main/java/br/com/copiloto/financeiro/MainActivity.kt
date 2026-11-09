@@ -40,6 +40,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     }
 
     private lateinit var webView: WebView
+    private lateinit var tamanduaAlerts: TamanduaAlerts
     private lateinit var voiceInput: VoiceInput
     private lateinit var spreadsheetFiles: SpreadsheetFiles
     private lateinit var billingClient: BillingClient
@@ -108,6 +109,10 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         spreadsheetFiles = SpreadsheetFiles(this, webView)
         webView.webChromeClient = spreadsheetFiles.chromeClient
         spreadsheetFiles.register()
+        tamanduaAlerts = TamanduaAlerts(this, webView) { event, payload ->
+            if (isTrustedAppAssetUrl(webView.url.orEmpty())) dispatchToWeb(event, payload)
+        }
+        tamanduaAlerts.register()
         registerBillingBridge()
         initializeNativeVoice()
         registerVoiceBridge()
@@ -554,6 +559,11 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                 finish()
             }
         }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (::tamanduaAlerts.isInitialized) tamanduaAlerts.handlePermissionResult(requestCode)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
