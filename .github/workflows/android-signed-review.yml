@@ -47,7 +47,7 @@ jobs:
       - name: Validate Android WebView assets
         run: |
           python3 tests/android_webview_assets_test.py
-          node --test tests/android_render_test.cjs tests/finance_core_test.cjs tests/tamandua_session_test.cjs tests/tamandua_finance_context_test.cjs tests/android_navigation_test.cjs tests/android_request_scope_test.cjs tests/file_export_test.cjs tests/reminder_plan_test.cjs
+          node --test tests/android_render_test.cjs tests/finance_core_test.cjs tests/tamandua_session_test.cjs tests/tamandua_finance_context_test.cjs tests/android_navigation_test.cjs tests/android_request_scope_test.cjs tests/file_export_test.cjs tests/reminder_plan_test.cjs tests/presentation_rebuild_test.cjs
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -90,15 +90,15 @@ jobs:
       - name: Prepare named deliverables and checksums
         run: |
           mkdir -p signed-package
-          cp android-app/app/build/outputs/bundle/release/app-release.aab signed-package/copiloto-financeiro-1.0.40.aab
-          cp android-app/app/build/outputs/apk/release/app-release.apk signed-package/copiloto-financeiro-1.0.40.apk
+          cp android-app/app/build/outputs/bundle/release/app-release.aab signed-package/copiloto-financeiro-1.0.41.aab
+          cp android-app/app/build/outputs/apk/release/app-release.apk signed-package/copiloto-financeiro-1.0.41.apk
           cd signed-package
-          sha256sum copiloto-financeiro-1.0.40.aab copiloto-financeiro-1.0.40.apk > SHA256SUMS.txt
+          sha256sum copiloto-financeiro-1.0.41.aab copiloto-financeiro-1.0.41.apk > SHA256SUMS.txt
 
       - name: Upload signed review AAB and APK
         uses: actions/upload-artifact@v4
         with:
-          name: copiloto-financeiro-1.0.40-assinado
+          name: copiloto-financeiro-1.0.41-assinado
           path: signed-package/*
           if-no-files-found: error
           retention-days: 30

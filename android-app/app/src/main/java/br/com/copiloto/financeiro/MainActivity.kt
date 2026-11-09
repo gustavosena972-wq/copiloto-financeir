@@ -31,7 +31,7 @@ import java.util.Locale
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     companion object {
-        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40"
+        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.41"
         private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
         const val ACCEPT_WEBVIEW_COOKIES = false
         const val ACCEPT_THIRD_PARTY_COOKIES = false
