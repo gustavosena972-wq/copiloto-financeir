@@ -44,8 +44,6 @@
   if(window.CFTamanduaSession?.shouldIntroduce(state(),!!$('.app-shell'),seen))introduce();
   persistProfile();
   const badge=$('.cf-tester-badge');if(badge&&!badge.dataset.refined){badge.dataset.refined='1';badge.innerHTML='<span>Versão de teste</span><span>Sem cobranças</span>';}
-  const home=$('[data-current-view="inicio"] .v0-mobile-dashboard')||$('[data-current-view="inicio"] .app-content');
-  if(home){const analysis=home.querySelector('.mobile-analysis'),open=home.querySelector('[data-v="planilha"]');if(analysis&&open&&analysis.nextElementSibling!==open)open.before(analysis);}
   const panel=$('.cf-tm-panel');if(!panel||panel.dataset.refined)return;
   panel.dataset.refined='1';
   const header=panel.querySelector('.cf-tm-head');

@@ -353,3 +353,8 @@ body:has([data-current-view="tamandua"]) #cf-tm-root .cf-tm-panel {
 #cf-tm-root .cf-tm-view:has(.cf-tm-bubble) .cf-chat-welcome {
   display: none !important;
 }
+
+body[data-ui="premium-fintech"] #app .app-shell[data-current-view="tamandua"] .app-sidebar,
+body[data-ui="premium-fintech"] #app .app-shell[data-current-view="tamandua"] .app-topbar {display:none!important}
+body:has([data-current-view="tamandua"]) #cf-tm-root {z-index:1000!important;background:#f6f8f4!important}
+body[data-ui="premium-fintech"] #app .app-shell[data-current-view="tamandua"] .app-main {backdrop-filter:none!important}

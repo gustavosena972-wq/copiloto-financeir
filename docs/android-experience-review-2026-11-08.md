@@ -5,7 +5,7 @@
 As alterações de interface ficam em `android-app/`. O site público, o Cloudflare Workers e o repositório de vitrine não são alterados.
 
 - Apresentação, recursos, planos, login e cadastro usam tipografia local e uma paleta verde, creme e dourada. O Tamanduá foi retirado do fundo a pedido do usuário; suas imagens continuam nos planos e o modelo 3D pode ser aberto explicitamente para rotação e aproximação.
-- A área financeira mantém navegação estável: Início, Planilha, Tamanduá, Metas e Mais. A análise mensal vem antes da abertura da planilha.
+- O dashboard usa cartões com profundidade, contraste alto, categorias e vencimentos calculados dos próprios lançamentos, inspirado apenas na composição das referências. A área financeira mantém navegação estável: Início, Planilha, Tamanduá, Metas e Mais. A análise mensal vem antes da abertura da planilha.
 - Boas-vindas opcionais depois do login/cadastro e antes de usar a área financeira, com configuração ou opção de pular. Nome e objetivo informados são associados à própria conta autenticada; não são guardados em armazenamento local compartilhado.
 - Chat em tela inteira, sem cabeçalho de família, filtros ou avisos de teste por cima. Mensagens em coluna central, sugestões editáveis, nova conversa, histórico filtrado pelo usuário e família atuais, e descarte de respostas iniciadas em outra sessão ou conversa.
 - Cálculos em centavos, datas reais e simulação explicitamente ilustrativa. Despesas pendentes são descontadas uma vez; saldo de lançamentos não é apresentado como saldo bancário.

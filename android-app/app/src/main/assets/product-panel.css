@@ -447,3 +447,5 @@ body[data-ui="premium-fintech"]
     animation: none !important;
   }
 }
+
+body[data-ui="premium-fintech"] #app{width:100%!important;min-width:0!important}body[data-ui="premium-fintech"] #app .app-shell{width:100%!important;max-width:100%!important}
