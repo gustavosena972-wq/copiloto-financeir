@@ -3358,7 +3358,7 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 @keyframes cf-tamandua-proactive-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(max-width:640px){.cf-tamandua-proactive{margin:0 0 10px;padding:12px;border-radius:16px}.cf-tamandua-proactive-actions{display:grid;grid-template-columns:1fr}.cf-tamandua-proactive-action{width:100%}}
 @media(prefers-reduced-motion:reduce){.cf-tamandua-proactive{animation:none}}
-.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"><link rel="stylesheet" href="mobile-motion.css"><script src="file-export.js"></script><link rel="stylesheet" href="android-presentation.css"><link rel="stylesheet" href="product-panel.css"><link rel="stylesheet" href="tamandua-chat.css"><link rel="stylesheet" href="tamandua-workspace.css"><link rel="stylesheet" href="continuous-presentation.css"><link rel="stylesheet" href="navigation-drawer.css"><link rel="stylesheet" href="tamandua-cocoa.css"></head>
+.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"><link rel="stylesheet" href="mobile-motion.css"><script src="file-export.js"></script><link rel="stylesheet" href="android-presentation.css"><link rel="stylesheet" href="product-panel.css"><link rel="stylesheet" href="tamandua-chat.css"><link rel="stylesheet" href="tamandua-workspace.css"><link rel="stylesheet" href="continuous-presentation.css"><link rel="stylesheet" href="navigation-drawer.css"><link rel="stylesheet" href="tamandua-cocoa.css"><link rel="stylesheet" href="atelier-polish.css"></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"><div class="cf-mobile-startup" role="status" aria-live="polite"><div class="cf-mobile-startup-mark">CF</div><div><b>Copiloto Financeiro</b><span>Preparando seu financeiro…</span></div></div></div>
 <div id="toast"></div>
@@ -3806,9 +3806,10 @@ function renderAuth(){
         <article class="landing-plan-card ultra"><div class="cf-plan-character">${tamanduaCharacterSvg('ultra')}</div>
           <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO AVANÇADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e o planejamento da sua família.</p></div>
           <div class="landing-price"><strong>${precoUltra}</strong><span>/ 30 dias</span></div>
-          <div class="landing-limit">Ferramentas avançadas de gestão financeira</div>
+          <div class="landing-limit">Tudo do Pro e Max, com ferramentas avançadas</div>
           <div class="landing-feature-heading">RECURSOS ULTRA DISPONÍVEIS</div>
           <ul class="landing-feature-list">
+            ${feature('Tudo dos planos Pro e Max')}
             ${feature('Acesso compartilhado com uma única família por conta')}
             ${feature('Relatórios anuais e comparativos avançados')}
             ${feature('Histórico da evolução patrimonial')}
@@ -4654,10 +4655,11 @@ async function fecharAno(){
 }
 const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button><button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>`;
 /*PIX*/
+const BASE_PLAN_RESOURCES=Object.freeze({planilha:true,importar:true,exportar:true,visaoAnual:true,checape:true,metas:true,dividas:true,tamandua:true});
 const PLANOS={
-  pro:{nome:'Pro',valor:30.00,limite:2,produto:'copiloto_pro_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
-  max:{nome:'Max',valor:40.00,limite:6,produto:'copiloto_max_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
-  ultra:{nome:'Ultra',valor:60.00,limite:null,produto:'copiloto_ultra_30d',recursos:{relatorios:true,patrimonioHistorico:true,simulador:true}}
+  pro:{nome:'Pro',valor:30.00,limite:2,produto:'copiloto_pro_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:false,patrimonioHistorico:false,simulador:false}},
+  max:{nome:'Max',valor:40.00,limite:6,produto:'copiloto_max_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:false,patrimonioHistorico:false,simulador:false}},
+  ultra:{nome:'Ultra',valor:60.00,limite:null,produto:'copiloto_ultra_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:true,patrimonioHistorico:true,simulador:true}}
 };
 function tamanduaPlanMarkup(tier){
   const labels={
@@ -4718,7 +4720,7 @@ async function renderPaywall(){
           ${tamanduaPlanMarkup('ultra')}
           <span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span>
           <strong>${S.playProducts?.copiloto_ultra_30d?.formattedPrice||brl(PLANOS.ultra.valor)}</strong>
-          <span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span>
+          <span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Tudo do Pro e Max, mais relatórios anuais, histórico patrimonial e simulador de objetivos.</span>
         </button>
       </div>
       <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${precoSelecionado}</strong></div>
@@ -5347,4 +5349,4 @@ function mountMobileCompanion(){
 }
 </script>
 
-<script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script></html>
+<script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script></html>

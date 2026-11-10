@@ -74,7 +74,7 @@ function initialize() {
       renderer.setClearColor(0x000000, 0);
       renderer.outputColorSpace = SRGBColorSpace;
       renderer.toneMapping = ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 0.9;
+      renderer.toneMappingExposure = 0.76;
       renderer.domElement.className = "cf-world-canvas";
       renderer.domElement.setAttribute("aria-hidden", "true");
       document.body.prepend(renderer.domElement);
@@ -121,7 +121,7 @@ function initialize() {
       }));
       let loadingTimer;
       const gltf = await Promise.race([
-        loader.loadAsync("tamandua-authored-3d.glb", (event) => {
+        loader.loadAsync("tamandua-authored-3d.glb?v=atelier6", (event) => {
           renderer.domElement.dataset.loaded = String(event.loaded);
         }),
         new Promise((_, reject) => {
@@ -299,8 +299,8 @@ function prepareInline() {
   renderer.domElement.onkeydown=event=>{
     if(event.key==='ArrowLeft'||event.key==='ArrowRight') {event.preventDefault();character.rotation.y+=(event.key==='ArrowLeft'?-.2:.2);draw(performance.now(),true);}
   };
-  props.visible=false;stars.visible=false;character.scale.setScalar(1);character.position.set(0,0,0);character.rotation.set(0,0,0);
-  camera.position.set(1.6,.35,3.4);controls.target.set(0,0,0);controls.enabled=true;controls.enableZoom=false;controls.update();resize();sync();
+  props.visible=false;stars.visible=false;character.scale.setScalar(1);character.position.set(0,0,0);character.rotation.set(0,-.35,0);
+  camera.position.set(2.5,.3,3.2);controls.target.set(0,0,0);controls.enabled=true;controls.enableZoom=false;controls.update();resize();sync();
 }
 export async function mountCharacter(host) {
   inlineHost=host;

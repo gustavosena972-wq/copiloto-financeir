@@ -42,7 +42,7 @@ jobs:
       - name: Validate Android WebView assets
         run: |
           python3 tests/android_webview_assets_test.py
-          node --test tests/android_render_test.cjs tests/finance_core_test.cjs tests/tamandua_session_test.cjs tests/tamandua_finance_context_test.cjs tests/android_navigation_test.cjs tests/android_request_scope_test.cjs tests/file_export_test.cjs tests/reminder_plan_test.cjs tests/presentation_rebuild_test.cjs tests/privacy_signup_test.cjs
+          node --test tests/android_render_test.cjs tests/finance_core_test.cjs tests/tamandua_session_test.cjs tests/tamandua_finance_context_test.cjs tests/android_navigation_test.cjs tests/android_request_scope_test.cjs tests/file_export_test.cjs tests/reminder_plan_test.cjs tests/presentation_rebuild_test.cjs tests/privacy_signup_test.cjs tests/plan_inheritance_test.cjs
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4

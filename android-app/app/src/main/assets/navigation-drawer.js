@@ -37,10 +37,11 @@
       button.setAttribute('aria-expanded', 'false');
       button.innerHTML = menuIcon + '<span>Áreas</span>';
       button.onclick = () => {
-        if (!drawer.isConnected) return;
-        drawer.showModal();
+        const currentDrawer=document.getElementById('cf-app-navigation');
+        if (!currentDrawer?.isConnected) return;
+        currentDrawer.showModal();
         button.setAttribute('aria-expanded', 'true');
-        if (!reduced.matches) drawer.animate([{transform:'translateX(-100%)'}, {transform:'translateX(0)'}], {duration:240,easing:'cubic-bezier(.16,1,.3,1)'});
+        if (!reduced.matches) currentDrawer.animate([{transform:'translateX(-100%)'}, {transform:'translateX(0)'}], {duration:240,easing:'cubic-bezier(.16,1,.3,1)'});
       };
       host.prepend(button);
     });

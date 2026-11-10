@@ -6,7 +6,7 @@
     if (!event.target.closest('[data-act="explore3d"]') || opening) return;
     opening = true;
     try {
-      const world = await import("./financial-world.js");
+      const world = await import("./financial-world.js?v=1.0.42");
       await world.openCharacter();
     } catch (_) {
       const status = document.querySelector(".cf-tm-voice-status");
