@@ -57,6 +57,11 @@ body[data-ui="premium-fintech"] #cf-tm-root .cf-tm-panel[data-workspace] {height
 #cf-tm-root .cf-tm-icon {display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:3px !important;padding:4px !important;}
 #cf-tm-root .cf-tm-icon::before,#cf-tm-root .cf-tm-icon::after {content:none !important;display:none !important;}
 #cf-tm-root .cf-tm-icon .cf-plan-face {flex-shrink:0;}
+#cf-tm-root .cf-tm-compose .cf-tm-inputrow .cf-tm-icon {position:relative;width:72px !important;min-width:72px !important;height:64px !important;background:#362a39 !important;border:1px solid #7b6281 !important;border-radius:12px !important;padding:4px !important;box-shadow:none !important;overflow:hidden !important;}
+#cf-tm-root .cf-tm-inputrow .cf-tm-icon span {position:static !important;inset:auto !important;color:#ffe4cc !important;line-height:1.2 !important;}
+#cf-tm-root .cf-tm-inputrow .cf-tm-icon .cf-plan-face {width:36px !important;height:36px !important;}
+#cf-tm-root .cf-chat-sidebar :is(input,select) {background:#221a31 !important;color:#f0e6ff !important;border-color:#665177 !important;color-scheme:dark;}
+#cf-tm-root .cf-chat-sidebar .cf-tm-conv {background:#2b203c !important;color:#f0e6ff !important;}
 #cf-tm-root .cf-tm-send {background:#9366ce !important;border-color:#bb95ec !important;color:#fff !important;}
 #cf-tm-root .cf-chat-privacy-link {color:#c8b5cc !important;}
 #cf-tm-root .cf-tm-voice-status {background:#332638 !important;color:#ffe4cc !important;}
