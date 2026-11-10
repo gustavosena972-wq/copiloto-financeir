@@ -22,6 +22,8 @@ body[data-ui="premium-fintech"] #app .landing-page .cf-brand-reveal>span:first-c
 body[data-ui="premium-fintech"] #app .landing-page :is(.landing-plan-card,.app-feature-cards>article,.landing-login-card) {
   background:#101016 !important;border-color:#36323c !important;
 }
+body[data-ui="premium-fintech"] #app .landing-page :is(.app-feature-cards,.landing-plan-grid,.landing-login-card) :is(h2,h3,strong,b,label,li) {color:#f3f0e8 !important;}
+body[data-ui="premium-fintech"] #app .landing-page :is(.app-feature-cards,.landing-plan-grid,.landing-login-card) :is(p,small) {color:#d0cbc4 !important;}
 body[data-ui="premium-fintech"] #app .landing-page :is(input,select) {background:#17151e !important;color:#fff5e5 !important;border-color:#685d68 !important;}
 body[data-ui="premium-fintech"] #app .landing-page :is(.primary,.landing-hero-actions>a:first-child) {
   background:#e38a52 !important;color:#1c100c !important;box-shadow:0 8px 24px #0006 !important;
@@ -51,4 +53,3 @@ body[data-ui="premium-fintech"] #app .app-shell :is(.cf-ledger-result,.cf-mobile
   .mobile-bottom-nav .mobile-nav-item span {margin-top:-5px;}
 }
 @media(prefers-reduced-motion:reduce){.mobile-bottom-nav .mobile-nav-item svg{transition:none !important;}}
-
