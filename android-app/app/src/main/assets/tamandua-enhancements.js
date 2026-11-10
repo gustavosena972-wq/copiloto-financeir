@@ -30,7 +30,7 @@ function css(){if($('#cf-tm-css'))return;const s=document.createElement('style')
 function cards(d,q){q=String(q||'').toLowerCase();let h='';if(/quanto|gastei|despesa|gasto|aliment|categoria/.test(q)){h+=`<div class="cf-tm-stat"><small>Total de despesas</small><b>${brl(d.despesas)}</b><span>Calculado a partir dos lançamentos carregados no aplicativo.</span></div>`;if(d.categorias.length)h+=`<div class="cf-tm-chart"><h4>Principais categorias</h4><div class="cf-tm-bars">${d.categorias.map(([n,v])=>`<div class="cf-tm-bar"><em>${brl(v)}</em><i style="height:${Math.max(5,Math.round(v/(d.categorias[0][1]||1)*76))}px"></i><span>${esc(n)}</span></div>`).join('')}</div></div>`}else if(/receita|renda|ganh/.test(q))h+=`<div class="cf-tm-stat"><small>Total de receitas</small><b>${brl(d.receitas)}</b><span>Somatório das receitas disponíveis.</span></div>`;else if(/saldo|sobrou|dispon/.test(q))h+=`<div class="cf-tm-stat"><small>Saldo calculado</small><b>${brl(d.saldo)}</b><span>Receitas menos despesas dos dados carregados.</span></div>`;else if(/comprom|pendente|conta|próximo|proximo/.test(q))h+=`<div class="cf-tm-stat"><small>Em aberto</small><b>${brl(d.pendentes)}</b><span>Despesas ainda não marcadas como pagas.</span></div>`;return h}
 function voiceStatus(text,error=false){const el=$('.cf-tm-voice-status');if(!el)return;el.textContent=text;el.classList.toggle('on',!!text);el.classList.toggle('error',!!error)}
 function speak(text){const clean=String(text||'').replace(/[*#`]/g,'').trim();if(!clean)return;if(window.CopilotoVoice?.postMessage){try{window.CopilotoVoice.postMessage(JSON.stringify({action:'speak',text:clean.slice(0,5000)}));voiceStatus('Tamanduá está falando…');return}catch(_){} }if(!window.speechSynthesis){voiceStatus('A fala não está disponível neste dispositivo.',true);return}window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(clean);u.lang=VOICE_LANGS[voiceLanguage()]||'pt-BR';u.rate=.94;u.pitch=1;u.volume=1;const voices=window.speechSynthesis.getVoices?.()||[];const chosen=voices.find(v=>v.lang.toLowerCase()===u.lang.toLowerCase())||voices.find(v=>v.lang.toLowerCase().split('-')[0]===u.lang.toLowerCase().split('-')[0]);if(chosen)u.voice=chosen;u.onstart=()=>voiceStatus('Tamanduá está falando…');u.onend=()=>voiceStatus('');u.onerror=()=>voiceStatus('Não consegui reproduzir a resposta em voz.',true);window.speechSynthesis.speak(u)}
-function add(role,text,q){const b=$('.cf-tm-messages');if(!b)return;const w=document.createElement('div');w.className='cf-tm-msg '+((role==='user'||role==='usuario')?'user':'bot');const x=document.createElement('div');x.className='cf-tm-bubble';x.innerHTML='<p>'+esc(text).replace(/\\n\\n/g,'</p><p>').replace(/\\n/g,'<br>')+'</p>'+(role==='bot'?cards(data(),q):'');w.appendChild(x);b.appendChild(w);b.parentElement.scrollTop=b.parentElement.scrollHeight}
+function add(role,text,q){const b=$('.cf-tm-messages');if(!b)return;const w=document.createElement('div');w.className='cf-tm-msg '+((role==='user'||role==='usuario')?'user':'bot');const x=document.createElement('div');x.className='cf-tm-bubble';x.innerHTML='<p>'+esc(text).replace(/\\n\\n/g,'</p><p>').replace(/\\n/g,'<br>')+'</p>';w.appendChild(x);b.appendChild(w);b.parentElement.scrollTop=b.parentElement.scrollHeight}
 async function history(){
  const b=$('.cf-tm-list'),c=sbc(),state=currentState(),ticket=sessionGate.ticket(state);
  if(!b||!c||!ticket)return;
@@ -59,6 +59,7 @@ async function send(fromVoice=false){
  if(message.length>2000){voiceStatus('Use até 2.000 caracteres por mensagem. Seu texto foi mantido para revisão.',true);return;}
  const c=sbc();if(!c){add('bot','Entre novamente para continuar a conversa.');return;}
  input.value='';add('user',message);
+ if(window.CFTamanduaActions?.handle(message,{reply:text=>{if(sessionGate.accepts(ticket,currentState()))add('bot',text);}}))return;
  const context={view:state.view,mes:state.mes?.mes,ano:state.ano?.ano,intencao:'conversa_financeira'};
  if(window.__cfTamanduaConversation)context.conversa_id=window.__cfTamanduaConversation;
  const button=$('.cf-tm-send');button.disabled=true;button.textContent='…';$('.cf-tm-panel')?.setAttribute('aria-busy','true');
@@ -81,13 +82,30 @@ window.addEventListener('copiloto:tamandua-new',()=>{sessionGate.invalidate();bo
 window.addEventListener('copiloto:voice-input',event=>{
  const pending=nativeVoiceTicket,detail=event.detail||{};
  if(!pending||pending.id!==detail.requestId||!sessionGate.accepts(pending.ticket,currentState()))return;
+ if(detail.status==='listening'){voiceStatus('Estou ouvindo… toque no rostinho para cancelar.');return;}
  nativeVoiceTicket=null;$('.cf-tm-icon')?.setAttribute('aria-pressed','false');
  if(detail.status==='recognized'){
   const input=$('.cf-tm-input');if(input){input.value=String(detail.text||'').slice(0,4000);input.dispatchEvent(new Event('input'));input.focus();}
   voiceStatus('Texto pronto. Revise e toque em Enviar.');
- }else voiceStatus(detail.status==='cancelled'?'Ditado cancelado.':'O ditado não está disponível agora. Você pode digitar sua mensagem.',detail.status!=='cancelled');
+ }else {const messages={permission_denied:'Permita o microfone em Configurações do Android > Aplicativos > Copiloto Financeiro > Permissões. Depois toque no rostinho novamente.',network:'O serviço de voz está sem conexão. Tente novamente ou digite sua mensagem.',empty:'Não ouvi nenhuma fala. Toque no rostinho para tentar novamente.',busy:'O microfone está em uso. Aguarde e tente novamente.',cancelled:'Ditado cancelado.'};voiceStatus(messages[detail.status]||'Ative um serviço de reconhecimento de voz nas configurações do Android. Você pode continuar digitando.',detail.status!=='cancelled');}
 });
-function voice(){if(window.CopilotoVoice?.postMessage){const ticket=sessionGate.ticket(currentState());if(!ticket)return;const id='voice_'+Date.now()+'_'+(++nativeVoiceSerial);nativeVoiceTicket={id,ticket};$('.cf-tm-icon')?.setAttribute('aria-pressed','true');voiceStatus('Abrindo o ditado do Android…');try{window.CopilotoVoice.postMessage(JSON.stringify({action:'recognize',requestId:id,language:voiceLanguage()}));}catch(_){nativeVoiceTicket=null;voiceStatus('Não foi possível abrir o ditado.',true);}return;}window.__cfTamanduaVoiceMode=true;if(window.CopilotoVoice?.postMessage){try{window.CopilotoVoice.postMessage(JSON.stringify({action:'stop'}));}catch(_){}}if(window.speechSynthesis?.speaking){window.__cfTamanduaVoiceMode=false;window.speechSynthesis.cancel();if(window.CopilotoVoice?.postMessage){try{window.CopilotoVoice.postMessage(JSON.stringify({action:'stop'}));}catch(_){}}voiceStatus('');return}const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){voiceStatus('O reconhecimento de voz não está disponível neste dispositivo.',true);return}const r=new R();window.__cfTamanduaRecognition=r;r.lang=VOICE_LANGS[voiceLanguage()]||'pt-BR';r.continuous=false;r.interimResults=false;r.maxAlternatives=1;const b=$('.cf-tm-icon');b.setAttribute('aria-pressed','true');voiceStatus('Estou ouvindo… fale sua pergunta.');r.onresult=e=>{const text=String(e.results?.[0]?.[0]?.transcript||'').trim();const i=$('.cf-tm-input');if(!text){voiceStatus('Não consegui identificar a fala.',true);return}i.value=text;voiceStatus('Texto pronto. Revise e toque em Enviar.');i.focus()};r.onerror=e=>{const msg=e?.error==='not-allowed'?'Permissão de microfone não concedida.':'Não consegui entender a fala. Tente novamente.';voiceStatus(msg,true)};r.onend=()=>{b.setAttribute('aria-pressed','false');window.__cfTamanduaRecognition=null;if(!window.__cfTamanduaVoiceMode)voiceStatus('')};try{r.start()}catch(_){voiceStatus('O microfone está ocupado. Tente novamente.',true);b.setAttribute('aria-pressed','false')}}
+function voice(){
+ const ticket=sessionGate.ticket(currentState());if(!ticket)return;
+ const button=$('.cf-tm-icon');
+ if(window.CopilotoVoice?.postMessage){
+  if(nativeVoiceTicket){window.CopilotoVoice.postMessage(JSON.stringify({action:'stop'}));return;}
+  const id='voice_'+Date.now()+'_'+(++nativeVoiceSerial);nativeVoiceTicket={id,ticket};button?.setAttribute('aria-pressed','true');voiceStatus('Autorize o microfone para ditar.');
+  try{window.CopilotoVoice.postMessage(JSON.stringify({action:'recognize',requestId:id,language:voiceLanguage()}));}catch(_){nativeVoiceTicket=null;button?.setAttribute('aria-pressed','false');voiceStatus('Não foi possível abrir o ditado do Android.',true);}return;
+ }
+ if(location.hostname==='appassets.androidplatform.net'){voiceStatus('Atualize o Android System WebView e reabra o aplicativo para ativar o ditado nativo.',true);return;}
+ const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){voiceStatus('Use o aplicativo Android para ditar ou digite sua mensagem.',true);return;}
+ const r=new R();window.__cfTamanduaRecognition=r;r.lang=VOICE_LANGS[voiceLanguage()]||'pt-BR';r.continuous=false;r.interimResults=false;
+ button?.setAttribute('aria-pressed','true');voiceStatus('Estou ouvindo…');
+ r.onresult=e=>{if(!sessionGate.accepts(ticket,currentState()))return;const text=String(e.results?.[0]?.[0]?.transcript||'').trim();const input=$('.cf-tm-input');if(input&&text){input.value=text.slice(0,2000);input.dispatchEvent(new Event('input'));voiceStatus('Texto pronto. Revise e toque em Enviar.');}};
+ r.onerror=e=>{if(sessionGate.accepts(ticket,currentState()))voiceStatus(e?.error==='not-allowed'?'Permita o microfone nas configurações deste navegador ou use o aplicativo Android.':'Não consegui ouvir. Tente novamente.',true);};
+ r.onend=()=>{button?.setAttribute('aria-pressed','false');window.__cfTamanduaRecognition=null;};
+ try{r.start();}catch(_){button?.setAttribute('aria-pressed','false');voiceStatus('Não foi possível iniciar o microfone.',true);}
+}
 function simulate(){
  const input=$('#cf-tm-sim-value'),out=$('.cf-tm-sim-output');if(!out)return;
  try{

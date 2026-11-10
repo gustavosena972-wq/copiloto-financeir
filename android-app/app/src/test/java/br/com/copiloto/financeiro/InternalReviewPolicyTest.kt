@@ -21,4 +21,10 @@ class InternalReviewPolicyTest {
         assertEquals("Olá", VoiceInputPolicy.draft(" Olá "))
         assertEquals(4000, VoiceInputPolicy.draft("a".repeat(5000)).length)
     }
+    @Test fun dictationDistinguishesPermissionNetworkAndSilence() {
+        assertEquals("permission_denied", VoiceInputPolicy.errorStatus(9))
+        assertEquals("network", VoiceInputPolicy.errorStatus(2))
+        assertEquals("empty", VoiceInputPolicy.errorStatus(7))
+        assertEquals("busy", VoiceInputPolicy.errorStatus(8))
+    }
 }

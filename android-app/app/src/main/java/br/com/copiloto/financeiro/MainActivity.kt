@@ -31,7 +31,7 @@ import java.util.Locale
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     companion object {
-        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.44"
+        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.45"
         private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
         const val ACCEPT_WEBVIEW_COOKIES = false
         const val ACCEPT_THIRD_PARTY_COOKIES = false
@@ -258,6 +258,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
 
             "stop" -> runOnUiThread {
                 textToSpeech?.stop()
+                if (::voiceInput.isInitialized) voiceInput.cancel()
             }
         }
     }
@@ -563,6 +564,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (::voiceInput.isInitialized && voiceInput.handlePermissionResult(requestCode)) return
         if (::tamanduaAlerts.isInitialized) tamanduaAlerts.handlePermissionResult(requestCode)
     }
 
@@ -570,6 +572,11 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         if (::voiceInput.isInitialized && voiceInput.handleResult(requestCode, resultCode, data)) return
         if (spreadsheetFiles.handleResult(requestCode, resultCode, data)) return
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onStop() {
+        if (::voiceInput.isInitialized) voiceInput.pause()
+        super.onStop()
     }
 
     override fun onDestroy() {
