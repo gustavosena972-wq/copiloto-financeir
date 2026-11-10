@@ -20,7 +20,7 @@
   });
   const decorate = () => {
     for (const host of document.querySelectorAll(
-      ".cf-chat-welcome,.cf-welcome-choices",
+      ".cf-welcome-choices",
     )) {
       if (host.querySelector('[data-act="explore3d"]')) continue;
       const button = document.createElement("button");

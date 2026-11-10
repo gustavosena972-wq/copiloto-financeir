@@ -15,7 +15,7 @@
   function mount() {
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     let page = null, sections = [], frame = 0;
-    const selector = '.landing-intro>h1,.landing-intro>p,.landing-hero-actions,.cf-finance-orbit,.landing-benefits>h2,.landing-benefits>p,.app-feature-cards>article,.landing-section-heading,.landing-plan-card,.landing-login-copy';
+    const selector = '.cf-brand-reveal>span,.cf-brand-benefit,.landing-intro>p,.landing-hero-actions,.cf-finance-orbit,.landing-benefits>h2,.landing-benefits>p,.app-feature-cards>article,.landing-section-heading,.landing-plan-card,.landing-login-copy';
     function clear(element) {
       ['transform','clip-path','opacity','will-change'].forEach(name => element.style.removeProperty(name));
       element.removeAttribute('data-rebuild-piece');
@@ -39,7 +39,7 @@
           if (!enabled || editing) {clear(element);return;}
           const p = pose(rect.top+piece.offset,piece.height,innerHeight,piece.index);
           element.dataset.rebuildPiece = '1';
-          element.style.transform = `perspective(1100px) translate3d(${p.x}px,${p.y}px,${p.z}px) rotateY(${p.rotate}deg) rotateX(${p.spread*9}deg)`;
+          element.style.transform = `perspective(1100px) translate3d(${p.x}px,${p.y}px,${p.z}px) rotateY(${p.rotate}deg) rotateX(${p.spread*9}deg) rotateZ(${(piece.index%2?1:-1)*p.spread*7}deg) scale(${1-p.spread*.08})`;
           element.style.clipPath = p.spread===0 ? 'none' : `inset(${p.clip}% ${p.clip*.3}% ${p.clip*.45}% ${p.clip*.3}%)`;
           element.style.opacity = String(1-p.spread*.4);
           if(p.spread>0 && p.spread<1) element.style.willChange='transform,clip-path';

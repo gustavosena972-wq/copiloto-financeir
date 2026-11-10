@@ -37,6 +37,7 @@ let renderer,
   frame = 0,
   last = 0,
   dialog = null,
+  inlineHost = null,
   view = "inicio",
   visible = false,
   editing = false,
@@ -50,7 +51,7 @@ try {
 
 function resize() {
   if (!renderer) return;
-  const host = dialog?.querySelector(".cf-model-stage"),
+  const host = dialog?.querySelector(".cf-model-stage") || (inlineHost?.isConnected ? inlineHost : null),
     width = host ? host.clientWidth : innerWidth,
     height = host ? host.clientHeight : innerHeight;
   if (!width || !height) return;
@@ -104,6 +105,7 @@ function initialize() {
       // Keep the presentation focused on the character; no abstract floating props.
       stars = new Group();
       controls = new OrbitControls(camera, renderer.domElement);
+      controls.addEventListener('change',()=>{if(renderer && (dialog || visible)) renderer.render(scene,camera);});
       controls.enabled = false;
       controls.enableDamping = true;
       controls.enablePan = false;
@@ -164,7 +166,7 @@ function draw(now, force = false) {
   if (force || now - last >= 32) {
     const dt = Math.min(0.08, Math.max(0.001, (now - last) / 1000));
     last = now;
-    if (dialog) {
+    if (dialog || (inlineHost?.isConnected && visible)) {
       controls.update();
     } else {
       const pose = poses[view] || poses.inicio;
@@ -231,7 +233,8 @@ function draw(now, force = false) {
 }
 function sync() {
   const shell = document.querySelector(".landing-page");
-  visible = false; // The character is available only when explicitly opened.
+  visible = !!inlineHost?.isConnected && !document.querySelector('dialog[open]:not(.cf-character-3d)') && inlineHost.getBoundingClientRect().bottom > 0 && inlineHost.getBoundingClientRect().top < innerHeight;
+  if (inlineHost && !inlineHost.isConnected) { inlineHost = null; controls && (controls.enabled = false); }
   view = shell?.dataset.screen || "inicio";
   if (renderer) {
     renderer.domElement.style.display = visible || dialog ? "block" : "none";
@@ -252,13 +255,15 @@ export async function openCharacter() {
     dialog = null;
     controls && (controls.enabled = false);
     if (renderer) {
-      document.body.prepend(renderer.domElement);
+      if(inlineHost?.isConnected) inlineHost.replaceChildren(renderer.domElement);
+      else document.body.prepend(renderer.domElement);
       props.visible = true;
       stars.visible = true;
       camera.position.set(0.1, 1, 5.3);
       resize();
     }
     old.remove();
+    if(inlineHost?.isConnected) prepareInline();
     sync();
   });
   try {
@@ -275,6 +280,7 @@ export async function openCharacter() {
     camera.position.set(2.2, 0.7, 3.8);
     controls.target.set(0, 0, 0);
     controls.enabled = true;
+    controls.enableZoom = true;
     controls.update();
     resize();
     draw(performance.now(), true);
@@ -284,11 +290,28 @@ export async function openCharacter() {
         "Não foi possível abrir o 3D neste dispositivo. Você pode continuar usando o aplicativo.";
   }
 }
-new MutationObserver(sync).observe(document.getElementById("app"), {
+function prepareInline() {
+  if(!renderer || !inlineHost?.isConnected || dialog) return;
+  inlineHost.replaceChildren(renderer.domElement);
+  renderer.domElement.setAttribute('aria-hidden','false');
+  renderer.domElement.setAttribute('aria-label','Tamanduá 3D interativo. Arraste para girar.');
+  renderer.domElement.tabIndex=0;
+  renderer.domElement.onkeydown=event=>{
+    if(event.key==='ArrowLeft'||event.key==='ArrowRight') {event.preventDefault();character.rotation.y+=(event.key==='ArrowLeft'?-.2:.2);draw(performance.now(),true);}
+  };
+  props.visible=false;stars.visible=false;character.scale.setScalar(1);character.position.set(0,0,0);character.rotation.set(0,0,0);
+  camera.position.set(1.6,.35,3.4);controls.target.set(0,0,0);controls.enabled=true;controls.enableZoom=false;controls.update();resize();sync();
+}
+export async function mountCharacter(host) {
+  inlineHost=host;
+  await initialize();
+  if(inlineHost===host && host.isConnected) prepareInline();
+}
+new MutationObserver(sync).observe(document.body, {
   childList: true,
   subtree: true,
   attributes: true,
-  attributeFilter: ["data-screen"],
+  attributeFilter: ["data-screen", "open"],
 });
 addEventListener("resize", resize);
 document.addEventListener("visibilitychange", () => {
@@ -323,8 +346,9 @@ addEventListener(
           Math.max(1, document.documentElement.scrollHeight - innerHeight),
       ),
     );
+    if(inlineHost) sync();
   },
-  { passive: true },
+  { passive: true, capture: true },
 );
 document.addEventListener("click", (e) => {
   if (e.target.closest('[data-act="screenmotion"]')) {

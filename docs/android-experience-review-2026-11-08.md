@@ -20,7 +20,7 @@ O modelo 3D sÃ³ Ã© carregado ao tocar em Ver personagem 3D. NÃ£o ocupa o f
 
 ## EvidÃªncias e limites
 
-41 testes Node verificam cÃ¡lculos, navegaÃ§Ã£o, descarte de respostas de sessÃ£o/perÃ­odo anterior e exportaÃ§Ã£o. O verificador Python analisa os cinco scripts inline, arquivos externos e orÃ§amento dos assets. O validador glTF nÃ£o encontrou erros nem avisos no modelo final. A apresentaÃ§Ã£o, o dashboard e o chat foram inspecionados no navegador com dados fictÃ­cios, sem sessÃ£o Supabase, em composiÃ§Ã£o ampla e em um frame de 390 px.
+44 testes Node verificam cÃ¡lculos, navegaÃ§Ã£o, descarte de respostas de sessÃ£o/perÃ­odo anterior e exportaÃ§Ã£o. O verificador Python analisa os cinco scripts inline, arquivos externos e orÃ§amento dos assets. O validador glTF nÃ£o encontrou erros nem avisos no modelo final. A apresentaÃ§Ã£o, o dashboard e o chat foram inspecionados no navegador com dados fictÃ­cios, sem sessÃ£o Supabase, em composiÃ§Ã£o ampla e em um frame de 390 px.
 
 O workflow `android-signed-review.yml` executa essas verificaÃ§Ãµes e os testes Kotlin, gera APK e AAB com a chave jÃ¡ configurada no repositÃ³rio, verifica as assinaturas e publica somente um artefato de revisÃ£o. NÃ£o envia a versÃ£o Ã  Google Play. O artefato interno usa `-PcopilotoInternalTest=true`: o cÃ³digo nativo bloqueia compras e a interface nÃ£o abre checkout. A liberaÃ§Ã£o de acesso continua dependendo da lista autenticada de testadores do servidor; o modo de teste nÃ£o concede acesso a contas desconhecidas. Para a versÃ£o pÃºblica, gerar outro pacote sem essa propriedade. Os produtos e preÃ§os continuam configurados.
 
@@ -44,7 +44,7 @@ O chat possui conversa ampla, histórico e ferramentas em lateral; no celular, a
 
 Lembretes locais opcionais usam WorkManager e permissão Android. Sincronizam vencimentos do contexto autorizado e guardam somente datas e hash de conta/família, por até sete dias. Logout ou mudança de identidade cancela os lembretes anteriores. A notificação é genérica e possui botão OK; o sistema Android controla entrega e duração flutuante. Não há processamento contínuo de IA, FCM ou execução de pagamentos. As preferências passam a ter chave composta usuário/família, preservando RLS e os registros existentes.
 
-Verificações: 41 testes Node; três novos testes Kotlin para consentimento, expiração e separação de identidade, além da suíte existente. A entrega em aparelho físico, inclusive com restrições de bateria, precisa ser validada pelos testadores.
+Verificações: 44 testes Node; três novos testes Kotlin para consentimento, expiração e separação de identidade, além da suíte existente. A entrega em aparelho físico, inclusive com restrições de bateria, precisa ser validada pelos testadores.
 
 
 ## Navegação lateral e reconstrução do conteúdo
@@ -52,3 +52,12 @@ Verificações: 41 testes Node; três novos testes Kotlin para consentimento, ex
 O menu geral deixou de ocupar uma faixa permanente no painel. Áreas abre uma gaveta lateral com os mesmos destinos e permissões; escolher um destino fecha a gaveta. No chat, Áreas abre a navegação geral; Conversas e ferramentas abre o histórico do Tamanduá. Os atalhos de celular foram preservados. A gaveta usa dialog modal, conserva foco e fecha com Voltar/Escape.
 
 A reconstrução agora transforma os próprios títulos, textos, ilustração e cartões conforme a rolagem: as peças se deslocam de lados opostos, mudam perspectiva e recuperam o recorte. A área de leitura permanece montada, sem rolagem forçada. A cena 3D fixa de fundo deixou de ser carregada. Movimento reduzido e a preferência de desligar movimento restauram conteúdo estático; campos em edição ficam estáveis. Três testes verificam montagem, limites e leitura de painéis longos.
+
+
+## Chat em tons de cacau, presença e privacidade — versão 1.0.41
+
+A lateral do Tamanduá mantém o verde. Cabeçalho, compositor e conversa usam marrom, creme e detalhes de latão. O personagem 3D passa a carregar à vista no cabeçalho do chat, com giro por arraste ou setas, ampliação e imagem alternativa em dispositivos sem WebGL. Não há mudança do modelo GLB nesta etapa. A carinha do Tamanduá identifica o ditado com Fala comigo; o texto continua sendo revisado antes do envio. A reconstrução da apresentação envolve também as palavras da marca e rotações alternadas, sem prender a rolagem.
+
+A política Android versão 3 corrige a afirmação antiga de que a IA estava desligada. Informa processamento na API, limites de store:false, memória pessoal, controles de família, voz, lembretes, arquivos, retenção e direitos. Referências: https://developers.openai.com/api/docs/guides/your-data e https://www.gov.br/anpd/pt-br/assuntos/titular-de-dados-1/direito-dos-titulares . A leitura da política tem caixa separada, inicialmente desmarcada; três testes verificam bloqueio anterior ao envio do cadastro e preservação do login. O backend de autenticação mantém o registro de aceite de termos existente, sem implementar um novo registro auditável de versão 3 nesta etapa.
+
+Somente a política empacotada no Android e sua cópia na prévia foram atualizadas. A página pública de privacidade continua sob a responsabilidade de quem mantém a web e precisa ser sincronizada antes de uma publicação pública; nenhum arquivo público foi alterado. Este PR permanece destinado a revisão e teste interno.

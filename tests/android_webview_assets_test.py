@@ -66,7 +66,7 @@ for number, script in enumerate(parser.scripts, 1):
     assert result.returncode == 0, f"Inline script {number}: {result.stderr}"
 print(f"PASS: {len(parser.scripts)} Android inline scripts parse successfully.")
 
-for asset in ("reminder-plan.js", "tamandua-preferences.js", "navigation-drawer.js", "presentation-rebuild.js", "tamandua-workspace.js", "presentation-art.js", "file-export.js", "tamandua-session.js", "tamandua-enhancements.js", "mobile-polish.js", "mobile-motion.js", "tamandua-3d.js", "finance-core.js"):
+for asset in ("reminder-plan.js", "tamandua-preferences.js", "navigation-drawer.js", "presentation-rebuild.js", "tamandua-presence.js", "tamandua-workspace.js", "presentation-art.js", "file-export.js", "tamandua-session.js", "tamandua-enhancements.js", "mobile-polish.js", "mobile-motion.js", "tamandua-3d.js", "finance-core.js"):
     subprocess.run(["node", "--check", str(HTML.parent / asset)], check=True)
 print("PASS: injected Android scripts parse successfully.")
 
