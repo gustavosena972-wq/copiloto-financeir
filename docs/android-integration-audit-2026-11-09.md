@@ -33,10 +33,12 @@ Tamanduá é um destino próprio, disponível pela navegação do aplicativo. Fo
 
 ## Evidências e limites
 
-49 testes Node de Android/interface/cálculos/sessão/planos; 12 testes de parsing e contexto do bot; 10 testes PostgreSQL/PGlite de isolamento entre famílias e usuários. A função publicada foi comparada ao PR revisado. O modelo GLB final não possui erros nem avisos no validador glTF. A suíte Kotlin e as assinaturas são conferidas pelo workflow da versão 1.0.42.
+50 testes Node de Android/interface/cálculos/sessão/planos; 12 testes de parsing e contexto do bot; 10 testes PostgreSQL/PGlite de isolamento entre famílias e usuários. A função publicada foi comparada ao PR revisado. O modelo GLB final não possui erros nem avisos no validador glTF. A suíte Kotlin e as assinaturas são conferidas pelo workflow da versão 1.0.42.
 
 Na revisão de navegação foi corrigida uma referência antiga do botão Áreas no chat após reconstruir o workspace. O botão agora resolve a gaveta da tela atual; dois testes cobrem a reconstrução e a impossibilidade de abrir um menu antigo após sair da conta.
 
 Persistem dois avisos anteriores do Supabase: proteção contra senhas vazadas desativada e tabela privada com RLS sem políticas (sem acesso liberado por isso). Nenhuma proteção foi reduzida. A ativação de proteção de senhas e as políticas operacionais de retenção exigem revisão da configuração de operação.
 
 Ainda faltam autenticação real e chamada autenticada ao modelo com uma conta de teste, teclado/TalkBack, seletor de arquivos, voz, GPU e entrega dos lembretes sob restrições de bateria em aparelho físico. Não foram lidos lançamentos ou mensagens reais para montar a prévia. Não há garantia de ausência total de falhas. A política pública segue com a equipe da web e precisa receber o texto já incluído no Android antes de publicação pública.
+
+Na conferência das áreas foi corrigido um rótulo ausente em Categorias e grupos. A navegação para o chat é imediata para evitar que uma transição de captura do workspace remova a gaveta aberta em seguida. Conferência final realizada em 10/11/2026.

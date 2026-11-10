@@ -4892,7 +4892,7 @@ function viewChecape(ed){
   return `<div class="bar"><button data-act="checape" ${ed?'':'disabled'}>Gerar checape de ${MN[S.mes.mes-1]}</button><span class="mu">A análise considera o mês atual e o histórico disponível.</span></div>
   ${cards||'<div class="mu">Lance as despesas e receitas do mês e gere o checape para receber uma análise. Quanto mais meses registrados, melhores serão as comparações.</div>'}`;
 }
-function familyAreaHeader(key,title,desc,label){
+function familyAreaHeader(key,title,desc,label='Gerenciar área'){
   const open=!!S.familyAreas?.[key];
   return '<div class="cf-family-area-header"><div><span class="cf-family-area-kicker">ÁREA</span><h2>'+title+'</h2><p>'+desc+'</p></div><div class="cf-family-area-actions"><button type="button" class="sec chip" data-act="'+(key==='membros'?'editfamily':key==='convites'?'editinvites':key==='categorias'?'editcategories':'editaccount')+'" aria-expanded="'+(open?'true':'false')+'">'+label+'</button></div></div>';
 }

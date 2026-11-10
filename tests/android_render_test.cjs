@@ -4,6 +4,7 @@ const {readFileSync}=require('node:fs');
 const vm=require('node:vm');
 const source=readFileSync(require('node:path').join(__dirname,'../android-app/app/src/main/assets/mobile.html'),'utf8');
 const brl=n=>Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+test('family area actions never expose an undefined label',()=>{const start=source.indexOf('function familyAreaHeader('),end=source.indexOf('function viewFamilia()',start);const header=vm.runInNewContext(source.slice(start,end)+';familyAreaHeader',{S:{familyAreas:{}}});const result=header('categorias','Categorias e grupos','Organize suas categorias');assert.doesNotMatch(result,/undefined/);assert.match(result,/Gerenciar área/);assert.match(result,/data-act="editcategories"/);});
 function render(name,next,S){
  const body=source.slice(source.indexOf('function '+name+'('),source.indexOf('function '+next+'('));
  return vm.runInNewContext(body+'; '+name+'()',{

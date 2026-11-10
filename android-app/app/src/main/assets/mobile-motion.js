@@ -20,7 +20,7 @@
     (event) => {
       const button = event.target.closest("button");
       if (!button) return;
-      if (button.dataset.act === "view") pending = true;
+      if (button.dataset.act === "view") pending = button.dataset.v !== "tamandua";
       if (button.dataset.act === "screenmotion") {
         enabled = !enabled;
         try {
