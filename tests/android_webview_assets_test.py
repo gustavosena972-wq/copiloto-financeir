@@ -14,7 +14,7 @@ assert ASSET.stat().st_size > 10000
 print("PASS: Android WebView uses a bundled Supabase runtime asset.")
 
 assert '<div id="app" class="wrap"><div class="cf-mobile-startup"' in html
-assert 'mobile.html?v=1.0.43' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
+assert 'mobile.html?v=1.0.44' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
 print("PASS: Android startup has visible fallback and cache-busted app entry.")
 
 
@@ -23,13 +23,13 @@ print("PASS: Android startup has visible fallback and cache-busted app entry.")
 assert html.count("function mostrarErroInicial(e)") == 1
 print("PASS: Android startup JavaScript parses past the initial error handler declaration.")
 
-# Release contract: the tested Android package is 1.0.43/versionCode 43.
+# Release contract: the tested Android package is 1.0.44/versionCode 44.
 gradle = (ROOT / "android-app/app/build.gradle.kts").read_text(encoding="utf-8")
-assert "versionCode = 43" in gradle
-assert 'versionName = "1.0.43"' in gradle
-print("PASS: Android release is pinned to 1.0.43/versionCode 43.")
+assert "versionCode = 44" in gradle
+assert 'versionName = "1.0.44"' in gradle
+print("PASS: Android release is pinned to 1.0.44/versionCode 44.")
 
-# CI release trigger marker: 1.0.43
+# CI release trigger marker: 1.0.44
 
 # Parse every classic inline script, rather than checking only one handler name.
 # Node parses syntax without executing application code or making network requests.

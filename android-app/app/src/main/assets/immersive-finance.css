@@ -33,6 +33,21 @@ body[data-ui="premium-fintech"] #app .landing-page .landing-nav a:last-child {
 }
 .cf-liquid-track {position:absolute;left:0;top:-15px;width:20%;height:78px;pointer-events:none;z-index:0;transform-origin:center;}
 .cf-liquid-track svg {width:100%;height:100%;overflow:visible;fill:#17121d;}
+/* Keep highlighted plans in the same dark material, including the legacy
+   recommended modifier which previously overrode the shared card background. */
+body[data-ui="premium-fintech"] #app .landing-page .landing-plans-section .landing-plan-card {
+  background:#141219 !important;color:#f3f0e8 !important;border:1px solid #49404b !important;box-shadow:none !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plans-section .landing-plan-card.recommended {
+  background:#201921 !important;border-color:#bd805c !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card :is(.landing-plan-top h3,.landing-price strong,.landing-feature-list li,.landing-feature-list li>span) {color:#f3f0e8 !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card :is(.landing-plan-top p,.landing-price>span,.landing-feature-heading) {color:#d0c4cc !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card :is(.landing-limit,.landing-ribbon) {background:#332731 !important;color:#f2c5a5 !important;border-color:#705045 !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card .landing-plan-status {color:#b4d9bb !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card .landing-plan-cta {background:#e38a52 !important;color:#25130d !important;box-shadow:none !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card .landing-plan-cta>span {color:inherit !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card .landing-feature-list :is(.landing-feature-check,small) {background:#332731 !important;color:#f2c5a5 !important;}
 .cf-finance-orbit[data-particle-sculpture]>*:not(.cf-finance-particles){visibility:hidden !important;}
 .cf-finance-particles {position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
 body:has(.app-shell){background:#09090c !important;}

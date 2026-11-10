@@ -95,15 +95,15 @@ jobs:
       - name: Prepare named deliverables and checksums
         run: |
           mkdir -p signed-package
-          cp android-app/app/build/outputs/bundle/release/app-release.aab signed-package/copiloto-financeiro-1.0.43.aab
-          cp android-app/app/build/outputs/apk/release/app-release.apk signed-package/copiloto-financeiro-1.0.43.apk
+          cp android-app/app/build/outputs/bundle/release/app-release.aab signed-package/copiloto-financeiro-1.0.44.aab
+          cp android-app/app/build/outputs/apk/release/app-release.apk signed-package/copiloto-financeiro-1.0.44.apk
           cd signed-package
-          sha256sum copiloto-financeiro-1.0.43.aab copiloto-financeiro-1.0.43.apk > SHA256SUMS.txt
+          sha256sum copiloto-financeiro-1.0.44.aab copiloto-financeiro-1.0.44.apk > SHA256SUMS.txt
 
       - name: Upload signed review AAB and APK
         uses: actions/upload-artifact@v4
         with:
-          name: copiloto-financeiro-1.0.43-assinado
+          name: copiloto-financeiro-1.0.44-assinado
           path: signed-package/*
           if-no-files-found: error
           retention-days: 30
