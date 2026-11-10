@@ -3358,7 +3358,7 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 @keyframes cf-tamandua-proactive-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(max-width:640px){.cf-tamandua-proactive{margin:0 0 10px;padding:12px;border-radius:16px}.cf-tamandua-proactive-actions{display:grid;grid-template-columns:1fr}.cf-tamandua-proactive-action{width:100%}}
 @media(prefers-reduced-motion:reduce){.cf-tamandua-proactive{animation:none}}
-.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"><link rel="stylesheet" href="mobile-motion.css"><script src="file-export.js"></script><link rel="stylesheet" href="android-presentation.css"><link rel="stylesheet" href="product-panel.css"><link rel="stylesheet" href="tamandua-chat.css"><link rel="stylesheet" href="tamandua-workspace.css"><link rel="stylesheet" href="continuous-presentation.css"><link rel="stylesheet" href="navigation-drawer.css"><link rel="stylesheet" href="tamandua-cocoa.css"><link rel="stylesheet" href="atelier-polish.css"></head>
+.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"><link rel="stylesheet" href="mobile-motion.css"><script src="file-export.js"></script><link rel="stylesheet" href="android-presentation.css"><link rel="stylesheet" href="product-panel.css"><link rel="stylesheet" href="tamandua-chat.css"><link rel="stylesheet" href="tamandua-workspace.css"><link rel="stylesheet" href="continuous-presentation.css"><link rel="stylesheet" href="navigation-drawer.css"><link rel="stylesheet" href="tamandua-cocoa.css"><link rel="stylesheet" href="atelier-polish.css"><link rel="stylesheet" href="mobile-scroll.css"><link rel="stylesheet" href="immersive-finance.css"></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"><div class="cf-mobile-startup" role="status" aria-live="polite"><div class="cf-mobile-startup-mark">CF</div><div><b>Copiloto Financeiro</b><span>Preparando seu financeiro…</span></div></div></div>
 <div id="toast"></div>
@@ -3571,19 +3571,28 @@ function mostrarErroInicial(e){
   console.error('Falha ao iniciar o Copiloto Financeiro:',e);
   const app=document.getElementById('app');
   if(!app)return;
-  app.innerHTML='<div class="auth"><h1>Não foi possível abrir o aplicativo</h1><p class="mu">Ocorreu uma falha ao carregar sua conta. Seus lançamentos não foram alterados. Confira sua conexão e tente novamente.</p><button id="tentar-novamente">Tentar novamente</button><p class="mu" style="font-size:12px">Se continuar, envie uma captura do Console do navegador para o suporte.</p></div>';
+  if(e?.name==='AbortError')return;
+  const code=e?.code==='42501'?'CF-ACESSO':e?.status===401?'CF-SESSAO':'CF-INICIO';
+  app.innerHTML='<div class="auth"><h1>Vamos recuperar seu acesso.</h1><p class="mu">Não conseguimos concluir a abertura da conta. Seus lançamentos não foram alterados.</p><button id="tentar-novamente">Tentar novamente</button><button id="entrar-novamente">Entrar novamente</button><p class="mu" style="font-size:12px">Se precisar de ajuda, informe ao suporte o código '+code+'. Não envie sua senha.</p></div>';
   const btn=document.getElementById('tentar-novamente');
-  if(btn)btn.onclick=()=>{app.innerHTML='<div class="auth mu">Carregando…</div>';boot().catch(mostrarErroInicial)};
+  if(btn)btn.onclick=()=>{app.innerHTML='<div class="auth mu">Carregando…</div>';restoreSessionAndBoot().catch(mostrarErroInicial)};
+  document.getElementById('entrar-novamente').onclick=async()=>{
+    try{const result=await sb.auth.signOut({scope:'local'});if(result.error)throw result.error;S.user=null;clearPrivateWorkspace();location.hash='login';renderAuth();}catch(error){mostrarErroInicial(error)}
+  };
+}
+async function restoreSessionAndBoot(){
+  const {data,error}=await sb.auth.getSession();
+  if(error)throw error;
+  S.user=data.session?.user||null;
+  await boot();
 }
 (async()=>{
   try{
-    const{data}=await sb.auth.getSession();
-    S.user=data.session?.user||null;
-    await boot();
     sb.auth.onAuthStateChange((ev,s)=>{
       const u=s?.user||null;
       if((u?.id)!==(S.user?.id)){S.user=u;scheduleBoot()}
     });
+    await restoreSessionAndBoot();
   }catch(e){mostrarErroInicial(e)}
 })();
 
@@ -5349,4 +5358,4 @@ function mountMobileCompanion(){
 }
 </script>
 
-<script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script></html>
+<script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script><script src="immersive-finance.js"></script><script src="finance-particles.js"></script></html>

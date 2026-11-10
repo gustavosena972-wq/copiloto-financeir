@@ -19,6 +19,7 @@
     function clear(element) {
       ['transform','clip-path','opacity','will-change'].forEach(name => element.style.removeProperty(name));
       element.removeAttribute('data-rebuild-piece');
+      element.removeAttribute('data-rebuild-pose');
     }
     function measure() {
       sections.forEach(section => section.pieces.forEach(piece => clear(piece.element)));
@@ -31,18 +32,25 @@
     function draw() {
       frame = 0;
       const enabled = !reduced.matches && document.documentElement.dataset.screenMotion !== 'off';
-      sections.forEach(section => {
-        const rect = section.element.getBoundingClientRect();
+      // Read all section geometry first; transforms/clip-path can invalidate layout.
+      const bounds = sections.map(section => section.element.getBoundingClientRect());
+      const compact = innerWidth <= 760;
+      sections.forEach((section, index) => {
+        const rect = bounds[index];
+        if (enabled && (rect.bottom < -innerHeight || rect.top > innerHeight * 2)) return;
         const editing = section.element.contains(document.activeElement) && document.activeElement.matches('input,textarea,select');
         section.pieces.forEach(piece => {
           const element = piece.element;
           if (!enabled || editing) {clear(element);return;}
           const p = pose(rect.top+piece.offset,piece.height,innerHeight,piece.index);
+          const key = [p.spread,p.x,p.y,compact].join(':');
+          if (element.dataset.rebuildPose === key) return;
+          element.dataset.rebuildPose = key;
           element.dataset.rebuildPiece = '1';
           element.style.transform = `perspective(1100px) translate3d(${p.x}px,${p.y}px,${p.z}px) rotateY(${p.rotate}deg) rotateX(${p.spread*9}deg) rotateZ(${(piece.index%2?1:-1)*p.spread*7}deg) scale(${1-p.spread*.08})`;
-          element.style.clipPath = p.spread===0 ? 'none' : `inset(${p.clip}% ${p.clip*.3}% ${p.clip*.45}% ${p.clip*.3}%)`;
+          element.style.clipPath = compact || p.spread===0 ? 'none' : `inset(${p.clip}% ${p.clip*.3}% ${p.clip*.45}% ${p.clip*.3}%)`;
           element.style.opacity = String(1-p.spread*.4);
-          if(p.spread>0 && p.spread<1) element.style.willChange='transform,clip-path';
+          if(p.spread>0 && p.spread<1) element.style.willChange=compact?'transform,opacity':'transform,clip-path';
           else element.style.removeProperty('will-change');
         });
       });
