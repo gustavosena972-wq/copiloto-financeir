@@ -78,3 +78,8 @@ html[data-screen-motion="off"] .cf-chat-face i{animation:none;}
 #cf-tm-root .cf-chat-sidebar-dialog {background:#12111b !important;border:1px solid #554164 !important;color:#ece0fb !important;width:min(360px,90vw);max-height:94dvh;overflow-y:auto;}
 #cf-tm-root .cf-chat-sidebar-dialog>form button {background:#352440;color:#f5e6ff;min-height:44px;border:1px solid #76568b;border-radius:10px;padding:10px 14px;}
 body[data-ui="premium-fintech"] #app .app-shell .cf-category-bar .cf-category-track>i {background:#9665e2 !important;box-shadow:none !important;}
+#cf-tm-root .cf-portrait-help{display:flex;align-items:center;gap:14px;max-width:100%;margin:22px 0 0;padding:14px 18px;background:#352638;color:#ffe9d8;border:1px solid #8c6c88;border-radius:14px;text-align:left;font:600 15px/1.4 Inter,system-ui,sans-serif;cursor:pointer;}
+#cf-tm-root .cf-portrait-help>span>span{display:block;margin-top:4px;color:#e0c5da;font-size:12px;font-weight:400;}
+#cf-tm-root .cf-portrait-help .cf-plan-face{display:block;flex:0 0 52px;width:52px;height:52px;border-radius:50%;background:url('tamandua-planos-3d.png') var(--face-x,12.5%) 0%/900% 300% no-repeat;}
+#cf-tm-root .cf-portrait-help:hover{background:#45304a;border-color:#c89dba;}
+#cf-tm-root .cf-portrait-help:focus-visible{outline:3px solid #e3b9ef;outline-offset:4px;}

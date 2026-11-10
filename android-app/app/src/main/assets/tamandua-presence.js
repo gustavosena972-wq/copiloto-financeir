@@ -17,6 +17,16 @@
       const settings=root.querySelector('.cf-voice-settings');if(settings)side.append(settings);
       welcome.querySelector('h2').textContent='O que vamos organizar hoje?';
       welcome.querySelector('p').textContent='Pode falar do seu jeito. As ferramentas ficam no menu lateral.';
+      const help=document.createElement('button');help.type='button';help.className='cf-portrait-help';
+      help.innerHTML='<span class="cf-plan-face" aria-hidden="true"></span><span>Vamos começar juntos<span>Configurar meu Tamanduá e encontrar tarefas</span></span>';
+      help.onclick=()=>{
+        const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches||document.documentElement.dataset.screenMotion==='off';
+        if(!reduced)root.querySelectorAll('.cf-chat-face i').forEach((piece,index)=>{piece.getAnimations().forEach(a=>a.cancel());piece.animate([{transform:`translateY(${14-index*7}px)`,opacity:.2},{transform:'none',opacity:1}],{duration:550,delay:index*65,easing:'cubic-bezier(.16,1,.3,1)'});});
+        if(!state().tamanduaProfile?.savedAt){root.querySelector('.cf-side-setup')?.click();return;}
+        if(matchMedia('(max-width:760px)').matches)root.querySelector('.cf-chat-menu')?.click();
+        root.querySelector('.cf-side-tasks button')?.focus();
+      };
+      welcome.append(help);
     }
     const compose=root.querySelector('.cf-tm-compose');
     if(compose&&!compose.querySelector('.cf-chat-privacy-link')){const link=document.createElement('button');link.className='cf-chat-privacy-link';link.type='button';link.dataset.act='legal';link.dataset.t='privacidade';link.textContent='Como seus dados são usados';compose.append(link);}
