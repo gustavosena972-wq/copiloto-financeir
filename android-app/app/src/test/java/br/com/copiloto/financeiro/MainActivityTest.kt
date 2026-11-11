@@ -280,8 +280,8 @@ class MainActivityTest {
         assertTrue(html.contains("['plan','Metas'"))
         assertTrue(html.contains("data-act=\"mobilemore\""))
         assertTrue(html.contains("id=\"cf-more-dialog\""))
-        assertTrue(html.contains("data-v=\"família\""))
-        assertTrue(html.contains("data-v=\"relatorios\""))
+        assertTrue(html.contains("link('família',"))
+        assertTrue(html.contains("link('relatorios',"))
 
     }
 
@@ -343,9 +343,9 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("S.mobileMore"))
         assertTrue(html.contains("data-act=\"mobilemore\""))
-        assertTrue(html.contains("data-act=\"view\" data-v=\"família\""))
-        assertTrue(html.contains("data-act=\"view\" data-v=\"relatorios\""))
-        assertTrue(html.contains("data-act=\"view\" data-v=\"admin\""))
+        assertTrue(html.contains("link('família',"))
+        assertTrue(html.contains("link('relatorios',"))
+        assertTrue(html.contains("const admin=S.admin?"))
         assertTrue(html.contains("data-act=\"sair\""))
     }
 
@@ -946,3 +946,4 @@ class MainActivityTest {
     }
 
 }
+
