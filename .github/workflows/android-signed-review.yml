@@ -52,7 +52,7 @@ jobs:
       - name: Test authenticated database access
         run: |
           npm install @electric-sql/pglite@0.5.15 --prefix "$RUNNER_TEMP/rls-test" --no-save
-          NODE_PATH="$RUNNER_TEMP/rls-test/node_modules" node --test tests/internal_tester_access_test.cjs tests/checape_access_test.cjs tests/username_test_access_test.cjs
+          NODE_PATH="$RUNNER_TEMP/rls-test/node_modules" node --test tests/internal_tester_access_test.cjs tests/checape_access_test.cjs tests/username_test_access_test.cjs tests/username_test_access_test.cjs
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -95,15 +95,15 @@ jobs:
       - name: Prepare named deliverables and checksums
         run: |
           mkdir -p signed-package
-          cp android-app/app/build/outputs/bundle/release/app-release.aab signed-package/copiloto-financeiro-1.0.47.aab
-          cp android-app/app/build/outputs/apk/release/app-release.apk signed-package/copiloto-financeiro-1.0.47.apk
+          cp android-app/app/build/outputs/bundle/release/app-release.aab signed-package/copiloto-financeiro-1.0.48.aab
+          cp android-app/app/build/outputs/apk/release/app-release.apk signed-package/copiloto-financeiro-1.0.48.apk
           cd signed-package
-          sha256sum copiloto-financeiro-1.0.47.aab copiloto-financeiro-1.0.47.apk > SHA256SUMS.txt
+          sha256sum copiloto-financeiro-1.0.48.aab copiloto-financeiro-1.0.48.apk > SHA256SUMS.txt
 
       - name: Upload signed review AAB and APK
         uses: actions/upload-artifact@v4
         with:
-          name: copiloto-financeiro-1.0.47-assinado
+          name: copiloto-financeiro-1.0.48-assinado
           path: signed-package/*
           if-no-files-found: error
           retention-days: 30

@@ -3453,8 +3453,8 @@ async function mobileLearnFromInteraction(profile){
   const{error}=await sb.from('ia_aprendizados').upsert(payload,{onConflict:'familia_id,usuario_id,chave'});
   if(error)throw error;
   await sb.from('ia_eventos').insert({
-    familia_id:S.fam.id,
-    usuario_id:S.user.id,
+    familia_id:payload.familia_id,
+    usuario_id:payload.usuario_id,
     tipo:'perfil_tamandua_atualizado',
     intencao:'personalizacao',
     contexto:{
@@ -3924,7 +3924,7 @@ function renderSemFamilia(){
 
 function mobileGuide(view){
   const guides={
-    planilha:{title:'Como usar os lançamentos',hint:'Entradas, despesas e pagamentos do mês.',intro:'Esta é a área de movimentações da família. Cada alteração é gravada na conta compartilhada.',steps:['Confira o mês selecionado logo acima.','Toque em “Novo lançamento” para registrar uma receita ou despesa. Informe data, descrição, categoria, valor e responsável.','Toque em uma movimentação para abrir os campos de edição. As alterações são salvas quando você sai do campo.','Use “Mais ações do mês” para importar, exportar, gerar recorrências ou fechar o período.']},
+    planilha:{title:'Como usar os lançamentos',hint:'Entradas, despesas e pagamentos do mês.',intro:'Esta é a área de movimentações da família. Cada alteração é gravada na conta compartilhada.',steps:['Confira o mês selecionado logo acima.','Use “Novo lançamento” para registrar uma receita ou despesa. Informe data, descrição, categoria, valor e responsável.','Toque em uma movimentação para abrir os campos de edição. As alterações são salvas quando você sai do campo.','Use “Ferramentas da planilha” para importar, exportar, gerar recorrências ou fechar o período.']},
     ano:{title:'Como usar a visão do ano',hint:'Compare os meses e abra qualquer período.',intro:'A visão anual reúne os resultados que já foram registrados. Os valores são calculados a partir dos lançamentos.',steps:['Escolha o ano no seletor do topo.','Compare receitas, despesas, saldo e poupança.','Toque em um mês para abrir os lançamentos daquele período.','Use as metas e os ajustes do fim da página para configurar o acompanhamento.']},
     checape:{title:'Como usar o checape',hint:'Entenda as sugestões geradas pelos seus lançamentos.',intro:'O checape analisa os dados cadastrados e apresenta sugestões. Ele não altera seus lançamentos sozinho.',steps:['Registre receitas e despesas para alimentar a análise.','Toque em “Gerar checape” para atualizar as sugestões do mês.','Abra cada sugestão, leia a explicação e o comparativo.','Escolha “Aceitar” ou “Ignorar”. Você mantém o controle da decisão.']},
     plan:{title:'Como usar o planejamento',hint:'Metas, dívidas e patrimônio em um só lugar.',intro:'Use esta área para acompanhar objetivos e compromissos de longo prazo da família.',steps:['Cadastre uma meta e informe o valor que pretende alcançar.','Registre dívidas com saldo, juros e pagamento mínimo.','Atualize os aportes das metas conforme guardar dinheiro.','Mantenha ativos e passivos atualizados para acompanhar o patrimônio.']},
@@ -3949,7 +3949,13 @@ function mobileMoreMenu(){
 }
 
 window.__copilotoHandleAndroidBack=()=>{
-  const dialog=document.querySelector("dialog[open]");if(dialog){dialog.close();return true;}
+  const dialog=[...document.querySelectorAll('dialog[open]')].at(-1);
+  if(dialog){
+    if(dialog.id==='cf-import-preview'){
+      if(!S.importando){S.imp=null;render();}
+    }else dialog.close();
+    return true;
+  }
   if(S.mobileMore){S.mobileMore=false;render();return true}
   if(S.mobileAddOpen){S.mobileAddOpen=false;render();return true}
   const openDetails=[...document.querySelectorAll('.app-main details[open]')];
@@ -3984,10 +3990,11 @@ function render(){
     relatorios:['Relatórios financeiros','Analise tendências, categorias e resultados do ano.'],
     espacos:['Central de espaços','Cada conta pertence a uma única família.']
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
-  const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
-  body=(S.view==='inicio'?mobileSmartContext()+`<details class="mobile-analysis"><summary>Análise do mês</summary>${viewGrupos()}${viewCats()}</details><button class="sec" data-act="view" data-v="planilha">Abrir planilha do mês</button>`:S.view==='tamandua'?`<section class="cf-chat-destination" aria-label="Conversa com o Tamanduá"><h2>Seu Tamanduá</h2><p>Converse sobre as finanças da sua família. Seu histórico e sua memória ficam neste espaço.</p></section>`:S.view==='planilha'?viewPlanilha(ed):S.view==='ano'?viewAno():S.view==='checape'?viewChecape(ed):S.view==='plan'?viewPlan():S.view==='relatorios'&&planoTemRecurso('relatorios')?viewRelatorios():S.view==='admin'?viewAdmin()+viewConfig():viewFamilia()+viewCats2()+viewConta());
-  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
+  body=(S.view==='inicio'?mobileSmartContext()+`<details class="mobile-analysis"><summary>Análise do mês</summary>${viewGrupos()}${viewCats()}</details>`:S.view==='tamandua'?`<section class="cf-chat-destination" aria-label="Conversa com o Tamanduá"><h2>Seu Tamanduá</h2><p>Converse sobre as finanças da sua família. Seu histórico e sua memória ficam neste espaço.</p></section>`:S.view==='planilha'?viewPlanilha(ed):S.view==='ano'?viewAno():S.view==='checape'?viewChecape(ed):S.view==='plan'?viewPlan():S.view==='relatorios'&&planoTemRecurso('relatorios')?viewRelatorios():S.view==='admin'?viewAdmin()+viewConfig():viewFamilia()+viewCats2()+viewConta());
+  const monthOptions=['inicio','planilha','checape'].includes(S.view)
+    ?S.meses.map(m=>`<option value="${m.id}" ${m.id===S.mes.id?'selected':''}>${MN[m.mes-1]}${m.status==='fechado'?' (fechado)':''}</option>`).join('')
+    :'';
   $('#app').innerHTML=`<div class="app-shell" data-current-view="${esc(S.view)}">
     <aside class="app-sidebar" aria-label="Navegação principal">
       <div class="sidebar-head">
@@ -3995,6 +4002,7 @@ function render(){
         <div class="sidebar-family"><small>FAMÍLIA ATIVA</small><strong title="${esc(S.fam.nome)}">${esc(S.fam.nome)}</strong><span><i></i> Sincronização ativa</span></div>
       </div>
       <nav class="sidebar-nav">${nav}</nav>
+      <button type="button" class="session-button" data-act="sair">Sair da conta</button>
       <div class="sidebar-footer">
         <span class="sidebar-avatar">${esc((S.me?.nome||'U').trim().charAt(0).toUpperCase())}</span>
         <div class="sidebar-user"><b>${esc(S.me.nome)}</b><small>${S.me.papel==='dono'?'Responsável':S.me.papel==='leitor'?'Somente leitura':'Editor'}</small></div>
@@ -4003,29 +4011,33 @@ function render(){
     <main class="app-main">
       <header class="app-topbar">
         <div class="page-heading">
-          <div class="page-eyebrow">COPILOTO FINANCEIRO · ${S.view==='admin'?'PAINEL ADMINISTRATIVO':'GESTÃO FAMILIAR'}</div><div class="cf-tester-badge" ${S.internalTester?'':'hidden'}>TESTE INTERNO · PAGAMENTOS DESATIVADOS</div>
           <h1>${info[0]}</h1>
           <p>${info[1]}</p>
-          <div class="date-line">${saudacao()} · ${dataHoje}</div>
-        </div>
-        <div class="top-actions">
-          ${S.notifs&&S.notifs.length?`<button type="button" class="utility-button notification-button" data-act="sino" aria-label="Abrir notificações">Avisos <span>${S.notifs.length}</span></button>`:''}
-          <div class="year-control">
-            <button type="button" class="utility-button year-arrow" data-act="anoant" title="Ano anterior" aria-label="Ano anterior">‹</button>
-            <select id="anosel" aria-label="Selecionar ano">${anos}</select>
-            <button type="button" class="utility-button year-arrow" data-act="anoprox" title="Próximo ano" aria-label="Próximo ano">${S.anos.some(x=>x.ano===S.ano.ano+1)?'›':'＋ '+(S.ano.ano+1)}</button>
-          </div>
-          <button type="button" class="session-button" data-act="sair">Sair da conta</button>
         </div>
       </header>
-      <div class="period-toolbar">${meses}</div>
+      <section class="cf-period-row" aria-label="Período financeiro">
+        ${monthOptions?`<label>Mês<select id="messel" aria-label="Selecionar mês">${monthOptions}</select></label>`:''}
+        <label>Ano<select id="anosel" aria-label="Selecionar ano">${anos}</select></label>
+        ${!S.anos.some(x=>x.ano===S.ano.ano+1)?`<button type="button" class="utility-button" data-act="anoprox" aria-label="Criar ano ${S.ano.ano+1}">+ ${S.ano.ano+1}</button>`:''}
+        ${S.notifs?.length?`<button type="button" class="utility-button notification-button" data-act="sino" aria-label="Abrir notificações">Avisos <span>${S.notifs.length}</span></button>`:''}
+      </section>
+      <p class="mobile-connection-status" role="status" hidden></p>
+      ${S.internalTester?'<p class="cf-test-notice">Teste interno · Sem cobrança</p>':''}
       ${S.view==='planilha'||S.view==='tamandua'||S.view==='inicio'?'':mobileGuide(S.view)}
-      <section class="v0-mobile-quick-nav" aria-label="Áreas do Copiloto"><button type="button" class="v0-mobile-quick-nav-primary" data-act="view" data-v="planilha"><strong>Planilha mensal</strong><small>Lançamentos, receitas, despesas e saldo</small></button><div class="v0-mobile-quick-nav-grid"><button type="button" class="v0-mobile-quick-nav-item ${S.view==='ano'?'is-current':''}" data-act="view" data-v="ano"><span class="nav-copy"><strong>Visão do ano</strong><small>Resultados dos meses</small></span><span class="nav-arrow">›</span></button><button type="button" class="v0-mobile-quick-nav-item ${S.view==='checape'?'is-current':''}" data-act="view" data-v="checape"><span class="nav-copy"><strong>Checape</strong><small>Análise financeira</small></span><span class="nav-arrow">›</span></button><button type="button" class="v0-mobile-quick-nav-item ${S.view==='plan'?'is-current':''}" data-act="view" data-v="plan"><span class="nav-copy"><strong>Planejamento</strong><small>Metas e patrimônio</small></span><span class="nav-arrow">›</span></button><button type="button" class="v0-mobile-quick-nav-item ${S.view==='família'?'is-current':''}" data-act="view" data-v="família"><span class="nav-copy"><strong>Família</strong><small>Membros e ajustes</small></span><span class="nav-arrow">›</span></button>${planoTemRecurso('relatorios')?`<button type="button" class="v0-mobile-quick-nav-item" data-act="view" data-v="relatorios"><span class="nav-copy"><strong>Relatórios</strong><small>Indicadores e tendências</small></span><span class="nav-arrow">›</span></button>`:''}${S.admin?`<button type="button" class="v0-mobile-quick-nav-item" data-act="view" data-v="admin"><span class="nav-copy"><strong>Administração</strong><small>Controle do serviço</small></span><span class="nav-arrow">›</span></button>`:''}</div></section>
-      <section class="app-content"><div class="v0-mobile-dashboard">${body}${viewImport()}${viewModais()}</div></section>
+      <section class="app-content"><div class="v0-mobile-dashboard">${body}${viewModais()}</div></section>
     </main>
+    ${viewImport()}
     ${mobileMoreMenu()}
     ${mobileNavigation()}
   </div>`;
+  const preview=$('#cf-import-preview');
+  if(preview){
+    preview.addEventListener('cancel',event=>{
+      event.preventDefault();
+      if(!S.importando){S.imp=null;render();}
+    });
+    preview.showModal();
+  }
   afterRender();
 }
 
@@ -4126,7 +4138,7 @@ function mobileSmartContext(){
   const d=monthlyFinancialSnapshot(), format=value=>brl(value/100);
   const categoryRows=d.categories.slice(0,4).map(([name,amount])=>'<div class="cf-category-bar"><div><span>'+esc(name)+'</span><b>'+format(amount)+'</b></div><span class="cf-category-track" aria-hidden="true"><i style="width:'+Math.min(100,amount/d.expense*100).toFixed(2)+'%"></i></span></div>').join('');
   const dueRows=d.due.slice(0,3).map(row=>'<li><span>'+esc(row.descricao||'Conta sem descrição')+'<small>'+row.due.split('-').reverse().join('/')+(row.due<d.today?' · Em atraso':'')+'</small></span><b>'+format(row.cents)+'</b></li>').join('');
-  const panels='<div class="cf-dashboard-panels"><section class="cf-finance-panel"><h3>Despesas por categoria</h3><p>O que mais pesa nos lançamentos do mês.</p>'+(categoryRows||'<p>Suas categorias aparecem aqui após registrar despesas.</p>')+'</section><section class="cf-finance-panel"><h3>Contas em aberto</h3><p>Vencimentos registrados que precisam de atenção.</p>'+(dueRows?'<ul class="cf-due-list">'+dueRows+'</ul>':'<p>Nenhuma conta com vencimento informado em aberto.</p>')+'<button type="button" data-act="view" data-v="planilha">Ver na planilha</button></section></div>';
+  const panels='<div class="cf-dashboard-panels"><section class="cf-finance-panel"><h3>Despesas por categoria</h3><p>O que mais pesa nos lançamentos do mês.</p>'+(categoryRows||'<p>Suas categorias aparecem aqui após registrar despesas.</p>')+'</section><section class="cf-finance-panel"><h3>Contas em aberto</h3><p>Vencimentos registrados que precisam de atenção.</p>'+(dueRows?'<ul class="cf-due-list">'+dueRows+'</ul>':'<p>Nenhuma conta com vencimento informado em aberto.</p>')+'</section></div>';
 
   return '<section class="cf-mobile-v025 cf-month-desk" aria-label="Resumo inteligente do mês">'+
     '<div class="cf-month-title"><h2>Seu mês, com clareza.</h2><span>'+d.rows.length+' movimentações</span></div>'+
@@ -4137,10 +4149,6 @@ function mobileSmartContext(){
     '<p class="cf-amount-note">Valores dos lançamentos deste período. Não representam o saldo da sua conta bancária.</p>'+
     (d.ignored?'<p role="status" class="cf-validation-note">'+d.ignored+' registro(s) precisam de revisão para entrar no cálculo.</p>':'')+
     panels+
-    '<div class="cf-mobile-command cf-month-actions" aria-label="Ações rápidas">'+
-    '<button type="button" data-act="mobileadd" '+(canEdit()&&mesAberto()?'':'disabled')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><b>Adicionar</b></button>'+
-    '<button type="button" data-act="view" data-v="checape"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><b>Checape</b></button>'+
-    '<button type="button" data-act="mobilemore"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"/></svg><b>Mais</b></button></div>'+
     (!d.rows.length?'<p class="cf-empty-welcome">Vamos começar pelo primeiro lançamento. O Tamanduá acompanha você a partir dos seus dados.</p>':'')+
     '</section>';
 }
@@ -4374,6 +4382,7 @@ function catPara(grupo,desc){
 }
 const lanc=(mid,tipo,desc,valor,grupo,i={})=>({familia_id:S.fam.id,mes_id:mid,tipo,descricao:desc,valor,categoria_id:catPara(grupo,desc),status:'pendente',parcela_atual:i.parcela_atual||null,parcelas_total:i.parcelas_total||null,observacao:i.obs||null,origem:'importacao_arquivo',criado_por:S.user.id});
 async function lerArquivo(file){
+  const scope=accountRequestScope();
   try{
     await ensureXlsx();
     const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});const meses=[];
@@ -4388,6 +4397,7 @@ async function lerArquivo(file){
         if(g)meses.push(...g);
       }
     }
+    if(scope!==accountRequestScope())return;
     if(!meses.length)return toast('Não encontrei lançamentos com mês, descrição e valor. Inclua uma coluna Mês (ou uma data de vencimento) na planilha.',1);
     const agrupados=new Map();
     meses.forEach(m=>{
@@ -4404,21 +4414,36 @@ function viewImport(){
   if(!S.imp)return '';
   const rows=S.imp.map(m=>{const d=m.itens.filter(i=>i.grupo!=='receita').reduce((a,i)=>a+i.valor,0);const r=m.receita+m.itens.filter(i=>i.grupo==='receita').reduce((a,i)=>a+i.valor,0);
     return `<tr><td>${MN[m.mes-1]} ${m.ano}</td><td>${m.itens.length}</td><td class="pos">${brl(r)}</td><td class="neg">${brl(d)}</td></tr>`}).join('');
-  return `<div class="modal"><div class="card box"><b>Importar planilha</b><div class="mu" style="margin:6px 0 10px">Confira o que foi encontrado antes de gravar.</div>
-  <div class="scroll"><table style="min-width:0"><thead><tr><th>Mês</th><th>Itens</th><th>Receita</th><th>Despesas</th></tr></thead><tbody>${rows}</tbody></table></div>
-  <div class="row" style="margin-top:12px">Se o mês já tiver lançamentos, importar de novo nunca duplica: <select id="imp_modo"><option value="mesclar">adicionar só o que falta (recomendado)</option><option value="substituir">substituir o mês inteiro</option></select></div>
-  <div class="row"><button data-act="impok">Importar</button><button class="sec" data-act="impno">Cancelar</button></div></div></div>`;
+  return `<dialog id="cf-import-preview" class="cf-import-preview" aria-labelledby="cf-import-title">
+    <header><h2 id="cf-import-title">Revisar importação</h2><p>${S.imp.length} período(s) encontrado(s)</p></header>
+    <div class="cf-import-content" tabindex="0" aria-label="Prévia dos períodos">
+      <table><thead><tr><th>Mês</th><th>Itens</th><th>Receita</th><th>Despesas</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>
+    <footer>
+      <label for="imp_modo">Lançamentos existentes
+        <select id="imp_modo" ${S.importando?'disabled':''}><option value="mesclar">Adicionar só o que falta</option><option value="substituir">Substituir o mês inteiro</option></select>
+      </label>
+      <div class="cf-import-actions"><button type="button" class="sec" data-act="impno" ${S.importando?'disabled':''}>Cancelar</button><button type="button" class="primary" data-act="impok" ${S.importando?'disabled':''}>${S.importando?'Importando…':'Importar planilha'}</button></div></footer>
+  </dialog>`;
 }
 async function importar(){
   if(S.importando)return;
   if(!Array.isArray(S.imp)||!S.imp.length)return toast('Selecione uma planilha válida antes de importar.',1);
+  if(!canEdit())return toast('Sua conta não pode importar lançamentos.',1);
+  const scope=accountRequestScope(),familyId=S.fam.id,periods=S.imp;
+  const modo=$('#imp_modo')?.value==='substituir'?'substituir':'mesclar';
+  if(modo==='substituir'&&!confirm('Substituir todos os lançamentos dos meses encontrados na planilha?'))return;
   S.importando=true;
-  document.querySelectorAll('.modal button').forEach(x=>x.disabled=true);
-  const modo=$('#imp_modo')?.value||'mesclar';let ins=0,ja=0;const pul=[];let primeiroImportado=null;
+  const preview=$('#cf-import-preview');
+  preview?.querySelectorAll('button,select').forEach(control=>control.disabled=true);
+  if(preview)preview.querySelector('[data-act="impok"]').textContent='Importando…';
+  let ins=0,ja=0;const pul=[];let primeiroImportado=null;
   try{
-    for(const m of S.imp){
+    for(const m of periods){
+      if(scope!==accountRequestScope())return;
       try{
-        const mid=await q(sb.rpc('garantir_mes',{p_fam:S.fam.id,p_ano:m.ano,p_mes:m.mes}));
+        const mid=await q(sb.rpc('garantir_mes',{p_fam:familyId,p_ano:m.ano,p_mes:m.mes}));
+        if(scope!==accountRequestScope())return;
         const itens=[];
         if(m.receita)itens.push({tipo:'receita',descricao:'Receita prevista',valor:m.receita,categoria_id:catPara('receita','Receita prevista'),status:'pendente'});
         m.itens.forEach(i=>{
@@ -4435,7 +4460,10 @@ async function importar(){
         if(!primeiroImportado)primeiroImportado={ano:m.ano,mes:m.mes};
       }catch(err){pul.push(MN[m.mes-1]+' '+m.ano+': '+(err?.message||'falha ao gravar'))}
     }
-    S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));
+    if(scope!==accountRequestScope())return;
+    const years=await q(sb.from('anos').select('*').eq('familia_id',familyId).order('ano'));
+    if(scope!==accountRequestScope())return;
+    S.anos=years;
     if(primeiroImportado){
       S.ano=S.anos.find(x=>x.ano===primeiroImportado.ano)||S.ano;
       await loadAno(primeiroImportado.mes);
@@ -4444,7 +4472,10 @@ async function importar(){
   }catch(err){
     console.error('Falha na importação:',err);
     toast('A importação não foi concluída: '+(err?.message||'erro inesperado'),1);
-  }finally{S.importando=false;S.imp=null;render()}
+  }finally{
+    S.importando=false;
+    if(S.imp===periods){S.imp=null;render();}
+  }
 }
 async function exportXlsx(){
   await ensureXlsx();
@@ -5080,7 +5111,7 @@ document.addEventListener('click',async e=>{
   else if(a==='desfazer'){await q(sb.rpc('desfazer',{p_hist:Number(b.dataset.id)}));toast('Alteração desfeita');S.hist=null;await loadMes()}
   else if(a==='imp')$('#arq').click();
   else if(a==='impok')await importar();
-  else if(a==='impno'){S.imp=null;render()}
+  else if(a==='impno'&&!S.importando){S.imp=null;render()}
   else if(a==='xlsx')await exportXlsx();
   else if(a==='irmes'){S.view='planilha';S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
   else if(a==='csv')await csv();
@@ -5100,6 +5131,11 @@ document.addEventListener('change',async e=>{
     const plano=document.getElementById('landing-selected-plan');
     if(campo)campo.hidden=!entrar;
     if(plano)plano.hidden=entrar||!S.planoPreCadastro;
+    return;
+  }
+  if(t.id==='messel'){
+    const month=S.meses.find(m=>m.id===t.value);
+    if(month){S.mes=month;await loadMes(true,false);}
     return;
   }
   if(t.id==='anosel'){S.ano=S.anos.find(a=>a.id===t.value);await loadAno();return}
@@ -5156,27 +5192,11 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     try{if(navigator.vibrate)navigator.vibrate(8)}catch(_){}
   }
   function mobileIsPhone(){return window.matchMedia&&window.matchMedia('(max-width:760px)').matches}
-  function mobileCommandBar(){
-    if(!mobileIsPhone())return;
-    const main=document.querySelector('.app-main');
-    const period=main&&main.querySelector('.period-toolbar');
-    if(!main||!period||main.querySelector('.mobile-command-bar'))return;
-    const bar=document.createElement('section');
-    bar.className='mobile-command-bar';
-    bar.setAttribute('aria-label','Ações rápidas');
-    bar.innerHTML=
-      '<button type="button" class="primary mobile-command-add" data-act="mobileadd" aria-label="Novo lançamento">＋ Adicionar</button>'+
-      '<button type="button" data-act="imp" aria-label="Importar planilha">↑ Importar</button>'+
-      '<button type="button" class="mobile-command-more" data-act="mobilemore" aria-label="Mais ações">⋯ Mais</button>'+
-      '<div class="mobile-connection-status" aria-live="polite"></div>';
-    period.before(bar);
-    mobileConnectionStatus();
-  }
   function mobileConnectionStatus(){
     document.querySelectorAll('.mobile-connection-status').forEach(el=>{
       const online=navigator.onLine!==false;
-      el.classList.toggle('offline',!online);
-      el.textContent=online?'Conectado · sincronização disponível':'Sem conexão · verifique a internet';
+      el.hidden=online;
+      el.textContent=online?'':'Sem conexão · verifique a internet';
     });
   }
   function bindMobileTransactionSearch(){
@@ -5232,7 +5252,6 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
   }
   function enhanceMobileWorkspace(){
     if(!mobileIsPhone())return;
-    mobileCommandBar();
     bindMobileTransactionSearch();
     mobileConnectionStatus();
     bindPremiumInteractions();

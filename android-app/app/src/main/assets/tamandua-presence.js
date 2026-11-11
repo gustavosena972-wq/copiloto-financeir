@@ -24,6 +24,7 @@
         if(!reduced)root.querySelectorAll('.cf-chat-face i').forEach((piece,index)=>{piece.getAnimations().forEach(a=>a.cancel());piece.animate([{transform:`translateY(${14-index*7}px)`,opacity:.2},{transform:'none',opacity:1}],{duration:550,delay:index*65,easing:'cubic-bezier(.16,1,.3,1)'});});
         if(!state().tamanduaProfile?.savedAt){root.querySelector('.cf-side-setup')?.click();return;}
         if(matchMedia('(max-width:760px)').matches)root.querySelector('.cf-chat-menu')?.click();
+        root.querySelector('[data-side-mode="tarefas"]')?.click();
         root.querySelector('.cf-side-tasks button')?.focus();
       };
       welcome.append(help);

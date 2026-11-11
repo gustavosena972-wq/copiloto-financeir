@@ -5,6 +5,7 @@ import {
   buildTamanduaMemoryUpdates,
   normalizeBotInput,
   trimModelOutput,
+  simpleGreeting,
 } from "./bot-core.ts";
 
 Deno.test("normaliza mensagem e contexto sem aceitar payload gigante", () => {
@@ -126,3 +127,11 @@ Deno.test("preserva contexto financeiro limitado e id da conversa sem persistir 
   }]);
   assertEquals(result.context.segredo, undefined);
 });
+
+Deno.test("cumprimentos isolados recebem resposta natural sem confundir pedidos financeiros", () => {
+  for (const message of ["Oi", "Olá!", "Bom dia", "E aí?"]) assert(simpleGreeting(message));
+  assertEquals(simpleGreeting("Oi, quanto gastei?"), null);
+  assertEquals(simpleGreeting("Oi", "en"), null);
+  assertEquals(simpleGreeting("constructor"), null);
+});
+

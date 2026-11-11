@@ -53,3 +53,12 @@ test('empty monthly briefing requests real records without inventing a forecast'
  assert.match(html,/0 movimentações/);assert.match(html,/Vamos começar pelo primeiro lançamento/);
  assert.doesNotMatch(html,/safeToSpend|smartHealthScore/);
 });
+
+test('an import preview separates the scrollable table from the confirmation controls',()=>{
+ const periods=Array.from({length:24},(_,i)=>({mes:i%12+1,ano:2025+Math.floor(i/12),receita:0,itens:[]}));
+ const declaration=source.slice(source.indexOf('function viewImport()'),source.indexOf('async function importar()'));
+ const html=vm.runInNewContext(declaration+'; viewImport()',{S:{imp:periods},brl,MN:Array(12).fill('Mês')});
+ assert.match(html,/<dialog[^>]+aria-labelledby="cf-import-title"/);
+ assert.equal((html.match(/<tr>/g)||[]).length,25);
+ assert.match(html,/<\/table>\s*<\/div>\s*<footer>[\s\S]*id="imp_modo"[\s\S]*data-act="impok"[^>]*>Importar planilha/);
+});

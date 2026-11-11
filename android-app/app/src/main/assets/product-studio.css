@@ -83,3 +83,131 @@ body[data-ui="premium-fintech"] #app .app-shell .cf-category-bar .cf-category-tr
 #cf-tm-root .cf-portrait-help .cf-plan-face{display:block;flex:0 0 52px;width:52px;height:52px;border-radius:50%;background:url('tamandua-planos-3d.png') var(--face-x,12.5%) 0%/900% 300% no-repeat;}
 #cf-tm-root .cf-portrait-help:hover{background:#45304a;border-color:#c89dba;}
 #cf-tm-root .cf-portrait-help:focus-visible{outline:3px solid #e3b9ef;outline-offset:4px;}
+
+/* The period, test notice and monthly summary have their own rows. */
+body[data-ui="premium-fintech"] #app .app-shell .app-topbar {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:start !important;
+  gap:14px !important;
+  padding:8px 0 16px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading {min-width:0 !important;}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading h1 {margin:0 0 6px !important;}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading p {margin:0 !important;}
+body[data-ui="premium-fintech"] #app .app-shell .top-actions {grid-column:1/-1;justify-content:flex-start !important;gap:8px !important;}
+body[data-ui="premium-fintech"] #app .app-shell .app-topbar>.cf-app-menu {grid-column:2;grid-row:1;}
+.cf-test-notice {margin:8px 0 20px;color:#c6b9df;font-size:12px;line-height:1.5;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger {
+  gap:0 !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  border:1px solid #353148;
+  border-radius:12px;
+  overflow:hidden;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger>div {
+  flex-direction:row !important;
+  justify-content:space-between;
+  align-items:baseline !important;
+  min-height:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  padding:14px 16px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger>div+div {border-top:1px solid #353148 !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger dd {font-size:clamp(16px,4vw,22px) !important;text-align:right;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-cash-notes>span {
+  background:transparent !important;
+  border:0;
+  padding:8px 0 !important;
+}
+@media(max-width:760px){
+  body[data-ui="premium-fintech"] #app .app-shell .app-topbar {grid-template-columns:minmax(0,1fr);}
+  body[data-ui="premium-fintech"] #app .app-shell .app-topbar>.cf-app-menu {display:none !important;}
+}
+
+/* Native modal above the bottom bar; only the preview body scrolls. */
+.cf-import-preview {
+  box-sizing:border-box;
+  width:min(620px,calc(100% - 24px));
+  max-height:calc(100dvh - 24px);
+  padding:0;
+  background:#171523;
+  color:#f0edff;
+  border:1px solid #645480;
+  border-radius:14px;
+  overflow:hidden;
+}
+.cf-import-preview[open] {display:flex;flex-direction:column;}
+.cf-import-preview::backdrop {background:#080710bc;}
+.cf-import-preview :is(header,footer) {flex:none;padding:12px 14px;}
+.cf-import-preview header {border-bottom:1px solid #403550;}
+.cf-import-preview h2 {margin:0;font-size:19px;}
+.cf-import-preview p {margin:4px 0 0;color:#c5bad7;}
+.cf-import-preview .cf-import-content {min-height:0;overflow:auto;overscroll-behavior:contain;padding:12px 14px;}
+.cf-import-preview table {width:100%;min-width:0 !important;table-layout:auto;font-size:clamp(11px,3.25vw,14px);}
+.cf-import-preview th,.cf-import-preview td {padding:8px 4px !important;white-space:normal !important;}
+.cf-import-preview th {background:#211c31 !important;color:#e3d9ff !important;}
+.cf-import-preview label {display:block;margin:16px 0 6px;font-size:13px;}
+.cf-import-preview select {box-sizing:border-box;min-height:44px;width:100%;font-size:16px;}
+.cf-import-preview footer {display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;border-top:1px solid #403550;}
+.cf-import-preview footer button {min-height:44px;flex:1 1 auto;font-size:14px;}
+
+#cf-tm-root .cf-sidebar-tabs {display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+#cf-tm-root .cf-sidebar-tabs button {min-height:44px;}
+#cf-tm-root .cf-sidebar-tabs button[aria-pressed="true"] {background:#514064 !important;border-color:#ac8bc8 !important;}
+#cf-tm-root .cf-chat-sidebar[data-mode="conversas"]>:is(nav,.cf-side-setup,.cf-chat-suggestions,.cf-voice-settings),
+#cf-tm-root .cf-chat-sidebar[data-mode="tarefas"]>:is(.cf-history-title,.cf-history-search,.cf-tm-view[data-v="history"],.cf-side-private) {display:none !important;}
+#cf-tm-root .cf-tm-head .cf-chat-menu {width:auto !important;min-height:44px;padding-inline:10px !important;font-size:12px !important;}
+
+dialog.cf-welcome {max-height:calc(100dvh - 20px);background:#201824;color:#fbecdf;border:1px solid #725b7b;overscroll-behavior:contain;}
+dialog.cf-welcome::backdrop {background:#120e17bd;}
+dialog.cf-welcome .cf-welcome-close {color:#f1d6ed !important;}
+dialog.cf-welcome .cf-welcome-picture {
+  width:clamp(122px,34vw,150px);
+  height:auto;
+  aspect-ratio:1;
+  border-radius:50%;
+  background:#281d2d url('tamandua-formal-retrato.webp') center/cover no-repeat;
+}
+dialog.cf-welcome.cf-configuring .cf-welcome-picture {width:104px;}
+dialog.cf-welcome .cf-welcome-copy {padding:14px 20px 22px;}
+dialog.cf-welcome .cf-welcome-copy p {color:#e1c8d9;}
+dialog.cf-welcome .cf-welcome-copy h2 {font-size:clamp(22px,6vw,28px);}
+dialog.cf-welcome [hidden] {display:none !important;}
+dialog.cf-welcome .cf-question-label {font-weight:700;color:#fff0e5;}
+dialog.cf-welcome #cf-question-answer {width:100%;box-sizing:border-box;min-height:48px;background:#302437;color:#ffedf7;border:1px solid #98799c;font-size:16px;color-scheme:dark;}
+dialog.cf-welcome .cf-question-actions {display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+dialog.cf-welcome .cf-question-actions button {flex:1 1 auto;min-height:44px;background:#48334f;color:#fff0f6;}
+dialog.cf-welcome .cf-question-actions .cf-question-next {background:#7e5093;}
+dialog.cf-welcome .cf-question-status:empty {display:none;}
+@media (prefers-reduced-motion:no-preference) {
+  html:not([data-screen-motion="off"]) dialog.cf-welcome.cf-configuring .cf-welcome-picture {animation:cf-portrait-nod 440ms ease-out both;}
+}
+@keyframes cf-portrait-nod {
+  0%,100% {transform:none;}
+  40% {transform:translateY(4px) rotate(3deg);}
+}
+
+#cf-welcome.cf-welcome {background:#201824 !important;color:#fbecdf !important;border-color:#725b7b !important;}
+#cf-welcome .cf-welcome-picture {background-position:center !important;}
+#cf-welcome .cf-welcome-copy h2 {color:#fbecdf !important;font-size:clamp(22px,6vw,28px) !important;}
+#cf-welcome .cf-welcome-copy :is(p,label) {color:#e1c8d9 !important;}
+#cf-welcome .cf-welcome-choices button.cf-configure,
+#cf-welcome .cf-question-actions .cf-question-next {background:#7e5093 !important;}
+
+
+.cf-period-row {display:flex;align-items:end;flex-wrap:wrap;gap:8px 12px;margin:0 0 14px;}
+.cf-period-row label {display:grid;gap:5px;min-width:0;color:#c9bedd;font-size:12px;}
+.cf-period-row label:first-child {flex:0 1 148px;}
+.cf-period-row select {min-height:44px;width:100%;padding:6px 12px;font-size:16px;}
+.cf-period-row button {min-height:44px;flex-shrink:0;font-size:12px;}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading h1 {max-width:none !important;text-wrap:pretty !important;}
+
+#app .app-shell .cf-import-preview td {color:#eee6fb !important;border-color:#3b334a !important;}
+#app .app-shell .cf-import-preview td.pos {color:#8de1b6 !important;}
+#app .app-shell .cf-import-preview td.neg {color:#ffb0b9 !important;}
+.cf-import-preview .cf-import-content {scrollbar-color:#79658c #201a2b;scrollbar-width:thin;}
+.cf-import-preview footer {display:grid;}
+.cf-import-preview footer label {display:grid;gap:4px;margin:0;color:#d4c8e5;}
+.cf-import-preview .cf-import-actions {display:flex;flex-wrap:wrap;gap:8px;}

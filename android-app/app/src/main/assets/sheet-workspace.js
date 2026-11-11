@@ -23,13 +23,7 @@
    drawer.addEventListener('close',()=>opener.setAttribute('aria-expanded','false'));
    drawer.addEventListener('click',event=>{if(event.target===drawer||event.target.closest('button[data-act]'))drawer.close();});
   }
-  if(!shell)return;
-  const command=shell.querySelector('.mobile-command-bar [data-act="imp"]');
-  if(command&&shell.querySelector('#cf-sheet-drawer')){delete command.dataset.act;command.textContent='Ferramentas';command.onclick=()=>shell.querySelector('#cf-sheet-drawer')?.showModal();}
-  const header=shell.querySelector('.app-topbar');
-  if(header&&!header.querySelector('.cf-global-tamandua')){
-   const button=document.createElement('button');button.type='button';button.className='cf-global-tamandua';button.dataset.act='view';button.dataset.v='tamandua';button.setAttribute('aria-label','Conversar com meu Tamanduá');button.innerHTML='<img src="tamandua-face-v4.png" alt=""><span>Meu Tamanduá</span>';header.append(button);
-  }
+
  }
  new MutationObserver(decorate).observe(document.body,{childList:true,subtree:true});decorate();
 })();

@@ -60,10 +60,10 @@ async function send(fromVoice=false){
  const c=sbc();if(!c){add('bot','Entre novamente para continuar a conversa.');return;}
  input.value='';add('user',message);
  if(window.CFTamanduaActions?.handle(message,{reply:text=>{if(sessionGate.accepts(ticket,currentState()))add('bot',text);}}))return;
- const context={view:state.view,mes:state.mes?.mes,ano:state.ano?.ano,intencao:'conversa_financeira'};
+ const context={view:state.view,mes:state.mes?.mes,ano:state.ano?.ano,intencao:'conversa'};
  if(window.__cfTamanduaConversation)context.conversa_id=window.__cfTamanduaConversation;
  const button=$('.cf-tm-send');button.disabled=true;button.textContent='…';$('.cf-tm-panel')?.setAttribute('aria-busy','true');
- voiceStatus('Analisando os dados deste mês…');
+ voiceStatus('Tamanduá está respondendo…');
  try{
   const r=await c.functions.invoke('tamandua-bot',{body:{message,context}});
   if(!sessionGate.accepts(ticket,currentState()))return;

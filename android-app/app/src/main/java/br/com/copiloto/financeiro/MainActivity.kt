@@ -8,8 +8,14 @@ import android.speech.tts.TextToSpeech
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.graphics.Color
+import android.widget.FrameLayout
 import android.webkit.WebView
 import android.view.WindowManager
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
@@ -31,7 +37,7 @@ import java.util.Locale
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     companion object {
-        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.47"
+        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.48"
         private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
         const val ACCEPT_WEBVIEW_COOKIES = false
         const val ACCEPT_THIRD_PARTY_COOKIES = false
@@ -163,7 +169,24 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             }
         }
 
-        setContentView(webView)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val content = FrameLayout(this).apply {
+            setBackgroundColor(Color.rgb(17, 16, 25))
+            addView(webView, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+        }
+        val protectedInsets = WindowInsetsCompat.Type.systemBars() or
+            WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime()
+        ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
+            val safe = insets.getInsets(protectedInsets)
+            view.setPadding(safe.left, safe.top, safe.right, safe.bottom)
+            WindowInsetsCompat.Builder(insets).setInsets(protectedInsets, Insets.NONE).build()
+        }
+        setContentView(content)
+        WindowCompat.getInsetsController(window, content).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
+        ViewCompat.requestApplyInsets(content)
         webView.loadUrl(APP_ENTRY_URL)
         connectBilling()
     }
