@@ -37,7 +37,7 @@ import java.util.Locale
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     companion object {
-        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.48"
+        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.49"
         private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
         const val ACCEPT_WEBVIEW_COOKIES = false
         const val ACCEPT_THIRD_PARTY_COOKIES = false
@@ -328,8 +328,13 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             "queryProducts" -> runOnUiThread { connectBilling() }
             "purchase" -> runOnUiThread {
                 val selectedProduct = productId ?: return@runOnUiThread
+                val accountId = payload.optString("accountId")
+                if (!accountId.matches(Regex("[a-f0-9]{64}"))) {
+                    dispatchToWeb("copiloto:play-error", JSONObject().put("message", "Entre novamente para comprar."))
+                    return@runOnUiThread
+                }
                 if (billingClient.isReady) {
-                    launchPurchase(selectedProduct)
+                    launchPurchase(selectedProduct, accountId)
                 } else {
                     connectBilling()
                 }
@@ -452,7 +457,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         }
     }
 
-    private fun launchPurchase(productId: String) {
+    private fun launchPurchase(productId: String, accountId: String) {
         val details = productDetails[productId]
         if (details == null) {
             loadProducts()
@@ -471,6 +476,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             .build()
 
         val flowParams = BillingFlowParams.newBuilder()
+            .setObfuscatedAccountId(accountId)
             .setProductDetailsParamsList(listOf(productParams))
             .build()
 

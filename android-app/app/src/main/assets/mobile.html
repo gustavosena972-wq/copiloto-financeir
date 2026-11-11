@@ -3830,7 +3830,7 @@ function renderAuth(){
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="ultra">Escolher Ultra <span>↗</span></button>
         </article>
       </div>
-      <p class="landing-plans-footnote">Produtos de compra única: 30 dias de acesso após a aprovação. O preço final é exibido pela Google Play no momento da compra. Pro comporta até 2 pessoas, Max até 6 e Ultra libera as ferramentas avançadas. A compra é por família e não há renovação automática.</p>
+      <p class="landing-plans-footnote">Produtos de compra única: 30 dias de acesso após a confirmação pela Google Play. O preço final é exibido pela Google Play no momento da compra. Pro comporta até 2 pessoas, Max até 6 e Ultra libera as ferramentas avançadas. A compra é por família e não há renovação automática.</p>
     </section>
     <section class="landing-login-section" id="landing-auth" aria-labelledby="landing-login-title">
       <div class="landing-login-intro"><span>ÁREA DO CLIENTE</span><h2 id="landing-login-title">Seu acesso, em uma área própria.</h2><p>Entre na sua conta ou crie um cadastro para começar a usar o Copiloto Financeiro.</p></div>
@@ -3941,11 +3941,24 @@ function mobileNavigation(){
  return '<nav class="mobile-bottom-nav" aria-label="Navegação principal do aplicativo">'+items.map(([v,label,path])=>'<button type="button" class="mobile-nav-item '+(S.view===v?'is-active':'')+'" data-act="view" data-v="'+v+'" aria-label="Abrir '+label+'" '+(S.view===v?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+path+'"/></svg><span>'+label+'</span></button>').join('')+'<button type="button" class="mobile-nav-item" data-act="mobilemore" aria-label="Mais ferramentas" aria-expanded="'+!!S.mobileMore+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h2M11 12h2M17 12h2"/></svg><span>Mais</span></button></nav>';
 }
 function mobileMoreMenu(){
-  let links='<button type="button" data-act="view" data-v="checape">Checape financeiro</button><button type="button" data-act="view" data-v="ano">Visão do ano</button><button type="button" data-act="view" data-v="família"><span>Família e ajustes</span><span aria-hidden="true">›</span></button>';
-  if(planoTemRecurso('relatorios'))links+='<button type="button" data-act="view" data-v="relatorios"><span>Relatórios financeiros</span><span aria-hidden="true">›</span></button>';
-  if(S.admin)links+='<button type="button" data-act="view" data-v="admin"><span>Administração</span><span aria-hidden="true">›</span></button>';
-  links+='<button type="button" class="mobile-more-signout" data-act="sair"><span>Sair da conta</span><span aria-hidden="true">↗</span></button>';
-  return '<div class="mobile-more-panel" '+(S.mobileMore?'':'hidden')+'><div class="mobile-more-heading"><b>Mais ferramentas</b><button type="button" data-act="mobilemore" aria-label="Fechar menu">Fechar</button></div>'+links+'</div>';
+  if(!S.mobileMore)return '';
+  const link=(view,title,description)=>`<button type="button" data-act="view" data-v="${view}"><span><strong>${title}</strong><small>${description}</small></span><span aria-hidden="true">›</span></button>`;
+  const reports=planoTemRecurso('relatorios')?link('relatorios','Relatórios financeiros','Veja tendências e categorias'):'';
+  const admin=S.admin?'<section><h3>Administração</h3>'+link('admin','Administração','Compras e configurações do serviço')+'</section>':'';
+  return `<dialog class="cf-more-dialog" id="cf-more-dialog" aria-labelledby="cf-more-title">
+    <header><h2 id="cf-more-title">Mais áreas</h2><button type="button" data-act="mobilemore">Fechar</button></header>
+    <div class="cf-more-content">
+      <section><h3>Análise financeira</h3>
+        ${link('checape','Checape financeiro','Sugestões para o mês escolhido')}
+        ${link('ano','Visão do ano','Compare entradas e despesas por mês')}${reports}
+      </section>
+      <section><h3>Família e conta</h3>
+        ${link('família','Família e ajustes','Membros, convites e preferências')}
+        <button type="button" class="mobile-more-signout" data-act="sair">Sair da conta</button>
+      </section>
+      ${admin}
+    </div>
+  </dialog>`;
 }
 
 window.__copilotoHandleAndroidBack=()=>{
@@ -4030,6 +4043,13 @@ function render(){
     ${mobileMoreMenu()}
     ${mobileNavigation()}
   </div>`;
+  const more=$('#cf-more-dialog');
+  if(more){
+    more.addEventListener('close',()=>{
+      if(more.isConnected&&S.mobileMore){S.mobileMore=false;render();}
+    });
+    more.showModal();
+  }
   const preview=$('#cf-import-preview');
   if(preview){
     preview.addEventListener('cancel',event=>{
@@ -4258,8 +4278,8 @@ function viewAno(){
   <div class="card"><small>Despesas no ano</small><b class="neg">${brl(T('total_despesas'))}</b></div>
   <div class="card"><small>Poupança no fim do ano</small><b class="pos">${brl(fim)}</b></div>
   <div class="card"><small>Mês mais caro</small><b>${maior.mes?MN[maior.mes-1]:'—'}</b></div></div>
-  <div class="card" style="margin-bottom:14px"><b>Receita <span class="pos">■</span> x Despesas <span class="neg">■</span></b><div class="chart">${bars}</div></div>
-  <div class="mobile-year-list">${mobileRows||'<p class="mobile-empty">Ainda não há resultados registrados neste ano.</p>'}</div><div class="scroll desktop-year-table"><table style="min-width:980px"><thead><tr><th>Mês</th><th>Receita</th><th>Fixas</th><th>Cartões</th><th>Retiradas</th><th>Outras</th><th>Total</th><th>Saldo</th><th>Poupança acum.</th><th>% Cartões</th><th>Meta cartão</th></tr></thead><tbody>${rows}</tbody>
+  <div class="card cf-year-chart"><h2>Comparativo mensal</h2><b>Receita <span class="pos">■</span> x Despesas <span class="neg">■</span></b><div class="chart">${bars}</div></div>
+  <div class="mobile-year-list"><h2>Resultados por mês</h2>${mobileRows||'<p class="mobile-empty">Ainda não há resultados registrados neste ano.</p>'}</div><div class="scroll desktop-year-table"><table style="min-width:980px"><thead><tr><th>Mês</th><th>Receita</th><th>Fixas</th><th>Cartões</th><th>Retiradas</th><th>Outras</th><th>Total</th><th>Saldo</th><th>Poupança acum.</th><th>% Cartões</th><th>Meta cartão</th></tr></thead><tbody>${rows}</tbody>
   <tfoot><tr><td>Total ${S.ano.ano}</td><td class="pos">${brl(T('receita'))}</td><td>${brl(T('fixas'))}</td><td>${brl(T('cartoes'))}</td><td>${brl(T('retiradas'))}</td><td>${brl(T('outras'))}</td><td class="neg">${brl(T('total_despesas'))}</td><td class="${T('saldo')>=0?'pos':'neg'}">${brl(T('saldo'))}</td><td>${brl(fim)}</td><td></td><td></td></tr></tfoot></table></div>
   <div class="grid2" style="margin-top:12px"><div class="card"><b>Poupança trazida do ano anterior</b><div class="row" style="margin-top:8px"><input type="number" step="0.01" data-af="poupanca_inicial" value="${S.ano.poupanca_inicial}" ${canEdit()?'':'disabled'}></div>
   <small class="mu">Ao fechar o ano, o saldo acumulado vira o ponto de partida do próximo.</small></div>
@@ -4731,7 +4751,7 @@ async function renderPaywall(){
   }
   const dono=S.me?.papel==='dono';
   if(!dono){
-    $('#app').innerHTML=`<main class="pix-page"><section class="pix-card"><div class="pix-heading"><span class="pix-kicker">ACESSO DA FAMÍLIA</span><h1>Aguardando aprovação</h1><p>O responsável pela família precisa concluir a compra pela Google Play e aguardar a aprovação do administrador. Você não precisa fazer outro pagamento.</p></div><div class="pix-pending"><b>Seu acesso ainda não foi liberado.</b><p>Assim que a compra for aprovada, o aplicativo será liberado para os membros desta família.</p></div><div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div></section></main>`;
+    $('#app').innerHTML=`<main class="pix-page"><section class="pix-card"><div class="pix-heading"><span class="pix-kicker">ACESSO DA FAMÍLIA</span><h1>Aguardando confirmação da compra</h1><p>O responsável pela família precisa concluir a compra pela Google Play. Você não precisa fazer outro pagamento.</p></div><div class="pix-pending"><b>Seu acesso ainda não foi liberado.</b><p>Assim que a compra for confirmada, o aplicativo será liberado para os membros desta família.</p></div><div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div></section></main>`;
     clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);return;
   }
   if(S.planoEscolhidoFamilia!==S.fam?.id){S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';S.planoEscolhidoFamilia=S.fam?.id;}
@@ -4742,7 +4762,7 @@ async function renderPaywall(){
   $('#app').innerHTML=`<main class="pix-page">
     <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>COMPRA E ACESSO FAMILIAR</small></div></header>
     <div class="pix-layout"><section class="pix-card">
-      <div class="pix-heading"><span class="pix-kicker">COMPRA PELA GOOGLE PLAY</span><h1>${S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date()?'Renove o acesso':'Escolha o plano da família'}</h1><p>Selecione um plano. A compra é única, concede 30 dias após a aprovação manual e não tem renovação automática.</p></div>
+      <div class="pix-heading"><span class="pix-kicker">COMPRA PELA GOOGLE PLAY</span><h1>${S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date()?'Renove o acesso':'Escolha o plano da família'}</h1><p>Selecione um plano. A compra é única, concede 30 dias após a confirmação pela Google Play e não tem renovação automática.</p></div>
       <div class="pix-plan-grid cf-plan-grid-premium">
         <button type="button" class="pix-plan cf-plan-card ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro" data-plan-price="30.00">
           ${tamanduaPlanMarkup('pro')}
@@ -4765,11 +4785,11 @@ async function renderPaywall(){
       </div>
       <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${precoSelecionado}</strong></div>
         <div class="pix-payment" hidden><b>Pagamento processado pela Google Play</b></div>
-        <p class="pix-checkout-disclaimer">A compra é processada pela Google Play. O preço final é exibido pela loja antes da confirmação. Após a validação do servidor, o pedido aguarda aprovação do administrador.</p>
+        <p class="pix-checkout-disclaimer">A compra é processada pela Google Play. O preço final é exibido pela loja antes da confirmação. O acesso é liberado automaticamente após a validação da compra.</p>
         <button type="button" class="pix-submit" data-act="comprarplay" data-product-id="${produtoSelecionado}" ${window.CopilotoPlayBilling?"":"disabled"}>${window.CopilotoPlayBilling?"Comprar pela Google Play":"Disponível no aplicativo Android"}</button>
       </div>
       <div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div>
-    </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a aprovação do administrador.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Para comprar, utilize o aplicativo Android oficial. O navegador não inicia pagamentos Google Play.</span></div></aside></div>
+    </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a confirmação da compra.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Para comprar, utilize o aplicativo Android oficial. O navegador não inicia pagamentos Google Play.</span></div></aside></div>
   </main>`;
   clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);
 }
@@ -4782,11 +4802,15 @@ async function enviarCompraGooglePlay(detail){
   }
   if(S.playTokensProcessing.has(purchaseToken))return;
   S.playTokensProcessing.add(purchaseToken);
+  const owner=S.user?.id;
   try{
     const{data,error}=await sb.functions.invoke("google-play-purchase",{body:{productId,purchaseToken}});
-    if(error)throw new Error("Não foi possível validar a compra no servidor.");
+    if(owner!==S.user?.id)return;
+    if(error)throw new Error("Não foi possível validar a compra no servidor. Reabra o app para tentar novamente.");
     if(data?.error)throw new Error(data.error);
-    toast(data?.status==="pendente"?"Compra validada e enviada para aprovação.":"Compra já registrada. Atualizando o acesso.");
+    if(data?.status==="aprovado")toast("Compra confirmada. Seu plano está ativo.");
+    else if(data?.status==="pendente")toast("Compra antiga em revisão. Você não precisa pagar novamente.");
+    else if(data?.status==="recusado")return toast("Esta compra foi recusada. Confira o pedido na Google Play.",1);
     await boot();
   }catch(error){
     toast(error?.message||"Falha ao validar a compra. Abra novamente o aplicativo para tentar de novo.",1);
@@ -4798,7 +4822,7 @@ async function enviarCompraGooglePlay(detail){
 window.addEventListener("copiloto:play-bridge-ready",event=>{
   window.CopilotoReleaseMode={internalTest:event.detail?.internalTest===true};
   if(window.CopilotoPlayBilling){
-    if(!window.CopilotoReleaseMode?.internalTest)window.CopilotoPlayBilling.queryProducts();
+    if(!window.CopilotoReleaseMode?.internalTest)window.CopilotoPlayBilling.postMessage(JSON.stringify({action:"queryProducts"}));
     if(document.querySelector(".pix-page"))renderPaywall();
   }
 });
@@ -4833,7 +4857,7 @@ function viewAdmin(){
   const A=S.adm||{r:{},g:[]},r=A.r;
   const linhasPlay=(A.g||[]).map(x=>`<tr><td>${new Date(x.criado_em).toLocaleString('pt-BR')}</td><td>${esc(x.familia)}<div class="mu">${esc(x.email||'')}</div></td><td>${esc(x.plano.toUpperCase())}<div class="mu">${esc(x.produto_id)}</div></td><td>${brl(x.valor)}</td><td>${x.status==='pendente'?'<button class="chip" data-act="aprovarplay" data-id="'+x.id+'">✔ Aprovar 30 dias</button> <button class="red chip" data-act="recusarplay" data-id="'+x.id+'">Reembolsar e recusar</button>':esc(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5" class="mu" style="padding:14px">Nenhuma compra Google Play.</td></tr>';
   return `<div class="cards"><div class="card"><small>Contas criadas</small><b>${r.contas??0}</b></div><div class="card"><small>Assinaturas ativas</small><b class="pos">${r.ativas??0}</b></div><div class="card"><small>Compras pendentes</small><b>${r.pendentes??0}</b></div><div class="card"><small>Receita total</small><b class="pos">${brl(r.receita_total)}</b></div><div class="card"><small>Últimos 30 dias</small><b>${brl(r.receita_30d)}</b></div><div class="card"><small>Vencem em 7 dias</small><b>${r.vencem_7d??0}</b></div></div>
-  <div class="card" style="margin-bottom:14px"><b>Compras Google Play</b><div class="mu" style="margin:4px 0 8px">A compra só libera 30 dias após a aprovação. A recusa solicita reembolso e revogação pela Google Play.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Compra</th><th>Família</th><th>Plano / produto</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${linhasPlay}</tbody></table></div></div>`;
+  <div class="card" style="margin-bottom:14px"><b>Compras Google Play</b><div class="mu" style="margin:4px 0 8px">Compras vinculadas à conta liberam 30 dias automaticamente. Pedidos antigos podem precisar de revisão.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Compra</th><th>Família</th><th>Plano / produto</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${linhasPlay}</tbody></table></div></div>`;
 }
 const catGrupos=[['fixas','Fixas / Financiamentos'],['cartoes','Cartões de Crédito'],['retirada','Retirada mensal'],['variaveis','Outras / Variáveis'],['receita','Receita']];
 function viewCats2(){
@@ -4925,12 +4949,12 @@ function viewChecape(ed){
     const comparativo=base.gasto_atual!=null&&base.media_historica!=null
       ?`<div class="mu" style="margin-top:7px;font-size:12px">Gasto neste mês: <b>${brl(base.gasto_atual)}</b> · Média histórica: <b>${brl(base.media_historica)}</b> · ${Number(base.meses_comparados)||0} mês(es) comparado(s)</div>`
       :'';
-    return `<div class="sug ${s.tipo}"><div><b>${esc(s.titulo)}</b> ${s.economia_estimada?`<span class="pos">· potencial de economia ${brl(s.economia_estimada)}</span>`:''}
+    return `<article class="sug cf-review-item ${esc(s.tipo)}"><div><h3>${esc(s.titulo)}</h3> ${s.economia_estimada?`<span class="pos">· potencial de economia ${brl(s.economia_estimada)}</span>`:''}
       <div class="mu">${esc(s.explicacao)}</div>${comparativo}</div>
-      <div class="row" style="margin:0">${s.status==='nova'&&ed?`<button data-act="aceitar" data-id="${s.id}">Aceitar</button><button class="sec" data-act="ignorar" data-id="${s.id}">Ignorar</button>`:`<span class="mu">${s.status}</span>`}</div></div>`;
+      <div class="row" style="margin:0">${s.status==='nova'&&ed?`<button data-act="aceitar" data-id="${s.id}">Aceitar</button><button class="sec" data-act="ignorar" data-id="${s.id}">Ignorar</button>`:`<span class="mu">${esc(s.status)}</span>`}</div></article>`;
   }).join('');
-  return `<div class="bar"><button data-act="checape" ${ed?'':'disabled'}>Gerar checape de ${MN[S.mes.mes-1]}</button><span class="mu">A análise considera o mês atual e o histórico disponível.</span></div>
-  ${cards||'<div class="mu">Lance as despesas e receitas do mês e gere o checape para receber uma análise. Quanto mais meses registrados, melhores serão as comparações.</div>'}`;
+  return `<section class="cf-review-intro"><button class="primary" data-act="checape" ${ed?'':'disabled'}>Gerar checape de ${MN[S.mes.mes-1]}</button><span class="mu">A análise considera o mês atual e o histórico disponível.</span></section>
+  <section class="cf-review-results" aria-label="Sugestões"><h2>Sugestões do mês</h2>${cards||'<div class="mu">Lance as despesas e receitas do mês e gere o checape para receber uma análise. Quanto mais meses registrados, melhores serão as comparações.</div>'}</section>`;
 }
 function familyAreaHeader(key,title,desc,label='Gerenciar área'){
   const open=!!S.familyAreas?.[key];
@@ -4984,7 +5008,7 @@ document.addEventListener('click',async e=>{
   else if(a==='view'){
     S.mobileMore=false;S.mobileAddOpen=false;
     const destino=b.dataset.v;
-    if(destino==='admin'){S.view='admin';await carregarAdmin();}
+    if(destino==='admin'){if(!S.admin)return toast('Acesso administrativo não autorizado.',1);S.view='admin';await carregarAdmin();}
     else {if(S.view==='admin')S.adm=null;S.view=destino;if(S.view==='plan')await carregarPlan();else render();}
   }
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes(true,false)}
@@ -5077,7 +5101,12 @@ document.addEventListener('click',async e=>{
      const productId=b.dataset.productId;
      if(!window.CopilotoPlayBilling)return toast('Abra o aplicativo Android para comprar pela Google Play.',1);
      if(!['copiloto_pro_30d','copiloto_max_30d','copiloto_ultra_30d'].includes(productId))return toast('Produto inválido. Atualize o aplicativo.',1);
-     window.CopilotoPlayBilling.purchase(productId);
+     const scope=accountRequestScope();
+     const identity=new TextEncoder().encode('copiloto-play-v1:'+S.user.id+':'+S.fam.id);
+     const digest=await crypto.subtle.digest('SHA-256',identity);
+     if(scope!==accountRequestScope())return;
+     const accountId=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+     window.CopilotoPlayBilling.postMessage(JSON.stringify({action:'purchase',productId,accountId}));
      toast('Abrindo a tela segura de pagamento da Google Play…');
    }
    else if(a==='verstatus')await boot();
@@ -5378,3 +5407,4 @@ function mountMobileCompanion(){
 </script>
 
 <script src="tamandua-task-core.js"></script><script src="tamandua-actions.js"></script><script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script><script src="immersive-finance.js"></script><script src="finance-particles.js"></script></html>
+

@@ -83,7 +83,7 @@ async function verifyPurchase(accessToken: string, packageName: string, productI
   const response = await fetch(url, { headers: { Authorization: "Bearer " + accessToken } });
   const data = await response.json();
   if (!response.ok) throw new Error("A Google Play não confirmou esta compra");
-  if (data.productId !== productId || Number(data.purchaseState) !== 0 || Number(data.quantity || 1) !== 1) {
+  if ((data.productId != null && data.productId !== productId) || data.purchaseState !== 0 || (data.quantity ?? 1) !== 1) {
     throw new Error("Compra não está em estado válido");
   }
   return data;
@@ -155,7 +155,7 @@ Deno.serve(async (req: Request) => {
 
     const productId = payload.productId;
     const purchaseToken = payload.purchaseToken;
-    if (typeof productId !== "string" || !products[productId]
+    if (typeof productId !== "string" || !Object.hasOwn(products, productId)
         || typeof purchaseToken !== "string"
         || purchaseToken.length < 20 || purchaseToken.length > 4096) {
       return json({ error: "Dados da compra inválidos." }, 400);
@@ -196,60 +196,80 @@ Deno.serve(async (req: Request) => {
     const purchase = await verifyPurchase(googleToken, packageName, productId, purchaseToken);
     const tokenHash = await sha256(purchaseToken);
 
-    const { data: existing, error: existingError } = await admin.from("google_play_compras")
-      .select("id,status,usuario_id,familia_id")
+    const userId = userData.user.id;
+    const familyId = membership.familia_id;
+    const boundAccount = purchase.obfuscatedExternalAccountId;
+    const automatic = typeof boundAccount === "string" && boundAccount.length > 0;
+    if (automatic && boundAccount !== await sha256(`copiloto-play-v1:${userId}:${familyId}`)) {
+      return json({ error: "Esta compra pertence a outra conta ou família." }, 409);
+    }
+
+    const fields = "id,status,usuario_id,familia_id,produto_id";
+    const readPurchase = () => admin.from("google_play_compras").select(fields)
       .eq("token_hash", tokenHash).maybeSingle();
-    if (existingError) throw existingError;
-    if (existing) {
-      if (existing.usuario_id !== userData.user.id || existing.familia_id !== membership.familia_id) {
-        return json({ error: "Esta compra já está vinculada a outra conta." }, 409);
+    const initial = await readPurchase();
+    if (initial.error) throw initial.error;
+    let order = initial.data;
+    if (!order) {
+      if (purchase.consumptionState === 1) {
+        return json({ error: "Esta compra já foi utilizada. Consulte o suporte." }, 409);
       }
-      // Consumir imediatamente após a validação para confirmar a compra à Google Play
-      // dentro do prazo de 3 dias. A liberação do acesso continua sob aprovação administrativa.
+      const product = products[productId];
+      const inserted = await admin.from("google_play_compras").insert({
+        familia_id: familyId,
+        usuario_id: userId,
+        produto_id: productId,
+        plano: product.plan,
+        valor: product.amount,
+        pacote: packageName,
+        pedido_google: purchase.orderId || null,
+        token_compra: purchaseToken,
+        token_hash: tokenHash,
+        comprado_em: purchase.purchaseTimeMillis
+          ? new Date(Number(purchase.purchaseTimeMillis)).toISOString()
+          : null,
+        status: "pendente",
+      }).select(fields).single();
+      if (inserted.error?.code === "23505") {
+        const raced = await readPurchase();
+        if (raced.error || !raced.data) throw raced.error || inserted.error;
+        order = raced.data;
+      } else {
+        if (inserted.error || !inserted.data) throw inserted.error || new Error("Compra não registrada");
+        order = inserted.data;
+      }
+    }
+
+    if (order.usuario_id !== userId || order.familia_id !== familyId || order.produto_id !== productId) {
+      return json({ error: "Esta compra já está vinculada a outra conta." }, 409);
+    }
+    if (order.status === "recusado") return json({ ok: true, status: "recusado" });
+
+    if (!automatic) {
+      // Older installed clients do not send an account identifier to Google.
+      // Preserve the existing review flow until they can be replaced.
       await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
-      return json({ ok: true, status: existing.status, duplicate: true });
+      return json({ ok: true, status: order.status });
     }
 
-    const product = products[productId];
-    const { error: insertError } = await admin.from("google_play_compras").insert({
-      familia_id: membership.familia_id,
-      usuario_id: userData.user.id,
-      produto_id: productId,
-      plano: product.plan,
-      valor: product.amount,
-      pacote: packageName,
-      pedido_google: purchase.orderId || null,
-      token_compra: purchaseToken,
-      token_hash: tokenHash,
-      comprado_em: purchase.purchaseTimeMillis
-        ? new Date(Number(purchase.purchaseTimeMillis)).toISOString()
-        : null,
-      status: "pendente",
+    const { data: expiresAt, error: grantError } = await admin.rpc("ativar_compra_google_play_verificada", {
+      p_compra: order.id,
+      p_usuario: userId,
+      p_familia: familyId,
     });
-    if (insertError) {
-      if (insertError.code === "23505") {
-        // Another request may have inserted this token after the initial lookup.
-        // Re-read ownership before returning an idempotent success response.
-        const { data: racedPurchase, error: racedLookupError } = await admin.from("google_play_compras")
-          .select("id,status,usuario_id,familia_id")
-          .eq("token_hash", tokenHash).maybeSingle();
-        if (racedLookupError) throw racedLookupError;
-        if (!racedPurchase) throw insertError;
-        if (racedPurchase.usuario_id !== userData.user.id || racedPurchase.familia_id !== membership.familia_id) {
-          return json({ error: "Esta compra já está vinculada a outra conta." }, 409);
-        }
-        await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
-        return json({ ok: true, status: racedPurchase.status, duplicate: true });
-      }
-      throw insertError;
-    }
+    if (grantError || !expiresAt) throw grantError || new Error("Acesso não atualizado");
 
-    // A compra é consumida após a persistência do token para cumprir o prazo de confirmação
-    // da Google Play. O acesso de 30 dias só é concedido após aprovação administrativa.
-    await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
-    return json({ ok: true, status: "pendente", message: "Compra verificada e enviada para aprovação manual." });
+    // Google is notified after entitlement is durable. A retry reuses the same grant.
+    try {
+      await consumePurchase(googleToken, packageName, productId, purchaseToken, purchase.consumptionState);
+    } catch (error) {
+      const latest = await verifyPurchase(googleToken, packageName, productId, purchaseToken);
+      if (latest.consumptionState !== 1) throw error;
+    }
+    return json({ ok: true, status: "aprovado", acesso_ate: expiresAt });
   } catch (error) {
-    console.error("google-play-purchase", error);
+    console.error("google-play-purchase", error instanceof Error ? error.name : "database_error");
     return json({ error: "Não foi possível validar a compra. Tente novamente." }, 500);
   }
 });
+

@@ -52,7 +52,7 @@ jobs:
       - name: Test authenticated database access
         run: |
           npm install @electric-sql/pglite@0.5.15 --prefix "$RUNNER_TEMP/rls-test" --no-save
-          NODE_PATH="$RUNNER_TEMP/rls-test/node_modules" node --test tests/internal_tester_access_test.cjs tests/checape_access_test.cjs tests/username_test_access_test.cjs tests/username_test_access_test.cjs
+          NODE_PATH="$RUNNER_TEMP/rls-test/node_modules" node --test tests/internal_tester_access_test.cjs tests/checape_access_test.cjs tests/username_test_access_test.cjs tests/google_play_activation_test.cjs
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -78,7 +78,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: gradle -PcopilotoInternalTest=true testDebugUnitTest bundleRelease assembleRelease
+        run: gradle -PcopilotoInternalTest=false testDebugUnitTest bundleRelease assembleRelease
 
       - name: Verify signed bundle and APK
         working-directory: android-app
@@ -95,17 +95,18 @@ jobs:
       - name: Prepare named deliverables and checksums
         run: |
           mkdir -p signed-package
-          cp android-app/app/build/outputs/bundle/release/app-release.aab signed-package/copiloto-financeiro-1.0.48.aab
-          cp android-app/app/build/outputs/apk/release/app-release.apk signed-package/copiloto-financeiro-1.0.48.apk
+          cp android-app/app/build/outputs/bundle/release/app-release.aab signed-package/copiloto-financeiro-1.0.49.aab
+          cp android-app/app/build/outputs/apk/release/app-release.apk signed-package/copiloto-financeiro-1.0.49.apk
           cd signed-package
-          sha256sum copiloto-financeiro-1.0.48.aab copiloto-financeiro-1.0.48.apk > SHA256SUMS.txt
+          sha256sum copiloto-financeiro-1.0.49.aab copiloto-financeiro-1.0.49.apk > SHA256SUMS.txt
 
       - name: Upload signed review AAB and APK
         uses: actions/upload-artifact@v4
         with:
-          name: copiloto-financeiro-1.0.48-assinado
+          name: copiloto-financeiro-1.0.49-assinado
           path: signed-package/*
           if-no-files-found: error
           retention-days: 30
 
 # Generates review artifacts only; does not publish to Google Play.
+

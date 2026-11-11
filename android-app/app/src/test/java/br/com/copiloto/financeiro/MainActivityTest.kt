@@ -12,7 +12,7 @@ class MainActivityTest {
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
-            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.48",
+            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.49",
             MainActivity.APP_ENTRY_URL
         )
     }
@@ -129,7 +129,7 @@ class MainActivityTest {
         assertTrue(html.contains("Falha ao inicializar o Supabase"))
         assertTrue(html.contains("sb.auth.getSession()"))
         assertTrue(html.contains("sb.auth.onAuthStateChange"))
-        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.48", MainActivity.APP_ENTRY_URL)
+        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.49", MainActivity.APP_ENTRY_URL)
 
     }
 
@@ -162,7 +162,7 @@ class MainActivityTest {
 
     @Test
     fun navigationOnlyKeepsTheExactBundledHttpsAssetOrigin() {
-        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.48"))
+        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.49"))
         assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/privacidade.html"))
         assertTrue(!isTrustedAppAssetUrl("http://appassets.androidplatform.net/assets/mobile.html"))
         assertTrue(!isTrustedAppAssetUrl("https://appassets.androidplatform.net.evil.test/assets/mobile.html"))
@@ -279,7 +279,7 @@ class MainActivityTest {
         assertTrue(html.contains("['tamandua','Tamanduá'"))
         assertTrue(html.contains("['plan','Metas'"))
         assertTrue(html.contains("data-act=\"mobilemore\""))
-        assertTrue(html.contains("class=\"mobile-more-panel\""))
+        assertTrue(html.contains("id=\"cf-more-dialog\""))
         assertTrue(html.contains("data-v=\"família\""))
         assertTrue(html.contains("data-v=\"relatorios\""))
 
@@ -397,7 +397,7 @@ class MainActivityTest {
             assertTrue(primary.contains("['$destination',"))
         }
         for (destination in listOf("ano", "checape", "família")) {
-            assertTrue(secondary.contains("data-v=\"$destination\""))
+            assertTrue(secondary.contains("link('$destination',"))
         }
     }
 
@@ -597,8 +597,8 @@ class MainActivityTest {
         @Test
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 48"))
-        assertTrue(gradle.contains("versionName = \"1.0.48\""))
+        assertTrue(gradle.contains("versionCode = 49"))
+        assertTrue(gradle.contains("versionName = \"1.0.49\""))
     }
 
     @Test

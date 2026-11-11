@@ -1,14 +1,38 @@
-/* The approved plan portrait is the voice control and conversation backdrop.
-   No live 3D renderer is mounted inside the conversation. */
+/* Chat artwork and shortcuts, independent of the conversation and voice controls. */
 (() => {
   function state(){try{return S}catch(_){return {}}}
+  function mountBackdrop(body){
+    if(!body||body.querySelector('.cf-chat-backdrop'))return;
+    const backdrop=document.createElement('div');
+    backdrop.className='cf-chat-backdrop';
+    backdrop.setAttribute('aria-hidden','true');
+    const tiles=document.createElement('div');
+    tiles.className='cf-chat-tiles';
+    for(let i=0;i<9;i++){
+      const tile=document.createElement('span');
+      tile.style.setProperty('--tile-x',((i%3)-1)*44+'px');
+      tile.style.setProperty('--tile-y',(Math.floor(i/3)-1)*44+'px');
+      tile.style.setProperty('--tile-delay',i*16+'ms');
+      tiles.append(tile);
+    }
+    backdrop.append(tiles);
+    body.prepend(backdrop);
+
+    const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+    body.addEventListener('click',event=>{
+      if(event.target.closest('.cf-tm-msg,button,input,select,textarea,a,form')||window.getSelection()?.toString())return;
+      if(reducedMotion.matches||document.documentElement.dataset.screenMotion==='off')return;
+      tiles.getAnimations({subtree:true}).forEach(animation=>{
+        if(animation.animationName==='cf-chat-assemble'){animation.currentTime=0;animation.play();}
+      });
+    });
+  }
   function decorate(){
     const root=document.querySelector('#cf-tm-root'),head=root?.querySelector('.cf-tm-head');if(!head)return;
     const tier=state().fam?.plano||'pro';root.dataset.portrait=tier;
     const voice=root.querySelector('.cf-tm-icon');
     if(voice&&!voice.dataset.planFace){voice.dataset.planFace='1';voice.replaceChildren();const face=document.createElement('span');face.className='cf-plan-face';face.setAttribute('aria-hidden','true');const label=document.createElement('span');label.textContent='Fala comigo';voice.append(face,label);voice.setAttribute('aria-label','Fala comigo — ditar mensagem');voice.title='Toque para ditar; toque novamente para cancelar. Revise antes de enviar.';}
-    const body=root.querySelector('.cf-tm-body');
-    if(body&&!body.querySelector('.cf-chat-face')){const face=document.createElement('div');face.className='cf-chat-face';face.setAttribute('aria-hidden','true');face.innerHTML='<i></i><i></i><i></i>';body.prepend(face);}
+    mountBackdrop(root.querySelector('.cf-tm-body'));
     const side=root.querySelector('.cf-chat-sidebar'),welcome=root.querySelector('.cf-chat-welcome');
     if(side&&welcome&&!welcome.dataset.focused){
       welcome.dataset.focused='1';
@@ -20,8 +44,6 @@
       const help=document.createElement('button');help.type='button';help.className='cf-portrait-help';
       help.innerHTML='<span class="cf-plan-face" aria-hidden="true"></span><span>Vamos começar juntos<span>Configurar meu Tamanduá e encontrar tarefas</span></span>';
       help.onclick=()=>{
-        const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches||document.documentElement.dataset.screenMotion==='off';
-        if(!reduced)root.querySelectorAll('.cf-chat-face i').forEach((piece,index)=>{piece.getAnimations().forEach(a=>a.cancel());piece.animate([{transform:`translateY(${14-index*7}px)`,opacity:.2},{transform:'none',opacity:1}],{duration:550,delay:index*65,easing:'cubic-bezier(.16,1,.3,1)'});});
         if(!state().tamanduaProfile?.savedAt){root.querySelector('.cf-side-setup')?.click();return;}
         if(matchMedia('(max-width:760px)').matches)root.querySelector('.cf-chat-menu')?.click();
         root.querySelector('[data-side-mode="tarefas"]')?.click();
@@ -34,3 +56,4 @@
   }
   new MutationObserver(decorate).observe(document.body,{childList:true,subtree:true});decorate();
 })();
+
