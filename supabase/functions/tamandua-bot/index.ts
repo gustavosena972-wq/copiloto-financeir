@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
-import { buildTamanduaInstructions, extractResponseText, normalizeBotInput, simpleGreeting } from "./bot-core.ts";
+import { buildTamanduaInstructions, extractResponseText, normalizeBotInput, simpleGreeting, summarizeFinancialSignals } from "./bot-core.ts";
 
 const ORIGINS = new Set(["https://gustavosena972-wq.github.io", "https://copiloto-financeir.gustavosena972.workers.dev", "https://appassets.androidplatform.net"]);
 function headers(origin: string | null) {
@@ -60,13 +60,15 @@ Deno.serve(async (request) => {
       const year = Number(input.context.ano || Number(new Intl.DateTimeFormat("en",{timeZone:"America/Sao_Paulo",year:"numeric"}).format(now)));
       const {data:financial,error:financialError} = await db.rpc("tamandua_contexto_financeiro",{p_mes:month,p_ano:year});
       if (financialError || !financial) return json(origin,{error:"Não consegui conferir seus dados financeiros com segurança. Tente novamente."},503);
-      const [knowledgeResult,memoryResult,historyResult] = await Promise.all([
+      const [knowledgeResult,memoryResult,historyResult,profileResult] = await Promise.all([
         db.from("ia_conhecimento").select("titulo,conteudo,fonte,versao,revisado_em").eq("status","ativo").order("revisado_em",{ascending:false}).limit(8),
-        remembers ? db.from("ia_aprendizados").select("chave,valor").eq("usuario_id",userId).eq("familia_id",familyId).neq("chave","estado_financeiro_atual").order("atualizado_em",{ascending:false}).limit(12) : Promise.resolve({data:[],error:null}),
-        conversationId ? db.from("mensagens_ia").select("papel,conteudo").eq("conversa_id",conversationId).eq("familia_id",familyId).order("criado_em",{ascending:false}).limit(12) : Promise.resolve({data:[],error:null})
+        remembers ? db.from("ia_aprendizados").select("chave,valor").eq("usuario_id",userId).eq("familia_id",familyId).neq("chave","estado_financeiro_atual").neq("chave","perfil_tamandua").order("atualizado_em",{ascending:false}).limit(12) : Promise.resolve({data:[],error:null}),
+        conversationId ? db.from("mensagens_ia").select("papel,conteudo").eq("conversa_id",conversationId).eq("familia_id",familyId).order("criado_em",{ascending:false}).limit(12) : Promise.resolve({data:[],error:null}),
+        remembers ? db.from("ia_aprendizados").select("valor").eq("usuario_id",userId).eq("familia_id",familyId).eq("chave","perfil_tamandua").maybeSingle() : Promise.resolve({data:null,error:null})
       ]);
-      if (memoryResult.error || historyResult.error) return json(origin,{error:"Não consegui verificar seu histórico com segurança."},503);
+      if (memoryResult.error || historyResult.error || profileResult.error) return json(origin,{error:"Não consegui verificar seu histórico com segurança."},503);
       const instructions = buildTamanduaInstructions({
+        profile:profileResult.data?.valor,
         knowledge:(knowledgeResult.data || []).map(x=>JSON.stringify({titulo:x.titulo,conteudo:x.conteudo,fonte:x.fonte,versao:x.versao})),
         learnings:(memoryResult.data || []).map(x=>({key:x.chave,value:x.valor})),
         history:(historyResult.data || []).slice().reverse().map(x=>({role:x.papel,content:x.conteudo}))
@@ -78,6 +80,7 @@ Deno.serve(async (request) => {
           store:false,instructions,max_output_tokens:1000,
           input:[{role:"user",content:JSON.stringify({
             contexto_financeiro_autorizado:financial,
+            indicadores_calculados:summarizeFinancialSignals(financial),
             idioma_manual:prefs?.idioma || "auto",
             mensagem:input.message
           })}]})

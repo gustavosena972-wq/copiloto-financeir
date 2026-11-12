@@ -3391,7 +3391,7 @@ function loadExternalScript(src,ready){
 }
 function ensureXlsx(){
   if(window.XLSX)return Promise.resolve();
-  if(!__xlsxLoader)__xlsxLoader=loadExternalScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',()=>!!window.XLSX);
+  if(!__xlsxLoader)__xlsxLoader=loadExternalScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',()=>!!window.XLSX).catch(error=>{document.querySelector('[data-cf-src*="xlsx-0.20.3"]')?.remove();__xlsxLoader=null;throw error;});
   return __xlsxLoader;
 }
 function ensureQrCode(){
@@ -4222,7 +4222,7 @@ function viewPlanilha(ed){
   <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>
   <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar v0-mobile-action-grid">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
-   <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
+   <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" hidden>
    <button class="sec" data-act="recorr" ${ed?'':'disabled'}>Gerar recorrentes</button>
    ${fe?`<button class="sec" data-act="reabrir" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>Reabrir mês</button>`:`<button class="sec" data-act="fechar" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ${MN[S.mes.mes-1]}</button>`}
    <button class="sec" data-act="copmes" ${ed?'':'disabled'}>⧉ Copiar mês anterior</button>
@@ -4326,30 +4326,35 @@ function parseYearCell(raw){
   const m=String(raw??'').match(/(?:19|20)\d{2}/);return m?+m[0]:null;
 }
 function parseTabularData(rows,fallbackMonth=null,fallbackYear=null){
-  const hi=rows.findIndex(r=>r.some(c=>norm(c).startsWith('valor'))&&r.some(c=>norm(c).startsWith('descri')||norm(c)==='item'));
+  const isAmount=value=>['valor','amount','montante','quantia'].some(key=>value===key||value.startsWith(key+' '));
+  const isDescription=value=>value.startsWith('descri')||['item','description','historico','lancamento'].includes(value);
+  const hi=rows.findIndex(row=>{const columns=row.map(norm);return columns.some(isAmount)&&columns.some(isDescription);});
   if(hi<0)return null;
   const h=rows[hi].map(norm),ix=(...keys)=>h.findIndex(x=>keys.some(k=>x===k||x.startsWith(k)));
-  const iv=ix('valor'),id=ix('descri','item'),it=ix('tipo'),ic=ix('categoria'),is=ix('status','situa');
-  const idateV=ix('vencimento','data'),im=ix('mes','competencia','referencia'),iy=ix('ano'),inat=ix('natureza compromisso','tipo de compromisso','tipo compromisso','natureza');
+  const iv=h.findIndex(isAmount),id=h.findIndex(isDescription),it=ix('tipo','type'),ic=ix('categoria','category'),is=ix('status','situa');
+  const idateV=ix('vencimento','data','date'),im=ix('mes','month','competencia','referencia'),iy=ix('ano','year'),inat=ix('natureza compromisso','tipo de compromisso','tipo compromisso','natureza');
   if(iv<0||id<0)return null;
   const grupos=new Map();
+  const ipa=ix('parcela atual','numero parcela'),ipt=ix('total parcelas','parcelas total','qtd parcelas','quantidade parcelas');
+  const ipc=h.findIndex(label=>['parcela','parcelamento'].includes(label));
   for(const r of rows.slice(hi+1)){
     const descricao=String(r[id]??'').trim(),valor=parseMoneyCell(r[iv]);
     if(!descricao||descricao.length>160||!(valor>0))continue;
-    const data=idateV>=0?parseDateCell(r[idateV]):null;
+    const rawDate=idateV>=0?r[idateV]:null;
+    const data=parseDateCell(rawDate);
+    if(rawDate!=null&&String(rawDate).trim()&&(!data||!Number.isFinite(Date.parse(data))||new Date(data).toISOString().slice(0,10)!==data))continue;
     const mes=(im>=0?parseMonthCell(r[im]):null)||(data?+data.slice(5,7):null)||fallbackMonth;
     const ano=(iy>=0?parseYearCell(r[iy]):null)||(im>=0?parseYearCell(r[im]):null)||(data?+data.slice(0,4):null)||fallbackYear;
     if(!mes)continue;
     const chave=(ano||'sem-ano')+'-'+String(mes).padStart(2,'0');
     if(!grupos.has(chave))grupos.set(chave,{mes,ano,itens:[],receita:0});
-    const tipo=it>=0&&norm(r[it]).startsWith('receita')?'receita':'despesa';
+    const tipo=it>=0&&/^(receita|income|credito|credit|entrada)\b/.test(norm(r[it]))?'receita':'despesa';
     const categoriaNome=ic>=0?String(r[ic]??'').trim():'';
     const categoria=S.cats.find(c=>c.tipo===tipo&&norm(c.nome)===norm(categoriaNome));
     const st=is>=0?norm(r[is]):'pendente';
     const status=['pago','atrasado'].includes(st)?st:'pendente';
-    const pm=String(r.find(v=>/\d+\s*(?:de|\/)\s*\d+/i.test(String(v??'')))??'').match(/(\d+)\s*(?:de|\/)\s*(\d+)/i);
-    const ipa=ix('parcela atual','numero parcela','número parcela'),ipt=ix('total parcelas','parcelas total','qtd parcelas','quantidade parcelas');
-    const pa=ipa>=0?Number(r[ipa]):(pm?+pm[1]:null),pt=ipt>=0?Number(r[ipt]):(pm?+pm[2]:null);
+    const combined=ipc>=0?String(r[ipc]??'').match(/^(\d+)\s*(?:de|\/)\s*(\d+)$/i):null;
+    const pa=ipa>=0?Number(r[ipa]):(combined?Number(combined[1]):null),pt=ipt>=0?Number(r[ipt]):(combined?Number(combined[2]):null);
     const naturezaRaw=inat>=0?norm(r[inat]):'';
     const naturezaComp=naturezaRaw.startsWith('financi')||naturezaRaw.startsWith('prest')||naturezaRaw.startsWith('emprest')?'financiamento':'compra';
     grupos.get(chave).itens.push({grupo:tipo==='receita'?'receita':(categoria?.grupo||'variaveis'),descricao,valor,
@@ -4363,8 +4368,8 @@ function parseSheetRows(name,rows){
   const m=norm(name).match(/^(janeiro|jan|fevereiro|fev|marco|mar|abril|abr|maio|mai|junho|jun|julho|jul|agosto|ago|setembro|set|outubro|out|novembro|nov|dezembro|dez)(?=[\s\d\/_-]|$)\s*[\/_-]?\s*(\d{4})?/);
   if(!m)return null;
   const mes=MES3.indexOf(m[1].slice(0,3))+1,ano=m[2]?+m[2]:null;
-  const header=rows.some(r=>r.some(c=>norm(c).startsWith('valor'))&&r.some(c=>norm(c).startsWith('descri')||norm(c)==='item'));
-  if(header)return parseTabularData(rows,mes,ano)||[];
+  const tabular=parseTabularData(rows,mes,ano);
+  if(tabular)return tabular;
   const out={mes,ano,itens:[],receita:0};
   for(const r of rows){
     const a=norm(r[0]);
@@ -4404,18 +4409,38 @@ const lanc=(mid,tipo,desc,valor,grupo,i={})=>({familia_id:S.fam.id,mes_id:mid,ti
 async function lerArquivo(file){
   const scope=accountRequestScope();
   try{
-    await ensureXlsx();
-    const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});const meses=[];
-    for(const n of wb.SheetNames){
-      if(norm(n)==='instrucoes')continue;
-      const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:null,raw:true});
-      const p=parseSheetRows(n,rows);
-      if(Array.isArray(p))meses.push(...p.filter(m=>m.itens.length||m.receita));
-      else if(p){if(p.itens.length||p.receita)meses.push(p)}
-      else{
-        const g=parseGeneric(rows);
-        if(g)meses.push(...g);
+    if(file.size>12*1024*1024)throw new Error('Escolha um arquivo de até 12 MB.');
+    const data=await file.arrayBuffer();
+    const prefix=new Uint8Array(data,0,Math.min(data.byteLength,4096));
+    const head=new TextDecoder().decode(prefix).trimStart();
+    const extension=file.name.split('.').pop().toLowerCase();
+    const maxRows=CFStructuredImport.maxRows;
+    let sheets;
+    if(extension==='json'||/^[{\[]/.test(head)){
+      sheets=[['JSON',CFStructuredImport.fromJson(new TextDecoder().decode(data))]];
+    }else if(extension==='ofx'||/<OFX[>\s]|OFXHEADER:/i.test(head)){
+      const encoding=/(?:CHARSET|ENCODING)\s*:\s*(?:1252|USASCII|ISO-8859-1)/i.test(head)?'windows-1252':'utf-8';
+      sheets=[['OFX',CFStructuredImport.fromOfx(new TextDecoder(encoding).decode(data))]];
+    }else{
+      if(/^(?:%PDF-)|^(?:image|video|audio)\//i.test(head)||/^(?:image|video|audio)\//i.test(file.type)||['pdf','doc','docx','png','jpg','jpeg','webp','zip'].includes(extension)){
+        throw new Error('Exporte os dados para CSV, Excel ou OFX para importar.');
       }
+      await ensureXlsx();
+      const book=XLSX.read(data,{type:'array',cellDates:true,sheetRows:maxRows+2,cellHTML:false,cellFormula:false});
+      if(book.SheetNames.length>100)throw new Error('Divida a planilha em arquivos de até 100 abas.');
+      sheets=book.SheetNames.filter(name=>norm(name)!=='instrucoes').map(name=>{
+        const rows=XLSX.utils.sheet_to_json(book.Sheets[name],{header:1,defval:null,raw:true});
+        return [name,rows];
+      });
+    }
+    if(sheets.reduce((total,[,rows])=>total+Math.max(0,rows.length-1),0)>maxRows){
+      throw new Error('Divida o arquivo em partes de até 10 mil linhas.');
+    }
+    const meses=[];
+    for(const [name,rows] of sheets){
+      const parsed=parseSheetRows(name,rows)??parseGeneric(rows);
+      if(Array.isArray(parsed))meses.push(...parsed.filter(period=>period.itens.length||period.receita));
+      else if(parsed&&(parsed.itens.length||parsed.receita))meses.push(parsed);
     }
     if(scope!==accountRequestScope())return;
     if(!meses.length)return toast('Não encontrei lançamentos com mês, descrição e valor. Inclua uma coluna Mês (ou uma data de vencimento) na planilha.',1);
@@ -4428,7 +4453,7 @@ async function lerArquivo(file){
       destino.itens.push(...(m.itens||[]));destino.receita+=Number(m.receita)||0;
     });
     S.imp=[...agrupados.values()].sort((a,b)=>a.ano-b.ano||a.mes-b.mes);render();
-  }catch(err){console.error('Falha ao ler planilha:',err);toast('Não consegui ler esse arquivo: '+(err?.message||'formato inválido'),1)}
+  }catch(err){if(scope===accountRequestScope())toast('Não consegui ler esse arquivo: '+(err?.message||'formato inválido'),1)}
 }
 function viewImport(){
   if(!S.imp)return '';
@@ -4717,9 +4742,9 @@ const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.
 /*PIX*/
 const BASE_PLAN_RESOURCES=Object.freeze({planilha:true,importar:true,exportar:true,visaoAnual:true,checape:true,metas:true,dividas:true,tamandua:true});
 const PLANOS={
-  pro:{nome:'Pro',valor:30.00,limite:2,produto:'copiloto_pro_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:false,patrimonioHistorico:false,simulador:false}},
-  max:{nome:'Max',valor:40.00,limite:6,produto:'copiloto_max_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:false,patrimonioHistorico:false,simulador:false}},
-  ultra:{nome:'Ultra',valor:60.00,limite:null,produto:'copiloto_ultra_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:true,patrimonioHistorico:true,simulador:true}}
+  pro:{nome:'Pro',valor:20.99,limite:2,produto:'copiloto_pro_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:false,patrimonioHistorico:false,simulador:false}},
+  max:{nome:'Max',valor:30.39,limite:6,produto:'copiloto_max_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:false,patrimonioHistorico:false,simulador:false}},
+  ultra:{nome:'Ultra',valor:50.00,limite:null,produto:'copiloto_ultra_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:true,patrimonioHistorico:true,simulador:true}}
 };
 function tamanduaPlanMarkup(tier){
   const labels={
@@ -5406,5 +5431,5 @@ function mountMobileCompanion(){
 }
 </script>
 
-<script src="tamandua-task-core.js"></script><script src="tamandua-actions.js"></script><script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script><script src="immersive-finance.js"></script><script src="finance-particles.js"></script></html>
+<script src="structured-import.js"></script><script src="tamandua-task-core.js"></script><script src="tamandua-actions.js"></script><script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script><script src="immersive-finance.js"></script><script src="finance-particles.js"></script></html>
 

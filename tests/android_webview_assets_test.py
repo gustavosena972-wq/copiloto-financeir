@@ -14,7 +14,7 @@ assert ASSET.stat().st_size > 10000
 print("PASS: Android WebView uses a bundled Supabase runtime asset.")
 
 assert '<div id="app" class="wrap"><div class="cf-mobile-startup"' in html
-assert 'mobile.html?v=1.0.49' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
+assert 'mobile.html?v=1.0.50' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
 print("PASS: Android startup has visible fallback and cache-busted app entry.")
 
 
@@ -23,13 +23,13 @@ print("PASS: Android startup has visible fallback and cache-busted app entry.")
 assert html.count("function mostrarErroInicial(e)") == 1
 print("PASS: Android startup JavaScript parses past the initial error handler declaration.")
 
-# Release contract: the tested Android package is 1.0.49/versionCode 49.
+# Release contract: the tested Android package is 1.0.50/versionCode 50.
 gradle = (ROOT / "android-app/app/build.gradle.kts").read_text(encoding="utf-8")
-assert "versionCode = 49" in gradle
-assert 'versionName = "1.0.49"' in gradle
-print("PASS: Android release is pinned to 1.0.49/versionCode 49.")
+assert "versionCode = 50" in gradle
+assert 'versionName = "1.0.50"' in gradle
+print("PASS: Android release is pinned to 1.0.50/versionCode 50.")
 
-# CI release trigger marker: 1.0.49
+# CI release trigger marker: 1.0.50
 
 # Parse every classic inline script, rather than checking only one handler name.
 # Node parses syntax without executing application code or making network requests.
@@ -66,7 +66,7 @@ for number, script in enumerate(parser.scripts, 1):
     assert result.returncode == 0, f"Inline script {number}: {result.stderr}"
 print(f"PASS: {len(parser.scripts)} Android inline scripts parse successfully.")
 
-for asset in ("tamandua-task-core.js", "tamandua-actions.js", "reminder-plan.js", "tamandua-preferences.js", "navigation-drawer.js", "presentation-rebuild.js", "tamandua-presence.js", "sheet-workspace.js", "tamandua-workspace.js", "presentation-art.js", "file-export.js", "tamandua-session.js", "tamandua-enhancements.js", "mobile-polish.js", "mobile-motion.js", "tamandua-3d.js", "finance-core.js"):
+for asset in ("structured-import.js", "tamandua-task-core.js", "tamandua-actions.js", "reminder-plan.js", "tamandua-preferences.js", "navigation-drawer.js", "presentation-rebuild.js", "tamandua-presence.js", "sheet-workspace.js", "tamandua-workspace.js", "presentation-art.js", "file-export.js", "tamandua-session.js", "tamandua-enhancements.js", "mobile-polish.js", "mobile-motion.js", "tamandua-3d.js", "finance-core.js"):
     subprocess.run(["node", "--check", str(HTML.parent / asset)], check=True)
 print("PASS: injected Android scripts parse successfully.")
 

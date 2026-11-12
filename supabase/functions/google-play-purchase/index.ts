@@ -21,9 +21,9 @@ function corsHeadersFor(origin: string | null): Record<string, string> {
 }
 
 const products: Record<string, { plan: string; amount: number }> = {
-  copiloto_pro_30d: { plan: "pro", amount: 23.90 },
-  copiloto_max_30d: { plan: "max", amount: 35.90 },
-  copiloto_ultra_30d: { plan: "ultra", amount: 59.90 },
+  copiloto_pro_30d: { plan: "pro", amount: 20.99 },
+  copiloto_max_30d: { plan: "max", amount: 30.39 },
+  copiloto_ultra_30d: { plan: "ultra", amount: 50.00 },
 };
 
 function base64url(bytes: Uint8Array): string {

@@ -56,7 +56,6 @@ internal class SpreadsheetFiles(private val activity: Activity, private val webV
             val picker = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "*/*"
-                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("text/csv", "text/plain", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
             }
             try { activity.startActivityForResult(picker, importRequest) }
