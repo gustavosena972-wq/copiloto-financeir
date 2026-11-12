@@ -1,0 +1,14 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');const vm=require('node:vm');
+const source=fs.readFileSync(path.join(__dirname,'../android-app/app/src/main/assets/mobile.html'),'utf8');
+function setup(){const S={user:{id:'a'},fam:{id:'one'},ano:{id:'2026'},mes:{id:'nov'}};const a=source.indexOf('function accountRequestScope()'),b=source.indexOf('function',source.indexOf('async function q(',a)+18);const part=source.slice(a,b);return {S,q:vm.runInNewContext(part+';q',{S,toast:()=>{},JSON,Error})};}
+test('an old family request cannot populate a new account',async()=>{const {S,q}=setup();let resolve;const result=q(new Promise(r=>resolve=r));S.user={id:'b'};S.fam={id:'two'};resolve({data:['private-one']});await assert.rejects(result,{name:'AbortError'});});
+test('a previous month cannot overwrite the selected month',async()=>{const {S,q}=setup();let resolve;const result=q(new Promise(r=>resolve=r));S.mes={id:'dec'};resolve({data:['november']});await assert.rejects(result,{name:'AbortError'});});
+test('same-account same-period requests still return their records',async()=>{const {q}=setup();assert.equal(await q(Promise.resolve({data:42})),42);});
+test('old private content disappears before a new session waits for configuration',()=>{
+ const state={user:{id:'new-user'},fam:{id:'old-family'},lanc:[{descricao:'private'}],notifs:[{id:'old-notification'}]};
+ const screen={innerHTML:'private content'};
+ const body=source.slice(source.indexOf('function clearPrivateWorkspace()'),source.indexOf('function renderAuth()'));
+ vm.runInNewContext(body+';boot()',{S:state,$:()=>screen,carregarConfig:()=>new Promise(()=>{})});
+ assert.doesNotMatch(screen.innerHTML,/private content/);
+ assert.equal(state.fam,null);assert.equal(state.lanc.length,0);assert.equal(state.notifs.length,0);
+});

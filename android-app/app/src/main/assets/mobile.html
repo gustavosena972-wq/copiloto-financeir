@@ -3358,7 +3358,7 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 @keyframes cf-tamandua-proactive-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(max-width:640px){.cf-tamandua-proactive{margin:0 0 10px;padding:12px;border-radius:16px}.cf-tamandua-proactive-actions{display:grid;grid-template-columns:1fr}.cf-tamandua-proactive-action{width:100%}}
 @media(prefers-reduced-motion:reduce){.cf-tamandua-proactive{animation:none}}
-.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style></head>
+.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"><link rel="stylesheet" href="mobile-motion.css"><script src="file-export.js"></script><link rel="stylesheet" href="android-presentation.css"><link rel="stylesheet" href="product-panel.css"><link rel="stylesheet" href="tamandua-chat.css"><link rel="stylesheet" href="tamandua-workspace.css"><link rel="stylesheet" href="continuous-presentation.css"><link rel="stylesheet" href="navigation-drawer.css"><link rel="stylesheet" href="tamandua-cocoa.css"><link rel="stylesheet" href="atelier-polish.css"><link rel="stylesheet" href="mobile-scroll.css"><link rel="stylesheet" href="immersive-finance.css"><link rel="stylesheet" href="product-studio.css"></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"><div class="cf-mobile-startup" role="status" aria-live="polite"><div class="cf-mobile-startup-mark">CF</div><div><b>Copiloto Financeiro</b><span>Preparando seu financeiro…</span></div></div></div>
 <div id="toast"></div>
@@ -3391,7 +3391,7 @@ function loadExternalScript(src,ready){
 }
 function ensureXlsx(){
   if(window.XLSX)return Promise.resolve();
-  if(!__xlsxLoader)__xlsxLoader=loadExternalScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',()=>!!window.XLSX);
+  if(!__xlsxLoader)__xlsxLoader=loadExternalScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',()=>!!window.XLSX).catch(error=>{document.querySelector('[data-cf-src*="xlsx-0.20.3"]')?.remove();__xlsxLoader=null;throw error;});
   return __xlsxLoader;
 }
 function ensureQrCode(){
@@ -3401,13 +3401,18 @@ function ensureQrCode(){
 }
 window.__copilotoSupabase=sb;
 const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const S={view:'planilha',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false},tamanduaProfile:null,tamanduaIntroStep:0};
+const S={view:'inicio',lanc:[],sug:[],cats:[],membros:[],anos:[],meses:[],planoPreCadastro:null,playProducts:{},playTokensProcessing:new Set(),internalTester:false,mobileMore:false,mobileAddOpen:false,familyAreas:{membros:false,convites:false,categorias:false,conta:false},tamanduaProfile:null,tamanduaIntroStep:0};
 const $=s=>document.querySelector(s);
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const dataLocalISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let tt;function toast(m,e){const t=$('#toast');t.textContent=m;t.className=e?'err':'';t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',3800)}
-async function q(p){const r=await p;if(r.error){toast(r.error.message,1);throw r.error}return r.data}
+function accountRequestScope(){return JSON.stringify([S.user?.id,S.fam?.id,S.ano?.id,S.mes?.id,S.bootEpoch]);}
+async function q(p){
+  const scope=accountRequestScope(),r=await p;
+  if(scope!==accountRequestScope()){const error=new Error('A conta ou o período mudou. Atualize a tela.');error.name='AbortError';throw error;}
+  if(r.error){toast(r.error.message,1);throw r.error}return r.data;
+}
 const canEdit=()=>S.me&&S.me.papel!=='leitor';
 const mesAberto=()=>S.mes&&S.mes.status==='aberto';
 
@@ -3420,6 +3425,7 @@ function tamanduaStorageKey(kind){
   return userId?'copiloto_tamandua_'+kind+'_v1_'+encodeURIComponent(userId):null;
 }
 async function loadTamanduaProfile(){
+  const scope=accountRequestScope();
   S.tamanduaProfile=null;
   if(!S.user?.id||!S.fam?.id)return;
   const{data,error}=await sb.from('ia_aprendizados')
@@ -3429,6 +3435,7 @@ async function loadTamanduaProfile(){
     .eq('chave','perfil_tamandua')
     .maybeSingle();
   if(error){console.warn('Não foi possível carregar o perfil adaptativo do Tamanduá.',error);return}
+  if(scope!==accountRequestScope())return;
   S.tamanduaProfile=data?.valor||null;
 }
 async function mobileLearnFromInteraction(profile){
@@ -3446,8 +3453,8 @@ async function mobileLearnFromInteraction(profile){
   const{error}=await sb.from('ia_aprendizados').upsert(payload,{onConflict:'familia_id,usuario_id,chave'});
   if(error)throw error;
   await sb.from('ia_eventos').insert({
-    familia_id:S.fam.id,
-    usuario_id:S.user.id,
+    familia_id:payload.familia_id,
+    usuario_id:payload.usuario_id,
     tipo:'perfil_tamandua_atualizado',
     intencao:'personalizacao',
     contexto:{
@@ -3464,22 +3471,9 @@ function tamanduaIntroCompleted(){
   if(!introKey)return false;
   try{return localStorage.getItem(introKey)==='1'}catch(e){return false}
 }
-function tamanduaCharacterSvg(){
-  return '<svg viewBox="0 0 180 220" aria-hidden="true">'+
-    '<path d="M124 158c28 8 39 23 31 38-6 12-23 10-28-2" fill="none" stroke="#9b6a38" stroke-width="13" stroke-linecap="round"/>'+
-    '<path d="M38 92c0-39 25-65 61-65 32 0 57 22 57 53 0 34-25 56-58 56H57c-22 0-37-15-37-34 0-16 7-27 18-36z" fill="#b9783f"/>'+
-    '<path d="M69 36c-17 14-24 31-22 50 2 21 14 34 31 43-27 5-49-10-49-34 0-31 19-54 40-59z" fill="#8f5c34" opacity=".72"/>'+
-    '<path d="M115 84c25 0 43 11 43 27s-17 26-43 26c-20 0-33-10-33-26s13-27 33-27z" fill="#d89d61"/>'+
-    '<circle cx="128" cy="99" r="4" fill="#1e281f"/><circle cx="154" cy="108" r="2.8" fill="#1e281f"/>'+
-    '<path d="M142 118c7 2 10 6 10 11" fill="none" stroke="#6e4325" stroke-width="3" stroke-linecap="round"/>'+
-    '<path d="M69 139c-9 16-7 28 3 37M100 142c-6 17-3 28 8 36" fill="none" stroke="#744b2b" stroke-width="9" stroke-linecap="round"/>'+
-    '<path d="M54 145c15 3 32 3 50-1l10 32H43z" fill="#173b2a"/>'+
-    '<path d="M75 147l17 4-9 22-12-7z" fill="#d8f24a" opacity=".95"/>'+
-    '<path d="M105 148l17-5 6 20-14 8z" fill="#2f7c59"/>'+
-    '<path d="M72 177h52" stroke="#d9e8d7" stroke-width="3" stroke-linecap="round"/>'+
-    '<path d="M87 181v20M110 181v20" stroke="#173b2a" stroke-width="10" stroke-linecap="round"/>'+
-    '<path d="M82 201h13M105 201h13" stroke="#9b6a38" stroke-width="5" stroke-linecap="round"/>'+
-  '</svg>';
+function tamanduaCharacterSvg(plan=S.fam?.plano||'pro'){
+  const tier=['pro','max','ultra'].includes(plan)?plan:'pro';
+  return '<span class="cf-mascot cf-mascot-'+tier+'" role="img" aria-label="Tamanduá, seu companheiro financeiro no plano '+tier+'"></span>';
 }
 function tamanduaIntroMarkup(step=0){
   if(step===0){
@@ -3543,15 +3537,7 @@ function renderTamanduaIntro(step=0){
   S.tamanduaIntroStep=step;
   $('#app').innerHTML=tamanduaIntroMarkup(step);
 }
-function renderWorkspaceOrKeepTamandua(){
-  if(S.user&&S.fam&&!tamanduaIntroCompleted()){
-    if(!document.querySelector('.cf-tamandua-intro')){
-      renderTamanduaIntro(S.tamanduaIntroStep||0);
-    }
-    return;
-  }
-  render();
-}
+function renderWorkspaceOrKeepTamandua(){render();}
 async function finishTamanduaIntro(){
   const groups=['melhorar','necessidade','organizacao','economia'];
   const unanswered=groups.filter(name=>!document.querySelector('input[name="'+name+'"]:checked'));
@@ -3585,19 +3571,28 @@ function mostrarErroInicial(e){
   console.error('Falha ao iniciar o Copiloto Financeiro:',e);
   const app=document.getElementById('app');
   if(!app)return;
-  app.innerHTML='<div class="auth"><h1>Não foi possível abrir o aplicativo</h1><p class="mu">Ocorreu uma falha ao carregar sua conta. Seus lançamentos não foram alterados. Confira sua conexão e tente novamente.</p><button id="tentar-novamente">Tentar novamente</button><p class="mu" style="font-size:12px">Se continuar, envie uma captura do Console do navegador para o suporte.</p></div>';
+  if(e?.name==='AbortError')return;
+  const code=e?.code==='42501'?'CF-ACESSO':e?.status===401?'CF-SESSAO':'CF-INICIO';
+  app.innerHTML='<div class="auth"><h1>Vamos recuperar seu acesso.</h1><p class="mu">Não conseguimos concluir a abertura da conta. Seus lançamentos não foram alterados.</p><button id="tentar-novamente">Tentar novamente</button><button id="entrar-novamente">Entrar novamente</button><p class="mu" style="font-size:12px">Se precisar de ajuda, informe ao suporte o código '+code+'. Não envie sua senha.</p></div>';
   const btn=document.getElementById('tentar-novamente');
-  if(btn)btn.onclick=()=>{app.innerHTML='<div class="auth mu">Carregando…</div>';boot().catch(mostrarErroInicial)};
+  if(btn)btn.onclick=()=>{app.innerHTML='<div class="auth mu">Carregando…</div>';restoreSessionAndBoot().catch(mostrarErroInicial)};
+  document.getElementById('entrar-novamente').onclick=async()=>{
+    try{const result=await sb.auth.signOut({scope:'local'});if(result.error)throw result.error;S.user=null;clearPrivateWorkspace();location.hash='login';renderAuth();}catch(error){mostrarErroInicial(error)}
+  };
+}
+async function restoreSessionAndBoot(){
+  const {data,error}=await sb.auth.getSession();
+  if(error)throw error;
+  S.user=data.session?.user||null;
+  await boot();
 }
 (async()=>{
   try{
-    const{data}=await sb.auth.getSession();
-    S.user=data.session?.user||null;
-    await boot();
     sb.auth.onAuthStateChange((ev,s)=>{
       const u=s?.user||null;
       if((u?.id)!==(S.user?.id)){S.user=u;scheduleBoot()}
     });
+    await restoreSessionAndBoot();
   }catch(e){mostrarErroInicial(e)}
 })();
 
@@ -3610,17 +3605,27 @@ function scheduleBoot(){
   },0);
 }
 
+function clearPrivateWorkspace(){
+  for(const key of ['lanc','sug','cats','contas','membros','anos','meses','resumo','meta','notifs'])S[key]=[];
+  for(const key of ['fam','me','ano','mes','plan','tamanduaProfile','imp','adm'])S[key]=null;
+  S.internalTester=false;S.mobileMore=false;S.mobileAddOpen=false;
+}
 async function boot(){
+  const epoch=(S.bootEpoch||0)+1;S.bootEpoch=epoch;clearPrivateWorkspace();
+  $('#app').innerHTML='<div class="auth mu" role="status">Carregando sua sessão…</div>';
   // Isola permissões e dados entre sessões diferentes.
   S.admin=false;S.adm=null;S.admPend=0;S.me=null;S.fam=null;
   if(S.rt){try{sb.removeChannel(S.rt)}catch(e){}S.rt=null}
   await carregarConfig();
+  if(epoch!==S.bootEpoch)return;
   if(!S.user){S.tamanduaProfile=null;renderAuth();checarServidor();return}
   $('#app').innerHTML='<div class="auth mu">Carregando…</div>';
   const adminCheck=await sb.rpc('eh_admin');
+  if(epoch!==S.bootEpoch)return;
   if(adminCheck.error)throw adminCheck.error;
   S.admin=adminCheck.data===true;
   const testerCheck=await sb.rpc('is_internal_tester');
+  if(epoch!==S.bootEpoch)return;
   if(testerCheck.error)throw testerCheck.error;
   S.internalTester=testerCheck.data===true;
   const rows=await q(sb.from('membros').select('id,papel,nome,familias(id,nome,meta_reducao_cartao,acesso_ate,plano)').eq('usuario_id',S.user.id).order('criado_em',{ascending:false}));
@@ -3634,8 +3639,9 @@ async function boot(){
   await loadTamanduaProfile();
   if(!S.admin&&!S.internalTester&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
-  try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);S.notifs=nr.data||[]}catch(e){S.notifs=[]}
-  if(S.admin){const rr=await sb.rpc('admin_resumo');S.admPend=rr.data?rr.data.pendentes:0}
+  try{await sb.rpc('gerar_lembretes',{p_familia:S.fam.id});const nr=await sb.from('notificacoes').select('*').eq('lida',false).order('criado_em',{ascending:false}).limit(30);if(epoch===S.bootEpoch)S.notifs=nr.data||[]}catch(e){if(epoch===S.bootEpoch)S.notifs=[]}
+  if(epoch!==S.bootEpoch)return;
+  if(S.admin){const rr=await sb.rpc('admin_resumo');if(epoch!==S.bootEpoch)return;S.admPend=rr.data?rr.data.pendentes:0}
   const[c,ct,m,a]=await Promise.all([
     q(sb.from('categorias').select('*').eq('familia_id',S.fam.id).order('nome')),
     q(sb.from('contas_cartoes').select('*').eq('familia_id',S.fam.id)),
@@ -3760,7 +3766,7 @@ function renderAuth(){
     </section>
     <section class="landing-benefits" id="recursos" aria-label="Conheça o aplicativo">
       <div class="app-page-section-heading"><span>O QUE VOCÊ ENCONTRA</span><h2>Tudo conectado à vida financeira da sua família.</h2><p>Recursos para sair das anotações espalhadas e ter uma visão mais completa das finanças.</p></div>
-      <div class="app-feature-cards">
+      <div class="app-feature-cards landing-feature-grid">
         <article><span>▦</span><div><small>01 · DIA A DIA</small><h3>Controle do mês</h3><p>Registre receitas, despesas, contas, vencimentos e pagamentos. Saiba o que entrou, o que saiu e o que ainda precisa ser pago.</p></div></article>
         <article><span>▥</span><div><small>02 · VISÃO GERAL</small><h3>Evolução financeira</h3><p>Acompanhe os resultados mês a mês, compare períodos e entenda como a organização financeira da família está evoluindo.</p></div></article>
         <article><span>◈</span><div><small>03 · ATENÇÃO</small><h3>Resumo e pontos de atenção</h3><p>Consulte resumos e sugestões com base nos lançamentos registrados para perceber despesas e compromissos que merecem atenção.</p></div></article>
@@ -3770,9 +3776,9 @@ function renderAuth(){
       </div>
     </section>
     <section class="landing-plans-section" id="landing-plans" aria-labelledby="landing-plans-title">
-      <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Uma assinatura por família. Os membros convidados não precisam contratar outro plano.</p></div>
+      <div class="landing-section-heading"><div><span>PLANOS DO COPILOTO</span><h2 id="landing-plans-title">Um plano para cada etapa da organização financeira.</h2></div><p>Um plano por família. Os membros convidados não precisam contratar outro plano.</p></div>
       <div class="landing-plan-grid">
-        <article class="landing-plan-card">
+        <article class="landing-plan-card"><div class="cf-plan-character">${tamanduaCharacterSvg('pro')}</div>
           <div class="landing-plan-top"><span class="landing-plan-label">CONTROLE FINANCEIRO</span><h3>Pro</h3><p>Para organizar as finanças do dia a dia.</p></div>
           <div class="landing-price"><strong>${precoPro}</strong><span>/ 30 dias</span></div>
           <div class="landing-limit">Até 2 pessoas na família</div>
@@ -3790,7 +3796,7 @@ function renderAuth(){
           <div class="landing-plan-status current">Disponível</div>
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="pro">Escolher Pro <span>↗</span></button>
         </article>
-        <article class="landing-plan-card recommended">
+        <article class="landing-plan-card recommended"><div class="cf-plan-character">${tamanduaCharacterSvg('max')}</div>
           <div class="landing-ribbon">FAMÍLIA AMPLIADA</div>
           <div class="landing-plan-top"><span class="landing-plan-label">FAMÍLIA AMPLIADA</span><h3>Max</h3><p>Para famílias que precisam organizar as finanças com mais pessoas.</p></div>
           <div class="landing-price"><strong>${precoMax}</strong><span>/ 30 dias</span></div>
@@ -3799,19 +3805,20 @@ function renderAuth(){
           <ul class="landing-feature-list">
             ${feature('Todos os recursos do plano Pro')}
             ${feature('Até 6 pessoas no mesmo espaço familiar')}
-            ${feature('Um único pagamento mensal para a família inteira')}
+            ${feature('Um pagamento por período de 30 dias para a família inteira')}
             ${feature('Cada membro acessa com seu próprio usuário e permissões')}
             ${feature('Leitura inteligente dos padrões financeiros da família')}
           </ul>
           <div class="landing-plan-status current">Disponível</div>
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="max">Escolher Max <span>↗</span></button>
         </article>
-        <article class="landing-plan-card ultra">
-          <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO AVANÇADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e espaços familiares já vinculados à sua conta.</p></div>
+        <article class="landing-plan-card ultra"><div class="cf-plan-character">${tamanduaCharacterSvg('ultra')}</div>
+          <div class="landing-plan-top"><span class="landing-plan-label">GESTÃO AVANÇADA</span><h3>Ultra</h3><p>Para acompanhar relatórios, patrimônio e o planejamento da sua família.</p></div>
           <div class="landing-price"><strong>${precoUltra}</strong><span>/ 30 dias</span></div>
-          <div class="landing-limit">Ferramentas avançadas de gestão financeira</div>
+          <div class="landing-limit">Tudo do Pro e Max, com ferramentas avançadas</div>
           <div class="landing-feature-heading">RECURSOS ULTRA DISPONÍVEIS</div>
           <ul class="landing-feature-list">
+            ${feature('Tudo dos planos Pro e Max')}
             ${feature('Acesso compartilhado com uma única família por conta')}
             ${feature('Relatórios anuais e comparativos avançados')}
             ${feature('Histórico da evolução patrimonial')}
@@ -3823,7 +3830,7 @@ function renderAuth(){
           <button type="button" class="landing-plan-cta" data-act="escolherplano" data-plano="ultra">Escolher Ultra <span>↗</span></button>
         </article>
       </div>
-      <p class="landing-plans-footnote">Produtos de compra única: 30 dias de acesso após a aprovação. O preço final é exibido pela Google Play no momento da compra. Pro comporta até 2 pessoas, Max até 6 e Ultra libera as ferramentas avançadas. A compra é por família e não há renovação automática.</p>
+      <p class="landing-plans-footnote">Produtos de compra única: 30 dias de acesso após a confirmação pela Google Play. O preço final é exibido pela Google Play no momento da compra. Pro comporta até 2 pessoas, Max até 6 e Ultra libera as ferramentas avançadas. A compra é por família e não há renovação automática.</p>
     </section>
     <section class="landing-login-section" id="landing-auth" aria-labelledby="landing-login-title">
       <div class="landing-login-intro"><span>ÁREA DO CLIENTE</span><h2 id="landing-login-title">Seu acesso, em uma área própria.</h2><p>Entre na sua conta ou crie um cadastro para começar a usar o Copiloto Financeiro.</p></div>
@@ -3857,7 +3864,8 @@ function renderAuth(){
             <small>A contratação pela Google Play será concluída depois da criação da conta, no aplicativo Android.</small>
           </div>
         </div>
-        <label class="aceite" id="landing-terms"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a> e a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a>.</span></label>
+        <label class="aceite" id="landing-terms"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#" data-act="legal" data-t="termos">Termos de Uso</a>.</span></label>
+        <label class="aceite" id="landing-privacy" style="display:${modoAcesso==='cadastro'?'flex':'none'}"><input type="checkbox" id="privacy-ack"><span>Li a <a href="#" data-act="legal" data-t="privacidade">Política de Privacidade</a> e entendi o uso dos meus dados, inclusive no Tamanduá. Voz e lembretes são opcionais.</span></label>
         <label class="aceite" id="landing-adult-confirmation" hidden><input type="checkbox" id="confirmar-idade"><span>Confirmo que tenho 18 anos ou mais.</span></label>
         <div id="recuperacao" hidden>
           <div class="mu">A recuperação não usa e-mail. Digite seu usuário acima, o código mostrado ao criar a conta e escolha uma nova senha.</div>
@@ -3916,7 +3924,7 @@ function renderSemFamilia(){
 
 function mobileGuide(view){
   const guides={
-    planilha:{title:'Como usar os lançamentos',hint:'Entradas, despesas e pagamentos do mês.',intro:'Esta é a área de movimentações da família. Cada alteração é gravada na conta compartilhada.',steps:['Confira o mês selecionado logo acima.','Toque em “Novo lançamento” para registrar uma receita ou despesa. Informe data, descrição, categoria, valor e responsável.','Toque em uma movimentação para abrir os campos de edição. As alterações são salvas quando você sai do campo.','Use “Mais ações do mês” para importar, exportar, gerar recorrências ou fechar o período.']},
+    planilha:{title:'Como usar os lançamentos',hint:'Entradas, despesas e pagamentos do mês.',intro:'Esta é a área de movimentações da família. Cada alteração é gravada na conta compartilhada.',steps:['Confira o mês selecionado logo acima.','Use “Novo lançamento” para registrar uma receita ou despesa. Informe data, descrição, categoria, valor e responsável.','Toque em uma movimentação para abrir os campos de edição. As alterações são salvas quando você sai do campo.','Use “Ferramentas da planilha” para importar, exportar, gerar recorrências ou fechar o período.']},
     ano:{title:'Como usar a visão do ano',hint:'Compare os meses e abra qualquer período.',intro:'A visão anual reúne os resultados que já foram registrados. Os valores são calculados a partir dos lançamentos.',steps:['Escolha o ano no seletor do topo.','Compare receitas, despesas, saldo e poupança.','Toque em um mês para abrir os lançamentos daquele período.','Use as metas e os ajustes do fim da página para configurar o acompanhamento.']},
     checape:{title:'Como usar o checape',hint:'Entenda as sugestões geradas pelos seus lançamentos.',intro:'O checape analisa os dados cadastrados e apresenta sugestões. Ele não altera seus lançamentos sozinho.',steps:['Registre receitas e despesas para alimentar a análise.','Toque em “Gerar checape” para atualizar as sugestões do mês.','Abra cada sugestão, leia a explicação e o comparativo.','Escolha “Aceitar” ou “Ignorar”. Você mantém o controle da decisão.']},
     plan:{title:'Como usar o planejamento',hint:'Metas, dívidas e patrimônio em um só lugar.',intro:'Use esta área para acompanhar objetivos e compromissos de longo prazo da família.',steps:['Cadastre uma meta e informe o valor que pretende alcançar.','Registre dívidas com saldo, juros e pagamento mínimo.','Atualize os aportes das metas conforme guardar dinheiro.','Mantenha ativos e passivos atualizados para acompanhar o patrimônio.']},
@@ -3929,24 +3937,38 @@ function mobileGuide(view){
   return '<details class="mobile-guide"><summary aria-controls="mobile-guide-content"><span class="mobile-guide-mark" aria-hidden="true">?</span><span class="mobile-guide-copy"><b>'+g.title+'</b><small>'+g.hint+'</small></span><span class="mobile-guide-action">Passo a passo</span></summary><div class="mobile-guide-content" id="mobile-guide-content"><p>'+g.intro+'</p><ol>'+steps+'</ol></div></details>';
 }
 function mobileNavigation(){
-  const activeMore=['família','relatorios','admin'].includes(S.view);
-  return '<nav class="mobile-bottom-nav" aria-label="Navegação principal do aplicativo">'+
-    '<button type="button" class="mobile-nav-item '+(S.view==='planilha'?'is-active':'')+'" data-act="view" data-v="planilha" data-mobile-nav="launches" aria-label="Abrir lançamentos" '+(S.view==='planilha'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5"/></svg><span>Lanç.</span></button>'+
-    '<button type="button" class="mobile-nav-item '+(S.view==='ano'?'is-active':'')+'" data-act="view" data-v="ano" data-mobile-nav="year" aria-label="Abrir visão do ano" '+(S.view==='ano'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17M7 15l4-4 3 2 5-7"/></svg><span>Ano</span></button>'+
-    '<button type="button" class="mobile-nav-item '+(S.view==='checape'?'is-active':'')+'" data-act="view" data-v="checape" data-mobile-nav="checkup" aria-label="Abrir checape financeiro" '+(S.view==='checape'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 4.6-3 8-8 10-5-2-8-5.4-8-10V6zM8.5 12l2.2 2.2 4.8-5"/></svg><span>Checape</span></button>'+
-    '<button type="button" class="mobile-nav-item '+(S.view==='plan'?'is-active':'')+'" data-act="view" data-v="plan" data-mobile-nav="planning" aria-label="Abrir planejamento" '+(S.view==='plan'?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 2v3M22 12h-3"/></svg><span>Metas</span></button>'+
-    '<button type="button" class="mobile-nav-item '+(activeMore?'is-active':'')+'" data-act="mobilemore" data-mobile-nav="more" aria-label="Mais ferramentas" aria-expanded="'+(S.mobileMore?'true':'false')+'"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg><span>Mais</span></button>'+
-    '</nav>';
+ const items=[['inicio','Início','M3 10 12 3l9 7v11h-6v-7H9v7H3z'],['planilha','Planilha','M5 4h14v16H5zM8 8h8M8 12h8M8 16h5'],['tamandua','Tamanduá','M4 4h16v12H9l-5 4zM8 8h8M8 12h5'],['plan','Metas','M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M12 8v8M8 12h8']];
+ return '<nav class="mobile-bottom-nav" aria-label="Navegação principal do aplicativo">'+items.map(([v,label,path])=>'<button type="button" class="mobile-nav-item '+(S.view===v?'is-active':'')+'" data-act="view" data-v="'+v+'" aria-label="Abrir '+label+'" '+(S.view===v?'aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+path+'"/></svg><span>'+label+'</span></button>').join('')+'<button type="button" class="mobile-nav-item" data-act="mobilemore" aria-label="Mais ferramentas" aria-expanded="'+!!S.mobileMore+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h2M11 12h2M17 12h2"/></svg><span>Mais</span></button></nav>';
 }
 function mobileMoreMenu(){
-  let links='<button type="button" data-act="view" data-v="família"><span>Família e ajustes</span><span aria-hidden="true">›</span></button>';
-  if(planoTemRecurso('relatorios'))links+='<button type="button" data-act="view" data-v="relatorios"><span>Relatórios financeiros</span><span aria-hidden="true">›</span></button>';
-  if(S.admin)links+='<button type="button" data-act="view" data-v="admin"><span>Administração</span><span aria-hidden="true">›</span></button>';
-  links+='<button type="button" class="mobile-more-signout" data-act="sair"><span>Sair da conta</span><span aria-hidden="true">↗</span></button>';
-  return '<div class="mobile-more-panel" '+(S.mobileMore?'':'hidden')+'><div class="mobile-more-heading"><b>Mais ferramentas</b><button type="button" data-act="mobilemore" aria-label="Fechar menu">Fechar</button></div>'+links+'</div>';
+  if(!S.mobileMore)return '';
+  const link=(view,title,description)=>`<button type="button" data-act="view" data-v="${view}"><span><strong>${title}</strong><small>${description}</small></span><span aria-hidden="true">›</span></button>`;
+  const reports=planoTemRecurso('relatorios')?link('relatorios','Relatórios financeiros','Veja tendências e categorias'):'';
+  const admin=S.admin?'<section><h3>Administração</h3>'+link('admin','Administração','Compras e configurações do serviço')+'</section>':'';
+  return `<dialog class="cf-more-dialog" id="cf-more-dialog" aria-labelledby="cf-more-title">
+    <header><h2 id="cf-more-title">Mais áreas</h2><button type="button" data-act="mobilemore">Fechar</button></header>
+    <div class="cf-more-content">
+      <section><h3>Análise financeira</h3>
+        ${link('checape','Checape financeiro','Sugestões para o mês escolhido')}
+        ${link('ano','Visão do ano','Compare entradas e despesas por mês')}${reports}
+      </section>
+      <section><h3>Família e conta</h3>
+        ${link('família','Família e ajustes','Membros, convites e preferências')}
+        <button type="button" class="mobile-more-signout" data-act="sair">Sair da conta</button>
+      </section>
+      ${admin}
+    </div>
+  </dialog>`;
 }
 
 window.__copilotoHandleAndroidBack=()=>{
+  const dialog=[...document.querySelectorAll('dialog[open]')].at(-1);
+  if(dialog){
+    if(dialog.id==='cf-import-preview'){
+      if(!S.importando){S.imp=null;render();}
+    }else dialog.close();
+    return true;
+  }
   if(S.mobileMore){S.mobileMore=false;render();return true}
   if(S.mobileAddOpen){S.mobileAddOpen=false;render();return true}
   const openDetails=[...document.querySelectorAll('.app-main details[open]')];
@@ -3957,12 +3979,6 @@ window.__copilotoHandleAndroidBack=()=>{
 
 /* ---------- app ---------- */
 function render(){
-  if(S.user&&S.fam&&!tamanduaIntroCompleted()){
-    if(!document.querySelector('.cf-tamandua-intro')){
-      renderTamanduaIntro(S.tamanduaIntroStep||0);
-    }
-    return;
-  }
   if(S.view==='admin'&&!S.admin){S.view='planilha';S.adm=null;S.admPend=0;}
   const ed=canEdit()&&mesAberto();
   const ultra=planoTemRecurso('relatorios');
@@ -3970,13 +3986,15 @@ function render(){
   const TL={planilha:'Lançamentos',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
   if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
   const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
-  const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('planilha','Planilha mensal','▦')}${navItem('ano','Visão do ano','▤')}</section>
+  const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('inicio','Início','⌂')}${navItem('planilha','Planilha mensal','▦')}${navItem('tamandua','Tamanduá','◎')}${navItem('ano','Visão do ano','▤')}</section>
     <section class="nav-section"><span class="nav-section-title">ANÁLISE E PLANEJAMENTO</span>${navItem('checape','Checape','◈')}${navItem('plan','Planejamento','◎')}${ultra?navItem('relatorios','Relatórios','▥'):''}</section>
     <section class="nav-section"><span class="nav-section-title">FAMÍLIA</span>${navItem('família','Família e ajustes','♧')}</section>
     ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   const info={
-    planilha:['Lançamentos do mês','Veja o saldo, registre entradas e despesas e acompanhe cada pagamento.'],
+    inicio:['Vamos cuidar do seu mês.','Um passo de cada vez, com sua família.'],
+    tamandua:['Tamanduá','Um espaço para conversar e cuidar das suas finanças.'],
+    planilha:['Sua planilha','Consulte, edite, importe e exporte seus lançamentos.'],
     ano:['Visão do ano','Acompanhe os resultados financeiros e compare os meses do ano.'],
     checape:['Checape financeiro','Revise as sugestões geradas a partir dos lançamentos do mês.'],
     plan:['Planejamento financeiro','Organize metas, dívidas e patrimônio em um só lugar.'],
@@ -3985,17 +4003,19 @@ function render(){
     relatorios:['Relatórios financeiros','Analise tendências, categorias e resultados do ano.'],
     espacos:['Central de espaços','Cada conta pertence a uma única família.']
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
-  const dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   let body='';
-  body=mobileTamanduaProactiveCard()+(S.view==='planilha'?mobileSmartContext()+viewPlanilha(ed):S.view==='ano'?viewAno():S.view==='checape'?viewChecape(ed):S.view==='plan'?viewPlan():S.view==='relatorios'&&planoTemRecurso('relatorios')?viewRelatorios():S.view==='admin'?viewAdmin()+viewConfig():viewFamilia()+viewCats2()+viewConta());
-  const meses=(S.view==='família'||S.view==='ano'||S.view==='plan'||S.view==='relatorios'||S.view==='admin')?'':`<div class="meses">${S.meses.map(m=>`<button class="${m.id===S.mes.id?'on':''} ${m.status==='fechado'?'fech':''}" data-act="mes" data-m="${m.mes}">${m.status==='fechado'?'🔒 ':''}${MN[m.mes-1].slice(0,3)}</button>`).join('')}</div>`;
-  $('#app').innerHTML=`<div class="app-shell">
+  body=(S.view==='inicio'?mobileSmartContext()+`<details class="mobile-analysis"><summary>Análise do mês</summary>${viewGrupos()}${viewCats()}</details>`:S.view==='tamandua'?`<section class="cf-chat-destination" aria-label="Conversa com o Tamanduá"><h2>Seu Tamanduá</h2><p>Converse sobre as finanças da sua família. Seu histórico e sua memória ficam neste espaço.</p></section>`:S.view==='planilha'?viewPlanilha(ed):S.view==='ano'?viewAno():S.view==='checape'?viewChecape(ed):S.view==='plan'?viewPlan():S.view==='relatorios'&&planoTemRecurso('relatorios')?viewRelatorios():S.view==='admin'?viewAdmin()+viewConfig():viewFamilia()+viewCats2()+viewConta());
+  const monthOptions=['inicio','planilha','checape'].includes(S.view)
+    ?S.meses.map(m=>`<option value="${m.id}" ${m.id===S.mes.id?'selected':''}>${MN[m.mes-1]}${m.status==='fechado'?' (fechado)':''}</option>`).join('')
+    :'';
+  $('#app').innerHTML=`<div class="app-shell" data-current-view="${esc(S.view)}">
     <aside class="app-sidebar" aria-label="Navegação principal">
       <div class="sidebar-head">
         <div class="sidebar-brand">${LOGO}<div><strong>Copiloto</strong><small>FINANCEIRO</small></div></div>
         <div class="sidebar-family"><small>FAMÍLIA ATIVA</small><strong title="${esc(S.fam.nome)}">${esc(S.fam.nome)}</strong><span><i></i> Sincronização ativa</span></div>
       </div>
       <nav class="sidebar-nav">${nav}</nav>
+      <button type="button" class="session-button" data-act="sair">Sair da conta</button>
       <div class="sidebar-footer">
         <span class="sidebar-avatar">${esc((S.me?.nome||'U').trim().charAt(0).toUpperCase())}</span>
         <div class="sidebar-user"><b>${esc(S.me.nome)}</b><small>${S.me.papel==='dono'?'Responsável':S.me.papel==='leitor'?'Somente leitura':'Editor'}</small></div>
@@ -4004,29 +4024,40 @@ function render(){
     <main class="app-main">
       <header class="app-topbar">
         <div class="page-heading">
-          <div class="page-eyebrow">COPILOTO FINANCEIRO · ${S.view==='admin'?'PAINEL ADMINISTRATIVO':'GESTÃO FAMILIAR'}</div><div class="cf-tester-badge" ${S.internalTester?'':'hidden'}>TESTE INTERNO · PAGAMENTOS DESATIVADOS</div>
           <h1>${info[0]}</h1>
           <p>${info[1]}</p>
-          <div class="date-line">${saudacao()} · ${dataHoje}</div>
-        </div>
-        <div class="top-actions">
-          ${S.notifs&&S.notifs.length?`<button type="button" class="utility-button notification-button" data-act="sino" aria-label="Abrir notificações">Avisos <span>${S.notifs.length}</span></button>`:''}
-          <div class="year-control">
-            <button type="button" class="utility-button year-arrow" data-act="anoant" title="Ano anterior" aria-label="Ano anterior">‹</button>
-            <select id="anosel" aria-label="Selecionar ano">${anos}</select>
-            <button type="button" class="utility-button year-arrow" data-act="anoprox" title="Próximo ano" aria-label="Próximo ano">${S.anos.some(x=>x.ano===S.ano.ano+1)?'›':'＋ '+(S.ano.ano+1)}</button>
-          </div>
-          <button type="button" class="session-button" data-act="sair">Sair da conta</button>
         </div>
       </header>
-      <div class="period-toolbar">${meses}</div>
-      ${mobileGuide(S.view)}
-      <section class="v0-mobile-quick-nav" aria-label="Áreas do Copiloto"><button type="button" class="v0-mobile-quick-nav-primary" data-act="view" data-v="planilha"><strong>Planilha mensal</strong><small>Lançamentos, receitas, despesas e saldo</small></button><div class="v0-mobile-quick-nav-grid"><button type="button" class="v0-mobile-quick-nav-item ${S.view==='ano'?'is-current':''}" data-act="view" data-v="ano"><span class="nav-copy"><strong>Visão do ano</strong><small>Resultados dos meses</small></span><span class="nav-arrow">›</span></button><button type="button" class="v0-mobile-quick-nav-item ${S.view==='checape'?'is-current':''}" data-act="view" data-v="checape"><span class="nav-copy"><strong>Checape</strong><small>Análise financeira</small></span><span class="nav-arrow">›</span></button><button type="button" class="v0-mobile-quick-nav-item ${S.view==='plan'?'is-current':''}" data-act="view" data-v="plan"><span class="nav-copy"><strong>Planejamento</strong><small>Metas e patrimônio</small></span><span class="nav-arrow">›</span></button><button type="button" class="v0-mobile-quick-nav-item ${S.view==='família'?'is-current':''}" data-act="view" data-v="família"><span class="nav-copy"><strong>Família</strong><small>Membros e ajustes</small></span><span class="nav-arrow">›</span></button>${planoTemRecurso('relatorios')?`<button type="button" class="v0-mobile-quick-nav-item" data-act="view" data-v="relatorios"><span class="nav-copy"><strong>Relatórios</strong><small>Indicadores e tendências</small></span><span class="nav-arrow">›</span></button>`:''}${S.admin?`<button type="button" class="v0-mobile-quick-nav-item" data-act="view" data-v="admin"><span class="nav-copy"><strong>Administração</strong><small>Controle do serviço</small></span><span class="nav-arrow">›</span></button>`:''}</div></section>
-      <section class="app-content"><div class="v0-mobile-dashboard">${body}${viewImport()}${viewModais()}</div></section>
+      <section class="cf-period-row" aria-label="Período financeiro">
+        ${monthOptions?`<label>Mês<select id="messel" aria-label="Selecionar mês">${monthOptions}</select></label>`:''}
+        <label>Ano<select id="anosel" aria-label="Selecionar ano">${anos}</select></label>
+        ${!S.anos.some(x=>x.ano===S.ano.ano+1)?`<button type="button" class="utility-button" data-act="anoprox" aria-label="Criar ano ${S.ano.ano+1}">+ ${S.ano.ano+1}</button>`:''}
+        ${S.notifs?.length?`<button type="button" class="utility-button notification-button" data-act="sino" aria-label="Abrir notificações">Avisos <span>${S.notifs.length}</span></button>`:''}
+      </section>
+      <p class="mobile-connection-status" role="status" hidden></p>
+      ${S.internalTester?'<p class="cf-test-notice">Teste interno · Sem cobrança</p>':''}
+      ${S.view==='planilha'||S.view==='tamandua'||S.view==='inicio'?'':mobileGuide(S.view)}
+      <section class="app-content"><div class="v0-mobile-dashboard">${body}${viewModais()}</div></section>
     </main>
+    ${viewImport()}
     ${mobileMoreMenu()}
     ${mobileNavigation()}
   </div>`;
+  const more=$('#cf-more-dialog');
+  if(more){
+    more.addEventListener('close',()=>{
+      if(more.isConnected&&S.mobileMore){S.mobileMore=false;render();}
+    });
+    more.showModal();
+  }
+  const preview=$('#cf-import-preview');
+  if(preview){
+    preview.addEventListener('cancel',event=>{
+      event.preventDefault();
+      if(!S.importando){S.imp=null;render();}
+    });
+    preview.showModal();
+  }
   afterRender();
 }
 
@@ -4117,60 +4148,29 @@ const stOpts=sel=>['pendente','pago','atrasado'].map(s=>`<option ${s===sel?'sele
 const tpOpts=sel=>['despesa','receita'].map(s=>`<option ${s===sel?'selected':''}>${s}</option>`).join('');
 
 function quickEditButton(kind){return canEdit()&&mesAberto()?`<button type="button" class="sec chip cf-quick-edit" data-act="quickedit" data-kind="${kind}">Editar valores</button>`:''}
+function localFinancialDate(){
+  return new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+}
+function monthlyFinancialSnapshot(){
+  return CFMoney.summarize((S.lanc||[]).map(row=>({...row,categoria:S.cats?.find(c=>c.id===row.categoria_id)?.nome||'Sem categoria'})),localFinancialDate());
+}
 function mobileSmartContext(){
-  const lanc=Array.isArray(S.lanc)?S.lanc:[];
-  const hoje=new Date();
-  const hojeIso=hoje.toISOString().slice(0,10);
-  const limiteIso=new Date(hoje.getTime()+7*86400000).toISOString().slice(0,10);
-  const receitas=lanc.filter(x=>x.tipo==='receita').reduce((a,x)=>a+Number(x.valor||0),0);
-  const despesas=lanc.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+Number(x.valor||0),0);
-  const abertas=lanc.filter(x=>x.tipo==='despesa'&&x.status!=='pago');
-  const atrasadas=abertas.filter(x=>x.status==='atrasado'||(x.data_vencimento&&x.data_vencimento<hojeIso));
-  const proximas=abertas.filter(x=>x.data_vencimento&&x.data_vencimento>=hojeIso&&x.data_vencimento<=limiteIso)
-    .sort((a,b)=>String(a.data_vencimento).localeCompare(String(b.data_vencimento)));
-  const categorias={};
-  lanc.filter(x=>x.tipo==='despesa').forEach(x=>{
-    const categoria=S.cats.find(c=>c.id===x.categoria_id);
-    const nome=categoria?categoria.nome:'Sem categoria';
-    categorias[nome]=(categorias[nome]||0)+Number(x.valor||0);
-  });
-  const maior=Object.entries(categorias).sort((a,b)=>b[1]-a[1])[0];
-  let next;
-  if(atrasadas.length){
-    next={title:'Revise as contas atrasadas',desc:atrasadas.length+' lançamento(s) precisam de atenção antes de planejar novos gastos.',go:'planilha'};
-  }else if(proximas.length){
-    next={title:'Confira os próximos vencimentos',desc:proximas.length+' lançamento(s) vencem nos próximos 7 dias.',go:'planilha'};
-  }else if(!lanc.length){
-    next={title:'Comece pelo primeiro lançamento',desc:'Registre uma receita ou despesa para o Copiloto começar a organizar seu mês.',go:'planilha'};
-  }else if(despesas>receitas&&receitas>0){
-    next={title:'Compare entradas e saídas',desc:'As despesas registradas estão acima das receitas deste mês. Vale revisar os lançamentos.',go:'checape'};
-  }else{
-    next={title:'Continue acompanhando',desc:'Não há alertas de vencimento nos próximos 7 dias. Use o Planejamento quando quiser organizar objetivos.',go:'plan'};
-  }
-  const saldo=receitas-despesas;
-  const metric=(label,value,sub,cls)=>'<div class="cf-mobile-balance-metric"><small>'+label+'</small><b class="'+(cls||'')+'">'+value+'</b><span>'+sub+'</span></div>';
-  const status=atrasadas.length?'Atenção em contas atrasadas':proximas.length?'Próximos vencimentos':'Mês em acompanhamento';
-  return '<section class="cf-mobile-v025" aria-label="Resumo inteligente do mês">'+
-    '<div class="cf-mobile-balance">'+
-      '<div class="cf-mobile-balance-head"><div><span class="cf-mobile-kicker">RESUMO DO MÊS</span><b>'+esc(status)+'</b></div><span class="cf-mobile-count">'+lanc.length+' movimentações</span></div>'+
-      '<div class="cf-mobile-balance-value"><small>Saldo registrado</small><strong class="'+(saldo>=0?'pos':'neg')+'">'+brl(saldo)+'</strong></div>'+
-      '<div class="cf-mobile-balance-metrics">'+
-        metric('Receitas',brl(receitas),'registradas','pos')+
-        metric('Despesas',brl(despesas),'registradas','neg')+
-        metric('Em aberto',String(abertas.length),'lançamento(s)',abertas.length?'neg':'pos')+
-      '</div>'+
-    '</div>'+
-    '<div class="cf-mobile-command" aria-label="Ações rápidas">'+
-      '<button type="button" data-act="mobileadd" '+(canEdit()&&mesAberto()?'':'disabled')+'><span>＋</span><b>Adicionar</b><small>lançamento</small></button>'+
-      '<button type="button" data-act="view" data-v="checape"><span>✓</span><b>Checape</b><small>revisar mês</small></button>'+
-      '<button type="button" data-act="mobilemore"><span>⋯</span><b>Mais</b><small>ferramentas</small></button>'+
-    '</div>'+
-    '<div class="cf-mobile-insight">'+
-      '<div class="cf-mobile-insight-copy"><span class="cf-mobile-kicker">PRÓXIMO PASSO</span><b>'+esc(next.title)+'</b><p>'+esc(next.desc)+'</p></div>'+
-      '<button type="button" class="cf-mobile-insight-action" data-act="smartgo" data-v="'+next.go+'">Abrir →</button>'+
-    '</div>'+
-    (maior?'<div class="cf-mobile-pattern"><span>Maior categoria</span><b>'+esc(maior[0])+'</b><small>'+brl(maior[1])+' em despesas registradas</small></div>':'')+
-  '</section>';
+  const d=monthlyFinancialSnapshot(), format=value=>brl(value/100);
+  const categoryRows=d.categories.slice(0,4).map(([name,amount])=>'<div class="cf-category-bar"><div><span>'+esc(name)+'</span><b>'+format(amount)+'</b></div><span class="cf-category-track" aria-hidden="true"><i style="width:'+Math.min(100,amount/d.expense*100).toFixed(2)+'%"></i></span></div>').join('');
+  const dueRows=d.due.slice(0,3).map(row=>'<li><span>'+esc(row.descricao||'Conta sem descrição')+'<small>'+row.due.split('-').reverse().join('/')+(row.due<d.today?' · Em atraso':'')+'</small></span><b>'+format(row.cents)+'</b></li>').join('');
+  const panels='<div class="cf-dashboard-panels"><section class="cf-finance-panel"><h3>Despesas por categoria</h3><p>O que mais pesa nos lançamentos do mês.</p>'+(categoryRows||'<p>Suas categorias aparecem aqui após registrar despesas.</p>')+'</section><section class="cf-finance-panel"><h3>Contas em aberto</h3><p>Vencimentos registrados que precisam de atenção.</p>'+(dueRows?'<ul class="cf-due-list">'+dueRows+'</ul>':'<p>Nenhuma conta com vencimento informado em aberto.</p>')+'</section></div>';
+
+  return '<section class="cf-mobile-v025 cf-month-desk" aria-label="Resumo inteligente do mês">'+
+    '<div class="cf-month-title"><h2>Seu mês, com clareza.</h2><span>'+d.rows.length+' movimentações</span></div>'+
+    '<dl class="cf-money-ledger"><div><dt>Receitas registradas</dt><dd>'+format(d.income)+'</dd></div>'+
+    '<div><dt>Despesas registradas</dt><dd>'+format(d.expense)+'</dd></div>'+
+    '<div class="cf-ledger-result"><dt>Resultado do mês</dt><dd class="'+(d.competence<0?'neg':'')+'">'+format(d.competence)+'</dd></div></dl>'+
+    '<div class="cf-cash-notes"><span>Recebido menos pago <b>'+format(d.cash)+'</b></span><span>Contas a pagar <b>'+format(d.payable)+'</b></span></div>'+
+    '<p class="cf-amount-note">Valores dos lançamentos deste período. Não representam o saldo da sua conta bancária.</p>'+
+    (d.ignored?'<p role="status" class="cf-validation-note">'+d.ignored+' registro(s) precisam de revisão para entrar no cálculo.</p>':'')+
+    panels+
+    (!d.rows.length?'<p class="cf-empty-welcome">Vamos começar pelo primeiro lançamento. O Tamanduá acompanha você a partir dos seus dados.</p>':'')+
+    '</section>';
 }
 function viewPlanilha(ed){
   ed=!!ed&&S.mes.status==='aberto';
@@ -4216,13 +4216,13 @@ function viewPlanilha(ed){
    <td data-label="Responsável"><select aria-label="Responsável" id="n_mem">${memOpts(S.me.id)}</select></td><td data-label="Ações"><button data-act="add" aria-label="Salvar novo lançamento">Adicionar</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
-  return `${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
+  return `<div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button></div>${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card v0-mobile-balance"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
-  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>${mobileFlow}<details class="mobile-analysis"><summary>Ver análise e categorias do mês</summary><div class="mobile-analysis-content">${viewGrupos()}${viewCats()}</div></details>
+  <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>
   <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar v0-mobile-action-grid">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
-   <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" accept=".xlsx,.xls,.csv" hidden>
+   <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" hidden>
    <button class="sec" data-act="recorr" ${ed?'':'disabled'}>Gerar recorrentes</button>
    ${fe?`<button class="sec" data-act="reabrir" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>Reabrir mês</button>`:`<button class="sec" data-act="fechar" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ${MN[S.mes.mes-1]}</button>`}
    <button class="sec" data-act="copmes" ${ed?'':'disabled'}>⧉ Copiar mês anterior</button>
@@ -4278,8 +4278,8 @@ function viewAno(){
   <div class="card"><small>Despesas no ano</small><b class="neg">${brl(T('total_despesas'))}</b></div>
   <div class="card"><small>Poupança no fim do ano</small><b class="pos">${brl(fim)}</b></div>
   <div class="card"><small>Mês mais caro</small><b>${maior.mes?MN[maior.mes-1]:'—'}</b></div></div>
-  <div class="card" style="margin-bottom:14px"><b>Receita <span class="pos">■</span> x Despesas <span class="neg">■</span></b><div class="chart">${bars}</div></div>
-  <div class="mobile-year-list">${mobileRows||'<p class="mobile-empty">Ainda não há resultados registrados neste ano.</p>'}</div><div class="scroll desktop-year-table"><table style="min-width:980px"><thead><tr><th>Mês</th><th>Receita</th><th>Fixas</th><th>Cartões</th><th>Retiradas</th><th>Outras</th><th>Total</th><th>Saldo</th><th>Poupança acum.</th><th>% Cartões</th><th>Meta cartão</th></tr></thead><tbody>${rows}</tbody>
+  <div class="card cf-year-chart"><h2>Comparativo mensal</h2><b>Receita <span class="pos">■</span> x Despesas <span class="neg">■</span></b><div class="chart">${bars}</div></div>
+  <div class="mobile-year-list"><h2>Resultados por mês</h2>${mobileRows||'<p class="mobile-empty">Ainda não há resultados registrados neste ano.</p>'}</div><div class="scroll desktop-year-table"><table style="min-width:980px"><thead><tr><th>Mês</th><th>Receita</th><th>Fixas</th><th>Cartões</th><th>Retiradas</th><th>Outras</th><th>Total</th><th>Saldo</th><th>Poupança acum.</th><th>% Cartões</th><th>Meta cartão</th></tr></thead><tbody>${rows}</tbody>
   <tfoot><tr><td>Total ${S.ano.ano}</td><td class="pos">${brl(T('receita'))}</td><td>${brl(T('fixas'))}</td><td>${brl(T('cartoes'))}</td><td>${brl(T('retiradas'))}</td><td>${brl(T('outras'))}</td><td class="neg">${brl(T('total_despesas'))}</td><td class="${T('saldo')>=0?'pos':'neg'}">${brl(T('saldo'))}</td><td>${brl(fim)}</td><td></td><td></td></tr></tfoot></table></div>
   <div class="grid2" style="margin-top:12px"><div class="card"><b>Poupança trazida do ano anterior</b><div class="row" style="margin-top:8px"><input type="number" step="0.01" data-af="poupanca_inicial" value="${S.ano.poupanca_inicial}" ${canEdit()?'':'disabled'}></div>
   <small class="mu">Ao fechar o ano, o saldo acumulado vira o ponto de partida do próximo.</small></div>
@@ -4326,30 +4326,35 @@ function parseYearCell(raw){
   const m=String(raw??'').match(/(?:19|20)\d{2}/);return m?+m[0]:null;
 }
 function parseTabularData(rows,fallbackMonth=null,fallbackYear=null){
-  const hi=rows.findIndex(r=>r.some(c=>norm(c).startsWith('valor'))&&r.some(c=>norm(c).startsWith('descri')||norm(c)==='item'));
+  const isAmount=value=>['valor','amount','montante','quantia'].some(key=>value===key||value.startsWith(key+' '));
+  const isDescription=value=>value.startsWith('descri')||['item','description','historico','lancamento'].includes(value);
+  const hi=rows.findIndex(row=>{const columns=row.map(norm);return columns.some(isAmount)&&columns.some(isDescription);});
   if(hi<0)return null;
   const h=rows[hi].map(norm),ix=(...keys)=>h.findIndex(x=>keys.some(k=>x===k||x.startsWith(k)));
-  const iv=ix('valor'),id=ix('descri','item'),it=ix('tipo'),ic=ix('categoria'),is=ix('status','situa');
-  const idateV=ix('vencimento','data'),im=ix('mes','competencia','referencia'),iy=ix('ano'),inat=ix('natureza compromisso','tipo de compromisso','tipo compromisso','natureza');
+  const iv=h.findIndex(isAmount),id=h.findIndex(isDescription),it=ix('tipo','type'),ic=ix('categoria','category'),is=ix('status','situa');
+  const idateV=ix('vencimento','data','date'),im=ix('mes','month','competencia','referencia'),iy=ix('ano','year'),inat=ix('natureza compromisso','tipo de compromisso','tipo compromisso','natureza');
   if(iv<0||id<0)return null;
   const grupos=new Map();
+  const ipa=ix('parcela atual','numero parcela'),ipt=ix('total parcelas','parcelas total','qtd parcelas','quantidade parcelas');
+  const ipc=h.findIndex(label=>['parcela','parcelamento'].includes(label));
   for(const r of rows.slice(hi+1)){
     const descricao=String(r[id]??'').trim(),valor=parseMoneyCell(r[iv]);
     if(!descricao||descricao.length>160||!(valor>0))continue;
-    const data=idateV>=0?parseDateCell(r[idateV]):null;
+    const rawDate=idateV>=0?r[idateV]:null;
+    const data=parseDateCell(rawDate);
+    if(rawDate!=null&&String(rawDate).trim()&&(!data||!Number.isFinite(Date.parse(data))||new Date(data).toISOString().slice(0,10)!==data))continue;
     const mes=(im>=0?parseMonthCell(r[im]):null)||(data?+data.slice(5,7):null)||fallbackMonth;
     const ano=(iy>=0?parseYearCell(r[iy]):null)||(im>=0?parseYearCell(r[im]):null)||(data?+data.slice(0,4):null)||fallbackYear;
     if(!mes)continue;
     const chave=(ano||'sem-ano')+'-'+String(mes).padStart(2,'0');
     if(!grupos.has(chave))grupos.set(chave,{mes,ano,itens:[],receita:0});
-    const tipo=it>=0&&norm(r[it]).startsWith('receita')?'receita':'despesa';
+    const tipo=it>=0&&/^(receita|income|credito|credit|entrada)\b/.test(norm(r[it]))?'receita':'despesa';
     const categoriaNome=ic>=0?String(r[ic]??'').trim():'';
     const categoria=S.cats.find(c=>c.tipo===tipo&&norm(c.nome)===norm(categoriaNome));
     const st=is>=0?norm(r[is]):'pendente';
     const status=['pago','atrasado'].includes(st)?st:'pendente';
-    const pm=String(r.find(v=>/\d+\s*(?:de|\/)\s*\d+/i.test(String(v??'')))??'').match(/(\d+)\s*(?:de|\/)\s*(\d+)/i);
-    const ipa=ix('parcela atual','numero parcela','número parcela'),ipt=ix('total parcelas','parcelas total','qtd parcelas','quantidade parcelas');
-    const pa=ipa>=0?Number(r[ipa]):(pm?+pm[1]:null),pt=ipt>=0?Number(r[ipt]):(pm?+pm[2]:null);
+    const combined=ipc>=0?String(r[ipc]??'').match(/^(\d+)\s*(?:de|\/)\s*(\d+)$/i):null;
+    const pa=ipa>=0?Number(r[ipa]):(combined?Number(combined[1]):null),pt=ipt>=0?Number(r[ipt]):(combined?Number(combined[2]):null);
     const naturezaRaw=inat>=0?norm(r[inat]):'';
     const naturezaComp=naturezaRaw.startsWith('financi')||naturezaRaw.startsWith('prest')||naturezaRaw.startsWith('emprest')?'financiamento':'compra';
     grupos.get(chave).itens.push({grupo:tipo==='receita'?'receita':(categoria?.grupo||'variaveis'),descricao,valor,
@@ -4363,8 +4368,8 @@ function parseSheetRows(name,rows){
   const m=norm(name).match(/^(janeiro|jan|fevereiro|fev|marco|mar|abril|abr|maio|mai|junho|jun|julho|jul|agosto|ago|setembro|set|outubro|out|novembro|nov|dezembro|dez)(?=[\s\d\/_-]|$)\s*[\/_-]?\s*(\d{4})?/);
   if(!m)return null;
   const mes=MES3.indexOf(m[1].slice(0,3))+1,ano=m[2]?+m[2]:null;
-  const header=rows.some(r=>r.some(c=>norm(c).startsWith('valor'))&&r.some(c=>norm(c).startsWith('descri')||norm(c)==='item'));
-  if(header)return parseTabularData(rows,mes,ano)||[];
+  const tabular=parseTabularData(rows,mes,ano);
+  if(tabular)return tabular;
   const out={mes,ano,itens:[],receita:0};
   for(const r of rows){
     const a=norm(r[0]);
@@ -4402,20 +4407,42 @@ function catPara(grupo,desc){
 }
 const lanc=(mid,tipo,desc,valor,grupo,i={})=>({familia_id:S.fam.id,mes_id:mid,tipo,descricao:desc,valor,categoria_id:catPara(grupo,desc),status:'pendente',parcela_atual:i.parcela_atual||null,parcelas_total:i.parcelas_total||null,observacao:i.obs||null,origem:'importacao_arquivo',criado_por:S.user.id});
 async function lerArquivo(file){
+  const scope=accountRequestScope();
   try{
-    await ensureXlsx();
-    const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});const meses=[];
-    for(const n of wb.SheetNames){
-      if(norm(n)==='instrucoes')continue;
-      const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:null,raw:true});
-      const p=parseSheetRows(n,rows);
-      if(Array.isArray(p))meses.push(...p.filter(m=>m.itens.length||m.receita));
-      else if(p){if(p.itens.length||p.receita)meses.push(p)}
-      else{
-        const g=parseGeneric(rows);
-        if(g)meses.push(...g);
+    if(file.size>12*1024*1024)throw new Error('Escolha um arquivo de até 12 MB.');
+    const data=await file.arrayBuffer();
+    const prefix=new Uint8Array(data,0,Math.min(data.byteLength,4096));
+    const head=new TextDecoder().decode(prefix).trimStart();
+    const extension=file.name.split('.').pop().toLowerCase();
+    const maxRows=CFStructuredImport.maxRows;
+    let sheets;
+    if(extension==='json'||/^[{\[]/.test(head)){
+      sheets=[['JSON',CFStructuredImport.fromJson(new TextDecoder().decode(data))]];
+    }else if(extension==='ofx'||/<OFX[>\s]|OFXHEADER:/i.test(head)){
+      const encoding=/(?:CHARSET|ENCODING)\s*:\s*(?:1252|USASCII|ISO-8859-1)/i.test(head)?'windows-1252':'utf-8';
+      sheets=[['OFX',CFStructuredImport.fromOfx(new TextDecoder(encoding).decode(data))]];
+    }else{
+      if(/^(?:%PDF-)|^(?:image|video|audio)\//i.test(head)||/^(?:image|video|audio)\//i.test(file.type)||['pdf','doc','docx','png','jpg','jpeg','webp','zip'].includes(extension)){
+        throw new Error('Exporte os dados para CSV, Excel ou OFX para importar.');
       }
+      await ensureXlsx();
+      const book=XLSX.read(data,{type:'array',cellDates:true,sheetRows:maxRows+2,cellHTML:false,cellFormula:false});
+      if(book.SheetNames.length>100)throw new Error('Divida a planilha em arquivos de até 100 abas.');
+      sheets=book.SheetNames.filter(name=>norm(name)!=='instrucoes').map(name=>{
+        const rows=XLSX.utils.sheet_to_json(book.Sheets[name],{header:1,defval:null,raw:true});
+        return [name,rows];
+      });
     }
+    if(sheets.reduce((total,[,rows])=>total+Math.max(0,rows.length-1),0)>maxRows){
+      throw new Error('Divida o arquivo em partes de até 10 mil linhas.');
+    }
+    const meses=[];
+    for(const [name,rows] of sheets){
+      const parsed=parseSheetRows(name,rows)??parseGeneric(rows);
+      if(Array.isArray(parsed))meses.push(...parsed.filter(period=>period.itens.length||period.receita));
+      else if(parsed&&(parsed.itens.length||parsed.receita))meses.push(parsed);
+    }
+    if(scope!==accountRequestScope())return;
     if(!meses.length)return toast('Não encontrei lançamentos com mês, descrição e valor. Inclua uma coluna Mês (ou uma data de vencimento) na planilha.',1);
     const agrupados=new Map();
     meses.forEach(m=>{
@@ -4426,27 +4453,42 @@ async function lerArquivo(file){
       destino.itens.push(...(m.itens||[]));destino.receita+=Number(m.receita)||0;
     });
     S.imp=[...agrupados.values()].sort((a,b)=>a.ano-b.ano||a.mes-b.mes);render();
-  }catch(err){console.error('Falha ao ler planilha:',err);toast('Não consegui ler esse arquivo: '+(err?.message||'formato inválido'),1)}
+  }catch(err){if(scope===accountRequestScope())toast('Não consegui ler esse arquivo: '+(err?.message||'formato inválido'),1)}
 }
 function viewImport(){
   if(!S.imp)return '';
   const rows=S.imp.map(m=>{const d=m.itens.filter(i=>i.grupo!=='receita').reduce((a,i)=>a+i.valor,0);const r=m.receita+m.itens.filter(i=>i.grupo==='receita').reduce((a,i)=>a+i.valor,0);
     return `<tr><td>${MN[m.mes-1]} ${m.ano}</td><td>${m.itens.length}</td><td class="pos">${brl(r)}</td><td class="neg">${brl(d)}</td></tr>`}).join('');
-  return `<div class="modal"><div class="card box"><b>Importar planilha</b><div class="mu" style="margin:6px 0 10px">Confira o que foi encontrado antes de gravar.</div>
-  <div class="scroll"><table style="min-width:0"><thead><tr><th>Mês</th><th>Itens</th><th>Receita</th><th>Despesas</th></tr></thead><tbody>${rows}</tbody></table></div>
-  <div class="row" style="margin-top:12px">Se o mês já tiver lançamentos, importar de novo nunca duplica: <select id="imp_modo"><option value="mesclar">adicionar só o que falta (recomendado)</option><option value="substituir">substituir o mês inteiro</option></select></div>
-  <div class="row"><button data-act="impok">Importar</button><button class="sec" data-act="impno">Cancelar</button></div></div></div>`;
+  return `<dialog id="cf-import-preview" class="cf-import-preview" aria-labelledby="cf-import-title">
+    <header><h2 id="cf-import-title">Revisar importação</h2><p>${S.imp.length} período(s) encontrado(s)</p></header>
+    <div class="cf-import-content" tabindex="0" aria-label="Prévia dos períodos">
+      <table><thead><tr><th>Mês</th><th>Itens</th><th>Receita</th><th>Despesas</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>
+    <footer>
+      <label for="imp_modo">Lançamentos existentes
+        <select id="imp_modo" ${S.importando?'disabled':''}><option value="mesclar">Adicionar só o que falta</option><option value="substituir">Substituir o mês inteiro</option></select>
+      </label>
+      <div class="cf-import-actions"><button type="button" class="sec" data-act="impno" ${S.importando?'disabled':''}>Cancelar</button><button type="button" class="primary" data-act="impok" ${S.importando?'disabled':''}>${S.importando?'Importando…':'Importar planilha'}</button></div></footer>
+  </dialog>`;
 }
 async function importar(){
   if(S.importando)return;
   if(!Array.isArray(S.imp)||!S.imp.length)return toast('Selecione uma planilha válida antes de importar.',1);
+  if(!canEdit())return toast('Sua conta não pode importar lançamentos.',1);
+  const scope=accountRequestScope(),familyId=S.fam.id,periods=S.imp;
+  const modo=$('#imp_modo')?.value==='substituir'?'substituir':'mesclar';
+  if(modo==='substituir'&&!confirm('Substituir todos os lançamentos dos meses encontrados na planilha?'))return;
   S.importando=true;
-  document.querySelectorAll('.modal button').forEach(x=>x.disabled=true);
-  const modo=$('#imp_modo')?.value||'mesclar';let ins=0,ja=0;const pul=[];let primeiroImportado=null;
+  const preview=$('#cf-import-preview');
+  preview?.querySelectorAll('button,select').forEach(control=>control.disabled=true);
+  if(preview)preview.querySelector('[data-act="impok"]').textContent='Importando…';
+  let ins=0,ja=0;const pul=[];let primeiroImportado=null;
   try{
-    for(const m of S.imp){
+    for(const m of periods){
+      if(scope!==accountRequestScope())return;
       try{
-        const mid=await q(sb.rpc('garantir_mes',{p_fam:S.fam.id,p_ano:m.ano,p_mes:m.mes}));
+        const mid=await q(sb.rpc('garantir_mes',{p_fam:familyId,p_ano:m.ano,p_mes:m.mes}));
+        if(scope!==accountRequestScope())return;
         const itens=[];
         if(m.receita)itens.push({tipo:'receita',descricao:'Receita prevista',valor:m.receita,categoria_id:catPara('receita','Receita prevista'),status:'pendente'});
         m.itens.forEach(i=>{
@@ -4463,7 +4505,10 @@ async function importar(){
         if(!primeiroImportado)primeiroImportado={ano:m.ano,mes:m.mes};
       }catch(err){pul.push(MN[m.mes-1]+' '+m.ano+': '+(err?.message||'falha ao gravar'))}
     }
-    S.anos=await q(sb.from('anos').select('*').eq('familia_id',S.fam.id).order('ano'));
+    if(scope!==accountRequestScope())return;
+    const years=await q(sb.from('anos').select('*').eq('familia_id',familyId).order('ano'));
+    if(scope!==accountRequestScope())return;
+    S.anos=years;
     if(primeiroImportado){
       S.ano=S.anos.find(x=>x.ano===primeiroImportado.ano)||S.ano;
       await loadAno(primeiroImportado.mes);
@@ -4472,7 +4517,10 @@ async function importar(){
   }catch(err){
     console.error('Falha na importação:',err);
     toast('A importação não foi concluída: '+(err?.message||'erro inesperado'),1);
-  }finally{S.importando=false;S.imp=null;render()}
+  }finally{
+    S.importando=false;
+    if(S.imp===periods){S.imp=null;render();}
+  }
 }
 async function exportXlsx(){
   await ensureXlsx();
@@ -4487,9 +4535,10 @@ async function exportXlsx(){
     });
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),MN[m.mes-1].slice(0,3)+' '+S.ano.ano);
   });
-  XLSX.writeFile(wb,S.fam.nome+'-'+S.ano.ano+'.xlsx');
+  const result=await CFFileExport.save(XLSX.write(wb,{bookType:'xlsx',type:'base64'}),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',S.fam.nome+'-'+S.ano.ano+'.xlsx');
+  toast(result==='saved'?'Planilha salva.':result==='cancelled'?'Exportação cancelada.':'Download iniciado.');
 }
-const LOGO='<span class="cf-mark" role="img" aria-label="Copiloto Financeiro">CF</span>';
+const LOGO='<img class="cf-mark" src="tamandua-mark.svg" alt="Tamanduá do Copiloto Financeiro">';
 const MSG=[['Invalid login','E-mail ou senha incorretos.'],['Email not confirmed','Confirme seu e-mail antes de entrar: abra o e-mail que enviamos (veja também o spam).'],['already registered','Esse e-mail já tem conta. Use "Entrar".'],['rate limit','Muitos e-mails em pouco tempo. Aguarde alguns minutos e tente de novo.'],['Failed to fetch','Sem conexão com o servidor. Se você abriu o arquivo dentro do Claude ou de uma pré-visualização, baixe-o e abra no Chrome (ou publique na Netlify/Vercel).'],['Password should','A senha precisa ter pelo menos 6 caracteres.'],['invalid format','Digite um e-mail válido.']];
 function aviso(t,ok){const a=$('#aviso');if(a){a.textContent=t;a.className='aviso '+(ok?'ok':'err')}}
 function normalizarUsuario(nome){
@@ -4511,6 +4560,7 @@ async function autenticar(a){
   if(username.length<3)return aviso('Digite um usuário com pelo menos 3 caracteres.');
   if(senha.length<8)return aviso('A senha precisa ter pelo menos 8 caracteres.');
   if(a==='cadastrar'&&!$('#aceite').checked)return aviso('Para criar a conta, marque que você leu e aceita os Termos de Uso e a Política de Privacidade.');
+  if(a==='cadastrar'&&!$('#privacy-ack')?.checked)return aviso('Leia a Política de Privacidade e marque a caixa de ciência para continuar.');
   if(a==='cadastrar'&&!$('#confirmar-idade')?.checked)return aviso('O Copiloto Financeiro é destinado a pessoas com 18 anos ou mais.');
   if(a==='cadastrar'&&modoFamilia==='entrar'&&!codigoFamilia)return aviso('Digite o código de convite enviado pelo responsável da família.');
   const bt=document.querySelectorAll('.login button');bt.forEach(x=>x.disabled=true);aviso(a==='entrar'?'Entrando…':'Criando sua conta…',1);
@@ -4690,10 +4740,11 @@ async function fecharAno(){
 }
 const barraAno=()=>`<div class="bar"><button data-act="pagarano" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>Pagar tudo do ano</button><button class="sec" data-act="fecharano" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ano ${S.ano.ano}</button></div>`;
 /*PIX*/
+const BASE_PLAN_RESOURCES=Object.freeze({planilha:true,importar:true,exportar:true,visaoAnual:true,checape:true,metas:true,dividas:true,tamandua:true});
 const PLANOS={
-  pro:{nome:'Pro',valor:30.00,limite:2,produto:'copiloto_pro_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
-  max:{nome:'Max',valor:40.00,limite:6,produto:'copiloto_max_30d',recursos:{relatorios:false,patrimonioHistorico:false,simulador:false}},
-  ultra:{nome:'Ultra',valor:60.00,limite:null,produto:'copiloto_ultra_30d',recursos:{relatorios:true,patrimonioHistorico:true,simulador:true}}
+  pro:{nome:'Pro',valor:20.99,limite:2,produto:'copiloto_pro_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:false,patrimonioHistorico:false,simulador:false}},
+  max:{nome:'Max',valor:30.39,limite:6,produto:'copiloto_max_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:false,patrimonioHistorico:false,simulador:false}},
+  ultra:{nome:'Ultra',valor:50.00,limite:null,produto:'copiloto_ultra_30d',recursos:{...BASE_PLAN_RESOURCES,relatorios:true,patrimonioHistorico:true,simulador:true}}
 };
 function tamanduaPlanMarkup(tier){
   const labels={
@@ -4708,7 +4759,7 @@ function tamanduaPlanMarkup(tier){
 }
 
 const planoAtual=()=>PLANOS[S.planoEscolhido||S.fam?.plano||'pro']||PLANOS.pro;
-const planoTemRecurso=(recurso)=>Boolean(PLANOS[S.fam?.plano||'pro']?.recursos?.[recurso]);
+const planoTemRecurso=(recurso)=>S.internalTester||Boolean(PLANOS[S.fam?.plano||'pro']?.recursos?.[recurso]);
 const limiteMembros=()=>PLANOS[S.fam?.plano||'pro']?.limite??Infinity;
 function crc16(t){let c=0xFFFF;for(let i=0;i<t.length;i++){c^=t.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,'0')}
 const tlv=(id,v)=>id+String(v.length).padStart(2,'0')+v;
@@ -4720,9 +4771,12 @@ function pixPayload(p){
 /*END*/
 function qrSvg(t){if(!window.qrcode)throw new Error("QR ainda não carregado");const q=qrcode(0,'M');q.addData(t);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}
 async function renderPaywall(){
+  if(window.CopilotoReleaseMode?.internalTest){
+    $('#app').innerHTML='<main class="auth"><h1>Teste fechado</h1><p>Esta versão não realiza cobranças. Use a conta liberada para o teste interno.</p><button data-act="verstatus">Atualizar acesso</button><button class="sec" data-act="sair">Sair</button></main>';return;
+  }
   const dono=S.me?.papel==='dono';
   if(!dono){
-    $('#app').innerHTML=`<main class="pix-page"><section class="pix-card"><div class="pix-heading"><span class="pix-kicker">ACESSO DA FAMÍLIA</span><h1>Aguardando aprovação</h1><p>O responsável pela família precisa concluir a compra pela Google Play e aguardar a aprovação do administrador. Você não precisa fazer outro pagamento.</p></div><div class="pix-pending"><b>Seu acesso ainda não foi liberado.</b><p>Assim que a compra for aprovada, o aplicativo será liberado para os membros desta família.</p></div><div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div></section></main>`;
+    $('#app').innerHTML=`<main class="pix-page"><section class="pix-card"><div class="pix-heading"><span class="pix-kicker">ACESSO DA FAMÍLIA</span><h1>Aguardando confirmação da compra</h1><p>O responsável pela família precisa concluir a compra pela Google Play. Você não precisa fazer outro pagamento.</p></div><div class="pix-pending"><b>Seu acesso ainda não foi liberado.</b><p>Assim que a compra for confirmada, o aplicativo será liberado para os membros desta família.</p></div><div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div></section></main>`;
     clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);return;
   }
   if(S.planoEscolhidoFamilia!==S.fam?.id){S.planoEscolhido=PLANOS[S.fam?.plano]?S.fam.plano:'pro';S.planoEscolhidoFamilia=S.fam?.id;}
@@ -4733,7 +4787,7 @@ async function renderPaywall(){
   $('#app').innerHTML=`<main class="pix-page">
     <header class="pix-brand"><div class="pix-brand-mark">${LOGO}</div><div><strong>Copiloto Financeiro</strong><small>COMPRA E ACESSO FAMILIAR</small></div></header>
     <div class="pix-layout"><section class="pix-card">
-      <div class="pix-heading"><span class="pix-kicker">COMPRA PELA GOOGLE PLAY</span><h1>${S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date()?'Renove o acesso':'Escolha o plano da família'}</h1><p>Selecione um plano. A compra é única, concede 30 dias após a aprovação manual e não tem renovação automática.</p></div>
+      <div class="pix-heading"><span class="pix-kicker">COMPRA PELA GOOGLE PLAY</span><h1>${S.fam.acesso_ate&&new Date(S.fam.acesso_ate)<=new Date()?'Renove o acesso':'Escolha o plano da família'}</h1><p>Selecione um plano. A compra é única, concede 30 dias após a confirmação pela Google Play e não tem renovação automática.</p></div>
       <div class="pix-plan-grid cf-plan-grid-premium">
         <button type="button" class="pix-plan cf-plan-card ${S.planoEscolhido==='pro'?'selected':''}" data-act="plano" data-plano="pro" data-plan-price="30.00">
           ${tamanduaPlanMarkup('pro')}
@@ -4751,16 +4805,16 @@ async function renderPaywall(){
           ${tamanduaPlanMarkup('ultra')}
           <span class="pix-plan-head"><b>Ultra</b><small>GESTÃO AMPLIADA</small></span>
           <strong>${S.playProducts?.copiloto_ultra_30d?.formattedPrice||brl(PLANOS.ultra.valor)}</strong>
-          <span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Relatórios anuais, histórico patrimonial e simulador de objetivos.</span>
+          <span class="pix-plan-cap">Ferramentas avançadas</span><span class="pix-plan-detail">Tudo do Pro e Max, mais relatórios anuais, histórico patrimonial e simulador de objetivos.</span>
         </button>
       </div>
       <div class="pix-total"><div><span>PLANO SELECIONADO</span><b>${plano.nome}</b></div><div class="pix-total-value"><small>Compra única · 30 dias</small><strong>${precoSelecionado}</strong></div>
         <div class="pix-payment" hidden><b>Pagamento processado pela Google Play</b></div>
-        <p class="pix-checkout-disclaimer">A compra é processada pela Google Play. O preço final é exibido pela loja antes da confirmação. Após a validação do servidor, o pedido aguarda aprovação do administrador.</p>
+        <p class="pix-checkout-disclaimer">A compra é processada pela Google Play. O preço final é exibido pela loja antes da confirmação. O acesso é liberado automaticamente após a validação da compra.</p>
         <button type="button" class="pix-submit" data-act="comprarplay" data-product-id="${produtoSelecionado}" ${window.CopilotoPlayBilling?"":"disabled"}>${window.CopilotoPlayBilling?"Comprar pela Google Play":"Disponível no aplicativo Android"}</button>
       </div>
       <div class="pix-footer"><button class="sec" data-act="verstatus">Atualizar status</button><button class="sec" data-act="sair">Sair</button></div>
-    </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a aprovação do administrador.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Para comprar, utilize o aplicativo Android oficial. O navegador não inicia pagamentos Google Play.</span></div></aside></div>
+    </section><aside class="pix-aside"><div class="pix-aside-card"><b>Compra protegida</b><p>O pagamento é processado pela Google Play.</p></div><div class="pix-aside-card"><b>30 dias de acesso</b><p>O prazo começa após a confirmação da compra.</p></div><div class="pix-aside-help"><b>Está no navegador?</b><span>Para comprar, utilize o aplicativo Android oficial. O navegador não inicia pagamentos Google Play.</span></div></aside></div>
   </main>`;
   clearTimeout(S.pw);S.pw=setTimeout(()=>{if(document.querySelector('.pix-page'))boot()},20000);
 }
@@ -4773,11 +4827,15 @@ async function enviarCompraGooglePlay(detail){
   }
   if(S.playTokensProcessing.has(purchaseToken))return;
   S.playTokensProcessing.add(purchaseToken);
+  const owner=S.user?.id;
   try{
     const{data,error}=await sb.functions.invoke("google-play-purchase",{body:{productId,purchaseToken}});
-    if(error)throw new Error("Não foi possível validar a compra no servidor.");
+    if(owner!==S.user?.id)return;
+    if(error)throw new Error("Não foi possível validar a compra no servidor. Reabra o app para tentar novamente.");
     if(data?.error)throw new Error(data.error);
-    toast(data?.status==="pendente"?"Compra validada e enviada para aprovação.":"Compra já registrada. Atualizando o acesso.");
+    if(data?.status==="aprovado")toast("Compra confirmada. Seu plano está ativo.");
+    else if(data?.status==="pendente")toast("Compra antiga em revisão. Você não precisa pagar novamente.");
+    else if(data?.status==="recusado")return toast("Esta compra foi recusada. Confira o pedido na Google Play.",1);
     await boot();
   }catch(error){
     toast(error?.message||"Falha ao validar a compra. Abra novamente o aplicativo para tentar de novo.",1);
@@ -4786,9 +4844,10 @@ async function enviarCompraGooglePlay(detail){
   }
 }
 
-window.addEventListener("copiloto:play-bridge-ready",()=>{
+window.addEventListener("copiloto:play-bridge-ready",event=>{
+  window.CopilotoReleaseMode={internalTest:event.detail?.internalTest===true};
   if(window.CopilotoPlayBilling){
-    window.CopilotoPlayBilling.queryProducts();
+    if(!window.CopilotoReleaseMode?.internalTest)window.CopilotoPlayBilling.postMessage(JSON.stringify({action:"queryProducts"}));
     if(document.querySelector(".pix-page"))renderPaywall();
   }
 });
@@ -4823,7 +4882,7 @@ function viewAdmin(){
   const A=S.adm||{r:{},g:[]},r=A.r;
   const linhasPlay=(A.g||[]).map(x=>`<tr><td>${new Date(x.criado_em).toLocaleString('pt-BR')}</td><td>${esc(x.familia)}<div class="mu">${esc(x.email||'')}</div></td><td>${esc(x.plano.toUpperCase())}<div class="mu">${esc(x.produto_id)}</div></td><td>${brl(x.valor)}</td><td>${x.status==='pendente'?'<button class="chip" data-act="aprovarplay" data-id="'+x.id+'">✔ Aprovar 30 dias</button> <button class="red chip" data-act="recusarplay" data-id="'+x.id+'">Reembolsar e recusar</button>':esc(x.status)+(x.acesso_ate?' · até '+new Date(x.acesso_ate).toLocaleDateString('pt-BR'):'')}</td></tr>`).join('')||'<tr><td colspan="5" class="mu" style="padding:14px">Nenhuma compra Google Play.</td></tr>';
   return `<div class="cards"><div class="card"><small>Contas criadas</small><b>${r.contas??0}</b></div><div class="card"><small>Assinaturas ativas</small><b class="pos">${r.ativas??0}</b></div><div class="card"><small>Compras pendentes</small><b>${r.pendentes??0}</b></div><div class="card"><small>Receita total</small><b class="pos">${brl(r.receita_total)}</b></div><div class="card"><small>Últimos 30 dias</small><b>${brl(r.receita_30d)}</b></div><div class="card"><small>Vencem em 7 dias</small><b>${r.vencem_7d??0}</b></div></div>
-  <div class="card" style="margin-bottom:14px"><b>Compras Google Play</b><div class="mu" style="margin:4px 0 8px">A compra só libera 30 dias após a aprovação. A recusa solicita reembolso e revogação pela Google Play.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Compra</th><th>Família</th><th>Plano / produto</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${linhasPlay}</tbody></table></div></div>`;
+  <div class="card" style="margin-bottom:14px"><b>Compras Google Play</b><div class="mu" style="margin:4px 0 8px">Compras vinculadas à conta liberam 30 dias automaticamente. Pedidos antigos podem precisar de revisão.</div><div class="scroll"><table style="min-width:760px"><thead><tr><th>Compra</th><th>Família</th><th>Plano / produto</th><th>Valor</th><th>Ação / status</th></tr></thead><tbody>${linhasPlay}</tbody></table></div></div>`;
 }
 const catGrupos=[['fixas','Fixas / Financiamentos'],['cartoes','Cartões de Crédito'],['retirada','Retirada mensal'],['variaveis','Outras / Variáveis'],['receita','Receita']];
 function viewCats2(){
@@ -4852,6 +4911,7 @@ async function carregarConfig(){
     if(c.pix_nome)PIX.nome=c.pix_nome;if(c.pix_cidade)PIX.cidade=c.pix_cidade;LEGAL.nome=c.operador_nome||'';LEGAL.cnpj=c.operador_cnpj||'';LEGAL.email=c.contato_email||'';LEGAL.versao=c.versao_termos||'1'}catch(e){}
 }
 function legalHtml(t){
+  if(t==='privacidade')return "<main>\n<div class=\"brand\">COPILOTO FINANCEIRO · ANDROID</div><h1>Política de Privacidade</h1><p class=\"meta\">Versão 3 · Atualizada em 9 de novembro de 2026</p>\n<div class=\"panel\"><strong>Responsável informado:</strong> Gustavo, desenvolvedor do aplicativo.<br><strong>Contato de privacidade e suporte:</strong> <a href=\"mailto:gustavosena972@gmail.com\">gustavosena972@gmail.com</a>.<br>CNPJ não informado.</div>\n<p>Esta política explica o uso de dados no aplicativo Android, inclusive no Tamanduá. O serviço é destinado a pessoas com 18 anos ou mais. As funções opcionais de voz, memória e notificações possuem controles próprios; ler esta política não liga essas funções automaticamente.</p>\n<h2>O essencial antes de começar</h2><ul><li>Os lançamentos são compartilhados somente com membros autorizados da sua família. O servidor verifica a conta e o vínculo familiar.</li><li>Conversas e memória do Tamanduá ficam vinculadas ao seu usuário e à sua família. Outro usuário, inclusive da mesma família, não recebe o seu histórico pessoal por esse recurso.</li><li>Ao conversar com o Tamanduá, a pergunta e o contexto necessário à análise são processados por um fornecedor de IA. Isso é diferente de compartilhar com outra família.</li><li>Não informe senhas, códigos de recuperação, documentos ou números completos de cartão no chat.</li></ul>\n<h2>1. Quais dados usamos</h2><p>Conta e acesso: nome de usuário, nome informado, identificadores internos, credenciais protegidas e resumo criptográfico do código de recuperação. Organização financeira: lançamentos inseridos ou importados, categorias, vencimentos, pagamentos, metas, dívidas, patrimônio e membros autorizados. Compras: produto, token e dados de validação, pedido quando fornecido e status. A versão de teste interno bloqueia compras, mantendo os planos disponíveis para futura versão pública.</p><p>No Tamanduá, são tratados mensagens, respostas, histórico, preferências opcionais e contexto financeiro autorizado. Também existem registros técnicos necessários à operação, segurança e diagnóstico.</p>\n<h2>2. Por que tratamos esses dados</h2><p>Para autenticar a conta, organizar e sincronizar as finanças, aplicar permissões, responder às solicitações no chat, personalizar a experiência quando permitido, importar e exportar dados, validar acesso e compras, prevenir fraude e cumprir obrigações legais. O Tamanduá oferece análises e cenários a partir dos registros; não acessa automaticamente sua conta bancária nem executa pagamentos.</p>\n<h2>3. Bases legais e escolhas</h2><p>O tratamento necessário ao serviço observa as bases legais aplicáveis da LGPD, como execução do contrato, obrigação legal e legítimo interesse para segurança, quando cabível. Quando uma atividade depender de consentimento, a escolha deve ser específica e poderá ser revogada. O reconhecimento da leitura da política no cadastro não equivale a autorização genérica para qualquer uso futuro.</p>\n<h2>4. Famílias, conversas e memória</h2><p>As informações financeiras de uma família não devem ser disponibilizadas a outra. O controle ocorre no servidor por autenticação, vínculo familiar e regras de acesso no banco. Respostas antigas são descartadas quando a sessão muda. Os membros autorizados da mesma família compartilham os dados financeiros de acordo com suas permissões; o histórico pessoal do chat e suas preferências permanecem vinculados ao respectivo usuário.</p><p>Em Memória e lembretes, você pode desativar o uso de preferências pessoais nas respostas. Isso não apaga mensagens existentes. Para exclusão ou exercício de direitos sobre conversas e memória, utilize Conta e privacidade ou o contato informado. Não há aprendizado entre famílias ou treinamento permanente implementado pelo aplicativo.</p>\n<h2>5. Fornecedores e inteligência artificial</h2><ul><li><strong>Supabase:</strong> autenticação, banco e funções de servidor.</li><li><strong>OpenAI, via API:</strong> geração das respostas do Tamanduá. O servidor envia sua mensagem, histórico necessário e resumos financeiros autorizados, como categorias, metas e vencimentos. A solicitação usa <code>store:false</code>; isso não representa uma garantia de retenção zero em todos os sistemas do fornecedor. Podem existir registros de segurança e prevenção de abuso conforme a política e configuração do serviço.</li><li><strong>Google Play:</strong> distribuição e processamento/validação das compras quando habilitadas.</li><li><strong>Serviço de reconhecimento de voz do dispositivo:</strong> processa o ditado quando você toca no botão de voz; conforme o mecanismo instalado, pode depender de conexão e de processamento externo.</li><li><strong>CDNs da SheetJS e jsDelivr:</strong> podem entregar bibliotecas opcionais de planilha/QR e receber dados técnicos de conexão. Os arquivos principais do Android são empacotados no aplicativo.</li></ul><p>Consulte os <a href=\"https://developers.openai.com/api/docs/guides/your-data\" rel=\"noopener\" target=\"_blank\">controles de dados da API da OpenAI</a>. O Copiloto não implementa compartilhamento de conversas entre famílias nem treinamento próprio do modelo com esses registros.</p>\n<h2>6. Voz, arquivos e lembretes opcionais</h2><p>O microfone não fica ouvindo continuamente. O botão “Fala comigo” solicita a permissão de microfone do Android e inicia o ditado; a transcrição fica disponível para você revisar antes de enviar ao chat. O aplicativo não grava nem mantém um arquivo de áudio desse ditado; o mecanismo de voz possui suas próprias regras.</p><p>Arquivos são escolhidos e salvos pelo seletor do Android. Confira o conteúdo antes de importar; um arquivo exportado fica no destino escolhido por você e passa a exigir seus cuidados de proteção.</p><p>Os lembretes dependem de ativação e permissão de notificações. O aparelho guarda somente datas, estado da escolha e um hash do escopo de conta/família para agendar até sete dias. A notificação não exibe valores, nomes de contas ou mensagens do chat. Sair ou mudar de identidade cancela o agendamento anterior. O Android pode atrasar ou limitar a entrega. Não há busca contínua de informações pessoais após sair do aplicativo.</p>\n<h2>7. Cookies e armazenamento local</h2><p>O aplicativo Android não utiliza cookies de publicidade ou análise; o WebView recusa cookies, inclusive de terceiros. A sessão usa tokens do Supabase em <code>localStorage</code>. Preferências de interface e o estado de conclusão da apresentação também podem ficar no dispositivo. Ao sair, a sessão local é encerrada e o conteúdo privado anterior é retirado da interface. Limpar os dados ou desinstalar o aplicativo remove seus dados locais, mas não exclui automaticamente a conta no servidor.</p>\n<h2>8. Localização, transferência e retenção</h2><p>O banco do projeto está configurado em São Paulo. Fornecedores podem processar dados em outros países, sujeitos a suas condições e às salvaguardas aplicáveis. As informações são mantidas enquanto necessárias à conta e à prestação do serviço; obrigações legais, segurança, disputas e cópias de segurança podem exigir retenção limitada adicional. Dados compartilhados da família podem permanecer para os demais membros autorizados. Não prometemos exclusão instantânea de todas as cópias ou registros dos fornecedores.</p>\n<h2>9. Seus direitos e exclusão</h2><p>Você pode solicitar confirmação de tratamento, acesso, correção, informações sobre compartilhamento, portabilidade quando aplicável, oposição e exclusão nas hipóteses da LGPD. Pedidos relacionados a dados pessoais podem ser enviados sem custo ao contato informado. A identidade do solicitante poderá precisar ser verificada, sem pedir sua senha ou código de recuperação.</p><p>No aplicativo, use Família e ajustes → Conta e privacidade para exportar dados ou iniciar a exclusão. Também existe a <a href=\"excluir-conta.html\">página de solicitação de exclusão</a>. Se a resposta não resolver sua solicitação, consulte os <a href=\"https://www.gov.br/anpd/pt-br/assuntos/titular-de-dados-1/direito-dos-titulares\" target=\"_blank\" rel=\"noopener\">direitos e canais da ANPD</a>.</p>\n<h2>10. Segurança e atualizações</h2><p>Usamos autenticação, conexão HTTPS e restrições de acesso no servidor. Nenhum sistema oferece risco zero. Incidentes serão avaliados e tratados conforme as obrigações legais de comunicação. Nunca envie sua senha ou código de recuperação ao suporte. Mudanças relevantes desta política serão comunicadas pelos canais do serviço; novas permissões opcionais exigem sua escolha.</p>\n<nav class=\"nav\"><a href=\"mobile.html\">Voltar ao aplicativo</a><a href=\"termos.html\">Termos de Uso</a><a href=\"excluir-conta.html\">Exclusão de conta</a></nav>\n</main>";
   const op=LEGAL.nome||'o responsável pelo aplicativo';
   const ct=LEGAL.email||'o contato disponível no próprio aplicativo';
   const cj=LEGAL.cnpj?', CNPJ '+esc(LEGAL.cnpj):'';
@@ -4871,7 +4931,7 @@ function legalHtml(t){
    ['Dados tratados','Conta: nome de usuário, nome informado, identificador interno e credenciais protegidas. Recuperação: resumo criptográfico do código secreto. Dados financeiros inseridos ou importados: receitas, despesas, categorias, metas, dívidas, patrimônio, rendas e informações dos membros da família. Compras Google Play: produto, token de compra para validação, resumo criptográfico do token, pedido quando fornecido, valor de referência, família vinculada e status. Também podem existir registros técnicos e de segurança.'],
    ['Finalidades','Usamos os dados para criar e manter a conta, fornecer os recursos financeiros e familiares, sincronizar dados entre membros autorizados, exportar ou excluir informações, validar pagamentos, prevenir fraude, proteger o serviço e cumprir obrigações legais.'],
    ['Bases e princípios','O tratamento ocorre conforme as bases legais aplicáveis da LGPD, incluindo execução de contrato, cumprimento de obrigação legal ou regulatória e legítimo interesse avaliado para segurança e prevenção de fraude. Quando o consentimento for a base adequada, ele poderá ser revogado nos termos da lei.'],
-   ['Compartilhamento e fornecedores','Supabase fornece autenticação, banco de dados e funções de servidor. Google Play processa compras e fornece dados para validação. GitHub Pages entrega os arquivos do aplicativo. jsDelivr e a CDN da SheetJS entregam bibliotecas utilizadas pelo navegador. Esses fornecedores podem tratar dados técnicos de conexão, como IP, navegador e registros de acesso. Os registros financeiros são enviados ao Supabase, não às CDNs. O recurso de IA está desativado; a função de servidor antiga responde que o recurso foi descontinuado e não encaminha dados à OpenAI.'],
+   ['Compartilhamento e fornecedores','Supabase fornece autenticação, banco de dados e funções de servidor. Google Play processa compras e fornece dados para validação. GitHub Pages entrega os arquivos do aplicativo. jsDelivr e a CDN da SheetJS entregam bibliotecas utilizadas pelo navegador. Esses fornecedores podem tratar dados técnicos de conexão, como IP, navegador e registros de acesso. Os registros financeiros são enviados ao Supabase, não às CDNs. O Tamanduá usa a API da OpenAI com mensagem, histórico necessário e contexto financeiro autorizado. Veja a política Android versão 3 para os controles de dados.'],
    ['Localização e transferências','O banco de dados Supabase está configurado na região de São Paulo, Brasil. Fornecedores de infraestrutura, distribuição de bibliotecas, suporte ou segurança podem tratar dados técnicos em outros países, conforme suas políticas, contratos e salvaguardas aplicáveis.'],
    ['Retenção','Os dados são mantidos enquanto a conta e a relação de serviço existirem e pelo período necessário para obrigações legais, segurança e resolução de disputas. Dados compartilhados da família podem permanecer para atender aos demais membros. Cópias de segurança e registros legalmente necessários podem permanecer por período limitado, com acesso restrito.'],
    ['Direitos e exportação','Você pode solicitar confirmação de tratamento, acesso, correção, informação sobre compartilhamento, portabilidade quando aplicável, oposição e eliminação nos termos da LGPD. O aplicativo oferece exportação dos dados e exclusão da conta. Para pedidos externos, use o canal indicado na página pública de exclusão.'],
@@ -4882,7 +4942,12 @@ function legalHtml(t){
   ];
   return '<h3 style="margin:0">'+(t==='termos'?'Termos de Uso':'Política de Privacidade')+'</h3><div class="mu">Versão '+esc(LEGAL.versao)+'</div>'+T.map((x,i)=>'<h4>'+(i+1)+'. '+x[0]+'</h4><p>'+x[1]+'</p>').join('')+links;
 }
-function showLegal(t){const d=document.getElementById('legalov');if(d)d.remove();const o=document.createElement('div');o.id='legalov';o.className='modal';o.innerHTML='<div class="card box legal">'+legalHtml(t)+'<div class="row" style="margin-top:14px"><button data-act="fecharlegal">Fechar</button></div></div>';document.body.appendChild(o)}
+function showLegal(t){
+ const previous=document.getElementById('legalov');if(previous)previous.remove();
+ const dialog=document.createElement('dialog');dialog.id='legalov';dialog.className='cf-legal-dialog';dialog.setAttribute('aria-label',t==='privacidade'?'Política de Privacidade':'Termos de Uso');dialog.tabIndex=-1;
+ dialog.innerHTML='<form method="dialog" class="cf-legal-header"><strong>'+(t==='privacidade'?'Seus dados, suas escolhas':'Termos de Uso')+'</strong><button type="submit">Fechar documento</button></form><div class="cf-legal-copy">'+legalHtml(t)+'</div>';
+ document.body.append(dialog);dialog.addEventListener('close',()=>dialog.remove());dialog.showModal();dialog.focus({preventScroll:true});
+}
 function viewConta(){
   const open=!!S.familyAreas?.conta;
   return '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('conta','Conta e privacidade','Ações da conta, documentos legais e exportação dos seus dados.','Gerenciar conta')+
@@ -4898,10 +4963,10 @@ function viewConfig(){
   <div class="grid2">${f('operador_nome','Nome ou razão social do responsável','')}${f('operador_cnpj','CNPJ (se tiver)','')}${f('contato_email','E-mail de contato e privacidade','')}</div>
   <div class="row" style="margin-top:10px"><button data-act="salvarcfg">Salvar configurações</button></div></div>`;
 }
-function csv(){
-  const rows=[['Vencimento','Descrição','Tipo','Categoria','Valor','Status']].concat(S.lanc.map(l=>[l.data_vencimento||'',l.descricao,l.tipo,(S.cats.find(c=>c.id===l.categoria_id)||{}).nome||'',String(l.valor).replace('.',','),l.status]));
-  const t='\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(';')).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download=`${S.fam.nome}-${S.ano.ano}-${String(S.mes.mes).padStart(2,'0')}.csv`;a.click();
+async function csv(){
+ const rows=[['Vencimento','Descrição','Tipo','Categoria','Valor','Status']].concat(S.lanc.map(l=>[l.data_vencimento||'',l.descricao,l.tipo,(S.cats.find(c=>c.id===l.categoria_id)||{}).nome||'',String(l.valor).replace('.',','),l.status]));
+ const result=await CFFileExport.save(CFFileExport.encode(CFFileExport.csv(rows)),'text/csv',S.fam.nome+'-'+S.ano.ano+'-'+String(S.mes.mes).padStart(2,'0')+'.csv');
+ toast(result==='saved'?'CSV salvo.':result==='cancelled'?'Exportação cancelada.':'Download iniciado.');
 }
 function viewChecape(ed){
   const cards=S.sug.map(s=>{
@@ -4909,14 +4974,14 @@ function viewChecape(ed){
     const comparativo=base.gasto_atual!=null&&base.media_historica!=null
       ?`<div class="mu" style="margin-top:7px;font-size:12px">Gasto neste mês: <b>${brl(base.gasto_atual)}</b> · Média histórica: <b>${brl(base.media_historica)}</b> · ${Number(base.meses_comparados)||0} mês(es) comparado(s)</div>`
       :'';
-    return `<div class="sug ${s.tipo}"><div><b>${esc(s.titulo)}</b> ${s.economia_estimada?`<span class="pos">· potencial de economia ${brl(s.economia_estimada)}</span>`:''}
+    return `<article class="sug cf-review-item ${esc(s.tipo)}"><div><h3>${esc(s.titulo)}</h3> ${s.economia_estimada?`<span class="pos">· potencial de economia ${brl(s.economia_estimada)}</span>`:''}
       <div class="mu">${esc(s.explicacao)}</div>${comparativo}</div>
-      <div class="row" style="margin:0">${s.status==='nova'&&ed?`<button data-act="aceitar" data-id="${s.id}">Aceitar</button><button class="sec" data-act="ignorar" data-id="${s.id}">Ignorar</button>`:`<span class="mu">${s.status}</span>`}</div></div>`;
+      <div class="row" style="margin:0">${s.status==='nova'&&ed?`<button data-act="aceitar" data-id="${s.id}">Aceitar</button><button class="sec" data-act="ignorar" data-id="${s.id}">Ignorar</button>`:`<span class="mu">${esc(s.status)}</span>`}</div></article>`;
   }).join('');
-  return `<div class="bar"><button data-act="checape" ${ed?'':'disabled'}>Gerar checape de ${MN[S.mes.mes-1]}</button><span class="mu">A análise considera o mês atual e o histórico disponível.</span></div>
-  ${cards||'<div class="mu">Lance as despesas e receitas do mês e gere o checape para receber uma análise. Quanto mais meses registrados, melhores serão as comparações.</div>'}`;
+  return `<section class="cf-review-intro"><button class="primary" data-act="checape" ${ed?'':'disabled'}>Gerar checape de ${MN[S.mes.mes-1]}</button><span class="mu">A análise considera o mês atual e o histórico disponível.</span></section>
+  <section class="cf-review-results" aria-label="Sugestões"><h2>Sugestões do mês</h2>${cards||'<div class="mu">Lance as despesas e receitas do mês e gere o checape para receber uma análise. Quanto mais meses registrados, melhores serão as comparações.</div>'}</section>`;
 }
-function familyAreaHeader(key,title,desc,label){
+function familyAreaHeader(key,title,desc,label='Gerenciar área'){
   const open=!!S.familyAreas?.[key];
   return '<div class="cf-family-area-header"><div><span class="cf-family-area-kicker">ÁREA</span><h2>'+title+'</h2><p>'+desc+'</p></div><div class="cf-family-area-actions"><button type="button" class="sec chip" data-act="'+(key==='membros'?'editfamily':key==='convites'?'editinvites':key==='categorias'?'editcategories':'editaccount')+'" aria-expanded="'+(open?'true':'false')+'">'+label+'</button></div></div>';
 }
@@ -4968,7 +5033,7 @@ document.addEventListener('click',async e=>{
   else if(a==='view'){
     S.mobileMore=false;S.mobileAddOpen=false;
     const destino=b.dataset.v;
-    if(destino==='admin'){S.view='admin';await carregarAdmin();}
+    if(destino==='admin'){if(!S.admin)return toast('Acesso administrativo não autorizado.',1);S.view='admin';await carregarAdmin();}
     else {if(S.view==='admin')S.adm=null;S.view=destino;if(S.view==='plan')await carregarPlan();else render();}
   }
   else if(a==='mes'){S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes(true,false)}
@@ -5057,10 +5122,16 @@ document.addEventListener('click',async e=>{
     toast('Aviso enviado! Assim que o Pix for conferido, o acesso é liberado.');await boot()}
   else if(a==='copiarpix'){try{await navigator.clipboard.writeText(S.pixcode);toast('Código Pix copiado')}catch(e){toast('Não consegui copiar: selecione o código acima e copie.',1)}}
   else if(a==='comprarplay'){
+     if(S.internalTester||window.CopilotoReleaseMode?.internalTest)return toast('Pagamentos desativados nesta versão de teste.');
      const productId=b.dataset.productId;
      if(!window.CopilotoPlayBilling)return toast('Abra o aplicativo Android para comprar pela Google Play.',1);
      if(!['copiloto_pro_30d','copiloto_max_30d','copiloto_ultra_30d'].includes(productId))return toast('Produto inválido. Atualize o aplicativo.',1);
-     window.CopilotoPlayBilling.purchase(productId);
+     const scope=accountRequestScope();
+     const identity=new TextEncoder().encode('copiloto-play-v1:'+S.user.id+':'+S.fam.id);
+     const digest=await crypto.subtle.digest('SHA-256',identity);
+     if(scope!==accountRequestScope())return;
+     const accountId=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+     window.CopilotoPlayBilling.postMessage(JSON.stringify({action:'purchase',productId,accountId}));
      toast('Abrindo a tela segura de pagamento da Google Play…');
    }
    else if(a==='verstatus')await boot();
@@ -5083,7 +5154,7 @@ document.addEventListener('click',async e=>{
     S.cats=await q(sb.from('categorias').select('*').eq('familia_id',S.fam.id).order('nome'));await loadMes()}
   else if(a==='legal')showLegal(b.dataset.t);
   else if(a==='fecharlegal'){const d=document.getElementById('legalov');if(d)d.remove()}
-  else if(a==='expjson'){const d=await q(sb.rpc('exportar_tudo',{p_familia:S.fam.id}));const l=document.createElement('a');l.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));l.download='meus-dados-'+S.fam.nome.replace(/\s+/g,'-')+'.json';l.click();toast('Arquivo com todos os seus dados baixado')}
+  else if(a==='expjson'){const d=await q(sb.rpc('exportar_tudo',{p_familia:S.fam.id}));const result=await CFFileExport.save(CFFileExport.encode(JSON.stringify(d,null,2)),'application/json','meus-dados-'+S.fam.nome.replace(/\s+/g,'-')+'.json');toast(result==='saved'?'Arquivo salvo.':result==='cancelled'?'Exportação cancelada.':'Download iniciado.')}
   else if(a==='delconta'){const t=prompt('Isto apaga a sua conta e os dados da sua família, para sempre. Para confirmar, digite EXCLUIR:');if(t!=='EXCLUIR')return;await q(sb.rpc('excluir_minha_conta'));try{await sb.auth.signOut()}catch(e){}S.user=null;toast('Conta excluída.');boot()}
   else if(a==='salvarcfg'){const k=['pix_chave','pix_dias','pix_nome','pix_cidade','operador_nome','operador_cnpj','contato_email'],o={};k.forEach(x=>{const v=$('#cfg_'+x).value.trim();if(v!==''||x.startsWith('operador')||x==='contato_email')o[x]=v});
     await q(sb.rpc('admin_salvar_config',{p_itens:o}));await carregarConfig();toast('Configurações salvas');render()}
@@ -5094,10 +5165,10 @@ document.addEventListener('click',async e=>{
   else if(a==='desfazer'){await q(sb.rpc('desfazer',{p_hist:Number(b.dataset.id)}));toast('Alteração desfeita');S.hist=null;await loadMes()}
   else if(a==='imp')$('#arq').click();
   else if(a==='impok')await importar();
-  else if(a==='impno'){S.imp=null;render()}
+  else if(a==='impno'&&!S.importando){S.imp=null;render()}
   else if(a==='xlsx')await exportXlsx();
   else if(a==='irmes'){S.view='planilha';S.mes=S.meses.find(m=>m.mes==b.dataset.m);await loadMes()}
-  else if(a==='csv')csv();
+  else if(a==='csv')await csv();
   else if(a==='reset'){const area=$('#recuperacao');area.hidden=!area.hidden;if(!area.hidden){$('#codigo-recuperacao').focus();aviso('Informe seu usuário, o código de recuperação e a nova senha. Não é necessário e-mail.')}}
   else if(a==='recuperar')await recuperarConta();
   else if(a==='copiarcodigo'){if(!S.codigoRecuperacao)return;try{await navigator.clipboard.writeText(S.codigoRecuperacao);toast('Código copiado. Guarde-o em local seguro.')}catch(e){const i=$('#codigo-recuperacao-exibido');if(i){i.select();toast('Selecione e copie o código manualmente.')}}}
@@ -5114,6 +5185,11 @@ document.addEventListener('change',async e=>{
     const plano=document.getElementById('landing-selected-plan');
     if(campo)campo.hidden=!entrar;
     if(plano)plano.hidden=entrar||!S.planoPreCadastro;
+    return;
+  }
+  if(t.id==='messel'){
+    const month=S.meses.find(m=>m.id===t.value);
+    if(month){S.mes=month;await loadMes(true,false);}
     return;
   }
   if(t.id==='anosel'){S.ano=S.anos.find(a=>a.id===t.value);await loadAno();return}
@@ -5170,27 +5246,11 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
     try{if(navigator.vibrate)navigator.vibrate(8)}catch(_){}
   }
   function mobileIsPhone(){return window.matchMedia&&window.matchMedia('(max-width:760px)').matches}
-  function mobileCommandBar(){
-    if(!mobileIsPhone())return;
-    const main=document.querySelector('.app-main');
-    const period=main&&main.querySelector('.period-toolbar');
-    if(!main||!period||main.querySelector('.mobile-command-bar'))return;
-    const bar=document.createElement('section');
-    bar.className='mobile-command-bar';
-    bar.setAttribute('aria-label','Ações rápidas');
-    bar.innerHTML=
-      '<button type="button" class="primary mobile-command-add" data-act="mobileadd" aria-label="Novo lançamento">＋ Adicionar</button>'+
-      '<button type="button" data-act="imp" aria-label="Importar planilha">↑ Importar</button>'+
-      '<button type="button" class="mobile-command-more" data-act="mobilemore" aria-label="Mais ações">⋯ Mais</button>'+
-      '<div class="mobile-connection-status" aria-live="polite"></div>';
-    period.before(bar);
-    mobileConnectionStatus();
-  }
   function mobileConnectionStatus(){
     document.querySelectorAll('.mobile-connection-status').forEach(el=>{
       const online=navigator.onLine!==false;
-      el.classList.toggle('offline',!online);
-      el.textContent=online?'Conectado · sincronização disponível':'Sem conexão · verifique a internet';
+      el.hidden=online;
+      el.textContent=online?'':'Sem conexão · verifique a internet';
     });
   }
   function bindMobileTransactionSearch(){
@@ -5246,7 +5306,6 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
   }
   function enhanceMobileWorkspace(){
     if(!mobileIsPhone())return;
-    mobileCommandBar();
     bindMobileTransactionSearch();
     mobileConnectionStatus();
     bindPremiumInteractions();
@@ -5264,35 +5323,26 @@ document.addEventListener('keydown',e=>{if(e.target.type==='number'&&(e.key==='A
 </script>
 <script>
 function mobileTamanduaProactiveInsights(){
-  const lanc=Array.isArray(S.lanc)?S.lanc:[];
+  const d=monthlyFinancialSnapshot(),lanc=d.rows;
   const resumo=Array.isArray(S.resumo)?S.resumo:[];
-  const hoje=new Date();
-  const hojeISO=hoje.toISOString().slice(0,10);
-  const limite7=new Date(hoje.getTime()+7*86400000).toISOString().slice(0,10);
-  const unpaid=lanc.filter(x=>x.tipo==='despesa'&&x.status!=='pago');
-  const overdue=unpaid.filter(x=>x.data_vencimento&&x.data_vencimento<hojeISO);
-  const upcoming=unpaid.filter(x=>x.data_vencimento&&x.data_vencimento>=hojeISO&&x.data_vencimento<=limite7);
-  const receitas=lanc.filter(x=>x.tipo==='receita').reduce((a,x)=>a+Number(x.valor||0),0);
-  const despesas=lanc.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+Number(x.valor||0),0);
-  const saldo=receitas-despesas;
+  const hojeISO=d.today,seven=new Date(hojeISO+'T12:00:00Z');
+  seven.setUTCDate(seven.getUTCDate()+7);
+  const limite7=seven.toISOString().slice(0,10);
+  const overdue=d.overdue;
+  const upcoming=d.due.filter(x=>x.due>=hojeISO&&x.due<=limite7);
+  const receitas=d.income/100,despesas=d.expense/100,saldo=d.competence/100;
   const insights=[];
 
   if(overdue.length){
-    const total=overdue.reduce((a,x)=>a+Number(x.valor||0),0);
+    const total=overdue.reduce((a,x)=>a+x.cents,0)/100;
     insights.push({key:'atrasadas-'+overdue.length+'-'+Math.round(total*100),title:'Há contas atrasadas para olhar agora.',text:overdue.length+' conta(s) já passaram do vencimento'+(total?' e somam '+brl(total)+'.':'')+' Vale resolver isso antes de assumir novos gastos.',action:'Ver lançamentos',view:'planilha'});
   }
   if(upcoming.length){
-    const total=upcoming.reduce((a,x)=>a+Number(x.valor||0),0);
+    const total=upcoming.reduce((a,x)=>a+x.cents,0)/100;
     insights.push({key:'proximos-'+upcoming.length+'-'+Math.round(total*100),title:'Seu próximo cuidado é com os vencimentos.',text:upcoming.length+' conta(s) vencem nos próximos 7 dias'+(total?' e somam '+brl(total)+'.':'')+' Confira primeiro o que precisa sair do caixa.',action:'Conferir contas',view:'planilha'});
   }
 
-  const porCategoria={};
-  lanc.filter(x=>x.tipo==='despesa').forEach(x=>{
-    const cat=S.cats?.find(c=>c.id===x.categoria_id);
-    const nome=cat?.nome||'Sem categoria';
-    porCategoria[nome]=(porCategoria[nome]||0)+Number(x.valor||0);
-  });
-  const maiorCategoria=Object.entries(porCategoria).sort((a,b)=>b[1]-a[1])[0];
+  const maiorCategoria=d.categories.length?[d.categories[0][0],d.categories[0][1]/100]:null;
   if(maiorCategoria&&despesas>0){
     const pct=(maiorCategoria[1]/despesas)*100;
     if(pct>=35)insights.push({key:'categoria-'+maiorCategoria[0]+'-'+Math.round(maiorCategoria[1]*100),title:'Um gasto está concentrando boa parte das saídas.',text:'A categoria '+maiorCategoria[0]+' representa cerca de '+pct.toFixed(0)+'% das despesas deste mês. Vale revisar se existe algum gasto que dá para reduzir, trocar ou planejar melhor.',action:'Abrir checape',view:'checape'});
@@ -5309,8 +5359,8 @@ function mobileTamanduaProactiveInsights(){
     else if(variacao<=-20)insights.push({key:'queda-'+atual+'-'+Math.round(atualDesp*100),title:'Você reduziu suas despesas este mês.',text:'As saídas estão cerca de '+Math.abs(variacao).toFixed(0)+'% abaixo do mês anterior. Se isso fizer sentido para sua rotina, pode ser uma boa oportunidade para reforçar uma meta.',action:'Ir para planejamento',view:'plan'});
   }
 
-  if(saldo<0)insights.push({key:'saldo-negativo-'+Math.round(Math.abs(saldo)*100),title:'O mês está gastando mais do que recebeu.',text:'Até agora, as despesas superam as receitas em '+brl(Math.abs(saldo))+'. O melhor próximo passo é entender quais saídas podem ser ajustadas.',action:'Revisar despesas',view:'planilha'});
-  else if(saldo>0&&despesas>0)insights.push({key:'saldo-positivo-'+Math.round(saldo*100),title:'Existe saldo positivo neste mês.',text:'Você está com '+brl(saldo)+' de diferença entre receitas e despesas. Se esse valor estiver disponível de verdade, considere direcionar uma parte para uma meta ou reserva.',action:'Ver planejamento',view:'plan'});
+  if(saldo<0)insights.push({key:'saldo-negativo-'+Math.round(Math.abs(saldo)*100),title:'As despesas registradas superam as receitas.',text:'Até agora, as despesas superam as receitas em '+brl(Math.abs(saldo))+'. O melhor próximo passo é entender quais saídas podem ser ajustadas.',action:'Revisar despesas',view:'planilha'});
+  else if(saldo>0&&despesas>0)insights.push({key:'saldo-positivo-'+Math.round(saldo*100),title:'O resultado registrado do mês está positivo.',text:'Você está com '+brl(saldo)+' de diferença entre receitas e despesas. Se esse valor estiver disponível de verdade, considere direcionar uma parte para uma meta ou reserva.',action:'Ver planejamento',view:'plan'});
 
   if(!insights.length&&lanc.length)insights.push({key:'rotina-'+S.mes?.id,title:'Está tudo relativamente tranquilo por aqui.',text:'Não encontrei um alerta prioritário agora. Minha sugestão é manter os lançamentos atualizados e revisar o checape antes de fechar o mês.',action:'Abrir checape',view:'checape'});
   if(!lanc.length)insights.push({key:'sem-dados-'+S.mes?.id,title:'Vamos começar pelo que realmente aconteceu.',text:'Ainda não há lançamentos neste mês. Registre suas primeiras receitas e despesas e eu passo a encontrar padrões, alertas e oportunidades para você.',action:'Adicionar lançamento',view:'planilha'});
@@ -5381,4 +5431,5 @@ function mountMobileCompanion(){
 }
 </script>
 
-</html>
+<script src="structured-import.js"></script><script src="tamandua-task-core.js"></script><script src="tamandua-actions.js"></script><script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script><script src="immersive-finance.js"></script><script src="finance-particles.js"></script></html>
+

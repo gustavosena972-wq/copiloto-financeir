@@ -4,6 +4,7 @@ const {readFileSync}=require('node:fs');
 const vm=require('node:vm');
 const source=readFileSync(require('node:path').join(__dirname,'../android-app/app/src/main/assets/mobile.html'),'utf8');
 const brl=n=>Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+test('family area actions never expose an undefined label',()=>{const start=source.indexOf('function familyAreaHeader('),end=source.indexOf('function viewFamilia()',start);const header=vm.runInNewContext(source.slice(start,end)+';familyAreaHeader',{S:{familyAreas:{}}});const result=header('categorias','Categorias e grupos','Organize suas categorias');assert.doesNotMatch(result,/undefined/);assert.match(result,/Gerenciar área/);assert.match(result,/data-act="editcategories"/);});
 function render(name,next,S){
  const body=source.slice(source.indexOf('function '+name+'('),source.indexOf('function '+next+'('));
  return vm.runInNewContext(body+'; '+name+'()',{
@@ -20,4 +21,44 @@ test('annual mobile view renders category target for each populated month',()=>{
  assert.match(result,/Novembro/);
  assert.match(result,/mobile-year-item/);
  assert.match(result,/100,00/);
+});
+const CFMoney=require('../android-app/app/src/main/assets/finance-core.js');
+function monthlyFunction(name,next,state){
+ const body=source.slice(source.indexOf('function '+name+'('),source.indexOf('function '+next+'('));
+ return vm.runInNewContext(body+'; '+name+'()',{
+  S:state, CFMoney, brl, esc:v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])), canEdit:()=>true,mesAberto:()=>true,
+  monthlyFinancialSnapshot:()=>CFMoney.summarize(state.lanc,'2026-11-08')
+ });
+}
+test('monthly briefing distinguishes recorded result, cash flow and outstanding bills',()=>{
+ const html=monthlyFunction('mobileSmartContext','viewPlanilha',{lanc:[
+  {tipo:'receita',status:'pago',valor:'1000.00'},
+  {tipo:'despesa',status:'pago',valor:'100.10'},
+  {tipo:'despesa',status:'pendente',valor:'200.20'}
+ ]});
+ for(const value of ['1000.00','300.30','699.70','899.90','200.20'])assert.ok(html.includes(brl(value)));
+ assert.match(html,/Não representam o saldo da sua conta bancária/);
+});
+test('attention rules ignore invalid dates and count only unpaid valid bills',()=>{
+ const rows=[{tipo:'despesa',status:'pendente',valor:'100.10',data_vencimento:'2026-11-07'},
+ {tipo:'despesa',status:'pendente',valor:'200.20',data_vencimento:'2026-11-15'},
+ {tipo:'despesa',status:'pago',valor:'400.00',data_vencimento:'2026-11-01'},
+ {tipo:'despesa',status:'pendente',valor:'50.00',data_vencimento:'2026-02-30'}];
+ const result=monthlyFunction('mobileTamanduaProactiveInsights','mobileTamanduaProactiveCard',{lanc:rows,resumo:[]});
+ assert.match(result[0].text,/1 conta/);assert.ok(result[0].text.includes(brl(100.10)));
+ assert.match(result[1].text,/1 conta/);assert.ok(result[1].text.includes(brl(200.20)));
+});
+test('empty monthly briefing requests real records without inventing a forecast',()=>{
+ const html=monthlyFunction('mobileSmartContext','viewPlanilha',{lanc:[]});
+ assert.match(html,/0 movimentações/);assert.match(html,/Vamos começar pelo primeiro lançamento/);
+ assert.doesNotMatch(html,/safeToSpend|smartHealthScore/);
+});
+
+test('an import preview separates the scrollable table from the confirmation controls',()=>{
+ const periods=Array.from({length:24},(_,i)=>({mes:i%12+1,ano:2025+Math.floor(i/12),receita:0,itens:[]}));
+ const declaration=source.slice(source.indexOf('function viewImport()'),source.indexOf('async function importar()'));
+ const html=vm.runInNewContext(declaration+'; viewImport()',{S:{imp:periods},brl,MN:Array(12).fill('Mês')});
+ assert.match(html,/<dialog[^>]+aria-labelledby="cf-import-title"/);
+ assert.equal((html.match(/<tr>/g)||[]).length,25);
+ assert.match(html,/<\/table>\s*<\/div>\s*<footer>[\s\S]*id="imp_modo"[\s\S]*data-act="impok"[^>]*>Importar planilha/);
 });

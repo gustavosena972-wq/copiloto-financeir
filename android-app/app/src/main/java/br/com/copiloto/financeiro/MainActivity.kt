@@ -8,8 +8,14 @@ import android.speech.tts.TextToSpeech
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.graphics.Color
+import android.widget.FrameLayout
 import android.webkit.WebView
 import android.view.WindowManager
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
@@ -31,7 +37,7 @@ import java.util.Locale
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     companion object {
-        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40"
+        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.50"
         private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
         const val ACCEPT_WEBVIEW_COOKIES = false
         const val ACCEPT_THIRD_PARTY_COOKIES = false
@@ -40,6 +46,9 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     }
 
     private lateinit var webView: WebView
+    private lateinit var tamanduaAlerts: TamanduaAlerts
+    private lateinit var voiceInput: VoiceInput
+    private lateinit var spreadsheetFiles: SpreadsheetFiles
     private lateinit var billingClient: BillingClient
     private var nativeBillingBridgeAvailable = false
     private var textToSpeech: TextToSpeech? = null
@@ -100,7 +109,16 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             setAcceptThirdPartyCookies(webView, ACCEPT_THIRD_PARTY_COOKIES)
         }
 
-        webView.webChromeClient = WebChromeClient()
+        voiceInput = VoiceInput(this) { event, payload ->
+            if (isTrustedAppAssetUrl(webView.url.orEmpty())) dispatchToWeb(event, payload)
+        }
+        spreadsheetFiles = SpreadsheetFiles(this, webView)
+        webView.webChromeClient = spreadsheetFiles.chromeClient
+        spreadsheetFiles.register()
+        tamanduaAlerts = TamanduaAlerts(this, webView) { event, payload ->
+            if (isTrustedAppAssetUrl(webView.url.orEmpty())) dispatchToWeb(event, payload)
+        }
+        tamanduaAlerts.register()
         registerBillingBridge()
         initializeNativeVoice()
         registerVoiceBridge()
@@ -145,13 +163,30 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
                     injectTamanduaEnhancements()
                     dispatchToWeb(
                         "copiloto:play-bridge-ready",
-                        JSONObject().put("ready", nativeBillingBridgeAvailable)
+                        JSONObject().put("ready", nativeBillingBridgeAvailable).put("internalTest", BuildConfig.INTERNAL_TESTING)
                     )
                 }
             }
         }
 
-        setContentView(webView)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val content = FrameLayout(this).apply {
+            setBackgroundColor(Color.rgb(17, 16, 25))
+            addView(webView, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+        }
+        val protectedInsets = WindowInsetsCompat.Type.systemBars() or
+            WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime()
+        ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
+            val safe = insets.getInsets(protectedInsets)
+            view.setPadding(safe.left, safe.top, safe.right, safe.bottom)
+            WindowInsetsCompat.Builder(insets).setInsets(protectedInsets, Insets.NONE).build()
+        }
+        setContentView(content)
+        WindowCompat.getInsetsController(window, content).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
+        ViewCompat.requestApplyInsets(content)
         webView.loadUrl(APP_ENTRY_URL)
         connectBilling()
     }
@@ -161,8 +196,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             assets.open("tamandua-enhancements.js").bufferedReader().use { it.readText() }
         }.getOrNull() ?: return
 
-        val quotedScript = JSONObject.quote(script)
-        webView.evaluateJavascript("eval($quotedScript)", null)
+        webView.evaluateJavascript(script, null)
     }
 
     private fun initializeNativeVoice() {
@@ -204,6 +238,10 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     private fun handleVoiceBridgeMessage(rawMessage: String) {
         val payload = runCatching { JSONObject(rawMessage) }.getOrNull() ?: return
         when (payload.optString("action")) {
+            "recognize" -> runOnUiThread {
+                val locale = resolveVoiceLocale(payload.optString("language")) ?: "pt-BR"
+                voiceInput.start(payload.optString("requestId"), locale)
+            }
             "setLanguage" -> {
                 val locale = resolveVoiceLocale(payload.optString("language")) ?: return
                 runOnUiThread {
@@ -243,6 +281,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
 
             "stop" -> runOnUiThread {
                 textToSpeech?.stop()
+                if (::voiceInput.isInitialized) voiceInput.cancel()
             }
         }
     }
@@ -275,11 +314,11 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         val action = payload.optString("action")
         val productId = payload.optString("productId").takeIf { it.isNotBlank() }
 
-        if (!isAllowedBillingCommand(action, productId)) {
+        if (!isAllowedBillingCommandForMode(action, productId, BuildConfig.INTERNAL_TESTING)) {
             if (action == "purchase") {
                 dispatchToWeb(
                     "copiloto:play-error",
-                    JSONObject().put("message", "Produto não reconhecido.")
+                    JSONObject().put("message", if (BuildConfig.INTERNAL_TESTING) "Pagamentos desativados nesta versão de teste." else "Produto não reconhecido.")
                 )
             }
             return
@@ -289,8 +328,13 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             "queryProducts" -> runOnUiThread { connectBilling() }
             "purchase" -> runOnUiThread {
                 val selectedProduct = productId ?: return@runOnUiThread
+                val accountId = payload.optString("accountId")
+                if (!accountId.matches(Regex("[a-f0-9]{64}"))) {
+                    dispatchToWeb("copiloto:play-error", JSONObject().put("message", "Entre novamente para comprar."))
+                    return@runOnUiThread
+                }
                 if (billingClient.isReady) {
-                    launchPurchase(selectedProduct)
+                    launchPurchase(selectedProduct, accountId)
                 } else {
                     connectBilling()
                 }
@@ -313,6 +357,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
     }
 
     private fun connectBilling() {
+        if (BuildConfig.INTERNAL_TESTING) return
         if (billingClient.isReady) {
             loadProducts()
             queryExistingPurchases()
@@ -412,7 +457,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         }
     }
 
-    private fun launchPurchase(productId: String) {
+    private fun launchPurchase(productId: String, accountId: String) {
         val details = productDetails[productId]
         if (details == null) {
             loadProducts()
@@ -431,6 +476,7 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             .build()
 
         val flowParams = BillingFlowParams.newBuilder()
+            .setObfuscatedAccountId(accountId)
             .setProductDetailsParamsList(listOf(productParams))
             .build()
 
@@ -545,7 +591,26 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (::voiceInput.isInitialized && voiceInput.handlePermissionResult(requestCode)) return
+        if (::tamanduaAlerts.isInitialized) tamanduaAlerts.handlePermissionResult(requestCode)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        if (::voiceInput.isInitialized && voiceInput.handleResult(requestCode, resultCode, data)) return
+        if (spreadsheetFiles.handleResult(requestCode, resultCode, data)) return
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onStop() {
+        if (::voiceInput.isInitialized) voiceInput.pause()
+        super.onStop()
+    }
+
     override fun onDestroy() {
+        if (::voiceInput.isInitialized) voiceInput.close()
+        if (::spreadsheetFiles.isInitialized) spreadsheetFiles.close()
         if (::webView.isInitialized) {
             webView.destroy()
         }
@@ -595,3 +660,6 @@ internal fun isAllowedBillingCommand(action: String, productId: String?): Boolea
         )
         else -> false
     }
+
+internal fun isAllowedBillingCommandForMode(action: String, productId: String?, internalTest: Boolean): Boolean =
+    isAllowedBillingCommand(action, productId) && !(internalTest && action == "purchase")

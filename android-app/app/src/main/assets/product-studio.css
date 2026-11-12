@@ -1,0 +1,315 @@
+/* Product only: graphite panels, violet actions, deliberate grouping. */
+body[data-ui="premium-fintech"] #app .app-shell {--cf-paper:#0c0d15;--cf-sheet:#141623;--cf-ink:#f0edff;--cf-muted:#b6b2cc;--cf-line:#353148;--cf-forest:#7651ce;--cf-moss:#251c3c;--cf-focus:#b694ff;background:#0c0d15 !important;color:#f0edff !important;}
+body[data-ui="premium-fintech"] #app .app-shell .app-main {background:#0c0d15 !important;color:#f0edff !important;padding:24px 24px 110px !important;}
+body[data-ui="premium-fintech"] #app .app-shell .app-topbar {gap:12px !important;flex-wrap:wrap;padding-bottom:18px !important;margin-bottom:14px !important;border-bottom:1px solid #353148 !important;}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading h1 {font:700 25px/1.25 Inter,system-ui,sans-serif !important;color:#f0edff !important;}
+body[data-ui="premium-fintech"] #app .app-shell :is(.page-heading p,.mu,small) {color:#b6b2cc !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-month-desk {background:none !important;border:0 !important;box-shadow:none !important;padding:0 !important;max-width:none;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-month-title {margin:20px 0 14px;gap:12px;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger {display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px !important;margin:0 0 14px !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger>div {display:flex !important;flex-direction:column;align-items:flex-start;gap:16px;background:#151623 !important;border:1px solid #353148 !important;border-radius:12px !important;padding:18px !important;min-height:110px !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger>div.cf-ledger-result {background:#282040 !important;border-color:#7651ce !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger :is(dt,dd) {color:#f0edff !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger dt {font-size:12px !important;color:#b6b2cc !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger dd {font-size:24px !important;margin:0 !important;line-height:1.25;overflow-wrap:anywhere;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-cash-notes {display:grid !important;grid-template-columns:1fr 1fr;gap:12px !important;margin:0 0 12px !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-cash-notes>span {display:flex;flex-direction:column;gap:8px;padding:14px !important;background:#11131f !important;border:1px solid #353148;border-radius:10px;color:#b6b2cc !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-cash-notes b {color:#d8c7ff !important;font-size:18px;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-dashboard-panels {display:grid !important;grid-template-columns:1.15fr 1fr;gap:16px !important;margin-top:22px !important;}
+body[data-ui="premium-fintech"] #app .app-shell :is(.cf-finance-panel,.card,.mobile-entry-details,.mobile-analysis) {background:#151623 !important;border:1px solid #353148 !important;border-radius:12px !important;padding:18px !important;box-shadow:none !important;}
+body[data-ui="premium-fintech"] #app .app-shell :is(h2,h3,.cf-category-label,.cf-due-list span) {color:#f0edff !important;}
+body[data-ui="premium-fintech"] #app .app-shell :is(.cf-finance-panel p,.cf-amount-note,.cf-category-bar,.cf-due-list small) {color:#b6b2cc !important;}
+body[data-ui="premium-fintech"] #app .app-shell :is(button,.cf-month-actions button,.cf-finance-panel button) {background:#2b2241 !important;color:#ece2ff !important;border:1px solid #56436e !important;box-shadow:none !important;}
+body[data-ui="premium-fintech"] #app .app-shell :is(.primary,.cf-global-tamandua,.meses button.on) {background:#7651ce !important;color:#fff !important;}
+body[data-ui="premium-fintech"] #app .app-shell :is(input,select,textarea) {background:#10121e !important;color:#f0edff !important;border-color:#5e5277 !important;color-scheme:dark;}
+body[data-ui="premium-fintech"] #app .app-shell .mobile-bottom-nav {background:#141321 !important;border-color:#3d3454 !important;}
+body[data-ui="premium-fintech"] #app .app-shell .mobile-nav-item.is-active {color:#d7bcff !important;background:transparent !important;}
+body[data-ui="premium-fintech"] #app .app-shell .mobile-nav-item.is-active svg {background:#9667ed !important;color:#140c22 !important;}
+@media(max-width:760px){body[data-ui="premium-fintech"] #app .app-shell .app-main{padding:16px 14px 104px !important;}body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger{grid-template-columns:1fr 1fr;}body[data-ui="premium-fintech"] #app .app-shell .cf-ledger-result{grid-column:1/-1;}body[data-ui="premium-fintech"] #app .app-shell .cf-dashboard-panels{grid-template-columns:1fr;gap:14px !important;}}
+
+/* A full-height conversation; only messages scroll. */
+html:has([data-current-view="tamandua"]){overflow:hidden !important;}
+body[data-ui="premium-fintech"]:has([data-current-view="tamandua"]) #cf-tm-root {position:fixed !important;inset:0 !important;width:100vw !important;height:100dvh !important;margin:0 !important;background:#111019 !important;}
+body:has([data-current-view="tamandua"]) .mobile-bottom-nav {display:none !important;}
+body[data-ui="premium-fintech"] #cf-tm-root .cf-tm-panel[data-workspace] {height:100% !important;background:#111019 !important;grid-template-columns:276px minmax(0,1fr);}
+#cf-tm-root .cf-tm-panel[data-workspace]>.cf-tm-head {background:#17131e !important;padding:12px 20px !important;flex-wrap:nowrap !important;min-height:64px !important;border-bottom:1px solid #3c3045;}
+#cf-tm-root .cf-tm-panel[data-workspace]>.cf-tm-body {position:relative;isolation:isolate;margin:0 !important;border:0 !important;border-radius:0 !important;background:#15111e !important;padding:24px max(22px,calc((100vw - 276px - 760px)/2)) !important;}
+#cf-tm-root .cf-tm-panel[data-workspace]>.cf-tm-compose {background:#19141c !important;padding:12px max(20px,calc((100vw - 276px - 800px)/2)) calc(12px + env(safe-area-inset-bottom)) !important;}
+#cf-tm-root .cf-chat-sidebar {background:#12111b !important;color:#e9e3f7 !important;overflow-y:auto !important;gap:14px !important;}
+#cf-tm-root .cf-chat-sidebar :is(button,.cf-side-setup) {background:#292039 !important;color:#e9dcff !important;border:1px solid #514061 !important;padding:12px !important;}
+#cf-tm-root .cf-chat-sidebar :is(small,p,h2,label,summary) {color:#c1b7cf !important;}
+#cf-tm-root .cf-chat-sidebar .cf-chat-suggestions {display:grid !important;grid-template-columns:1fr !important;gap:8px !important;margin:8px 0 !important;}
+#cf-tm-root .cf-chat-sidebar .cf-chat-suggestions button {min-height:44px !important;font-size:12px !important;}
+#cf-tm-root .cf-tm-head :is(button,.cf-chat-menu) {background:#322437 !important;color:#f0deee !important;}
+#cf-tm-root .cf-tm-head .cf-app-menu {display:none !important;}
+#cf-tm-root .cf-tm-head .cf-tm-back {display:grid !important;}
+#cf-tm-root .cf-tm-body>.cf-tm-view {position:relative;z-index:1;}
+#cf-tm-root .cf-tm-messages {max-width:760px;margin:auto;}
+#cf-tm-root .cf-tm-messages {display:grid;gap:16px;}
+#cf-tm-root .cf-tm-msg {min-width:0;margin:0;}
+#cf-tm-root .cf-tm-msg.bot {flex-direction:column;align-items:flex-start;}
+#cf-tm-root .cf-tm-msg .cf-tm-bubble {
+  box-sizing:border-box;
+  max-width:min(94%,620px) !important;
+  color:#fff7ef !important;
+  font-size:17px !important;
+  font-weight:450;
+  line-height:1.6 !important;
+  text-shadow:none !important;
+  overflow-wrap:anywhere;
+  opacity:1;
+}
+#cf-tm-root .cf-tm-msg.bot .cf-tm-bubble {
+  color:#fff7ef !important;
+  background:#262030 !important;
+  border:1px solid #6f5b80 !important;
+  border-radius:16px 16px 16px 5px !important;
+  padding:13px 15px !important;
+}
+#cf-tm-root .cf-tm-msg.user .cf-tm-bubble {
+  background:#4c3464 !important;
+  color:#fff !important;
+  border:1px solid #9776b4 !important;
+  border-radius:16px 16px 5px 16px !important;
+  padding:12px 15px !important;
+}
+#cf-tm-root .cf-tm-msg .cf-tm-bubble p {margin:0 0 .7em;}
+#cf-tm-root .cf-tm-msg .cf-tm-bubble p:last-child {margin-bottom:0;}
+.cf-tm-speaker {display:block;margin:0 0 6px;color:#dec4f6;font-size:12px;font-weight:700;}
+#cf-tm-root .cf-chat-welcome {display:flex;min-height:300px;flex-direction:column;justify-content:center;align-items:center;max-width:620px;}
+#cf-tm-root .cf-chat-welcome h2 {color:#f0e5dc !important;font:650 26px/1.3 Inter,system-ui,sans-serif !important;}
+#cf-tm-root .cf-chat-welcome p {color:#cabacd !important;font-size:14px !important;}
+#cf-tm-root .cf-tm-inputrow {background:#2b222e !important;border:1px solid #725b7b !important;border-radius:20px !important;box-shadow:none !important;}
+#cf-tm-root .cf-tm-compose .cf-tm-input {color:#fff8f2 !important;font-size:16px !important;font-weight:500;caret-color:#f5cdfd;}
+#cf-tm-root .cf-tm-input::placeholder {color:#e0cde4 !important;opacity:1;}
+#cf-tm-root .cf-tm-icon {background:#362a39 !important;border-color:#7b6281 !important;color:#ffe4cc !important;width:70px !important;min-width:70px !important;height:62px !important;}
+#cf-tm-root .cf-tm-icon {display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:3px !important;padding:4px !important;}
+#cf-tm-root .cf-tm-icon::before,#cf-tm-root .cf-tm-icon::after {content:none !important;display:none !important;}
+#cf-tm-root .cf-tm-icon .cf-plan-face {flex-shrink:0;}
+#cf-tm-root .cf-tm-compose .cf-tm-inputrow .cf-tm-icon {position:relative;width:72px !important;min-width:72px !important;height:64px !important;background:#362a39 !important;border:1px solid #7b6281 !important;border-radius:12px !important;padding:4px !important;box-shadow:none !important;overflow:hidden !important;}
+#cf-tm-root .cf-tm-inputrow .cf-tm-icon span {position:static !important;inset:auto !important;color:#ffe4cc !important;line-height:1.2 !important;}
+#cf-tm-root .cf-tm-inputrow .cf-tm-icon .cf-plan-face {width:36px !important;height:36px !important;}
+#cf-tm-root .cf-chat-sidebar :is(input,select) {background:#221a31 !important;color:#f0e6ff !important;border-color:#665177 !important;color-scheme:dark;}
+#cf-tm-root .cf-chat-sidebar .cf-tm-conv {background:#2b203c !important;color:#f0e6ff !important;}
+#cf-tm-root .cf-tm-send {background:#9366ce !important;border-color:#bb95ec !important;color:#fff !important;}
+#cf-tm-root .cf-chat-privacy-link {color:#c8b5cc !important;}
+#cf-tm-root .cf-tm-voice-status {background:#332638 !important;color:#ffe4cc !important;}
+#cf-tm-root .cf-tm-icon .cf-plan-face {display:block;width:32px;height:32px;border-radius:50%;background-image:url('tamandua-planos-3d.png');background-size:900% 300%;background-position:var(--face-x,12.5%) 0%;}
+#cf-tm-root[data-portrait="max"] {--face-x:50%;}#cf-tm-root[data-portrait="ultra"] {--face-x:87.5%;}
+/* A violet mosaic sits behind the conversation and never captures touch. */
+.cf-chat-backdrop {
+  position:absolute;
+  inset:0 0 auto;
+  height:420px;
+  max-height:100%;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+  background:radial-gradient(ellipse at 74% 32%,#42265788 0,transparent 66%);
+}
+.cf-chat-tiles {
+  position:absolute;
+  top:50px;
+  right:9%;
+  width:clamp(150px,45vw,246px);
+  aspect-ratio:1;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:repeat(3,minmax(0,1fr));
+  gap:7px;
+  transform:rotate(-15deg);
+}
+.cf-chat-tiles span {
+  border:1px solid #9b72bc60;
+  border-radius:13px;
+  background:linear-gradient(145deg,#60407f81,#251b39a6);
+}
+.cf-chat-tiles span:nth-child(2n) {background:linear-gradient(145deg,#38274ed6,#181323dc);}
+.cf-chat-tiles span:nth-child(3n) {border-color:#c694ba56;background:linear-gradient(145deg,#66395886,#2b203ab6);}
+@media(prefers-reduced-motion:no-preference) {
+  html:not([data-screen-motion="off"]):has([data-current-view="tamandua"]) .cf-chat-tiles span {
+    animation:cf-chat-assemble 920ms cubic-bezier(.24,.7,.18,1) var(--tile-delay) both;
+  }
+}
+@keyframes cf-chat-assemble {
+  0%,100% {transform:none;opacity:1;}
+  38% {transform:translate(var(--tile-x),var(--tile-y)) scale(.78) rotate(12deg);opacity:.35;}
+}
+@media(max-width:760px){body[data-ui="premium-fintech"] #cf-tm-root .cf-tm-panel[data-workspace]{grid-template-columns:1fr;}#cf-tm-root .cf-tm-panel[data-workspace]>.cf-tm-body{padding:20px 18px !important;}#cf-tm-root .cf-tm-panel[data-workspace]>.cf-tm-compose{padding:10px 12px calc(10px + env(safe-area-inset-bottom)) !important;}#cf-tm-root .cf-tm-panel[data-workspace]>.cf-tm-head{padding:10px 12px !important;}#cf-tm-root .cf-chat-menu{display:grid !important;}}
+.cf-task-dialog{width:min(640px,calc(100vw - 24px));max-height:90dvh;box-sizing:border-box;padding:0;border:1px solid #675177;border-radius:18px;background:#17131f;color:#efe5fb;overflow:auto;}.cf-task-dialog::backdrop{background:#080611bd;}.cf-task-heading{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;background:#17131f;border-bottom:1px solid #493853;}.cf-task-heading h2{font:650 20px/1.3 Inter,system-ui,sans-serif;margin:0;}.cf-task-content{padding:20px;line-height:1.65;}.cf-task-content p{color:#cbbbda;}.cf-task-dialog button{background:#7952ba;color:#fff;border:1px solid #af8ade;min-height:44px;padding:10px 14px;border-radius:10px;cursor:pointer;}.cf-task-dialog button:disabled{opacity:.55;}.cf-task-dialog :is(input,select){box-sizing:border-box;width:100%;min-height:46px;background:#251d30;color:#fff0ff;border:1px solid #755c88;padding:12px;border-radius:9px;font-size:16px;color-scheme:dark;}.cf-task-row,.cf-task-entry label{display:grid;gap:8px;margin:0 0 18px;padding-bottom:18px;border-bottom:1px solid #493853;}.cf-task-row span{color:#cbbbda;font-size:13px;}.cf-task-content [role="status"]{color:#efccff;}.cf-task-entry button{width:100%;}
+#cf-tm-root .cf-chat-sidebar-dialog {background:#12111b !important;border:1px solid #554164 !important;color:#ece0fb !important;width:min(360px,90vw);max-height:94dvh;overflow-y:auto;}
+#cf-tm-root .cf-chat-sidebar-dialog>form button {background:#352440;color:#f5e6ff;min-height:44px;border:1px solid #76568b;border-radius:10px;padding:10px 14px;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-category-bar .cf-category-track>i {background:#9665e2 !important;box-shadow:none !important;}
+#cf-tm-root .cf-portrait-help{display:flex;align-items:center;gap:14px;max-width:100%;margin:22px 0 0;padding:14px 18px;background:#352638;color:#ffe9d8;border:1px solid #8c6c88;border-radius:14px;text-align:left;font:600 15px/1.4 Inter,system-ui,sans-serif;cursor:pointer;}
+#cf-tm-root .cf-portrait-help>span>span{display:block;margin-top:4px;color:#e0c5da;font-size:12px;font-weight:400;}
+#cf-tm-root .cf-portrait-help .cf-plan-face{display:block;flex:0 0 52px;width:52px;height:52px;border-radius:50%;background:url('tamandua-planos-3d.png') var(--face-x,12.5%) 0%/900% 300% no-repeat;}
+#cf-tm-root .cf-portrait-help:hover{background:#45304a;border-color:#c89dba;}
+#cf-tm-root .cf-portrait-help:focus-visible{outline:3px solid #e3b9ef;outline-offset:4px;}
+
+/* The period, test notice and monthly summary have their own rows. */
+body[data-ui="premium-fintech"] #app .app-shell .app-topbar {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:start !important;
+  gap:14px !important;
+  padding:8px 0 16px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading {min-width:0 !important;}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading h1 {margin:0 0 6px !important;}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading p {margin:0 !important;}
+body[data-ui="premium-fintech"] #app .app-shell .top-actions {grid-column:1/-1;justify-content:flex-start !important;gap:8px !important;}
+body[data-ui="premium-fintech"] #app .app-shell .app-topbar>.cf-app-menu {grid-column:2;grid-row:1;}
+.cf-test-notice {margin:8px 0 20px;color:#c6b9df;font-size:12px;line-height:1.5;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger {
+  gap:0 !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  border:1px solid #353148;
+  border-radius:12px;
+  overflow:hidden;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger>div {
+  flex-direction:row !important;
+  justify-content:space-between;
+  align-items:baseline !important;
+  min-height:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  padding:14px 16px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger>div+div {border-top:1px solid #353148 !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger dd {font-size:clamp(16px,4vw,22px) !important;text-align:right;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-cash-notes>span {
+  background:transparent !important;
+  border:0;
+  padding:8px 0 !important;
+}
+@media(max-width:760px){
+  body[data-ui="premium-fintech"] #app .app-shell .app-topbar {grid-template-columns:minmax(0,1fr);}
+  body[data-ui="premium-fintech"] #app .app-shell .app-topbar>.cf-app-menu {display:none !important;}
+}
+
+/* Native modal above the bottom bar; only the preview body scrolls. */
+.cf-import-preview {
+  box-sizing:border-box;
+  width:min(620px,calc(100% - 24px));
+  max-height:calc(100dvh - 24px);
+  padding:0;
+  background:#171523;
+  color:#f0edff;
+  border:1px solid #645480;
+  border-radius:14px;
+  overflow:hidden;
+}
+.cf-import-preview[open] {display:flex;flex-direction:column;}
+.cf-import-preview::backdrop {background:#080710bc;}
+.cf-import-preview :is(header,footer) {flex:none;padding:12px 14px;}
+.cf-import-preview header {border-bottom:1px solid #403550;}
+.cf-import-preview h2 {margin:0;font-size:19px;}
+.cf-import-preview p {margin:4px 0 0;color:#c5bad7;}
+.cf-import-preview .cf-import-content {min-height:0;overflow:auto;overscroll-behavior:contain;padding:12px 14px;}
+.cf-import-preview table {width:100%;min-width:0 !important;table-layout:auto;font-size:clamp(11px,3.25vw,14px);}
+.cf-import-preview th,.cf-import-preview td {padding:8px 4px !important;white-space:normal !important;}
+.cf-import-preview th {background:#211c31 !important;color:#e3d9ff !important;}
+.cf-import-preview label {display:block;margin:16px 0 6px;font-size:13px;}
+.cf-import-preview select {box-sizing:border-box;min-height:44px;width:100%;font-size:16px;}
+.cf-import-preview footer {display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;border-top:1px solid #403550;}
+.cf-import-preview footer button {min-height:44px;flex:1 1 auto;font-size:14px;}
+
+#cf-tm-root .cf-sidebar-tabs {display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+#cf-tm-root .cf-sidebar-tabs button {min-height:44px;}
+#cf-tm-root .cf-sidebar-tabs button[aria-pressed="true"] {background:#514064 !important;border-color:#ac8bc8 !important;}
+#cf-tm-root .cf-chat-sidebar[data-mode="conversas"]>:is(nav,.cf-side-setup,.cf-chat-suggestions,.cf-voice-settings),
+#cf-tm-root .cf-chat-sidebar[data-mode="tarefas"]>:is(.cf-history-title,.cf-history-search,.cf-tm-view[data-v="history"],.cf-side-private) {display:none !important;}
+#cf-tm-root .cf-tm-head .cf-chat-menu {width:auto !important;min-height:44px;padding-inline:10px !important;font-size:12px !important;}
+
+dialog.cf-welcome {max-height:calc(100dvh - 20px);background:#201824;color:#fbecdf;border:1px solid #725b7b;overscroll-behavior:contain;}
+dialog.cf-welcome::backdrop {background:#120e17bd;}
+dialog.cf-welcome .cf-welcome-close {color:#f1d6ed !important;}
+dialog.cf-welcome .cf-welcome-picture {
+  width:clamp(122px,34vw,150px);
+  height:auto;
+  aspect-ratio:1;
+  border-radius:50%;
+  background:#281d2d url('tamandua-formal-retrato.webp') center/cover no-repeat;
+}
+dialog.cf-welcome.cf-configuring .cf-welcome-picture {width:104px;}
+dialog.cf-welcome .cf-welcome-copy {padding:14px 20px 22px;}
+dialog.cf-welcome .cf-welcome-copy p {color:#e1c8d9;}
+dialog.cf-welcome .cf-welcome-copy h2 {font-size:clamp(22px,6vw,28px);}
+dialog.cf-welcome [hidden] {display:none !important;}
+dialog.cf-welcome .cf-question-label {font-weight:700;color:#fff0e5;}
+dialog.cf-welcome #cf-question-answer {width:100%;box-sizing:border-box;min-height:48px;background:#302437;color:#ffedf7;border:1px solid #98799c;font-size:16px;color-scheme:dark;}
+dialog.cf-welcome .cf-question-actions {display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+dialog.cf-welcome .cf-question-actions button {flex:1 1 auto;min-height:44px;background:#48334f;color:#fff0f6;}
+dialog.cf-welcome .cf-question-actions .cf-question-next {background:#7e5093;}
+dialog.cf-welcome .cf-question-status:empty {display:none;}
+@media (prefers-reduced-motion:no-preference) {
+  html:not([data-screen-motion="off"]) dialog.cf-welcome.cf-configuring .cf-welcome-picture {animation:cf-portrait-nod 440ms ease-out both;}
+}
+@keyframes cf-portrait-nod {
+  0%,100% {transform:none;}
+  40% {transform:translateY(4px) rotate(3deg);}
+}
+
+#cf-welcome.cf-welcome {background:#201824 !important;color:#fbecdf !important;border-color:#725b7b !important;}
+#cf-welcome .cf-welcome-picture {background-position:center !important;}
+#cf-welcome .cf-welcome-copy h2 {color:#fbecdf !important;font-size:clamp(22px,6vw,28px) !important;}
+#cf-welcome .cf-welcome-copy :is(p,label) {color:#e1c8d9 !important;}
+#cf-welcome .cf-welcome-choices button.cf-configure,
+#cf-welcome .cf-question-actions .cf-question-next {background:#7e5093 !important;}
+
+
+.cf-period-row {display:flex;align-items:end;flex-wrap:wrap;gap:8px 12px;margin:0 0 14px;}
+.cf-period-row label {display:grid;gap:5px;min-width:0;color:#c9bedd;font-size:12px;}
+.cf-period-row label:first-child {flex:0 1 148px;}
+.cf-period-row select {min-height:44px;width:100%;padding:6px 12px;font-size:16px;}
+.cf-period-row button {min-height:44px;flex-shrink:0;font-size:12px;}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading h1 {max-width:none !important;text-wrap:pretty !important;}
+
+#app .app-shell .cf-import-preview td {color:#eee6fb !important;border-color:#3b334a !important;}
+#app .app-shell .cf-import-preview td.pos {color:#8de1b6 !important;}
+#app .app-shell .cf-import-preview td.neg {color:#ffb0b9 !important;}
+.cf-import-preview .cf-import-content {scrollbar-color:#79658c #201a2b;scrollbar-width:thin;}
+.cf-import-preview footer {display:grid;}
+.cf-import-preview footer label {display:grid;gap:4px;margin:0;color:#d4c8e5;}
+.cf-import-preview .cf-import-actions {display:flex;flex-wrap:wrap;gap:8px;}
+
+.cf-more-dialog {
+  box-sizing:border-box;
+  width:min(94%,480px);
+  max-height:calc(100dvh - 28px);
+  padding:0;
+  overflow:hidden;
+  border:1px solid #61516f;
+  border-radius:18px;
+  color:#fff4fd;
+  background:#1e1728;
+}
+.cf-more-dialog[open] {display:flex;flex-direction:column;}
+.cf-more-dialog::backdrop {background:#0c0815af;}
+.cf-more-dialog header {flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #554562;}
+.cf-more-dialog h2 {margin:0;font-size:21px;}
+.cf-more-dialog header button {min-height:44px;}
+.cf-more-content {min-height:0;overflow:auto;padding:16px 18px;overscroll-behavior:contain;}
+.cf-more-content section+section {margin-top:22px;}
+.cf-more-content h3 {font-size:14px;margin:0 0 7px;color:#dec7f5 !important;}
+body[data-ui="premium-fintech"] #app .app-shell .cf-more-content button {
+  display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+  min-height:56px;padding:10px 12px;margin:0 0 6px;
+  text-align:left;background:#2c2138 !important;border:1px solid #4a3a58 !important;
+}
+.cf-more-content button strong,.cf-more-content button small {display:block;}
+.cf-more-content button small {margin-top:3px;line-height:1.45;}
+.cf-review-intro {display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:0 0 24px;}
+.cf-review-results {display:grid;gap:12px;}
+.cf-review-results h2,.cf-year-chart h2,.mobile-year-list h2 {font-size:18px;margin:0 0 10px;}
+.cf-review-item {display:grid !important;gap:14px;padding:15px !important;background:#1c1828 !important;border:1px solid #4d405d !important;border-radius:12px;}
+.cf-review-item h3 {margin:0 0 6px;font-size:16px;}
+.cf-review-item .row {gap:8px;}
+.cf-year-chart {margin:18px 0 22px;}
+@media(max-width:760px){
+  .cf-more-dialog {margin:auto auto 10px;}
+  body[data-ui="premium-fintech"] #app .app-shell .mobile-year-item {padding:16px 0 !important;border-color:#4a4058 !important;}
+  .mobile-year-list {padding:14px 0 6px;}
+}
+

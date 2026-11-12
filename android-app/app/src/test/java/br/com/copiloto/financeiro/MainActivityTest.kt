@@ -12,7 +12,7 @@ class MainActivityTest {
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
-            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40",
+            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.50",
             MainActivity.APP_ENTRY_URL
         )
     }
@@ -129,7 +129,7 @@ class MainActivityTest {
         assertTrue(html.contains("Falha ao inicializar o Supabase"))
         assertTrue(html.contains("sb.auth.getSession()"))
         assertTrue(html.contains("sb.auth.onAuthStateChange"))
-        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40", MainActivity.APP_ENTRY_URL)
+        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.50", MainActivity.APP_ENTRY_URL)
 
     }
 
@@ -162,7 +162,7 @@ class MainActivityTest {
 
     @Test
     fun navigationOnlyKeepsTheExactBundledHttpsAssetOrigin() {
-        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.40"))
+        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.50"))
         assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/privacidade.html"))
         assertTrue(!isTrustedAppAssetUrl("http://appassets.androidplatform.net/assets/mobile.html"))
         assertTrue(!isTrustedAppAssetUrl("https://appassets.androidplatform.net.evil.test/assets/mobile.html"))
@@ -274,14 +274,14 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("class=\"mobile-bottom-nav\""))
         assertTrue(html.contains("aria-label=\"Navegação principal do aplicativo\""))
-        assertTrue(html.contains("data-mobile-nav=\"launches\""))
-        assertTrue(html.contains("data-mobile-nav=\"year\""))
-        assertTrue(html.contains("data-mobile-nav=\"checkup\""))
-        assertTrue(html.contains("data-mobile-nav=\"planning\""))
+        assertTrue(html.contains("['inicio','Início'"))
+        assertTrue(html.contains("['planilha','Planilha'"))
+        assertTrue(html.contains("['tamandua','Tamanduá'"))
+        assertTrue(html.contains("['plan','Metas'"))
         assertTrue(html.contains("data-act=\"mobilemore\""))
-        assertTrue(html.contains("class=\"mobile-more-panel\""))
-        assertTrue(html.contains("data-v=\"família\""))
-        assertTrue(html.contains("data-v=\"relatorios\""))
+        assertTrue(html.contains("id=\"cf-more-dialog\""))
+        assertTrue(html.contains("link('família',"))
+        assertTrue(html.contains("link('relatorios',"))
 
     }
 
@@ -343,9 +343,9 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("S.mobileMore"))
         assertTrue(html.contains("data-act=\"mobilemore\""))
-        assertTrue(html.contains("data-act=\"view\" data-v=\"família\""))
-        assertTrue(html.contains("data-act=\"view\" data-v=\"relatorios\""))
-        assertTrue(html.contains("data-act=\"view\" data-v=\"admin\""))
+        assertTrue(html.contains("link('família',"))
+        assertTrue(html.contains("link('relatorios',"))
+        assertTrue(html.contains("const admin=S.admin?"))
         assertTrue(html.contains("data-act=\"sair\""))
     }
 
@@ -389,15 +389,16 @@ class MainActivityTest {
     }
 
     @Test
-    fun androidV016KeepsFinanceViewsInsideTheV0MobileSystem() {
+    fun workspaceNavigationReachesEveryFinanceArea() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("data-v=\"planilha\""))
-        assertTrue(html.contains("data-v=\"ano\""))
-        assertTrue(html.contains("data-v=\"checape\""))
-        assertTrue(html.contains("data-v=\"plan\""))
-        assertTrue(html.contains("data-v=\"família\""))
-        assertTrue(html.contains(".v0-mobile-section-title"))
-        assertTrue(html.contains(".v0-mobile-transaction-list"))
+        val primary = html.substringAfter("function mobileNavigation(){").substringBefore("function mobileMoreMenu(){")
+        val secondary = html.substringAfter("function mobileMoreMenu(){").substringBefore("window.__copilotoHandleAndroidBack")
+        for (destination in listOf("inicio", "planilha", "tamandua", "plan")) {
+            assertTrue(primary.contains("['$destination',"))
+        }
+        for (destination in listOf("ano", "checape", "família")) {
+            assertTrue(secondary.contains("link('$destination',"))
+        }
     }
 
     @Test
@@ -411,15 +412,15 @@ class MainActivityTest {
     }
 
     @Test
-    fun androidV016SeparatesMobileFinanceSectionsIntoDedicatedButtons() {
+    fun homeUsesThePrimaryNavigationWithoutDuplicatingAreaShortcuts() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("v0-mobile-quick-nav"))
-        assertTrue(html.contains("data-v=\"planilha\""))
-        assertTrue(html.contains("data-v=\"ano\""))
-        assertTrue(html.contains("data-v=\"checape\""))
-        assertTrue(html.contains("data-v=\"plan\""))
-        assertTrue(html.contains("data-v=\"família\""))
-        assertTrue(html.contains("v0-mobile-quick-nav-item"))
+        val workspace = html.substringAfter("function render(){").substringBefore("function viewRelatorios(){")
+        assertTrue(workspace.contains("mobileNavigation()"))
+        assertTrue(workspace.contains("mobileMoreMenu()"))
+        assertFalse(workspace.contains("v0-mobile-quick-nav"))
+        val home = html.substringAfter("function mobileSmartContext(){").substringBefore("function viewPlanilha(ed)")
+        assertFalse(home.contains("cf-month-actions"))
+        assertFalse(File("src/main/assets/sheet-workspace.js").readText().contains("cf-global-tamandua"))
     }
 
         @Test
@@ -444,15 +445,15 @@ class MainActivityTest {
     }
 
     @Test
-    fun androidV017KeepsTheSpreadsheetAsThePrimaryMobileWorkspace() {
+    fun spreadsheetHasOneFileToolsDrawerAndItsOwnEntryAction() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("data-v=\"planilha\""))
-        assertTrue(html.contains("Planilha mensal"))
-        assertTrue(html.contains("Lançamentos, receitas, despesas e saldo"))
-        assertTrue(html.contains("data-v=\"ano\""))
-        assertTrue(html.contains("data-v=\"checape\""))
-        assertTrue(html.contains("data-v=\"plan\""))
-        assertTrue(html.contains("data-v=\"família\""))
+        val ledger = html.substringAfter("function viewPlanilha(ed){").substringBefore("function familyAreaHeader")
+        val tools = File("src/main/assets/sheet-workspace.js").readText()
+        assertTrue(ledger.contains("Novo lançamento"))
+        assertTrue(ledger.contains("id=\"arq\""))
+        assertTrue(tools.contains("Ferramentas da planilha"))
+        assertTrue(tools.contains("drawer.showModal()"))
+        assertTrue(tools.contains("files.append(button)"))
     }
 
     @Test
@@ -476,13 +477,13 @@ class MainActivityTest {
     }
 
     @Test
-    fun androidV019AddsPremiumMobileCommandBarAndConnectionStatus() {
+    fun workspaceShowsAnOfflineNoticeWithoutASecondCommandBar() {
         val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("cf-mobile-premium-1-0-19"))
-        assertTrue(html.contains("mobile-command-bar"))
-        assertTrue(html.contains("mobile-connection-status"))
-        assertTrue(html.contains("mobile-command-add"))
-        assertTrue(html.contains("mobile-command-more"))
+        val interaction = html.substringAfter("<script id=\"cf-mobile-premium-1-0-19-js\">").substringBefore("</script>")
+        assertTrue(html.contains("class=\"mobile-connection-status\" role=\"status\" hidden"))
+        assertTrue(interaction.contains("el.hidden=online"))
+        assertTrue(interaction.contains("addEventListener('offline',mobileConnectionStatus"))
+        assertFalse(interaction.contains("mobileCommandBar"))
     }
 
     @Test
@@ -568,7 +569,8 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("function mobileSmartContext()"))
         assertTrue(html.contains("cf-mobile-insight"))
-        assertTrue(html.contains("Próximo passo") || html.contains("PRÓXIMO PASSO"))
+        assertTrue(html.contains("Resultado do mês"))
+        assertTrue(html.contains("Não representam o saldo da sua conta bancária."))
         assertFalse(html.contains("smartHealthScore"))
         assertFalse(html.contains("safeToSpend"))
     }
@@ -578,8 +580,9 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("contas atrasadas"))
         assertTrue(html.contains("próximos vencimentos"))
-        assertTrue(html.contains("Maior categoria"))
-        assertTrue(html.contains("Sem dados suficientes") || html.contains("Comece pelo primeiro lançamento"))
+        assertTrue(html.contains("monthlyFinancialSnapshot()"))
+        assertTrue(html.contains("d.categories"))
+        assertTrue(html.contains("Vamos começar pelo primeiro lançamento"))
         assertTrue(html.contains("smartgo"))
     }
 
@@ -588,14 +591,14 @@ class MainActivityTest {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("S.internalTester=testerCheck.data===true"))
         assertTrue(html.contains("!S.internalTester&&!(S.fam.acesso_ate"))
-        assertTrue(html.contains("TESTE INTERNO · PAGAMENTOS DESATIVADOS"))
+        assertTrue(html.contains("Teste interno · Sem cobrança"))
     }
 
         @Test
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 40"))
-        assertTrue(gradle.contains("versionName = \"1.0.40\""))
+        assertTrue(gradle.contains("versionCode = 50"))
+        assertTrue(gradle.contains("versionName = \"1.0.50\""))
     }
 
     @Test
@@ -658,16 +661,14 @@ class MainActivityTest {
     }
 
         @Test
-    fun androidV023SpeechIsContextualAndUsesRealFinancialState() {
-        val html = File("src/main/assets/mobile.html").readText()
-        assertTrue(html.contains("S.lanc"))
-        assertTrue(html.contains("S.view"))
-        assertTrue(html.contains("data-v=\"planilha\""))
-        assertTrue(html.contains("data-v=\"checape\""))
-        assertTrue(html.contains("data-v=\"plan\""))
-        assertTrue(html.contains("mobileCompanionSpeech"))
-        assertTrue(html.contains("dados suficientes"))
-        assertTrue(html.contains("próximos vencimentos"))
+    fun assistantSeparatesTasksFromTheGeneralConversation() {
+        val chat = File("src/main/assets/tamandua-enhancements.js").readText()
+        assertTrue(chat.contains("CFTamanduaActions?.handle"))
+        assertTrue(chat.contains("functions.invoke('tamandua-bot'"))
+        assertTrue(chat.contains("Tamanduá está respondendo"))
+        val sidebar = File("src/main/assets/tamandua-workspace.js").readText()
+        assertTrue(sidebar.contains("data-side-mode=\"conversas\""))
+        assertTrue(sidebar.contains("data-side-mode=\"tarefas\""))
     }
 
     @Test
@@ -782,26 +783,27 @@ class MainActivityTest {
     }
 
     @Test
-    fun androidV025KeepsTheTamanduaAsContextualAssistanceWithoutAddingANewTab() {
+    fun tamanduaHasADedicatedDestinationAlongsideTheFinancialLedger() {
         val html = File("src/main/assets/mobile.html").readText()
         assertTrue(html.contains("function mobileCompanionSpeech()"))
         assertTrue(html.contains("function mountMobileCompanion()"))
-        assertFalse(html.contains("data-mobile-nav=\"tamandua\""))
+        assertTrue(html.contains("S.view==='tamandua'"))
     }
 
 
     @Test
-    fun androidV026MakesTamanduaOnboardingMandatoryBeforeShowingTheFinanceWorkspace() {
+    fun tamanduaSetupIsOptionalAndDoesNotBlockTheFinanceWorkspace() {
         val html = File("src/main/assets/mobile.html").readText()
-        val loadMes = html.substringAfter("async function loadMes").substringBefore("/* ---------- telas de entrada ----------")
-        assertTrue(loadMes.contains("renderWorkspaceOrKeepTamandua()"))
-        assertTrue(html.contains("function renderWorkspaceOrKeepTamandua()"))
-        assertFalse(html.contains("tamandua-intro-skip"))
-        assertFalse(html.contains("Pular por enquanto"))
-        val intro = html.substringAfter("function tamanduaIntroMarkup(").substringBefore("function renderTamanduaIntro(")
-        assertFalse(intro.contains("Agora não"))
+        val setup = File("src/main/assets/mobile-polish.js").readText()
+        val entry = html.substringAfter("function renderWorkspaceOrKeepTamandua(){").substringBefore("async function finishTamanduaIntro")
+        assertTrue(entry.contains("render();"))
+        assertFalse(entry.contains("renderTamanduaIntro("))
+        assertTrue(setup.contains("Configurar meu Tamanduá"))
+        assertTrue(setup.contains("Pular por enquanto"))
+        assertTrue(setup.contains("id=\"cf-welcome-form\" hidden"))
+        assertTrue(setup.contains("recordAnswer('')"))
+        assertTrue(setup.contains("welcomeKey()!==scope"))
     }
-
 
     @Test
     fun androidV028MakesTamanduaProactiveInsteadOfWaitingForChatMessages() {
@@ -811,7 +813,8 @@ class MainActivityTest {
         assertTrue(html.contains("TAMANDUÁ PERCEBEU"))
         assertTrue(html.contains("data-act=\"tamandua-proactive-action\""))
         assertTrue(html.contains("data-act=\"tamandua-proactive-dismiss\""))
-        assertTrue(html.contains("Maior categoria"))
+        assertTrue(html.contains("monthlyFinancialSnapshot()"))
+        assertTrue(html.contains("d.categories"))
         assertTrue(html.contains("próximo passo"))
     }
 
@@ -875,7 +878,7 @@ class MainActivityTest {
         assertTrue(html.contains("function mobileCompanionSpeech()"))
         assertTrue(html.contains("mountMobileCompanion()"))
         assertTrue(html.contains("S.tamanduaProfile"))
-        assertFalse(html.contains("data-mobile-nav=\"tamandua\""))
+        assertTrue(html.contains("S.view==='tamandua'"))
     }
 
 
@@ -891,12 +894,14 @@ class MainActivityTest {
         assertTrue(js.contains("speechSynthesis"))
         assertTrue(js.contains("CopilotoVoice"))
         assertTrue(js.contains("voiceStatus"))
-        assertTrue(js.contains("send(true)"))
+        assertFalse(js.contains("send(true)"))
+        assertTrue(js.contains("copiloto:voice-input"))
+        assertTrue(js.contains("Revise e toque em Enviar"))
         assertTrue(js.contains("Estou ouvindo"))
         assertTrue(js.contains("Calcular cenário"))
         assertTrue(js.contains("speechSynthesis"))
-        assertTrue(js.contains("Compromissos financeiros"))
-        assertTrue(js.contains("Após em aberto"))
+        assertTrue(js.contains("sessionGate.accepts"))
+        assertTrue(js.contains("familia_id"))
         assertTrue(js.contains("Principais categorias"))
     }
 
@@ -923,7 +928,7 @@ class MainActivityTest {
         val activity = File("src/main/java/br/com/copiloto/financeiro/MainActivity.kt").readText()
         assertTrue(activity.contains("injectTamanduaEnhancements()"))
         assertTrue(activity.contains("assets.open(\"tamandua-enhancements.js\")"))
-        assertTrue(activity.contains("eval(\$quotedScript)"))
+        assertTrue(activity.contains("webView.evaluateJavascript(script, null)"))
         assertTrue(activity.contains("CopilotoVoice"))
         assertTrue(activity.contains("TextToSpeech"))
         assertTrue(activity.contains("Locale(\"pt\", \"BR\")"))
@@ -941,3 +946,4 @@ class MainActivityTest {
     }
 
 }
+
