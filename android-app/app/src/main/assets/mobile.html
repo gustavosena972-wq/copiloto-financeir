@@ -3029,6 +3029,20 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 </style>
 <style id="cf-android-v0-mobile-1-0-21">
 .cf-family-area-shell{display:grid;gap:12px}
+.cf-family-summary,.cf-sheet-start{display:grid;gap:12px;margin-bottom:14px;padding:16px;border:1px solid var(--bd);border-radius:18px;background:var(--card)}
+.cf-family-summary h2,.cf-sheet-start h2{font-size:18px;margin:0}
+.cf-family-summary p,.cf-sheet-start p,.cf-family-join p{margin:0;color:var(--mu);line-height:1.5}
+.cf-family-join{display:grid;gap:9px;padding:14px 0;border-bottom:1px solid var(--bd)}
+.cf-family-join h2{font-size:17px;margin:0}
+.cf-family-join label,.cf-family-invite label{display:grid;gap:5px}
+.cf-family-invite{display:grid;gap:10px}
+.cf-family-invite input,.cf-family-invite select{width:100%;min-width:0}
+.cf-sheet-start-actions{display:flex;flex-wrap:wrap;gap:8px}
+.cf-sheet-start-actions button,.cf-family-join button,.cf-family-invite button{min-height:44px}
+.cf-family-area summary{cursor:pointer;padding:6px 0;font-weight:700}
+.cf-invite-result[hidden]{display:none}
+.cf-invite-result{display:grid;gap:8px}
+@media(max-width:420px){.cf-sheet-start-actions button{flex:1 1 100%}}
 .cf-family-area{background:var(--card);border:1px solid var(--bd);border-radius:18px;overflow:hidden}
 .cf-family-area-body{padding:16px}
 .cf-family-area-header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
@@ -3917,9 +3931,16 @@ if(!window.__cfLandingHashBound){window.__cfLandingHashBound=true;window.addEven
 if(!window.__cfLandingRouteBound){window.__cfLandingRouteBound=true;document.addEventListener('click',e=>{const link=e.target.closest('[data-public-route]');if(!link)return;e.preventDefault();const route=link.dataset.publicRoute;if(!['inicio','recursos','planos','login','cadastro'].includes(route))return;const hash='#'+route;if(location.hash===hash){if(!S.user){const page=document.querySelector('.landing-page');if(!page||(['login','cadastro'].includes(route)!==(page.dataset.screen==='acesso')))renderAuth();}scrollLandingRoute(route);}else{if(!S.user&&['inicio','recursos','planos'].includes(route)){const page=document.querySelector('.landing-page');if(page)page.dataset.screen=route;}location.hash=hash;scrollLandingRoute(route);}});}
 
 function renderSemFamilia(){
-  $('#app').innerHTML=`<div class="auth"><h1>Sua família</h1><div class="mu">Crie a família para começar ou entre com um código de convite.</div>
-  <input id="fnome" placeholder="Nome da família (ex.: Família Silva)"><button data-act="criarfam">Criar família</button>
-  <div class="mu" style="margin-top:8px">Ou entre numa família existente:</div><input id="cod" placeholder="Código do convite"><button class="sec" data-act="entrarfam">Entrar com código</button>
+  $('#app').innerHTML=`<div class="auth"><h1>Seu espaço financeiro</h1>
+  <p class="mu">Organize suas contas sozinho ou com pessoas de confiança. Cada conta participa de um espaço por vez.</p>
+  <section class="cf-family-join"><h2>Começar do zero</h2>
+  <p>Crie seu espaço para montar a planilha. Você pode convidar alguém depois.</p>
+  <label>Nome do espaço<input id="fnome" placeholder="Ex.: Meu orçamento ou Família Silva"></label>
+  <button data-act="criarfam">Criar meu espaço</button></section>
+  <section class="cf-family-join"><h2>Já recebeu um convite?</h2>
+  <p>Peça o código à pessoa que administra o espaço. Ao entrar, você recebe a permissão escolhida no convite.</p>
+  <label>Código do convite<input id="cod" autocapitalize="characters" autocomplete="off" spellcheck="false"></label>
+  <button class="sec" data-act="entrarfam">Entrar com código</button></section>
   ${S.admin?'<button class="sec" data-act="atualizaradmin">Administração</button>':''}
   <button class="red" data-act="sair">Sair da conta</button></div>`;
 }
@@ -4094,11 +4115,16 @@ function atualizarParcelamento(){
   s.innerHTML=Array.from({length:limite},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'x</option>').join('');
   s.value=String(Math.min(atual,limite));
   if(tipo==='receita')s.value='1';
+  const categoria=$('#n_cat');
+  if(categoria&&categoria.dataset.tipo!==tipo){
+    categoria.innerHTML=catOpts(tipo);
+    categoria.dataset.tipo=tipo;
+  }
   s.disabled=tipo==='receita';
   const n=$('#n_natureza');if(n)n.disabled=tipo==='receita';
   const v=$('#n_valor'),h=$('#n_valor_help');
-  if(v)v.placeholder=natureza==='financiamento'?'Valor mensal (R$)':'Valor total (R$)';
-  if(h)h.textContent=(natureza==='financiamento'?'Informe o valor de uma prestação. O sistema projeta esse valor pelos meses escolhidos.':'Informe o valor total da compra. O sistema divide pelas parcelas e ajusta os centavos na última.')+' O status selecionado será aplicado à primeira parcela; as demais começam pendentes.';
+  if(v)v.placeholder=tipo==='receita'?'Valor recebido ou previsto (R$)':natureza==='financiamento'?'Valor mensal (R$)':'Valor total (R$)';
+  if(h)h.textContent=tipo==='receita'?'Informe o valor da receita.':(natureza==='financiamento'?'Informe o valor de uma prestação. O sistema projeta esse valor pelos meses escolhidos.':'Informe o valor total da compra. O sistema divide pelas parcelas e ajusta os centavos na última.')+' O status selecionado será aplicado à primeira parcela; as demais começam pendentes.';
   s.title=natureza==='financiamento'?'Prestação/financiamento de 2 a 600 meses':'Compra parcelada de 1 a 30 vezes';
 }
 async function mostrarCompromissos(){
@@ -4213,19 +4239,32 @@ function viewPlanilha(ed){
   const mobileFlow=totalFluxo>0
     ?'<section class="mobile-flow" aria-label="Comparativo de entradas e saídas do mês"><div class="mobile-flow-header"><div><small>FLUXO DO MÊS</small><b>Entradas e saídas</b></div><span>'+S.lanc.length+' movimentações</span></div><div class="mobile-flow-track" role="img" aria-label="Entradas representam '+percentualEntradas.toFixed(0)+'% e saídas '+percentualSaidas.toFixed(0)+'% do volume registrado"><i class="income" style="width:'+percentualEntradas+'%"></i><i class="expense" style="width:'+percentualSaidas+'%"></i></div><div class="mobile-flow-values"><div><small>Entradas</small><b class="pos">'+brl(rec)+'</b></div><div><small>Saídas</small><b class="neg">'+brl(des)+'</b></div></div></section>'
     :'<section class="mobile-flow mobile-flow-empty"><div><small>FLUXO DO MÊS</small><b>Seu movimento financeiro começa aqui</b><p>Registre uma receita ou despesa para acompanhar entradas e saídas neste comparativo.</p></div></section>';
-  const novo=ed?`<tr class="novo ${S.mobileAddOpen?'is-open':''}" id="novo"><td data-label="Vencimento"><input aria-label="Vencimento" type="date" id="n_data"></td><td data-label="Descrição"><div style="display:grid;gap:5px;min-width:0"><input id="n_desc" placeholder="Descrição da compra ou compromisso" style="min-width:0"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
-   <td data-label="Tipo"><select aria-label="Tipo" id="n_tipo" onchange="atualizarParcelamento()">${tpOpts('despesa')}</select></td><td data-label="Categoria"><select aria-label="Categoria" id="n_cat" onchange="atualizarParcelamento()">${catOpts('despesa')}</select></td>
+  const tipoInicial=S.mobileAddType==='receita'?'receita':'despesa';
+  const periodo=String(S.ano.ano)+'-'+String(S.mes.mes).padStart(2,'0');
+  const hoje=dataLocalISO();
+  const dataInicial=hoje.startsWith(periodo+'-')?hoje:periodo+'-01';
+  const comMovimentos=S.lanc.length>0;
+  const sheetStart=`<section class="cf-sheet-start" aria-labelledby="cf-sheet-start-title">
+    <h2 id="cf-sheet-start-title">${comMovimentos?'Melhore sua planilha':'Monte sua planilha'}</h2>
+    <p>${comMovimentos?'Revise categorias e pagamentos para entender melhor para onde seu dinheiro vai.':'Registre uma entrada e depois suas despesas. Se já tiver um arquivo, abra Ferramentas da planilha para importar.'}</p>
+    <div class="cf-sheet-start-actions">
+    ${ed&&!comMovimentos&&!S.mobileAddOpen?'<button type="button" data-act="mobileadd" data-tipo="receita">Registrar uma entrada</button>':''}
+    ${ed&&comMovimentos&&S.lanc.some(row=>!row.categoria_id)?'<button type="button" data-act="planilha-categorias">Revisar categorias</button>':''}
+    <button type="button" class="sec" data-act="planilha-ajuda">Pedir ajuda ao Tamanduá</button>
+    </div></section>`;
+  const novo=ed?`<tr class="novo ${S.mobileAddOpen?'is-open':''}" id="novo"><td data-label="Vencimento"><input aria-label="Vencimento" type="date" id="n_data" value="${dataInicial}"></td><td data-label="Descrição"><div style="display:grid;gap:5px;min-width:0"><input id="n_desc" placeholder="${tipoInicial==='receita'?'Ex.: salário ou trabalho extra':'Ex.: mercado, aluguel ou internet'}" style="min-width:0"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
+   <td data-label="Tipo"><select aria-label="Tipo" id="n_tipo" onchange="atualizarParcelamento()">${tpOpts(tipoInicial)}</select></td><td data-label="Categoria"><select aria-label="Categoria" id="n_cat" data-tipo="${tipoInicial}">${catOpts(tipoInicial)}</select></td>
    <td data-label="Valor"><input aria-label="Valor" type="number" step="0.01" min="0" id="n_valor" placeholder="Valor total (R$)"></td><td data-label="Status"><select aria-label="Status" id="n_status">${stOpts('pendente')}</select></td>
    <td data-label="Responsável"><select aria-label="Responsável" id="n_mem">${memOpts(S.me.id)}</select></td><td data-label="Ações"><button data-act="add" aria-label="Salvar novo lançamento">Adicionar</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
-  return `<div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button></div>${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
+  return `<div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button></div>${sheetStart}${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card v0-mobile-balance"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
   <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>
   <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar v0-mobile-action-grid">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
-   <button class="sec" data-act="xlsx">⬇ Exportar ano (Excel)</button><button class="sec" data-act="csv">CSV do mês</button><button class="sec" data-act="imp" ${ed?'':'disabled'}>⬆ Importar planilha</button><button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" hidden>
+   <button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" hidden>
    <button class="sec" data-act="recorr" ${ed?'':'disabled'}>Gerar recorrentes</button>
    ${fe?`<button class="sec" data-act="reabrir" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>Reabrir mês</button>`:`<button class="sec" data-act="fechar" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ${MN[S.mes.mes-1]}</button>`}
    <button class="sec" data-act="copmes" ${ed?'':'disabled'}>⧉ Copiar mês anterior</button>
@@ -4998,9 +5037,9 @@ function viewSaidaFamilia(dono){
   const notice=dono&&!successors.length
     ? 'Convide outra pessoa e espere que ela entre para poder transferir a responsabilidade.'
     : 'Você perde o acesso a esta família e pode entrar em outra com um novo convite. Os registros compartilhados ficam na família atual.';
-  return '<section class="cf-family-area"><div class="cf-family-area-body"><h2>Sair da família</h2><p class="mu">'+notice+'</p>'+
+  return '<section class="cf-family-area"><div class="cf-family-area-body"><details><summary>Trocar de família ou sair</summary><p class="mu">'+notice+'</p>'+
     successorField+(dono&&!successors.length?'':'<div class="row"><button type="button" class="sec" data-act="sairfamilia">Sair da família</button></div>')+
-    '</div></section>';
+    '</details></div></section>';
 }
 
 function viewFamilia(){
@@ -5010,11 +5049,21 @@ function viewFamilia(){
     : '<tr data-mid="'+x.id+'"><td data-label="Membro"><b>'+esc(x.nome)+'</b></td><td data-label="Acesso" class="mu">'+esc(x.usuario_id?(x.papel==='dono'?'Responsável':x.papel==='editor'?'Editor':'Somente leitura'):'Sem login')+'</td><td data-label="Renda mensal" class="mu">'+(x.renda_mensal!=null?brl(x.renda_mensal):'Não informada')+'</td><td data-label="Ações" class="mu">—</td></tr>'
   ).join('');
   const memberEdit=areas.membros&&ed?'<div class="row cf-family-editor"><input id="mnome" placeholder="Nome (ex.: filho, esposa)"><input id="mrenda" type="number" step="0.01" placeholder="Renda mensal"><button data-act="addmem">Adicionar membro</button></div>':'';
-  const inviteEdit=areas.convites&&ed?'<div class="row cf-family-editor"><select id="cpapel"><option value="editor">Editor</option><option value="leitor">Leitor</option></select><button data-act="convite">Gerar código</button></div><div id="cres" class="cf-family-code"></div>':'<div class="mu">Convites ficam separados dos membros para facilitar o controle de acesso.</div>';
+  const inviteEdit=areas.convites&&ed?`<div class="cf-family-invite">
+    <label>O que a pessoa poderá fazer?<select id="cpapel"><option value="leitor">Consultar planilha e relatórios</option><option value="editor">Consultar e editar lançamentos</option></select></label>
+    <button type="button" data-act="convite">Gerar código de uso único</button>
+    <div id="cres" class="cf-invite-result" hidden>
+      <label>Código para enviar<input id="codigo-gerado" readonly></label>
+      <button type="button" class="sec" data-act="copiarconvite">Copiar código</button>
+      <p class="mu">Quem receber deve abrir o app, fazer login e escolher “Entrar com código”. Se já estiver em outro espaço, precisa sair dele primeiro.</p>
+    </div>
+    </div>`:'';
+  const pessoas=membrosAtivos().filter(member=>member.usuario_id).length;
   return '<div class="cf-family-area-shell">'+
-    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('membros','Membros da família','Pessoas cadastradas nesta família, permissões e renda mensal.','Editar membros')+
+    '<section class="cf-family-summary"><h2>'+esc(S.fam.nome)+'</h2><p>'+pessoas+(pessoas===1?' pessoa com acesso':' pessoas com acesso')+' · Um espaço por conta</p><p>As pessoas com acesso compartilham a planilha deste espaço. Você pode usar sozinho e convidar alguém quando quiser.</p></section>'+
+    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('convites','Convidar alguém',ed?'Escolha o acesso e envie o código à pessoa.':'Quem pode editar a família consegue gerar convites.','Criar convite')+inviteEdit+'</div></section>'+
+    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('membros','Quem tem acesso','Perfis sem login podem organizar responsáveis na planilha e não acessam a conta.','Editar pessoas')+
     '<div class="scroll cf-family-table"><table style="min-width:0"><tbody>'+m+'</tbody></table></div>'+memberEdit+'</div></section>'+
-    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('convites','Convites e acessos','Crie códigos para adicionar alguém sem misturar convites com a relação de membros.','Gerenciar convites')+inviteEdit+'</div></section>'+
     viewSaidaFamilia(dono)+'</div>';
 }
 
@@ -5047,7 +5096,12 @@ document.addEventListener('click',async e=>{
     toast('Você saiu da família. Agora pode criar outra ou entrar por convite.');
   }
   else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));await boot()}
-  else if(a==='entrarfam'){const id=await q(sb.rpc('aceitar_convite',{p_codigo:$('#cod').value.trim()}));await boot()}
+  else if(a==='entrarfam'){
+    const codigo=$('#cod').value.trim();
+    if(!codigo)return toast('Digite o código que você recebeu.',1);
+    await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));
+    await boot();
+  }
   else if(a==='entrarfam-pix'){const campo=$('#cod-pix'),codigo=campo?.value.trim();if(!codigo)return toast('Digite o código do convite.',1);const id=await q(sb.rpc('aceitar_convite',{p_codigo:codigo}));toast('Convite aceito! Abrindo a família…');await boot()}
   else if(a==='mobilemore'){S.mobileMore=!S.mobileMore;render()}
   else if(a==='companion'){mobileCompanionGuide()}
@@ -5057,7 +5111,23 @@ document.addEventListener('click',async e=>{
     S.mobileMore=false;S.mobileAddOpen=false;S.view=b.dataset.v||'planilha';
     if(S.view==='plan')await carregarPlan();else render();
   }
-  else if(a==='mobileadd'){S.mobileAddOpen=!S.mobileAddOpen;render();if(S.mobileAddOpen)document.getElementById('n_desc')?.focus()}
+  else if(a==='mobileadd'){
+    S.mobileAddOpen=!S.mobileAddOpen;
+    S.mobileAddType=b.dataset.tipo==='receita'?'receita':'despesa';
+    render();
+    if(S.mobileAddOpen){atualizarParcelamento();$('#n_desc')?.focus();}
+  }
+  else if(a==='planilha-ajuda'){
+    if(!S.fam||!S.me)return;
+    const message=S.lanc.length
+      ? 'Ajude a melhorar a planilha deste mês. Veja o que está sem categoria e me indique as mudanças que devo revisar antes de aplicar.'
+      : 'Quero montar minha primeira planilha mensal do zero. Me ajude a escolher as categorias iniciais e a registrar minha primeira entrada.';
+    S.view='tamandua';S.mobileMore=false;render();
+    window.dispatchEvent(new CustomEvent('copiloto:tamandua-draft',{detail:message}));
+  }
+  else if(a==='planilha-categorias'){
+    window.CFTamanduaActions?.handle('Organizar minha planilha');
+  }
   else if(a==='smartgo'){S.mobileMore=false;S.mobileAddOpen=false;S.view=b.dataset.v||'planilha';if(S.view==='plan')await carregarPlan();render()}
   else if(a==='editfamily'||a==='editinvites'||a==='editcategories'||a==='editaccount'){const key={editfamily:'membros',editinvites:'convites',editcategories:'categorias',editaccount:'conta'}[a];S.familyAreas[key]=!S.familyAreas[key];render()}
   else if(a==='view'){
@@ -5080,7 +5150,7 @@ document.addEventListener('click',async e=>{
     const limite=natureza==='financiamento'?600:30;
     if(!Number.isInteger(parcelas)||parcelas<1||parcelas>limite)return toast('Quantidade de parcelas inválida para o tipo escolhido.',1);
     if(natureza==='financiamento'&&parcelas<2)return toast('Uma prestação/financiamento precisa ter pelo menos 2 meses.',1);
-    const inicio=$('#n_data').value||dataLocalISO();
+    const inicio=$('#n_data').value;
     const [yy,mm,dd]=inicio.split('-').map(Number);
     if(!yy||!mm||!dd||mm<1||mm>12||dd<1||dd>31)return toast('Data inicial inválida.',1);
     if(parcelas>1){
@@ -5203,7 +5273,13 @@ document.addEventListener('click',async e=>{
   else if(a==='recuperar')await recuperarConta();
   else if(a==='copiarcodigo'){if(!S.codigoRecuperacao)return;try{await navigator.clipboard.writeText(S.codigoRecuperacao);toast('Código copiado. Guarde-o em local seguro.')}catch(e){const i=$('#codigo-recuperacao-exibido');if(i){i.select();toast('Selecione e copie o código manualmente.')}}}
   else if(a==='fecharcodigo'){const o=document.getElementById('codigo-recuperacao-modal');if(o)o.remove();S.codigoRecuperacao=null}
-  else if(a==='convite'){const limite=limiteMembros();if(membrosAtivos().length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#cres').textContent=c}
+  else if(a==='convite'){const limite=limiteMembros();if(membrosAtivos().length>=limite)return toast('Limite do plano atingido: '+limite+' pessoas no total.',1);const c=await q(sb.rpc('criar_convite',{p_familia:S.fam.id,p_papel:$('#cpapel').value}));$('#codigo-gerado').value=c;$('#cres').hidden=false}
+  else if(a==='copiarconvite'){
+    const campo=$('#codigo-gerado');
+    if(!campo?.value)return;
+    try{await navigator.clipboard.writeText(campo.value);toast('Código copiado.');}
+    catch(_){campo.focus();campo.select();toast('Código selecionado para copiar.');}
+  }
   }catch(err){console.error('Falha em ação do aplicativo:',a,err);toast('Não foi possível concluir esta ação: '+(err?.message||'erro inesperado'),1)}finally{S.busy=false}
 });
 document.addEventListener('change',async e=>{

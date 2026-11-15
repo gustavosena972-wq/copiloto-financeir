@@ -21,12 +21,12 @@ Use este roteiro com a versão Android que será enviada. Revise cada declaraç�
 | Catálogo de compras | Conferir Brasil, disponibilidade e preço dos três produtos de 30 dias. Pro R$ 20,99, Max R$ 30,39 e Ultra R$ 50,00 são os valores pretendidos. A loja determina o preço cobrado. |
 
 **Descrição curta sugerida**  
-Organize as contas da família, importe planilhas e planeje com o Tamanduá.
+Crie ou melhore sua planilha financeira com a ajuda do Tamanduá.
 
 **Descrição sugerida**  
-Acompanhe receitas, despesas, vencimentos e metas da sua família. Cada conta participa de uma família por vez, com acesso por convite e permissões de edição ou leitura.
+Monte uma planilha mensal do zero. Registre sua primeira entrada, acompanhe despesas e vencimentos e veja como o saldo muda conforme você organiza o mês. Use sozinho ou convide pessoas de confiança para participar do mesmo espaço financeiro.
 
-Importe planilhas e extratos em formatos compatíveis e revise os lançamentos antes de salvar. Veja o resumo do mês, compare os períodos e pergunte ao Tamanduá como começar a organizar suas contas. Você pode configurar o jeito como prefere receber ajuda.
+Se já tiver planilhas ou extratos em formatos compatíveis, importe e confira a prévia antes de salvar. O Tamanduá ajuda a estruturar o orçamento e oferece uma revisão das categorias para você confirmar. Convites podem dar acesso de leitura ou de edição. Cada conta participa de um espaço por vez.
 
 ## Inventário para Segurança dos dados
 

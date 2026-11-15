@@ -62,3 +62,30 @@ test('an import preview separates the scrollable table from the confirmation con
  assert.equal((html.match(/<tr>/g)||[]).length,25);
  assert.match(html,/<\/table>\s*<\/div>\s*<footer>[\s\S]*id="imp_modo"[\s\S]*data-act="impok"[^>]*>Importar planilha/);
 });
+
+function renderLedger(state, editable=true){
+ const body=source.slice(source.indexOf('function viewPlanilha('),source.indexOf('function viewGrupos('));
+ return vm.runInNewContext(body+';viewPlanilha(ed)',{
+  S:{ano:{ano:2026,status:'aberto'},mes:{mes:8,status:'aberto'},me:{id:'p'},lanc:[],cats:[],membros:[],...state},
+  ed:editable,brl,esc:String,canEdit:()=>editable,viewStatus:()=>'',quickEditButton:()=>'',
+  MN:Array(12).fill('Mês'),window:{innerWidth:390},dataLocalISO:()=>'2026-11-15',
+  tpOpts:type=>'<option selected>'+type+'</option>',catOpts:type=>'<option>'+type+'</option>',stOpts:()=>'',memOpts:()=>''
+ });
+}
+test('an empty sheet offers a first entry and prefills a date in the selected month',()=>{
+ const html=renderLedger({mobileAddType:'receita'});
+ assert.match(html,/Monte sua planilha/);
+ assert.match(html,/data-act="mobileadd" data-tipo="receita"/);
+ assert.match(html,/id="n_data" value="2026-08-01"/);
+ assert.match(html,/id="n_cat" data-tipo="receita"/);
+ assert.equal((html.match(/data-act="imp"/g)||[]).length,1);
+});
+test('a populated sheet offers category review only while editing is allowed',()=>{
+ const lanc=[{id:'expense',tipo:'despesa',valor:10,descricao:'Mercado',status:'pendente'}];
+ const html=renderLedger({lanc});
+ assert.match(html,/Melhore sua planilha/);
+ assert.match(html,/data-act="planilha-categorias"/);
+ assert.doesNotMatch(html,/data-tipo="receita">Registrar uma entrada/);
+ assert.doesNotMatch(renderLedger({lanc},false),/data-act="planilha-categorias"/);
+ assert.doesNotMatch(renderLedger({lanc,mes:{mes:8,status:'fechado'}}),/data-act="planilha-categorias"/);
+});
