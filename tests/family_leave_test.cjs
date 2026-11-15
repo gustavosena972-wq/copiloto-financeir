@@ -56,11 +56,20 @@ test('leaving a family preserves shared records and revokes private access',asyn
   `);
   await db.exec(fs.readFileSync(path.join(files,migration),'utf8'));
   await db.exec(`
+   create function public.tamandua_salvar_conversa(uuid,text,text) returns uuid
+   language sql as $$select familia_id from public.membros where usuario_id=auth.uid()$$;
+  `);
+  const binding=fs.readdirSync(files).find(name=>name.endsWith('_tamandua_conversa_vinculada.sql'));
+  await db.exec(fs.readFileSync(path.join(files,binding),'utf8'));
+  const save="select tamandua_salvar_conversa_vinculada($1,$2,null,'pergunta','resposta') as familia_id";
+
+  await db.exec(`
    create trigger membros_protege before update or delete on membros for each row execute function trg_membros_protege();
    create trigger membros_limite before insert on membros for each row execute function limitar_membros_por_plano();
    create function public.aceitar_convite(text) returns uuid language sql as $$select private.aceitar_convite($1)$$;
   `);
   await as(editor);
+  assert.deepEqual((await db.query(save,[m2,f1])).rows,[{familia_id:f1}]);
   assert.equal((await db.query('select familia_id from lancamentos')).rows[0].familia_id,f1);
   assert.equal((await db.query('select usuario_id from conversas_ia')).rows[0].usuario_id,editor);
   await assert.rejects(db.query("select aceitar_convite('ABCDEF1234567890ABCDEF12')"),/única família/);
@@ -72,6 +81,7 @@ test('leaving a family preserves shared records and revokes private access',asyn
   }
   await db.query("select aceitar_convite('ABCDEF1234567890ABCDEF12')");
   assert.deepEqual((await db.query('select familia_id from lancamentos')).rows,[{familia_id:f2}]);
+  await assert.rejects(db.query(save,[m2,f1]),/vínculo com a família mudou/);
   for(const table of ['conversas_ia','ia_aprendizados']){
    assert.equal((await db.query('select * from '+table)).rows.length,0);
   }

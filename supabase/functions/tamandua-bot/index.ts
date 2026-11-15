@@ -34,7 +34,7 @@ Deno.serve(async (request) => {
     const {data:auth,error:authError} = await db.auth.getUser(token);
     if (authError || !auth.user) return json(origin,{error:"Sessão inválida."},401);
     const userId = auth.user.id;
-    const {data:member,error:memberError} = await db.from("membros").select("familia_id").eq("usuario_id",userId).maybeSingle();
+    const {data:member,error:memberError} = await db.from("membros").select("id,familia_id").eq("usuario_id",userId).maybeSingle();
     if (memberError || !member) return json(origin,{error:"Família não autorizada."},403);
     const familyId = member.familia_id;
     const {data:prefs,error:prefsError} = await db.from("tamandua_preferencias").select("memoria_habilitada,idioma").eq("usuario_id",userId).eq("familia_id",familyId).maybeSingle();
@@ -73,6 +73,11 @@ Deno.serve(async (request) => {
         learnings:(memoryResult.data || []).map(x=>({key:x.chave,value:x.valor})),
         history:(historyResult.data || []).slice().reverse().map(x=>({role:x.papel,content:x.conteudo}))
       });
+      const {data:activeMembership,error:membershipError} = await db.from("membros")
+        .select("id").eq("id",member.id).eq("usuario_id",userId).eq("familia_id",familyId).maybeSingle();
+      if (membershipError || !activeMembership) {
+        return json(origin,{error:"Seu vínculo com a família mudou. Abra uma nova conversa."},409);
+      }
       const response = await fetch("https://api.openai.com/v1/responses",{
         method:"POST",signal:AbortSignal.timeout(25000),
         headers:{Authorization:`Bearer ${apiKey}`,"Content-Type":"application/json"},
@@ -94,9 +99,11 @@ Deno.serve(async (request) => {
       }
       knowledgeUsed = knowledgeResult.data?.length || 0;
     }
-    const {data:saved,error:saveError} = await db.rpc("tamandua_salvar_conversa",{
+    const {data:saved,error:saveError} = await db.rpc("tamandua_salvar_conversa_vinculada",{
+      p_vinculo:member.id,p_familia:familyId,
       p_conversa:conversationId,p_mensagem:input.message,p_resposta:answer
     });
+    if (saveError?.code === "42501") return json(origin,{error:"Seu acesso à família mudou. Abra uma nova conversa."},409);
     if (!saveError && saved) conversationId = saved;
     // Only operational metadata. No message bodies, financial values or upstream errors in logs.
     if (saveError) console.error("tamandua_history_not_saved",saveError.code);
