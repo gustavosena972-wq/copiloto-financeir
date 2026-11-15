@@ -8,7 +8,8 @@ test('old private content disappears before a new session waits for configuratio
  const state={user:{id:'new-user'},fam:{id:'old-family'},lanc:[{descricao:'private'}],notifs:[{id:'old-notification'}]};
  const screen={innerHTML:'private content'};
  const body=source.slice(source.indexOf('function clearPrivateWorkspace()'),source.indexOf('function renderAuth()'));
- vm.runInNewContext(body+';boot()',{S:state,$:()=>screen,carregarConfig:()=>new Promise(()=>{})});
+ vm.runInNewContext(body+';boot()',{S:state,$:()=>screen,clearTimeout,carregarConfig:()=>new Promise(()=>{})});
  assert.doesNotMatch(screen.innerHTML,/private content/);
  assert.equal(state.fam,null);assert.equal(state.lanc.length,0);assert.equal(state.notifs.length,0);
 });
+
