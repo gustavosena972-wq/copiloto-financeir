@@ -3029,9 +3029,17 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 </style>
 <style id="cf-android-v0-mobile-1-0-21">
 .cf-family-area-shell{display:grid;gap:12px}
-.cf-family-summary,.cf-sheet-start{display:grid;gap:12px;margin-bottom:14px;padding:16px;border:1px solid var(--bd);border-radius:18px;background:var(--card)}
-.cf-family-summary h2,.cf-sheet-start h2{font-size:18px;margin:0}
-.cf-family-summary p,.cf-sheet-start p,.cf-family-join p{margin:0;color:var(--mu);line-height:1.5}
+.cf-family-summary,.cf-sheet-start{display:grid;gap:12px;padding:clamp(16px,4vw,26px);border-radius:16px;background:#243d32;color:#fcf9ef}
+.cf-sheet-start{margin-bottom:16px}
+.cf-family-summary h2,.cf-sheet-start h2{font-size:1.375rem;line-height:1.2;letter-spacing:-.025em;margin:0;overflow-wrap:anywhere}
+.cf-family-summary p,.cf-sheet-start p,.cf-family-join p{margin:0;line-height:1.55}
+.cf-family-summary p,.cf-sheet-start p{color:#e0e9df;max-width:56ch}
+.cf-family-summary .cf-family-count{font-weight:700;color:#fff4d7}
+.cf-sheet-start-actions button{background:#e9d7ae!important;color:#273b31!important;border:1px solid #e9d7ae!important;box-shadow:none!important}
+.cf-sheet-start-actions button.sec{background:transparent!important;color:#fcf9ef!important;border-color:#9cb3a4!important}
+.cf-sheet-start-actions button:focus-visible{outline:3px solid #f4d58e;outline-offset:3px}
+.cf-sheet-start-actions button:active{transform:translateY(1px)}
+.cf-family-join p{color:var(--mu)}
 .cf-family-join{display:grid;gap:9px;padding:14px 0;border-bottom:1px solid var(--bd)}
 .cf-family-join h2{font-size:17px;margin:0}
 .cf-family-join label,.cf-family-invite label{display:grid;gap:5px}
@@ -3039,16 +3047,23 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 .cf-family-invite input,.cf-family-invite select{width:100%;min-width:0}
 .cf-sheet-start-actions{display:flex;flex-wrap:wrap;gap:8px}
 .cf-sheet-start-actions button,.cf-family-join button,.cf-family-invite button{min-height:44px}
-.cf-family-area summary{cursor:pointer;padding:6px 0;font-weight:700}
+.cf-family-area summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:700}
 .cf-invite-result[hidden]{display:none}
-.cf-invite-result{display:grid;gap:8px}
+.cf-invite-result{display:grid;gap:10px;padding:14px;border:1px solid var(--cf-line,var(--bd));border-radius:12px}
+.cf-invite-result input{font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.cf-family-roster{list-style:none;padding:0;margin:0;border-top:1px solid var(--cf-line,var(--bd))}
+.cf-family-roster li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--cf-line,var(--bd))}
+.cf-family-roster li:last-child{border-bottom:0;padding-bottom:0}
+.cf-family-roster strong,.cf-family-roster span{overflow-wrap:anywhere}
+.cf-family-roster strong{font-size:.9375rem}
+.cf-family-roster span{font-size:.8125rem;color:var(--cf-muted,var(--mu));text-align:right}
+.cf-family-roster small{grid-column:1/-1;color:var(--cf-muted,var(--mu));font-size:.8125rem}
 @media(max-width:420px){.cf-sheet-start-actions button{flex:1 1 100%}}
 .cf-family-area{background:var(--card);border:1px solid var(--bd);border-radius:18px;overflow:hidden}
 .cf-family-area-body{padding:16px}
 .cf-family-area-header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
 .cf-family-area-header h2{margin:2px 0 3px;font-size:18px;letter-spacing:-.01em}
 .cf-family-area-header p{margin:0;color:var(--mu);font-size:12.5px;max-width:620px}
-.cf-family-area-kicker{font-size:10px;letter-spacing:.12em;color:var(--ac2);font-weight:800}
 .cf-family-area-actions{display:flex;flex:none}
 .cf-family-editor{padding-top:10px;border-top:1px solid var(--bd);margin-top:10px}
 .cf-family-table{margin:0!important}
@@ -3062,6 +3077,10 @@ html,body,#app{max-width:100%;overflow-x:hidden}
   .cf-family-area-actions .chip{min-height:44px;padding:9px 12px}
   .cf-family-editor{display:grid;grid-template-columns:1fr;gap:8px}
   .cf-family-editor>*{width:100%!important;min-height:48px}
+}
+@media(max-width:420px){
+  .cf-family-area-header{display:grid;gap:10px}
+  .cf-family-area-actions button{width:100%}
 }
 </style><style id="cf-smart-mobile-1-0-22">
 .cf-smart-briefing{margin:14px 0 16px;padding:17px;border:1px solid rgba(54,82,65,.15);border-radius:22px;background:linear-gradient(145deg,#f7faf6 0%,#eef4ec 100%);box-shadow:0 14px 34px rgba(31,52,39,.10)}
@@ -4258,7 +4277,7 @@ function viewPlanilha(ed){
    <td data-label="Responsável"><select aria-label="Responsável" id="n_mem">${memOpts(S.me.id)}</select></td><td data-label="Ações"><button data-act="add" aria-label="Salvar novo lançamento">Adicionar</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
-  return `<div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button></div>${sheetStart}${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
+  return `${sheetStart}<div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button></div>${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card v0-mobile-balance"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
   <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>
@@ -5026,7 +5045,9 @@ function viewChecape(ed){
 }
 function familyAreaHeader(key,title,desc,label='Gerenciar área'){
   const open=!!S.familyAreas?.[key];
-  return '<div class="cf-family-area-header"><div><span class="cf-family-area-kicker">ÁREA</span><h2>'+title+'</h2><p>'+desc+'</p></div><div class="cf-family-area-actions"><button type="button" class="sec chip" data-act="'+(key==='membros'?'editfamily':key==='convites'?'editinvites':key==='categorias'?'editcategories':'editaccount')+'" aria-expanded="'+(open?'true':'false')+'">'+label+'</button></div></div>';
+  const action={membros:'editfamily',convites:'editinvites',categorias:'editcategories',conta:'editaccount'}[key];
+  return '<div class="cf-family-area-header"><div><h2>'+title+'</h2><p>'+desc+'</p></div>'+
+    (label?'<div class="cf-family-area-actions"><button type="button" class="sec chip" data-act="'+action+'" aria-expanded="'+open+'">'+(open?'Fechar':label)+'</button></div>':'')+'</div>';
 }
 function viewSaidaFamilia(dono){
   const successors=dono?membrosAtivos().filter(member=>member.usuario_id&&member.id!==S.me.id):[];
@@ -5044,10 +5065,15 @@ function viewSaidaFamilia(dono){
 
 function viewFamilia(){
   const ed=canEdit(),dono=S.me?.papel==='dono',areas=S.familyAreas||{};
-  const m=membrosAtivos().map(x=>areas.membros
-    ? '<tr data-mid="'+x.id+'"><td data-label="Membro">'+esc(x.nome)+'</td><td data-label="Acesso" class="mu">'+(x.usuario_id?(dono&&x.papel!=='dono'?'<select data-papel-membro="'+x.id+'" aria-label="Permissão de '+esc(x.nome)+'"><option value="editor" '+(x.papel==='editor'?'selected':'')+'>Editor</option><option value="leitor" '+(x.papel==='leitor'?'selected':'')+'>Somente leitura</option></select>':esc(x.papel)):'sem login')+'</td><td data-label="Renda mensal"><input type="number" step="0.01" min="0" data-rf="renda_mensal" value="'+(x.renda_mensal??'')+'" placeholder="Renda" '+(ed?'':'disabled')+'></td><td data-label="Ações">'+(ed&&!x.usuario_id?'<button class="red chip" data-act="delmem" data-id="'+x.id+'">Excluir</button>':'')+'</td></tr>'
-    : '<tr data-mid="'+x.id+'"><td data-label="Membro"><b>'+esc(x.nome)+'</b></td><td data-label="Acesso" class="mu">'+esc(x.usuario_id?(x.papel==='dono'?'Responsável':x.papel==='editor'?'Editor':'Somente leitura'):'Sem login')+'</td><td data-label="Renda mensal" class="mu">'+(x.renda_mensal!=null?brl(x.renda_mensal):'Não informada')+'</td><td data-label="Ações" class="mu">—</td></tr>'
-  ).join('');
+  const members=membrosAtivos();
+  const role=x=>x.usuario_id?({dono:'Responsável',editor:'Pode editar',leitor:'Somente leitura'}[x.papel]||'Com acesso'):'Sem login';
+  const roster='<ul class="cf-family-roster" aria-label="Pessoas e permissões">'+members.map(x=>
+    '<li><strong>'+esc(x.nome)+(x.id===S.me?.id?' (você)':'')+'</strong><span>'+role(x)+'</span>'+
+    (x.renda_mensal!=null?'<small>Renda mensal · '+brl(x.renda_mensal)+'</small>':'')+'</li>'
+  ).join('')+'</ul>';
+  const m=areas.membros&&ed?members.map(x=>
+    '<tr data-mid="'+x.id+'"><td data-label="Membro">'+esc(x.nome)+'</td><td data-label="Acesso" class="mu">'+(x.usuario_id&&dono&&x.papel!=='dono'?'<select data-papel-membro="'+x.id+'" aria-label="Permissão de '+esc(x.nome)+'"><option value="editor" '+(x.papel==='editor'?'selected':'')+'>Pode editar</option><option value="leitor" '+(x.papel==='leitor'?'selected':'')+'>Somente leitura</option></select>':role(x))+'</td><td data-label="Renda mensal"><input type="number" step="0.01" min="0" data-rf="renda_mensal" value="'+(x.renda_mensal??'')+'" aria-label="Renda mensal de '+esc(x.nome)+'" placeholder="Renda"></td><td data-label="Ações">'+(!x.usuario_id?'<button class="red chip" data-act="delmem" data-id="'+x.id+'">Excluir</button>':'')+'</td></tr>'
+  ).join(''):null;
   const memberEdit=areas.membros&&ed?'<div class="row cf-family-editor"><input id="mnome" placeholder="Nome (ex.: filho, esposa)"><input id="mrenda" type="number" step="0.01" placeholder="Renda mensal"><button data-act="addmem">Adicionar membro</button></div>':'';
   const inviteEdit=areas.convites&&ed?`<div class="cf-family-invite">
     <label>O que a pessoa poderá fazer?<select id="cpapel"><option value="leitor">Consultar planilha e relatórios</option><option value="editor">Consultar e editar lançamentos</option></select></label>
@@ -5058,12 +5084,12 @@ function viewFamilia(){
       <p class="mu">Quem receber deve abrir o app, fazer login e escolher “Entrar com código”. Se já estiver em outro espaço, precisa sair dele primeiro.</p>
     </div>
     </div>`:'';
-  const pessoas=membrosAtivos().filter(member=>member.usuario_id).length;
+  const pessoas=members.filter(member=>member.usuario_id).length;
   return '<div class="cf-family-area-shell">'+
-    '<section class="cf-family-summary"><h2>'+esc(S.fam.nome)+'</h2><p>'+pessoas+(pessoas===1?' pessoa com acesso':' pessoas com acesso')+' · Um espaço por conta</p><p>As pessoas com acesso compartilham a planilha deste espaço. Você pode usar sozinho e convidar alguém quando quiser.</p></section>'+
-    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('convites','Convidar alguém',ed?'Escolha o acesso e envie o código à pessoa.':'Quem pode editar a família consegue gerar convites.','Criar convite')+inviteEdit+'</div></section>'+
-    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('membros','Quem tem acesso','Perfis sem login podem organizar responsáveis na planilha e não acessam a conta.','Editar pessoas')+
-    '<div class="scroll cf-family-table"><table style="min-width:0"><tbody>'+m+'</tbody></table></div>'+memberEdit+'</div></section>'+
+    '<section class="cf-family-summary"><h2>'+esc(S.fam.nome)+'</h2><p class="cf-family-count">'+pessoas+(pessoas===1?' pessoa com acesso':' pessoas com acesso')+'</p><p>As pessoas com acesso compartilham a planilha deste espaço. Cada conta participa de um espaço por vez.</p></section>'+
+    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('convites','Convidar alguém',ed?'Escolha a permissão e envie o código.':'Peça a quem pode editar a planilha para criar um convite.',ed?'Criar convite':null)+inviteEdit+'</div></section>'+
+    '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('membros','Pessoas e permissões','Perfis sem login apenas identificam responsáveis por lançamentos.',ed?'Editar pessoas':null)+
+    (m===null?roster:'<div class="scroll cf-family-table"><table style="min-width:0"><tbody>'+m+'</tbody></table></div>')+memberEdit+'</div></section>'+
     viewSaidaFamilia(dono)+'</div>';
 }
 
@@ -5129,7 +5155,12 @@ document.addEventListener('click',async e=>{
     window.CFTamanduaActions?.handle('Organizar minha planilha');
   }
   else if(a==='smartgo'){S.mobileMore=false;S.mobileAddOpen=false;S.view=b.dataset.v||'planilha';if(S.view==='plan')await carregarPlan();render()}
-  else if(a==='editfamily'||a==='editinvites'||a==='editcategories'||a==='editaccount'){const key={editfamily:'membros',editinvites:'convites',editcategories:'categorias',editaccount:'conta'}[a];S.familyAreas[key]=!S.familyAreas[key];render()}
+  else if(a==='editfamily'||a==='editinvites'||a==='editcategories'||a==='editaccount'){
+    const key={editfamily:'membros',editinvites:'convites',editcategories:'categorias',editaccount:'conta'}[a];
+    S.familyAreas[key]=!S.familyAreas[key];
+    render();
+    $('[data-act="'+a+'"]')?.focus({preventScroll:true});
+  }
   else if(a==='view'){
     S.mobileMore=false;S.mobileAddOpen=false;
     const destino=b.dataset.v;

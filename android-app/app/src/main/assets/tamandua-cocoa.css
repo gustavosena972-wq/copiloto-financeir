@@ -26,6 +26,14 @@
 #cf-tm-root .cf-presence-copy button{background:#614a36!important;color:#f6e4c6!important;min-height:36px;border:1px solid #b99b7055!important;border-radius:9px;padding:7px 12px;box-shadow:none!important;font-size:11px}
 #cf-tm-root .cf-chat-privacy-link{display:block;margin:8px auto 0;border:0!important;background:none!important;color:#dec6a6!important;padding:3px 8px!important;min-height:28px!important;box-shadow:none!important;font-size:11px!important;text-decoration:underline;text-underline-offset:3px}
 #cf-tm-root .cf-tm-voice-status{color:#f7e4c8!important}
+#cf-tm-root .cf-tm-panel[data-workspace] .cf-tm-msg:not(.user) .cf-tm-bubble{
+  background:#fffaf0!important;color:#422e22!important;border:1px solid #cebaa2;
+  padding:12px 14px!important;border-radius:6px 14px 14px 14px!important
+}
+#cf-tm-root .cf-tm-panel[data-workspace] .cf-tm-bubble{overflow-wrap:anywhere;font-size:15px!important;line-height:1.62!important}
+#cf-tm-root .cf-tm-panel[data-workspace] .cf-tm-input{font-size:16px!important;line-height:1.45!important}
+#cf-tm-root .cf-tm-panel[data-workspace] .cf-tm-inputrow:focus-within{outline:2px solid #b47b43;outline-offset:2px}
+#cf-tm-root .cf-tm-panel[data-workspace] .cf-tm-send:disabled{opacity:.65!important}
 body[data-ui="premium-fintech"] #app .landing-page #landing-privacy{background:#12243a!important;border:1px solid #8ab9d24d!important;border-radius:12px!important;padding:16px!important;gap:12px!important;color:#e4edf7!important;line-height:1.6!important}
 #landing-privacy input{width:22px!important;height:22px!important;flex-shrink:0;accent-color:#63c8ed}
 #landing-privacy a{color:#8bd8f1!important;text-decoration:underline;text-underline-offset:3px}
