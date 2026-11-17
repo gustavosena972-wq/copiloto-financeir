@@ -3640,7 +3640,7 @@ function scheduleBoot(){
 
 function clearPrivateWorkspace(){
   for(const key of ['lanc','sug','cats','contas','membros','anos','meses','resumo','meta','notifs'])S[key]=[];
-  for(const key of ['fam','me','ano','mes','plan','tamanduaProfile','imp','adm','hist','quickEdit','planoEscolhidoFamilia','tamanduaProactiveDismissedKey'])S[key]=null;
+  for(const key of ['fam','me','ano','mes','plan','planQuitada','tamanduaProfile','imp','adm','hist','quickEdit','planoEscolhidoFamilia','tamanduaProactiveDismissedKey'])S[key]=null;
   clearTimeout(S.pw);S.pw=null;
   S.internalTester=false;S.mobileMore=false;S.mobileAddOpen=false;S.sino=false;
   S.familyAreas={membros:false,convites:false,categorias:false,conta:false};
@@ -4204,7 +4204,8 @@ function monthlyFinancialSnapshot(){
 }
 function mobileSmartContext(){
   const d=monthlyFinancialSnapshot(), format=value=>brl(value/100);
-  const primeiroPasso=canEdit()&&mesAberto()&&(d.income===0||d.expense===0)
+  const podeRegistrar=canEdit()&&mesAberto();
+  const primeiroPasso=podeRegistrar&&(d.income===0||d.expense===0)
     ? '<div class="cf-sheet-start-actions" role="group" aria-label="Complete o resumo do mês">'+
       (d.income===0?'<button type="button" data-act="mobileadd" data-tipo="receita" data-origem="inicio">Registrar o que entra</button>':'')+
       (d.expense===0?'<button type="button" data-act="mobileadd" data-tipo="despesa" data-origem="inicio">Registrar uma conta</button>':'')+'</div>'
@@ -4214,7 +4215,7 @@ function mobileSmartContext(){
   const panels='<div class="cf-dashboard-panels"><section class="cf-finance-panel"><h3>Despesas por categoria</h3><p>O que mais pesa nos lançamentos do mês.</p>'+(categoryRows||'<p>Suas categorias aparecem aqui após registrar despesas.</p>')+'</section><section class="cf-finance-panel"><h3>Contas em aberto</h3><p>Vencimentos registrados que precisam de atenção.</p>'+(dueRows?'<ul class="cf-due-list">'+dueRows+'</ul>':'<p>Nenhuma conta com vencimento informado em aberto.</p>')+'</section></div>';
 
   return '<section class="cf-mobile-v025 cf-month-desk" aria-label="Resumo inteligente do mês">'+
-    '<div class="cf-month-title"><h2>Seu mês, com clareza.</h2><span>'+d.rows.length+' movimentações</span></div>'+
+    '<div class="cf-month-title"><h2>Seu mês, com clareza.</h2><span>'+d.rows.length+' '+(d.rows.length===1?'movimentação':'movimentações')+'</span></div>'+
     '<dl class="cf-money-ledger"><div><dt>Receitas registradas</dt><dd>'+format(d.income)+'</dd></div>'+
     '<div><dt>Despesas registradas</dt><dd>'+format(d.expense)+'</dd></div>'+
     '<div class="cf-ledger-result"><dt>Resultado do mês</dt><dd class="'+(d.competence<0?'neg':'')+'">'+format(d.competence)+'</dd></div></dl>'+
@@ -4222,7 +4223,9 @@ function mobileSmartContext(){
     '<p class="cf-amount-note">Valores dos lançamentos deste período. Não representam o saldo da sua conta bancária.</p>'+
     (d.ignored?'<p role="status" class="cf-validation-note">'+d.ignored+' registro(s) precisam de revisão para entrar no cálculo.</p>':'')+
     panels+
-    (!d.rows.length?'<p class="cf-empty-welcome">Vamos começar pelo primeiro lançamento. Escolha o que você tem em mãos.</p>':
+    (!podeRegistrar
+      ? (!d.rows.length?'<p class="cf-empty-welcome">Nenhum lançamento disponível neste mês.</p>':'')
+      :!d.rows.length?'<p class="cf-empty-welcome">Vamos começar pelo primeiro lançamento. Escolha o que você tem em mãos.</p>':
       (d.income===0?'<p class="cf-empty-welcome">Falta registrar o que entra para comparar com suas despesas.</p>':
         (d.expense===0?'<p class="cf-empty-welcome">Falta registrar pelo menos uma despesa para comparar com suas receitas.</p>':'')))+
     primeiroPasso+
