@@ -3069,6 +3069,10 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 .cf-plan-sections :is(.chip,.cf-plan-methods button){min-height:44px}
 .cf-plan-methods{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .cf-plan-methods button{flex:1 1 140px;white-space:normal;text-align:left}
+.cf-plan-expand-body{padding:0 0 12px}
+.cf-plan-expand-body .cf-plan-fields{padding-bottom:0}
+.cf-plan-expand-body .cf-projection-result{min-width:0}
+.cf-plan-expand-body .cf-history-chart{max-width:100%;overflow-x:auto}
 .cf-plan-sections :is(summary,button,input,select):focus-visible,.cf-plan-sections [tabindex="-1"]:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 @media(max-width:400px){.cf-plan-fields{grid-template-columns:minmax(0,1fr)}}
 .cf-family-area summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:700}
@@ -4872,8 +4876,8 @@ function viewPlan(){
       <label>Valor (R$)<input id="p_valor" type="number" min="0.01" step="0.01"></label>
       <button class="cf-plan-wide" data-act="additem">Salvar item</button>
     </div></details>`:''}
+    ${S.fam?.plano==='ultra'?viewUltraExtras(P,ed):''}
    </section>
-   ${S.fam?.plano==='ultra'?viewUltraExtras(P,ed):''}
   </div>`;
 }
 
@@ -4885,8 +4889,18 @@ function viewUltraExtras(P,ed){
     const dt=new Date(x.data+"T12:00:00").toLocaleDateString("pt-BR");
     return '<div class="cf-history-point"><div class="cf-history-column"><i style="height:'+h+'%"></i></div><b>'+brl(x.liquido)+'</b><small>'+dt+'</small></div>';
   }).join("");
-  const history='<section class="cf-section"><h2>Histórico patrimonial</h2><p>Acompanhe a evolução do patrimônio líquido.</p><button data-act="registrarpat" '+(ed?"":"disabled")+'>Registrar posição de hoje</button>'+(hist.length?'<div class="cf-history-chart">'+bars+'</div>':'<p class="cf-note">Registre sua primeira posição patrimonial.</p>')+'</section>';
-  const sim='<section class="cf-section"><h2>Compare seus aportes</h2><p>Veja quanto você juntaria com os mesmos depósitos em dois cenários.</p><div class="cf-simulator"><label>Valor disponível para este objetivo<input id="proj_inicial" type="number" min="0" step="0.01" value="0"></label><label>Aporte mensal<input id="proj_aporte" type="number" min="0" step="0.01" value="0"></label><label>Prazo em meses<input id="proj_meses" type="number" min="1" max="360" value="60"></label><label>Taxa mensal hipotética (%)<input id="proj_taxa" type="number" min="-3" max="3" step="0.01" value="0"></label><button data-act="simularproj">Comparar cenários</button></div><div id="proj_result" class="cf-projection-result" role="status">Informe os dados para comparar.</div><p class="cf-note-text">Aportes no fim do mês. A simulação usa uma taxa constante e não inclui impostos, taxas de investimento ou inflação. Na prática, o resultado pode variar e o resgate pode ter prazo.</p></section>';
+  const history='<details class="cf-plan-form"><summary>Histórico patrimonial</summary><div class="cf-plan-expand-body">'+
+    (hist.length?'<div class="cf-history-chart">'+bars+'</div>':'<p class="mu">Nenhuma posição patrimonial registrada.</p>')+
+    (ed?'<button data-act="registrarpat">Registrar posição de hoje</button>':'')+'</div></details>';
+  const sim='<details class="cf-plan-form"><summary>Simular rendimento</summary><div class="cf-plan-expand-body">'+
+    '<p class="mu">Compare o total dos aportes com o resultado de uma taxa hipotética.</p><div class="cf-plan-fields">'+
+    '<label>Valor inicial (R$)<input id="proj_inicial" type="number" min="0" step="0.01" value="0"></label>'+
+    '<label>Aporte mensal (R$)<input id="proj_aporte" type="number" min="0" step="0.01" value="0"></label>'+
+    '<label>Prazo em meses<input id="proj_meses" type="number" min="1" max="360" value="60"></label>'+
+    '<label>Taxa mensal hipotética (%)<input id="proj_taxa" type="number" min="-3" max="3" step="0.01" value="0"></label>'+
+    '<button class="cf-plan-wide" data-act="simularproj">Comparar cenários</button></div>'+
+    '<div id="proj_result" class="cf-projection-result" role="status">Informe os dados para comparar.</div>'+
+    '<p class="mu">Aportes no fim do mês. A simulação usa uma taxa constante e não inclui impostos, taxas de investimento ou inflação. Na prática, o resultado pode variar e o resgate pode ter prazo.</p></div></details>';
   return history+sim;
 }
 
@@ -5388,9 +5402,9 @@ document.addEventListener('click',async e=>{
     const meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;
     const comparacao=compararAportes(inicial,aporte,meses,taxa),out=$('#proj_result');
     if(!comparacao){out.textContent='Confira os valores, o prazo de 1 a 360 meses e a taxa entre -3% e 3% ao mês.';return;}
-    out.innerHTML='<dl><dt>Total dos aportes, sem rendimento</dt><dd>'+brl(comparacao.semRendimento)+
-      '</dd><dt>Total com a taxa hipotética</dt><dd>'+brl(comparacao.comRendimento)+
-      '</dd><dt>Diferença simulada</dt><dd>'+brl(comparacao.comRendimento-comparacao.semRendimento)+'</dd></dl>';
+    out.innerHTML='<dl class="cf-plan-values"><div><dt>Sem rendimento</dt><dd>'+brl(comparacao.semRendimento)+
+      '</dd></div><div><dt>Com a taxa hipotética</dt><dd>'+brl(comparacao.comRendimento)+
+      '</dd></div><div><dt>Diferença simulada</dt><dd>'+brl(comparacao.comRendimento-comparacao.semRendimento)+'</dd></div></dl>';
   }
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
   else if(a==='fecharmodal'){S.pv=null;S.sino=false;S.hist=null;render()}
