@@ -4743,19 +4743,44 @@ function parcelasDaMeta(alvo,prazo,guardado=0,hoje=dataLocalISO()){
   const meses=Math.max(1,(data.getUTCFullYear()-ano)*12+data.getUTCMonth()+1-mes-(data.getUTCDate()<dia?1:0));
   return {meses,valor:Math.ceil(centavos/meses)/100};
 }
+function compararAportes(inicial,aporte,meses,taxa){
+  if(![inicial,aporte,meses,taxa].every(Number.isFinite)||inicial<0||aporte<0||
+    !Number.isInteger(meses)||meses<1||meses>360||taxa<-.03||taxa>.03)return null;
+  const semRendimento=inicial+aporte*meses;
+  const variacao=Math.expm1(meses*Math.log1p(taxa));
+  const comRendimento=taxa===0?semRendimento:inicial*(1+variacao)+aporte*variacao/taxa;
+  if(!Number.isFinite(comRendimento))return null;
+  return {semRendimento:Math.round(semRendimento*100)/100,comRendimento:Math.round(comRendimento*100)/100};
+}
 function viewProximoPasso(plano,ed,quitada){
-  const meta=plano?.metas.find(m=>Number(m.valor_alvo)>Number(m.valor_atual));
+  if(!plano)return '';
+  const metasAbertas=plano.metas.filter(m=>Number(m.valor_alvo)>Number(m.valor_atual));
+  metasAbertas.sort((a,b)=>(a.prazo||'9999-12-31').localeCompare(b.prazo||'9999-12-31'));
+  const meta=metasAbertas[0];
+  const concluida=plano.metas.find(m=>Number(m.valor_alvo)>0&&Number(m.valor_atual)>=Number(m.valor_alvo));
   const confirmou=quitada?.familyId===S.fam.id&&quitada?.userId===S.user?.id;
   const simulacao=meta?.prazo?parcelasDaMeta(meta.valor_alvo,meta.prazo,meta.valor_atual):null;
+  const dividas=plano.dividas.length;
+  const detalhar=meta?'<dl class="row"><div><dt>Já guardado</dt><dd>'+brl(meta.valor_atual)+
+    '</dd></div><div><dt>Ainda falta</dt><dd>'+brl(Number(meta.valor_alvo)-Number(meta.valor_atual))+
+    '</dd></div><div><dt>Prazo</dt><dd>'+(meta.prazo?new Date(meta.prazo+'T12:00:00').toLocaleDateString('pt-BR'):'Sem data')+'</dd></div></dl>':'';
   const texto=meta
-    ? '<strong>'+esc(meta.nome)+'</strong> · Faltam '+brl(Number(meta.valor_alvo)-Number(meta.valor_atual))+'. Revise seu progresso no fechamento do mês.'
-    : 'Monte uma reserva para imprevistos ou escolha o que quer conquistar, como um curso, uma mudança ou uma viagem.';
+    ? '<strong>'+esc(meta.nome)+'</strong>'
+    : dividas
+      ? 'Dívidas em aberto no app: <strong>'+dividas+'</strong>. Confira o saldo de cada uma antes de decidir quanto guardar.'
+      : concluida
+        ? '<strong>'+esc(concluida.nome)+'</strong> foi concluída. Escolha onde quer colocar os próximos aportes.'
+        : 'Defina quanto quer guardar e até quando. Comece por uma reserva ou escolha um objetivo, como um curso.';
   const acao=meta
     ? '<button class="sec chip" data-act="focometa" data-id="'+esc(meta.id)+'">Ver minha meta</button>'
+    : dividas?'<button class="sec chip" data-act="focodividas">Revisar dívidas</button>'
     : ed?'<button class="sec chip" data-act="focometa" data-tipo="reserva_emergencia">Montar reserva</button>':'';
+  const orientacao=simulacao?brl(simulacao.valor)+' por mês até o prazo, sem contar rendimentos.'
+    :meta?.prazo&&meta.prazo<=dataLocalISO()?'O prazo passou. Revise o que falta antes de definir uma nova data.'
+    :meta&&!meta.prazo?'Sem prazo definido. Use o saldo guardado para decidir quando pretende concluir.':'';
   return '<section class="card" aria-labelledby="proximo-passo-titulo" style="margin-bottom:12px"><h2 id="proximo-passo-titulo">Seu próximo passo</h2>'+
     (confirmou?'<p role="status">Dívida marcada como quitada. Que tal escolher o próximo objetivo?</p>':'')+
-    '<p>'+texto+'</p>'+(simulacao?'<p class="mu">Para chegar ao prazo: '+brl(simulacao.valor)+' por mês, em uma simulação sem rendimentos.</p>':'')+
+    '<p>'+texto+'</p>'+detalhar+(orientacao?'<p class="mu">'+orientacao+'</p>':'')+
     '<div class="row">'+acao+
     (ed?'<button class="sec chip" data-act="focometa" data-tipo="sonho">Planejar uma meta</button>':'')+
     '</div></section>';
@@ -4779,12 +4804,12 @@ function viewPlan(){
   const divs=ord.map((x,i)=>`<div class="item"><div class="row" style="justify-content:space-between;margin:0"><b>${i+1}º · ${esc(x.nome)}</b><span class="neg">${brl(x.saldo_devedor)}</span></div><div class="row mu" style="margin:4px 0 0">${x.taxa_juros_mensal}% ao mês · mínimo ${brl(x.pagamento_minimo)}${x.credor?' · '+esc(x.credor):''}<button class="sec chip" data-act="deldiv" data-id="${x.id}" ${d}>Quitada ✔</button></div></div>`).join('')||'<div class="mu">Sem dívidas cadastradas. 🎉</div>';
   const its=P.itens.map(x=>`<div class="item row" style="justify-content:space-between;margin:0"><span>${x.tipo==='ativo'?'🟢':'🔴'} ${esc(x.nome)}</span><span>${brl(x.valor)} <button class="red chip" data-act="delitem" data-id="${x.id}" ${d}>✕</button></span></div>`).join('');
   const pt=P.pat||{};
-  return `${viewProximoPasso(P,ed,S.planQuitada)}<div class="cards"><div class="card"><small>Ativos</small><b class="pos">${brl(pt.ativos)}</b></div><div class="card"><small>Passivos (dívidas)</small><b class="neg">${brl(pt.passivos)}</b></div><div class="card"><small>Patrimônio líquido</small><b class="${Number(pt.liquido)>=0?'pos':'neg'}">${brl(pt.liquido)}</b></div></div>
+  return `${viewProximoPasso(S.plan,ed,S.planQuitada)}<div class="cards"><div class="card"><small>Ativos</small><b class="pos">${brl(pt.ativos)}</b></div><div class="card"><small>Passivos (dívidas)</small><b class="neg">${brl(pt.passivos)}</b></div><div class="card"><small>Patrimônio líquido</small><b class="${Number(pt.liquido)>=0?'pos':'neg'}">${brl(pt.liquido)}</b></div></div>
   <div class="grid2"><div class="card"><b>🎯 Metas e sonhos</b><div style="margin:8px 0">${metas}</div>
    <div class="row"><input id="m_nome" placeholder="Nome (ex.: Viagem)" style="flex:1" ${d}><input id="m_alvo" type="number" step="0.01" placeholder="Valor alvo" style="width:110px" ${d}></div>
    <div class="row"><input id="m_prazo" type="date" aria-label="Prazo da meta" ${d}><select id="m_tipo" aria-label="Tipo da meta" ${d}><option value="economia">Economia</option><option value="reserva_emergencia">Reserva de emergência</option><option value="sonho">Sonho</option></select><button data-act="addmeta" ${d}>Criar meta</button></div>
    ${ed?'<p id="cf-meta-simulacao" class="mu" role="status">Informe o valor e uma data futura para ver uma simulação mensal.</p>':''}</div>
-  <div class="card"><b>💳 Dívidas · plano de quitação</b>
+  <div class="card" id="cf-plan-dividas" tabindex="-1"><b>💳 Dívidas · plano de quitação</b>
    <div class="row" style="margin:8px 0"><button class="${met==='avalanche'?'':'sec'} chip" data-act="metodo" data-m="avalanche">Avalanche (maior juros)</button><button class="${met==='neve'?'':'sec'} chip" data-act="metodo" data-m="neve">Bola de neve (menor saldo)</button></div>
    <div>${divs}</div>
    <div class="row" style="margin-top:10px"><input id="d_nome" placeholder="Dívida" style="flex:1" ${d}><input id="d_saldo" type="number" step="0.01" placeholder="Saldo R$" style="width:100px" ${d}></div>
@@ -4802,8 +4827,7 @@ function viewUltraExtras(P,ed){
     return '<div class="cf-history-point"><div class="cf-history-column"><i style="height:'+h+'%"></i></div><b>'+brl(x.liquido)+'</b><small>'+dt+'</small></div>';
   }).join("");
   const history='<section class="cf-section"><h2>Histórico patrimonial</h2><p>Acompanhe a evolução do patrimônio líquido.</p><button data-act="registrarpat" '+(ed?"":"disabled")+'>Registrar posição de hoje</button>'+(hist.length?'<div class="cf-history-chart">'+bars+'</div>':'<p class="cf-note">Registre sua primeira posição patrimonial.</p>')+'</section>';
-  const initial=Math.max(0,Number((P.pat||{}).liquido)||0).toFixed(2);
-  const sim='<section class="cf-section"><span>PLANEJAMENTO DE LONGO PRAZO</span><h2>Simulador de objetivos</h2><div class="cf-simulator"><label>Valor inicial<input id="proj_inicial" type="number" min="0" step="0.01" value="'+initial+'"></label><label>Aporte mensal<input id="proj_aporte" type="number" min="0" step="0.01" value="0"></label><label>Prazo em meses<input id="proj_meses" type="number" min="1" max="360" value="60"></label><label>Taxa mensal hipotética (%)<input id="proj_taxa" type="number" min="0" max="3" step="0.01" value="0"></label><button data-act="simularproj">Calcular</button></div><div id="proj_result" class="cf-projection-result">Informe os dados e calcule o cenário.</div><p class="cf-note-text">Simulação matemática, sem garantia de rendimento ou recomendação de investimento.</p></section>';
+  const sim='<section class="cf-section"><h2>Compare seus aportes</h2><p>Veja quanto você juntaria com os mesmos depósitos em dois cenários.</p><div class="cf-simulator"><label>Valor disponível para este objetivo<input id="proj_inicial" type="number" min="0" step="0.01" value="0"></label><label>Aporte mensal<input id="proj_aporte" type="number" min="0" step="0.01" value="0"></label><label>Prazo em meses<input id="proj_meses" type="number" min="1" max="360" value="60"></label><label>Taxa mensal hipotética (%)<input id="proj_taxa" type="number" min="-3" max="3" step="0.01" value="0"></label><button data-act="simularproj">Comparar cenários</button></div><div id="proj_result" class="cf-projection-result" role="status">Informe os dados para comparar.</div><p class="cf-note-text">Aportes no fim do mês. A simulação usa uma taxa constante e não inclui impostos, taxas de investimento ou inflação. Na prática, o resultado pode variar e o resgate pode ter prazo.</p></section>';
   return history+sim;
 }
 
@@ -5268,6 +5292,7 @@ document.addEventListener('click',async e=>{
     S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
   else if(a==='delmem'){await q(sb.from('membros').delete().eq('id',b.dataset.id));S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
   else if(a==='metodo'){S.metodo=b.dataset.m;render()}
+  else if(a==='focodividas'){document.getElementById('cf-plan-dividas')?.focus()}
   else if(a==='focometa'){
     if(b.dataset.id){document.getElementById('cf-meta-'+b.dataset.id)?.focus();return;}
     if(!canEdit())return;
@@ -5294,7 +5319,16 @@ document.addEventListener('click',async e=>{
     await q(sb.from('patrimonio_itens').insert({familia_id:S.fam.id,tipo:$('#p_tipo').value,nome:n,valor:v}));await carregarPlan()}
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
   else if(a==='registrarpat'){if(!planoTemRecurso('patrimonioHistorico'))return toast('O histórico patrimonial é um recurso do plano Ultra.',1);if(!canEdit())return toast('Somente quem edita pode registrar o patrimônio.',1);const p=S.plan?.pat||{},now=new Date(),data=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');await q(sb.from('patrimonio_snapshots').upsert({familia_id:S.fam.id,data,ativos:Number(p.ativos)||0,passivos:Number(p.passivos)||0,liquido:Number(p.liquido)||0},{onConflict:'familia_id,data'}));toast('Posição patrimonial registrada.');await carregarPlan()}
-  else if(a==='simularproj'){if(!planoTemRecurso('simulador'))return toast('O simulador de objetivos é um recurso do plano Ultra.',1);const inicial=Number($('#proj_inicial').value),aporte=Number($('#proj_aporte').value),meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;if(![inicial,aporte,meses,taxa].every(Number.isFinite)||inicial<0||aporte<0||meses<1||meses>360||!Number.isInteger(meses)||taxa<0||taxa>0.03)return toast('Confira os valores: prazo de 1 a 360 meses e taxa de 0% a 3% ao mês.',1);const fator=Math.pow(1+taxa,meses),futuro=taxa===0?inicial+aporte*meses:inicial*fator+aporte*((fator-1)/taxa),aportado=inicial+aporte*meses,out=$('#proj_result');if(out)out.innerHTML='<span>Resultado ilustrativo</span><strong>'+brl(futuro)+'</strong><p>Valor total colocado: '+brl(aportado)+' · diferença matemática: '+brl(futuro-aportado)+'</p>';}
+  else if(a==='simularproj'){
+    if(!planoTemRecurso('simulador'))return toast('O simulador de objetivos é um recurso do plano Ultra.',1);
+    const inicial=Number($('#proj_inicial').value),aporte=Number($('#proj_aporte').value);
+    const meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;
+    const comparacao=compararAportes(inicial,aporte,meses,taxa),out=$('#proj_result');
+    if(!comparacao){out.textContent='Confira os valores, o prazo de 1 a 360 meses e a taxa entre -3% e 3% ao mês.';return;}
+    out.innerHTML='<dl><dt>Total dos aportes, sem rendimento</dt><dd>'+brl(comparacao.semRendimento)+
+      '</dd><dt>Total com a taxa hipotética</dt><dd>'+brl(comparacao.comRendimento)+
+      '</dd><dt>Diferença simulada</dt><dd>'+brl(comparacao.comRendimento-comparacao.semRendimento)+'</dd></dl>';
+  }
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
   else if(a==='fecharmodal'){S.pv=null;S.sino=false;S.hist=null;render()}
   else if(a==='plano'){const p=b.dataset.plano;if(!PLANOS[p])return;S.planoEscolhido=p;PIX.valor=PLANOS[p].valor;renderPaywall();return}
