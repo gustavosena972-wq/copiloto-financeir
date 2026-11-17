@@ -3047,6 +3047,30 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 .cf-family-invite input,.cf-family-invite select{width:100%;min-width:0}
 .cf-sheet-start-actions{display:flex;flex-wrap:wrap;gap:8px}
 .cf-sheet-start-actions button,.cf-family-join button,.cf-family-invite button{min-height:44px}
+.cf-sheet-file-actions,.cf-plan-form{margin:0 0 12px;padding:0 12px;border:1px solid var(--cf-line,var(--bd));border-radius:12px}
+.cf-sheet-file-actions summary,.cf-plan-form summary{min-height:44px;padding:12px 0;cursor:pointer;font-weight:700}
+.cf-sheet-file-actions[open] .cf-sheet-tools{margin:0 0 12px}
+.cf-sheet-file-actions .cf-sheet-tools button{min-height:44px}
+.cf-plan-sections{display:grid;gap:12px}
+.cf-plan-sections section{min-width:0}
+.cf-plan-sections :is(h2,p){overflow-wrap:anywhere}
+.cf-plan-sections h2{margin:0 0 8px;font-size:1.125rem}
+.cf-plan-list{display:grid;gap:8px;margin:12px 0}
+.cf-plan-form{margin:12px 0 0}
+.cf-plan-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:0 0 12px}
+.cf-plan-fields label{display:grid;gap:5px;min-width:0;color:var(--cf-muted,var(--mu));font-size:.875rem}
+.cf-plan-fields :is(input,select){width:100%;min-width:0;margin:0}
+.cf-plan-fields :is(input,select,button){min-height:44px}
+.cf-plan-fields .cf-plan-wide{grid-column:1/-1}
+.cf-plan-values{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));gap:12px;padding:0;margin:12px 0}
+.cf-plan-values div{padding:10px 12px;border:1px solid var(--cf-line,var(--bd));border-radius:10px}
+.cf-plan-values dt{color:var(--cf-muted,var(--mu));font-size:.8125rem}
+.cf-plan-values dd{margin:4px 0 0;font-variant-numeric:tabular-nums;font-weight:700;overflow-wrap:anywhere}
+.cf-plan-sections :is(.chip,.cf-plan-methods button){min-height:44px}
+.cf-plan-methods{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.cf-plan-methods button{flex:1 1 140px;white-space:normal;text-align:left}
+.cf-plan-sections :is(summary,button,input,select):focus-visible,.cf-plan-sections [tabindex="-1"]:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+@media(max-width:400px){.cf-plan-fields{grid-template-columns:minmax(0,1fr)}}
 .cf-family-area summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:700}
 .cf-invite-result[hidden]{display:none}
 .cf-invite-result{display:grid;gap:10px;padding:14px;border:1px solid var(--cf-line,var(--bd));border-radius:12px}
@@ -4276,7 +4300,7 @@ function viewPlanilha(ed){
   const comMovimentos=S.lanc.length>0;
   const sheetStart=`<section class="cf-sheet-start" aria-labelledby="cf-sheet-start-title">
     <h2 id="cf-sheet-start-title">${comMovimentos?'Melhore sua planilha':'Monte sua planilha'}</h2>
-    <p>${comMovimentos?'Revise categorias e pagamentos para entender melhor para onde seu dinheiro vai.':'Registre uma entrada e depois suas despesas. Se já tiver um arquivo, abra Ferramentas da planilha para importar.'}</p>
+    <p>${comMovimentos?'Revise categorias e pagamentos para entender melhor para onde seu dinheiro vai.':'Registre uma entrada e depois suas despesas. Se já tiver um arquivo, abra Importar e exportar.'}</p>
     <div class="cf-sheet-start-actions">
     ${ed&&!comMovimentos&&!S.mobileAddOpen?'<button type="button" data-act="mobileadd" data-tipo="receita">Registrar uma entrada</button>':''}
     ${ed&&comMovimentos&&S.lanc.some(row=>!row.categoria_id)?'<button type="button" data-act="planilha-categorias">Revisar categorias</button>':''}
@@ -4289,13 +4313,13 @@ function viewPlanilha(ed){
    <td data-label="Responsável"><select aria-label="Responsável" id="n_mem">${memOpts(S.me.id)}</select></td><td data-label="Ações"><button data-act="add" aria-label="Salvar novo lançamento">Adicionar</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
-  return `${sheetStart}<div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button></div>${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
+  return `${sheetStart}<details class="cf-sheet-file-actions"><summary>Importar e exportar</summary><div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button><input type="file" id="arq" hidden></div></details>${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card v0-mobile-balance"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
   <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>
   <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar v0-mobile-action-grid">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
-   <button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" hidden>
+   <button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button>
    <button class="sec" data-act="recorr" ${ed?'':'disabled'}>Gerar recorrentes</button>
    ${fe?`<button class="sec" data-act="reabrir" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>Reabrir mês</button>`:`<button class="sec" data-act="fechar" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ${MN[S.mes.mes-1]}</button>`}
    <button class="sec" data-act="copmes" ${ed?'':'disabled'}>⧉ Copiar mês anterior</button>
@@ -4773,7 +4797,7 @@ function viewProximoPasso(plano,ed,quitada){
   const confirmou=quitada?.familyId===S.fam.id&&quitada?.userId===S.user?.id;
   const simulacao=meta?.prazo?parcelasDaMeta(meta.valor_alvo,meta.prazo,meta.valor_atual):null;
   const dividas=plano.dividas.length;
-  const detalhar=meta?'<dl class="row"><div><dt>Já guardado</dt><dd>'+brl(meta.valor_atual)+
+  const detalhar=meta?'<dl class="cf-plan-values"><div><dt>Já guardado</dt><dd>'+brl(meta.valor_atual)+
     '</dd></div><div><dt>Ainda falta</dt><dd>'+brl(Number(meta.valor_alvo)-Number(meta.valor_atual))+
     '</dd></div><div><dt>Prazo</dt><dd>'+(meta.prazo?new Date(meta.prazo+'T12:00:00').toLocaleDateString('pt-BR'):'Sem data')+'</dd></div></dl>':'';
   const texto=meta
@@ -4790,7 +4814,7 @@ function viewProximoPasso(plano,ed,quitada){
   const orientacao=simulacao?brl(simulacao.valor)+' por mês até o prazo, sem contar rendimentos.'
     :meta?.prazo&&meta.prazo<=dataLocalISO()?'O prazo passou. Revise o que falta antes de definir uma nova data.'
     :meta&&!meta.prazo?'Sem prazo definido. Use o saldo guardado para decidir quando pretende concluir.':'';
-  return '<section class="card" aria-labelledby="proximo-passo-titulo" style="margin-bottom:12px"><h2 id="proximo-passo-titulo">Seu próximo passo</h2>'+
+  return '<section class="card" aria-labelledby="proximo-passo-titulo"><h2 id="proximo-passo-titulo">Seu próximo passo</h2>'+
     (confirmou?'<p role="status">Dívida marcada como quitada. Que tal escolher o próximo objetivo?</p>':'')+
     '<p>'+texto+'</p>'+detalhar+(orientacao?'<p class="mu">'+orientacao+'</p>':'')+
     '<div class="row">'+acao+
@@ -4816,18 +4840,41 @@ function viewPlan(){
   const divs=ord.map((x,i)=>`<div class="item"><div class="row" style="justify-content:space-between;margin:0"><b>${i+1}º · ${esc(x.nome)}</b><span class="neg">${brl(x.saldo_devedor)}</span></div><div class="row mu" style="margin:4px 0 0">${x.taxa_juros_mensal}% ao mês · mínimo ${brl(x.pagamento_minimo)}${x.credor?' · '+esc(x.credor):''}<button class="sec chip" data-act="deldiv" data-id="${x.id}" ${d}>Quitada ✔</button></div></div>`).join('')||'<div class="mu">Sem dívidas cadastradas. 🎉</div>';
   const its=P.itens.map(x=>`<div class="item row" style="justify-content:space-between;margin:0"><span>${x.tipo==='ativo'?'🟢':'🔴'} ${esc(x.nome)}</span><span>${brl(x.valor)} <button class="red chip" data-act="delitem" data-id="${x.id}" ${d}>✕</button></span></div>`).join('');
   const pt=P.pat||{};
-  return `${viewProximoPasso(S.plan,ed,S.planQuitada)}<div class="cards"><div class="card"><small>Ativos</small><b class="pos">${brl(pt.ativos)}</b></div><div class="card"><small>Passivos (dívidas)</small><b class="neg">${brl(pt.passivos)}</b></div><div class="card"><small>Patrimônio líquido</small><b class="${Number(pt.liquido)>=0?'pos':'neg'}">${brl(pt.liquido)}</b></div></div>
-  <div class="grid2"><div class="card"><b>🎯 Metas e sonhos</b><div style="margin:8px 0">${metas}</div>
-   <div class="row"><input id="m_nome" placeholder="Nome (ex.: Viagem)" style="flex:1" ${d}><input id="m_alvo" type="number" step="0.01" placeholder="Valor alvo" style="width:110px" ${d}></div>
-   <div class="row"><input id="m_prazo" type="date" aria-label="Prazo da meta" ${d}><select id="m_tipo" aria-label="Tipo da meta" ${d}><option value="economia">Economia</option><option value="reserva_emergencia">Reserva de emergência</option><option value="sonho">Sonho</option></select><button data-act="addmeta" ${d}>Criar meta</button></div>
-   ${ed?'<p id="cf-meta-simulacao" class="mu" role="status">Informe o valor e uma data futura para ver uma simulação mensal.</p>':''}</div>
-  <div class="card" id="cf-plan-dividas" tabindex="-1"><b>💳 Dívidas · plano de quitação</b>
-   <div class="row" style="margin:8px 0"><button class="${met==='avalanche'?'':'sec'} chip" data-act="metodo" data-m="avalanche">Avalanche (maior juros)</button><button class="${met==='neve'?'':'sec'} chip" data-act="metodo" data-m="neve">Bola de neve (menor saldo)</button></div>
-   <div>${divs}</div>
-   <div class="row" style="margin-top:10px"><input id="d_nome" placeholder="Dívida" style="flex:1" ${d}><input id="d_saldo" type="number" step="0.01" placeholder="Saldo R$" style="width:100px" ${d}></div>
-   <div class="row"><input id="d_juros" type="number" step="0.01" placeholder="Juros %/mês" style="width:110px" ${d}><input id="d_min" type="number" step="0.01" placeholder="Mínimo R$" style="width:100px" ${d}><input id="d_credor" placeholder="Credor" style="flex:1" ${d}><button data-act="adddiv" ${d}>Adicionar</button></div></div></div>
-  <div class="card" style="margin-top:12px"><b>🏠 Patrimônio</b><div class="mu" style="margin:4px 0 8px">Soma bens, saldos das contas e dívidas. Cadastre imóveis, veículos, investimentos e financiamentos.</div>${its}
-   <div class="row" style="margin-top:10px"><select id="p_tipo" ${d}><option value="ativo">Ativo (tenho)</option><option value="passivo">Passivo (devo)</option></select><input id="p_nome" placeholder="Nome (ex.: Casa, Carro)" style="flex:1" ${d}><input id="p_valor" type="number" step="0.01" placeholder="Valor R$" style="width:120px" ${d}><button data-act="additem" ${d}>Adicionar</button></div></div>${S.fam?.plano==='ultra'?viewUltraExtras(P,ed):''}`;
+  return `<div class="cf-plan-sections">${viewProximoPasso(S.plan,ed,S.planQuitada)}
+   <section class="card" aria-labelledby="cf-metas-titulo"><h2 id="cf-metas-titulo">Minhas metas</h2><div class="cf-plan-list">${metas}</div>
+    ${ed?`<details class="cf-plan-form" id="cf-nova-meta"><summary>Nova meta</summary><div class="cf-plan-fields">
+      <label class="cf-plan-wide">Nome da meta<input id="m_nome" placeholder="Ex.: curso ou viagem"></label>
+      <label>Valor desejado (R$)<input id="m_alvo" type="number" min="0.01" step="0.01"></label>
+      <label>Prazo (opcional)<input id="m_prazo" type="date"></label>
+      <label class="cf-plan-wide">Tipo de meta<select id="m_tipo"><option value="economia">Economia</option><option value="reserva_emergencia">Reserva de emergência</option><option value="sonho">Sonho</option></select></label>
+      <p id="cf-meta-simulacao" class="mu cf-plan-wide" role="status">Informe o valor e uma data futura para ver uma simulação mensal.</p>
+      <button class="cf-plan-wide" data-act="addmeta">Criar meta</button>
+    </div></details>`:''}
+   </section>
+   <section class="card" id="cf-plan-dividas" tabindex="-1" aria-labelledby="cf-dividas-titulo"><h2 id="cf-dividas-titulo">Dívidas</h2>
+    ${ord.length>1?`<div class="cf-plan-methods" role="group" aria-label="Ordenar dívidas"><button class="${met==='avalanche'?'':'sec'} chip" data-act="metodo" data-m="avalanche" aria-pressed="${met==='avalanche'}">Maiores juros primeiro</button><button class="${met==='neve'?'':'sec'} chip" data-act="metodo" data-m="neve" aria-pressed="${met==='neve'}">Menor saldo primeiro</button></div>`:''}
+    <div class="cf-plan-list">${divs}</div>
+    ${ed?`<details class="cf-plan-form"><summary>Cadastrar dívida</summary><div class="cf-plan-fields">
+      <label class="cf-plan-wide">Descrição<input id="d_nome"></label>
+      <label>Saldo devedor (R$)<input id="d_saldo" type="number" min="0.01" step="0.01"></label>
+      <label>Juros ao mês (%)<input id="d_juros" type="number" min="0" step="0.01"></label>
+      <label>Pagamento mínimo (R$)<input id="d_min" type="number" min="0" step="0.01"></label>
+      <label>Credor (opcional)<input id="d_credor"></label>
+      <button class="cf-plan-wide" data-act="adddiv">Salvar dívida</button>
+    </div></details>`:''}
+   </section>
+   <section class="card" aria-labelledby="cf-patrimonio-titulo"><h2 id="cf-patrimonio-titulo">Patrimônio</h2>
+    <dl class="cf-plan-values"><div><dt>Ativos</dt><dd>${brl(pt.ativos)}</dd></div><div><dt>Passivos</dt><dd>${brl(pt.passivos)}</dd></div><div><dt>Patrimônio líquido</dt><dd class="${Number(pt.liquido)>=0?'pos':'neg'}">${brl(pt.liquido)}</dd></div></dl>
+    <div class="cf-plan-list">${its||'<p class="mu">Nenhum item de patrimônio cadastrado.</p>'}</div>
+    ${ed?`<details class="cf-plan-form"><summary>Adicionar item</summary><div class="cf-plan-fields">
+      <label class="cf-plan-wide">Nome do item<input id="p_nome" placeholder="Ex.: veículo"></label>
+      <label>Tipo<select id="p_tipo"><option value="ativo">Ativo (tenho)</option><option value="passivo">Passivo (devo)</option></select></label>
+      <label>Valor (R$)<input id="p_valor" type="number" min="0.01" step="0.01"></label>
+      <button class="cf-plan-wide" data-act="additem">Salvar item</button>
+    </div></details>`:''}
+   </section>
+   ${S.fam?.plano==='ultra'?viewUltraExtras(P,ed):''}
+  </div>`;
 }
 
 function viewUltraExtras(P,ed){
@@ -5311,6 +5358,7 @@ document.addEventListener('click',async e=>{
   else if(a==='focometa'){
     if(b.dataset.id){document.getElementById('cf-meta-'+b.dataset.id)?.focus();return;}
     if(!canEdit())return;
+    $('#cf-nova-meta').open=true;
     $('#m_tipo').value=b.dataset.tipo==='reserva_emergencia'?'reserva_emergencia':'sonho';
     if(b.dataset.tipo==='reserva_emergencia'&&!$('#m_nome').value.trim())$('#m_nome').value='Reserva de emergência';
     $('#m_nome').focus();
