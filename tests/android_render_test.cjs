@@ -189,3 +189,19 @@ test('planning puts each editor under its own section and hides editors from rea
  assert.doesNotMatch(html,/aria-label="Ordenar dívidas"/);
  assert.match(html,/id="cf-nova-meta"><summary>Nova meta/);
 });
+
+test('Ultra history and yield simulation are grouped under the existing patrimony section',()=>{
+ const start=source.indexOf('function viewPlan(){');
+ const end=source.indexOf('function viewStatus(){',start);
+ const render=(plan,editor)=>vm.runInNewContext(source.slice(start,end)+';viewPlan()',{
+   S:{fam:{plano:plan},plan:{metas:[],dividas:[],itens:[],pat:{},snapshots:[]}},
+   canEdit:()=>editor,viewProximoPasso:()=>'',brl,esc:String,
+ });
+ const html=render('ultra',true);
+ const patrimony=html.split('aria-labelledby="cf-patrimonio-titulo"')[1].split('</section>')[0];
+ assert.match(patrimony,/<summary>Histórico patrimonial<\/summary>/);
+ assert.match(patrimony,/<summary>Simular rendimento<\/summary>/);
+ assert.match(patrimony,/data-act="simularproj"/);
+ assert.doesNotMatch(render('pro',true),/data-act="simularproj"/);
+ assert.doesNotMatch(render('ultra',false),/data-act="registrarpat"/);
+});
