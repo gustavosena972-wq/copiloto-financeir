@@ -4733,20 +4733,57 @@ async function carregarPlan(rd=true){
     q(sb.from('patrimonio_snapshots').select('*').eq('familia_id',S.fam.id).order('data',{ascending:true}))]);
   S.plan={metas:m,dividas:d,itens:i,pat:p||{},snapshots:h};if(rd)render();
 }
+function parcelasDaMeta(alvo,prazo,guardado=0,hoje=dataLocalISO()){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(prazo)||prazo<=hoje)return null;
+  const data=new Date(prazo+'T00:00:00Z');
+  if(!Number.isFinite(data.getTime())||data.toISOString().slice(0,10)!==prazo)return null;
+  const centavos=Math.round(Number(alvo)*100)-Math.round(Number(guardado)*100);
+  if(!Number.isSafeInteger(centavos)||centavos<=0)return null;
+  const [ano,mes,dia]=hoje.split('-').map(Number);
+  const meses=Math.max(1,(data.getUTCFullYear()-ano)*12+data.getUTCMonth()+1-mes-(data.getUTCDate()<dia?1:0));
+  return {meses,valor:Math.ceil(centavos/meses)/100};
+}
+function viewProximoPasso(plano,ed,quitada){
+  const meta=plano?.metas.find(m=>Number(m.valor_alvo)>Number(m.valor_atual));
+  const confirmou=quitada?.familyId===S.fam.id&&quitada?.userId===S.user?.id;
+  const simulacao=meta?.prazo?parcelasDaMeta(meta.valor_alvo,meta.prazo,meta.valor_atual):null;
+  const texto=meta
+    ? '<strong>'+esc(meta.nome)+'</strong> · Faltam '+brl(Number(meta.valor_alvo)-Number(meta.valor_atual))+'. Revise seu progresso no fechamento do mês.'
+    : 'Monte uma reserva para imprevistos ou escolha o que quer conquistar, como um curso, uma mudança ou uma viagem.';
+  const acao=meta
+    ? '<button class="sec chip" data-act="focometa" data-id="'+esc(meta.id)+'">Ver minha meta</button>'
+    : ed?'<button class="sec chip" data-act="focometa" data-tipo="reserva_emergencia">Montar reserva</button>':'';
+  return '<section class="card" aria-labelledby="proximo-passo-titulo" style="margin-bottom:12px"><h2 id="proximo-passo-titulo">Seu próximo passo</h2>'+
+    (confirmou?'<p role="status">Dívida marcada como quitada. Que tal escolher o próximo objetivo?</p>':'')+
+    '<p>'+texto+'</p>'+(simulacao?'<p class="mu">Para chegar ao prazo: '+brl(simulacao.valor)+' por mês, em uma simulação sem rendimentos.</p>':'')+
+    '<div class="row">'+acao+
+    (ed?'<button class="sec chip" data-act="focometa" data-tipo="sonho">Planejar uma meta</button>':'')+
+    '</div></section>';
+}
+document.addEventListener('input',e=>{
+  if(e.target.id!=='m_alvo'&&e.target.id!=='m_prazo')return;
+  const resultado=$('#cf-meta-simulacao');
+  if(!resultado)return;
+  const calculo=parcelasDaMeta($('#m_alvo').value,$('#m_prazo').value);
+  resultado.textContent=calculo
+    ? 'Simulação: '+brl(calculo.valor)+' por mês em '+calculo.meses+' '+(calculo.meses===1?'mês':'meses')+'. Confira se esse valor cabe no seu orçamento.'
+    : 'Informe o valor e uma data futura para ver uma simulação mensal.';
+});
 function viewPlan(){
   const P=S.plan||{metas:[],dividas:[],itens:[],pat:{}},ed=canEdit(),d=ed?'':'disabled',met=S.metodo||'avalanche';
   const metas=P.metas.map(m=>{const pc=Math.min(100,Number(m.valor_atual)/Number(m.valor_alvo)*100||0);
-    return `<div class="item"><div class="row" style="justify-content:space-between;margin:0"><b>${esc(m.nome)}</b><span class="mu">${brl(m.valor_atual)} de ${brl(m.valor_alvo)}${m.prazo?' · até '+new Date(m.prazo+'T12:00:00').toLocaleDateString('pt-BR'):''}</span></div>
+    return `<div class="item" id="cf-meta-${esc(m.id)}" tabindex="-1"><div class="row" style="justify-content:space-between;margin:0"><b>${esc(m.nome)}</b><span class="mu">${brl(m.valor_atual)} de ${brl(m.valor_alvo)}${m.prazo?' · até '+new Date(m.prazo+'T12:00:00').toLocaleDateString('pt-BR'):''}</span></div>
     <div class="track" style="margin:8px 0"><i style="width:${pc}%"></i></div>
     <div class="row" style="margin:0"><input type="number" step="0.01" min="0" placeholder="Aporte R$" data-ap="${m.id}" style="width:120px" ${d}><button class="sec chip" data-act="aporte" data-id="${m.id}" ${d}>Guardar</button><span class="mu">${pc.toFixed(0)}%</span><button class="red chip" data-act="delmeta" data-id="${m.id}" ${d}>✕</button></div></div>`}).join('')||'<div class="mu">Nenhuma meta ainda: viagem, reserva de emergência, entrada do carro…</div>';
   const ord=[...P.dividas].sort((a,b)=>met==='avalanche'?b.taxa_juros_mensal-a.taxa_juros_mensal:a.saldo_devedor-b.saldo_devedor);
   const divs=ord.map((x,i)=>`<div class="item"><div class="row" style="justify-content:space-between;margin:0"><b>${i+1}º · ${esc(x.nome)}</b><span class="neg">${brl(x.saldo_devedor)}</span></div><div class="row mu" style="margin:4px 0 0">${x.taxa_juros_mensal}% ao mês · mínimo ${brl(x.pagamento_minimo)}${x.credor?' · '+esc(x.credor):''}<button class="sec chip" data-act="deldiv" data-id="${x.id}" ${d}>Quitada ✔</button></div></div>`).join('')||'<div class="mu">Sem dívidas cadastradas. 🎉</div>';
   const its=P.itens.map(x=>`<div class="item row" style="justify-content:space-between;margin:0"><span>${x.tipo==='ativo'?'🟢':'🔴'} ${esc(x.nome)}</span><span>${brl(x.valor)} <button class="red chip" data-act="delitem" data-id="${x.id}" ${d}>✕</button></span></div>`).join('');
   const pt=P.pat||{};
-  return `<div class="cards"><div class="card"><small>Ativos</small><b class="pos">${brl(pt.ativos)}</b></div><div class="card"><small>Passivos (dívidas)</small><b class="neg">${brl(pt.passivos)}</b></div><div class="card"><small>Patrimônio líquido</small><b class="${Number(pt.liquido)>=0?'pos':'neg'}">${brl(pt.liquido)}</b></div></div>
+  return `${viewProximoPasso(P,ed,S.planQuitada)}<div class="cards"><div class="card"><small>Ativos</small><b class="pos">${brl(pt.ativos)}</b></div><div class="card"><small>Passivos (dívidas)</small><b class="neg">${brl(pt.passivos)}</b></div><div class="card"><small>Patrimônio líquido</small><b class="${Number(pt.liquido)>=0?'pos':'neg'}">${brl(pt.liquido)}</b></div></div>
   <div class="grid2"><div class="card"><b>🎯 Metas e sonhos</b><div style="margin:8px 0">${metas}</div>
    <div class="row"><input id="m_nome" placeholder="Nome (ex.: Viagem)" style="flex:1" ${d}><input id="m_alvo" type="number" step="0.01" placeholder="Valor alvo" style="width:110px" ${d}></div>
-   <div class="row"><input id="m_prazo" type="date" ${d}><select id="m_tipo" ${d}><option value="economia">Economia</option><option value="reserva_emergencia">Reserva de emergência</option><option value="sonho">Sonho</option></select><button data-act="addmeta" ${d}>Criar meta</button></div></div>
+   <div class="row"><input id="m_prazo" type="date" aria-label="Prazo da meta" ${d}><select id="m_tipo" aria-label="Tipo da meta" ${d}><option value="economia">Economia</option><option value="reserva_emergencia">Reserva de emergência</option><option value="sonho">Sonho</option></select><button data-act="addmeta" ${d}>Criar meta</button></div>
+   ${ed?'<p id="cf-meta-simulacao" class="mu" role="status">Informe o valor e uma data futura para ver uma simulação mensal.</p>':''}</div>
   <div class="card"><b>💳 Dívidas · plano de quitação</b>
    <div class="row" style="margin:8px 0"><button class="${met==='avalanche'?'':'sec'} chip" data-act="metodo" data-m="avalanche">Avalanche (maior juros)</button><button class="${met==='neve'?'':'sec'} chip" data-act="metodo" data-m="neve">Bola de neve (menor saldo)</button></div>
    <div>${divs}</div>
@@ -5231,14 +5268,28 @@ document.addEventListener('click',async e=>{
     S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
   else if(a==='delmem'){await q(sb.from('membros').delete().eq('id',b.dataset.id));S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
   else if(a==='metodo'){S.metodo=b.dataset.m;render()}
-  else if(a==='addmeta'){const n=$('#m_nome').value.trim(),v=parseFloat($('#m_alvo').value);if(!n||!(v>0))return toast('Informe nome e valor da meta',1);
-    await q(sb.from('metas').insert({familia_id:S.fam.id,nome:n,valor_alvo:v,prazo:$('#m_prazo').value||null,tipo:$('#m_tipo').value}));await carregarPlan()}
+  else if(a==='focometa'){
+    if(b.dataset.id){document.getElementById('cf-meta-'+b.dataset.id)?.focus();return;}
+    if(!canEdit())return;
+    $('#m_tipo').value=b.dataset.tipo==='reserva_emergencia'?'reserva_emergencia':'sonho';
+    if(b.dataset.tipo==='reserva_emergencia'&&!$('#m_nome').value.trim())$('#m_nome').value='Reserva de emergência';
+    $('#m_nome').focus();
+  }
+  else if(a==='addmeta'){if(!canEdit())return;const n=$('#m_nome').value.trim(),v=Number($('#m_alvo').value);if(!n||!Number.isFinite(v)||v<=0)return toast('Informe nome e valor da meta',1);
+    await q(sb.from('metas').insert({familia_id:S.fam.id,nome:n,valor_alvo:v,prazo:$('#m_prazo').value||null,tipo:$('#m_tipo').value}));
+    S.planQuitada=null;await carregarPlan()}
   else if(a==='aporte'){const i=document.querySelector('[data-ap="'+b.dataset.id+'"]'),v=parseFloat(i.value);if(!(v>0))return toast('Digite o valor do aporte',1);
     await q(sb.from('aportes_meta').insert({familia_id:S.fam.id,meta_id:b.dataset.id,valor:v}));toast('Aporte registrado');await carregarPlan()}
   else if(a==='delmeta'){if(!confirm('Excluir esta meta?'))return;await q(sb.from('metas').delete().eq('id',b.dataset.id));await carregarPlan()}
   else if(a==='adddiv'){const n=$('#d_nome').value.trim(),v=parseFloat($('#d_saldo').value);if(!n||!(v>0))return toast('Informe nome e saldo da dívida',1);
     await q(sb.from('dividas').insert({familia_id:S.fam.id,nome:n,credor:$('#d_credor').value.trim()||null,saldo_devedor:v,taxa_juros_mensal:parseFloat($('#d_juros').value)||0,pagamento_minimo:parseFloat($('#d_min').value)||0}));await carregarPlan()}
-  else if(a==='deldiv'){if(!confirm('Marcar esta dívida como quitada?'))return;await q(sb.from('dividas').update({ativa:false}).eq('id',b.dataset.id));await carregarPlan()}
+  else if(a==='deldiv'){
+    if(!canEdit()||!confirm('Marcar esta dívida como quitada?'))return;
+    const familyId=S.fam.id,userId=S.user?.id;
+    const quitada=await q(sb.from('dividas').update({ativa:false}).eq('id',b.dataset.id).eq('familia_id',familyId).eq('ativa',true).select('id').maybeSingle());
+    if(quitada){S.planQuitada={familyId,userId};toast('Dívida marcada como quitada. Veja seu próximo passo em Metas.');}
+    await carregarPlan();
+  }
   else if(a==='additem'){const n=$('#p_nome').value.trim(),v=parseFloat($('#p_valor').value);if(!n||!(v>0))return toast('Informe nome e valor',1);
     await q(sb.from('patrimonio_itens').insert({familia_id:S.fam.id,tipo:$('#p_tipo').value,nome:n,valor:v}));await carregarPlan()}
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
