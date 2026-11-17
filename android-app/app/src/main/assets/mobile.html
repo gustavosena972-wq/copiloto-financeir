@@ -3047,6 +3047,34 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 .cf-family-invite input,.cf-family-invite select{width:100%;min-width:0}
 .cf-sheet-start-actions{display:flex;flex-wrap:wrap;gap:8px}
 .cf-sheet-start-actions button,.cf-family-join button,.cf-family-invite button{min-height:44px}
+.cf-sheet-file-actions,.cf-plan-form{margin:0 0 12px;padding:0 12px;border:1px solid var(--cf-line,var(--bd));border-radius:12px}
+.cf-sheet-file-actions summary,.cf-plan-form summary{min-height:44px;padding:12px 0;cursor:pointer;font-weight:700}
+.cf-sheet-file-actions[open] .cf-sheet-tools{margin:0 0 12px}
+.cf-sheet-file-actions .cf-sheet-tools button{min-height:44px}
+.cf-plan-sections{display:grid;gap:12px}
+.cf-plan-sections section{min-width:0}
+.cf-plan-sections :is(h2,p){overflow-wrap:anywhere}
+.cf-plan-sections h2{margin:0 0 8px;font-size:1.125rem}
+.cf-plan-list{display:grid;gap:8px;margin:12px 0}
+.cf-plan-form{margin:12px 0 0}
+.cf-plan-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:0 0 12px}
+.cf-plan-fields label{display:grid;gap:5px;min-width:0;color:var(--cf-muted,var(--mu));font-size:.875rem}
+.cf-plan-fields :is(input,select){width:100%;min-width:0;margin:0}
+.cf-plan-fields :is(input,select,button){min-height:44px}
+.cf-plan-fields .cf-plan-wide{grid-column:1/-1}
+.cf-plan-values{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));gap:12px;padding:0;margin:12px 0}
+.cf-plan-values div{padding:10px 12px;border:1px solid var(--cf-line,var(--bd));border-radius:10px}
+.cf-plan-values dt{color:var(--cf-muted,var(--mu));font-size:.8125rem}
+.cf-plan-values dd{margin:4px 0 0;font-variant-numeric:tabular-nums;font-weight:700;overflow-wrap:anywhere}
+.cf-plan-sections :is(.chip,.cf-plan-methods button){min-height:44px}
+.cf-plan-methods{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.cf-plan-methods button{flex:1 1 140px;white-space:normal;text-align:left}
+.cf-plan-expand-body{padding:0 0 12px}
+.cf-plan-expand-body .cf-plan-fields{padding-bottom:0}
+.cf-plan-expand-body .cf-projection-result{min-width:0}
+.cf-plan-expand-body .cf-history-chart{max-width:100%;overflow-x:auto}
+.cf-plan-sections :is(summary,button,input,select):focus-visible,.cf-plan-sections [tabindex="-1"]:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+@media(max-width:400px){.cf-plan-fields{grid-template-columns:minmax(0,1fr)}}
 .cf-family-area summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:700}
 .cf-invite-result[hidden]{display:none}
 .cf-invite-result{display:grid;gap:10px;padding:14px;border:1px solid var(--cf-line,var(--bd));border-radius:12px}
@@ -3640,7 +3668,7 @@ function scheduleBoot(){
 
 function clearPrivateWorkspace(){
   for(const key of ['lanc','sug','cats','contas','membros','anos','meses','resumo','meta','notifs'])S[key]=[];
-  for(const key of ['fam','me','ano','mes','plan','tamanduaProfile','imp','adm','hist','quickEdit','planoEscolhidoFamilia','tamanduaProactiveDismissedKey'])S[key]=null;
+  for(const key of ['fam','me','ano','mes','plan','planQuitada','tamanduaProfile','imp','adm','hist','quickEdit','planoEscolhidoFamilia','tamanduaProactiveDismissedKey'])S[key]=null;
   clearTimeout(S.pw);S.pw=null;
   S.internalTester=false;S.mobileMore=false;S.mobileAddOpen=false;S.sino=false;
   S.familyAreas={membros:false,convites:false,categorias:false,conta:false};
@@ -4204,12 +4232,18 @@ function monthlyFinancialSnapshot(){
 }
 function mobileSmartContext(){
   const d=monthlyFinancialSnapshot(), format=value=>brl(value/100);
+  const podeRegistrar=canEdit()&&mesAberto();
+  const primeiroPasso=podeRegistrar&&(d.income===0||d.expense===0)
+    ? '<div class="cf-sheet-start-actions" role="group" aria-label="Complete o resumo do mês">'+
+      (d.income===0?'<button type="button" data-act="mobileadd" data-tipo="receita" data-origem="inicio">Registrar o que entra</button>':'')+
+      (d.expense===0?'<button type="button" data-act="mobileadd" data-tipo="despesa" data-origem="inicio">Registrar uma conta</button>':'')+'</div>'
+    : '';
   const categoryRows=d.categories.slice(0,4).map(([name,amount])=>'<div class="cf-category-bar"><div><span>'+esc(name)+'</span><b>'+format(amount)+'</b></div><span class="cf-category-track" aria-hidden="true"><i style="width:'+Math.min(100,amount/d.expense*100).toFixed(2)+'%"></i></span></div>').join('');
   const dueRows=d.due.slice(0,3).map(row=>'<li><span>'+esc(row.descricao||'Conta sem descrição')+'<small>'+row.due.split('-').reverse().join('/')+(row.due<d.today?' · Em atraso':'')+'</small></span><b>'+format(row.cents)+'</b></li>').join('');
   const panels='<div class="cf-dashboard-panels"><section class="cf-finance-panel"><h3>Despesas por categoria</h3><p>O que mais pesa nos lançamentos do mês.</p>'+(categoryRows||'<p>Suas categorias aparecem aqui após registrar despesas.</p>')+'</section><section class="cf-finance-panel"><h3>Contas em aberto</h3><p>Vencimentos registrados que precisam de atenção.</p>'+(dueRows?'<ul class="cf-due-list">'+dueRows+'</ul>':'<p>Nenhuma conta com vencimento informado em aberto.</p>')+'</section></div>';
 
   return '<section class="cf-mobile-v025 cf-month-desk" aria-label="Resumo inteligente do mês">'+
-    '<div class="cf-month-title"><h2>Seu mês, com clareza.</h2><span>'+d.rows.length+' movimentações</span></div>'+
+    '<div class="cf-month-title"><h2>Seu mês, com clareza.</h2><span>'+d.rows.length+' '+(d.rows.length===1?'movimentação':'movimentações')+'</span></div>'+
     '<dl class="cf-money-ledger"><div><dt>Receitas registradas</dt><dd>'+format(d.income)+'</dd></div>'+
     '<div><dt>Despesas registradas</dt><dd>'+format(d.expense)+'</dd></div>'+
     '<div class="cf-ledger-result"><dt>Resultado do mês</dt><dd class="'+(d.competence<0?'neg':'')+'">'+format(d.competence)+'</dd></div></dl>'+
@@ -4217,7 +4251,12 @@ function mobileSmartContext(){
     '<p class="cf-amount-note">Valores dos lançamentos deste período. Não representam o saldo da sua conta bancária.</p>'+
     (d.ignored?'<p role="status" class="cf-validation-note">'+d.ignored+' registro(s) precisam de revisão para entrar no cálculo.</p>':'')+
     panels+
-    (!d.rows.length?'<p class="cf-empty-welcome">Vamos começar pelo primeiro lançamento. O Tamanduá acompanha você a partir dos seus dados.</p>':'')+
+    (!podeRegistrar
+      ? (!d.rows.length?'<p class="cf-empty-welcome">Nenhum lançamento disponível neste mês.</p>':'')
+      :!d.rows.length?'<p class="cf-empty-welcome">Vamos começar pelo primeiro lançamento. Escolha o que você tem em mãos.</p>':
+      (d.income===0?'<p class="cf-empty-welcome">Falta registrar o que entra para comparar com suas despesas.</p>':
+        (d.expense===0?'<p class="cf-empty-welcome">Falta registrar pelo menos uma despesa para comparar com suas receitas.</p>':'')))+
+    primeiroPasso+
     '</section>';
 }
 function viewPlanilha(ed){
@@ -4265,10 +4304,11 @@ function viewPlanilha(ed){
   const comMovimentos=S.lanc.length>0;
   const sheetStart=`<section class="cf-sheet-start" aria-labelledby="cf-sheet-start-title">
     <h2 id="cf-sheet-start-title">${comMovimentos?'Melhore sua planilha':'Monte sua planilha'}</h2>
-    <p>${comMovimentos?'Revise categorias e pagamentos para entender melhor para onde seu dinheiro vai.':'Registre uma entrada e depois suas despesas. Se já tiver um arquivo, abra Ferramentas da planilha para importar.'}</p>
+    <p>${comMovimentos?'Revise categorias e pagamentos para entender melhor para onde seu dinheiro vai.':'Registre uma entrada e depois suas despesas. Se já tiver um arquivo, abra Importar e exportar.'}</p>
     <div class="cf-sheet-start-actions">
     ${ed&&!comMovimentos&&!S.mobileAddOpen?'<button type="button" data-act="mobileadd" data-tipo="receita">Registrar uma entrada</button>':''}
     ${ed&&comMovimentos&&S.lanc.some(row=>!row.categoria_id)?'<button type="button" data-act="planilha-categorias">Revisar categorias</button>':''}
+    ${comMovimentos?'<button type="button" class="sec" data-act="smartgo" data-v="inicio">Ver o resumo do mês</button>':''}
     <button type="button" class="sec" data-act="planilha-ajuda">Pedir ajuda ao Tamanduá</button>
     </div></section>`;
   const novo=ed?`<tr class="novo ${S.mobileAddOpen?'is-open':''}" id="novo"><td data-label="Vencimento"><input aria-label="Vencimento" type="date" id="n_data" value="${dataInicial}"></td><td data-label="Descrição"><div style="display:grid;gap:5px;min-width:0"><input id="n_desc" placeholder="${tipoInicial==='receita'?'Ex.: salário ou trabalho extra':'Ex.: mercado, aluguel ou internet'}" style="min-width:0"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
@@ -4277,13 +4317,13 @@ function viewPlanilha(ed){
    <td data-label="Responsável"><select aria-label="Responsável" id="n_mem">${memOpts(S.me.id)}</select></td><td data-label="Ações"><button data-act="add" aria-label="Salvar novo lançamento">Adicionar</button></td></tr>
    `:'';
   const fe=S.mes.status==='fechado';
-  return `${sheetStart}<div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button></div>${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
+  return `${sheetStart}<details class="cf-sheet-file-actions"><summary>Importar e exportar</summary><div class="cf-sheet-tools" role="group" aria-label="Arquivos da planilha"><button class="sec" data-act="imp" ${ed?'':'disabled'}>Importar planilha</button><button class="sec" data-act="xlsx">Exportar Excel</button><button class="sec" data-act="csv">Exportar CSV</button><input type="file" id="arq" hidden></div></details>${viewStatus()}<div class="cards mobile-month-overview"><div class="card"><small>Receitas</small><b class="pos">${brl(rec)}</b>${quickEditButton('receita')}</div>
   <div class="card"><small>Despesas</small><b class="neg">${brl(des)}</b>${quickEditButton('despesas')}</div>
   <div class="card v0-mobile-balance"><small>Saldo do mês</small><b class="${rec-des>=0?'pos':'neg'}">${brl(rec-des)}</b></div>
   <div class="card"><small>A pagar</small><b>${brl(apagar)}</b>${quickEditButton('apagar')}</div></div>
   <details class="mobile-actions-menu" ${window.innerWidth>760?'open':''}><summary>Mais ações do mês</summary><div class="bar v0-mobile-action-grid">
    <button data-act="pagartudo" ${ed?'':'disabled'}>Pagar todas as contas</button>
-   <button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button><input type="file" id="arq" hidden>
+   <button class="sec" data-act="compromissos">▤ Compromissos e parcelas</button>
    <button class="sec" data-act="recorr" ${ed?'':'disabled'}>Gerar recorrentes</button>
    ${fe?`<button class="sec" data-act="reabrir" ${S.me.papel==='dono'&&S.ano.status==='aberto'?'':'disabled'}>Reabrir mês</button>`:`<button class="sec" data-act="fechar" ${canEdit()&&S.ano.status==='aberto'?'':'disabled'}>🔒 Fechar ${MN[S.mes.mes-1]}</button>`}
    <button class="sec" data-act="copmes" ${ed?'':'disabled'}>⧉ Copiar mês anterior</button>
@@ -4733,27 +4773,112 @@ async function carregarPlan(rd=true){
     q(sb.from('patrimonio_snapshots').select('*').eq('familia_id',S.fam.id).order('data',{ascending:true}))]);
   S.plan={metas:m,dividas:d,itens:i,pat:p||{},snapshots:h};if(rd)render();
 }
+function parcelasDaMeta(alvo,prazo,guardado=0,hoje=dataLocalISO()){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(prazo)||prazo<=hoje)return null;
+  const data=new Date(prazo+'T00:00:00Z');
+  if(!Number.isFinite(data.getTime())||data.toISOString().slice(0,10)!==prazo)return null;
+  const centavos=Math.round(Number(alvo)*100)-Math.round(Number(guardado)*100);
+  if(!Number.isSafeInteger(centavos)||centavos<=0)return null;
+  const [ano,mes,dia]=hoje.split('-').map(Number);
+  const meses=Math.max(1,(data.getUTCFullYear()-ano)*12+data.getUTCMonth()+1-mes-(data.getUTCDate()<dia?1:0));
+  return {meses,valor:Math.ceil(centavos/meses)/100};
+}
+function compararAportes(inicial,aporte,meses,taxa){
+  if(![inicial,aporte,meses,taxa].every(Number.isFinite)||inicial<0||aporte<0||
+    !Number.isInteger(meses)||meses<1||meses>360||taxa<-.03||taxa>.03)return null;
+  const semRendimento=inicial+aporte*meses;
+  const variacao=Math.expm1(meses*Math.log1p(taxa));
+  const comRendimento=taxa===0?semRendimento:inicial*(1+variacao)+aporte*variacao/taxa;
+  if(!Number.isFinite(comRendimento))return null;
+  return {semRendimento:Math.round(semRendimento*100)/100,comRendimento:Math.round(comRendimento*100)/100};
+}
+function viewProximoPasso(plano,ed,quitada){
+  if(!plano)return '';
+  const metasAbertas=plano.metas.filter(m=>Number(m.valor_alvo)>Number(m.valor_atual));
+  metasAbertas.sort((a,b)=>(a.prazo||'9999-12-31').localeCompare(b.prazo||'9999-12-31'));
+  const meta=metasAbertas[0];
+  const concluida=plano.metas.find(m=>Number(m.valor_alvo)>0&&Number(m.valor_atual)>=Number(m.valor_alvo));
+  const confirmou=quitada?.familyId===S.fam.id&&quitada?.userId===S.user?.id;
+  const simulacao=meta?.prazo?parcelasDaMeta(meta.valor_alvo,meta.prazo,meta.valor_atual):null;
+  const dividas=plano.dividas.length;
+  const detalhar=meta?'<dl class="cf-plan-values"><div><dt>Já guardado</dt><dd>'+brl(meta.valor_atual)+
+    '</dd></div><div><dt>Ainda falta</dt><dd>'+brl(Number(meta.valor_alvo)-Number(meta.valor_atual))+
+    '</dd></div><div><dt>Prazo</dt><dd>'+(meta.prazo?new Date(meta.prazo+'T12:00:00').toLocaleDateString('pt-BR'):'Sem data')+'</dd></div></dl>':'';
+  const texto=meta
+    ? '<strong>'+esc(meta.nome)+'</strong>'
+    : dividas
+      ? 'Dívidas em aberto no app: <strong>'+dividas+'</strong>. Confira o saldo de cada uma antes de decidir quanto guardar.'
+      : concluida
+        ? '<strong>'+esc(concluida.nome)+'</strong> foi concluída. Escolha onde quer colocar os próximos aportes.'
+        : 'Defina quanto quer guardar e até quando. Comece por uma reserva ou escolha um objetivo, como um curso.';
+  const acao=meta
+    ? '<button class="sec chip" data-act="focometa" data-id="'+esc(meta.id)+'">Ver minha meta</button>'
+    : dividas?'<button class="sec chip" data-act="focodividas">Revisar dívidas</button>'
+    : ed?'<button class="sec chip" data-act="focometa" data-tipo="reserva_emergencia">Montar reserva</button>':'';
+  const orientacao=simulacao?brl(simulacao.valor)+' por mês até o prazo, sem contar rendimentos.'
+    :meta?.prazo&&meta.prazo<=dataLocalISO()?'O prazo passou. Revise o que falta antes de definir uma nova data.'
+    :meta&&!meta.prazo?'Sem prazo definido. Use o saldo guardado para decidir quando pretende concluir.':'';
+  return '<section class="card" aria-labelledby="proximo-passo-titulo"><h2 id="proximo-passo-titulo">Seu próximo passo</h2>'+
+    (confirmou?'<p role="status">Dívida marcada como quitada. Que tal escolher o próximo objetivo?</p>':'')+
+    '<p>'+texto+'</p>'+detalhar+(orientacao?'<p class="mu">'+orientacao+'</p>':'')+
+    '<div class="row">'+acao+
+    (ed?'<button class="sec chip" data-act="focometa" data-tipo="sonho">Planejar uma meta</button>':'')+
+    '</div></section>';
+}
+document.addEventListener('input',e=>{
+  if(e.target.id!=='m_alvo'&&e.target.id!=='m_prazo')return;
+  const resultado=$('#cf-meta-simulacao');
+  if(!resultado)return;
+  const calculo=parcelasDaMeta($('#m_alvo').value,$('#m_prazo').value);
+  resultado.textContent=calculo
+    ? 'Simulação: '+brl(calculo.valor)+' por mês em '+calculo.meses+' '+(calculo.meses===1?'mês':'meses')+'. Confira se esse valor cabe no seu orçamento.'
+    : 'Informe o valor e uma data futura para ver uma simulação mensal.';
+});
 function viewPlan(){
   const P=S.plan||{metas:[],dividas:[],itens:[],pat:{}},ed=canEdit(),d=ed?'':'disabled',met=S.metodo||'avalanche';
   const metas=P.metas.map(m=>{const pc=Math.min(100,Number(m.valor_atual)/Number(m.valor_alvo)*100||0);
-    return `<div class="item"><div class="row" style="justify-content:space-between;margin:0"><b>${esc(m.nome)}</b><span class="mu">${brl(m.valor_atual)} de ${brl(m.valor_alvo)}${m.prazo?' · até '+new Date(m.prazo+'T12:00:00').toLocaleDateString('pt-BR'):''}</span></div>
+    return `<div class="item" id="cf-meta-${esc(m.id)}" tabindex="-1"><div class="row" style="justify-content:space-between;margin:0"><b>${esc(m.nome)}</b><span class="mu">${brl(m.valor_atual)} de ${brl(m.valor_alvo)}${m.prazo?' · até '+new Date(m.prazo+'T12:00:00').toLocaleDateString('pt-BR'):''}</span></div>
     <div class="track" style="margin:8px 0"><i style="width:${pc}%"></i></div>
     <div class="row" style="margin:0"><input type="number" step="0.01" min="0" placeholder="Aporte R$" data-ap="${m.id}" style="width:120px" ${d}><button class="sec chip" data-act="aporte" data-id="${m.id}" ${d}>Guardar</button><span class="mu">${pc.toFixed(0)}%</span><button class="red chip" data-act="delmeta" data-id="${m.id}" ${d}>✕</button></div></div>`}).join('')||'<div class="mu">Nenhuma meta ainda: viagem, reserva de emergência, entrada do carro…</div>';
   const ord=[...P.dividas].sort((a,b)=>met==='avalanche'?b.taxa_juros_mensal-a.taxa_juros_mensal:a.saldo_devedor-b.saldo_devedor);
   const divs=ord.map((x,i)=>`<div class="item"><div class="row" style="justify-content:space-between;margin:0"><b>${i+1}º · ${esc(x.nome)}</b><span class="neg">${brl(x.saldo_devedor)}</span></div><div class="row mu" style="margin:4px 0 0">${x.taxa_juros_mensal}% ao mês · mínimo ${brl(x.pagamento_minimo)}${x.credor?' · '+esc(x.credor):''}<button class="sec chip" data-act="deldiv" data-id="${x.id}" ${d}>Quitada ✔</button></div></div>`).join('')||'<div class="mu">Sem dívidas cadastradas. 🎉</div>';
   const its=P.itens.map(x=>`<div class="item row" style="justify-content:space-between;margin:0"><span>${x.tipo==='ativo'?'🟢':'🔴'} ${esc(x.nome)}</span><span>${brl(x.valor)} <button class="red chip" data-act="delitem" data-id="${x.id}" ${d}>✕</button></span></div>`).join('');
   const pt=P.pat||{};
-  return `<div class="cards"><div class="card"><small>Ativos</small><b class="pos">${brl(pt.ativos)}</b></div><div class="card"><small>Passivos (dívidas)</small><b class="neg">${brl(pt.passivos)}</b></div><div class="card"><small>Patrimônio líquido</small><b class="${Number(pt.liquido)>=0?'pos':'neg'}">${brl(pt.liquido)}</b></div></div>
-  <div class="grid2"><div class="card"><b>🎯 Metas e sonhos</b><div style="margin:8px 0">${metas}</div>
-   <div class="row"><input id="m_nome" placeholder="Nome (ex.: Viagem)" style="flex:1" ${d}><input id="m_alvo" type="number" step="0.01" placeholder="Valor alvo" style="width:110px" ${d}></div>
-   <div class="row"><input id="m_prazo" type="date" ${d}><select id="m_tipo" ${d}><option value="economia">Economia</option><option value="reserva_emergencia">Reserva de emergência</option><option value="sonho">Sonho</option></select><button data-act="addmeta" ${d}>Criar meta</button></div></div>
-  <div class="card"><b>💳 Dívidas · plano de quitação</b>
-   <div class="row" style="margin:8px 0"><button class="${met==='avalanche'?'':'sec'} chip" data-act="metodo" data-m="avalanche">Avalanche (maior juros)</button><button class="${met==='neve'?'':'sec'} chip" data-act="metodo" data-m="neve">Bola de neve (menor saldo)</button></div>
-   <div>${divs}</div>
-   <div class="row" style="margin-top:10px"><input id="d_nome" placeholder="Dívida" style="flex:1" ${d}><input id="d_saldo" type="number" step="0.01" placeholder="Saldo R$" style="width:100px" ${d}></div>
-   <div class="row"><input id="d_juros" type="number" step="0.01" placeholder="Juros %/mês" style="width:110px" ${d}><input id="d_min" type="number" step="0.01" placeholder="Mínimo R$" style="width:100px" ${d}><input id="d_credor" placeholder="Credor" style="flex:1" ${d}><button data-act="adddiv" ${d}>Adicionar</button></div></div></div>
-  <div class="card" style="margin-top:12px"><b>🏠 Patrimônio</b><div class="mu" style="margin:4px 0 8px">Soma bens, saldos das contas e dívidas. Cadastre imóveis, veículos, investimentos e financiamentos.</div>${its}
-   <div class="row" style="margin-top:10px"><select id="p_tipo" ${d}><option value="ativo">Ativo (tenho)</option><option value="passivo">Passivo (devo)</option></select><input id="p_nome" placeholder="Nome (ex.: Casa, Carro)" style="flex:1" ${d}><input id="p_valor" type="number" step="0.01" placeholder="Valor R$" style="width:120px" ${d}><button data-act="additem" ${d}>Adicionar</button></div></div>${S.fam?.plano==='ultra'?viewUltraExtras(P,ed):''}`;
+  return `<div class="cf-plan-sections">${viewProximoPasso(S.plan,ed,S.planQuitada)}
+   <section class="card" aria-labelledby="cf-metas-titulo"><h2 id="cf-metas-titulo">Minhas metas</h2><div class="cf-plan-list">${metas}</div>
+    ${ed?`<details class="cf-plan-form" id="cf-nova-meta"><summary>Nova meta</summary><div class="cf-plan-fields">
+      <label class="cf-plan-wide">Nome da meta<input id="m_nome" placeholder="Ex.: curso ou viagem"></label>
+      <label>Valor desejado (R$)<input id="m_alvo" type="number" min="0.01" step="0.01"></label>
+      <label>Prazo (opcional)<input id="m_prazo" type="date"></label>
+      <label class="cf-plan-wide">Tipo de meta<select id="m_tipo"><option value="economia">Economia</option><option value="reserva_emergencia">Reserva de emergência</option><option value="sonho">Sonho</option></select></label>
+      <p id="cf-meta-simulacao" class="mu cf-plan-wide" role="status">Informe o valor e uma data futura para ver uma simulação mensal.</p>
+      <button class="cf-plan-wide" data-act="addmeta">Criar meta</button>
+    </div></details>`:''}
+   </section>
+   <section class="card" id="cf-plan-dividas" tabindex="-1" aria-labelledby="cf-dividas-titulo"><h2 id="cf-dividas-titulo">Dívidas</h2>
+    ${ord.length>1?`<div class="cf-plan-methods" role="group" aria-label="Ordenar dívidas"><button class="${met==='avalanche'?'':'sec'} chip" data-act="metodo" data-m="avalanche" aria-pressed="${met==='avalanche'}">Maiores juros primeiro</button><button class="${met==='neve'?'':'sec'} chip" data-act="metodo" data-m="neve" aria-pressed="${met==='neve'}">Menor saldo primeiro</button></div>`:''}
+    <div class="cf-plan-list">${divs}</div>
+    ${ed?`<details class="cf-plan-form"><summary>Cadastrar dívida</summary><div class="cf-plan-fields">
+      <label class="cf-plan-wide">Descrição<input id="d_nome"></label>
+      <label>Saldo devedor (R$)<input id="d_saldo" type="number" min="0.01" step="0.01"></label>
+      <label>Juros ao mês (%)<input id="d_juros" type="number" min="0" step="0.01"></label>
+      <label>Pagamento mínimo (R$)<input id="d_min" type="number" min="0" step="0.01"></label>
+      <label>Credor (opcional)<input id="d_credor"></label>
+      <button class="cf-plan-wide" data-act="adddiv">Salvar dívida</button>
+    </div></details>`:''}
+   </section>
+   <section class="card" aria-labelledby="cf-patrimonio-titulo"><h2 id="cf-patrimonio-titulo">Patrimônio</h2>
+    <dl class="cf-plan-values"><div><dt>Ativos</dt><dd>${brl(pt.ativos)}</dd></div><div><dt>Passivos</dt><dd>${brl(pt.passivos)}</dd></div><div><dt>Patrimônio líquido</dt><dd class="${Number(pt.liquido)>=0?'pos':'neg'}">${brl(pt.liquido)}</dd></div></dl>
+    <div class="cf-plan-list">${its||'<p class="mu">Nenhum item de patrimônio cadastrado.</p>'}</div>
+    ${ed?`<details class="cf-plan-form"><summary>Adicionar item</summary><div class="cf-plan-fields">
+      <label class="cf-plan-wide">Nome do item<input id="p_nome" placeholder="Ex.: veículo"></label>
+      <label>Tipo<select id="p_tipo"><option value="ativo">Ativo (tenho)</option><option value="passivo">Passivo (devo)</option></select></label>
+      <label>Valor (R$)<input id="p_valor" type="number" min="0.01" step="0.01"></label>
+      <button class="cf-plan-wide" data-act="additem">Salvar item</button>
+    </div></details>`:''}
+    ${S.fam?.plano==='ultra'?viewUltraExtras(P,ed):''}
+   </section>
+  </div>`;
 }
 
 function viewUltraExtras(P,ed){
@@ -4764,9 +4889,18 @@ function viewUltraExtras(P,ed){
     const dt=new Date(x.data+"T12:00:00").toLocaleDateString("pt-BR");
     return '<div class="cf-history-point"><div class="cf-history-column"><i style="height:'+h+'%"></i></div><b>'+brl(x.liquido)+'</b><small>'+dt+'</small></div>';
   }).join("");
-  const history='<section class="cf-section"><h2>Histórico patrimonial</h2><p>Acompanhe a evolução do patrimônio líquido.</p><button data-act="registrarpat" '+(ed?"":"disabled")+'>Registrar posição de hoje</button>'+(hist.length?'<div class="cf-history-chart">'+bars+'</div>':'<p class="cf-note">Registre sua primeira posição patrimonial.</p>')+'</section>';
-  const initial=Math.max(0,Number((P.pat||{}).liquido)||0).toFixed(2);
-  const sim='<section class="cf-section"><span>PLANEJAMENTO DE LONGO PRAZO</span><h2>Simulador de objetivos</h2><div class="cf-simulator"><label>Valor inicial<input id="proj_inicial" type="number" min="0" step="0.01" value="'+initial+'"></label><label>Aporte mensal<input id="proj_aporte" type="number" min="0" step="0.01" value="0"></label><label>Prazo em meses<input id="proj_meses" type="number" min="1" max="360" value="60"></label><label>Taxa mensal hipotética (%)<input id="proj_taxa" type="number" min="0" max="3" step="0.01" value="0"></label><button data-act="simularproj">Calcular</button></div><div id="proj_result" class="cf-projection-result">Informe os dados e calcule o cenário.</div><p class="cf-note-text">Simulação matemática, sem garantia de rendimento ou recomendação de investimento.</p></section>';
+  const history='<details class="cf-plan-form"><summary>Histórico patrimonial</summary><div class="cf-plan-expand-body">'+
+    (hist.length?'<div class="cf-history-chart">'+bars+'</div>':'<p class="mu">Nenhuma posição patrimonial registrada.</p>')+
+    (ed?'<button data-act="registrarpat">Registrar posição de hoje</button>':'')+'</div></details>';
+  const sim='<details class="cf-plan-form"><summary>Simular rendimento</summary><div class="cf-plan-expand-body">'+
+    '<p class="mu">Compare o total dos aportes com o resultado de uma taxa hipotética.</p><div class="cf-plan-fields">'+
+    '<label>Valor inicial (R$)<input id="proj_inicial" type="number" min="0" step="0.01" value="0"></label>'+
+    '<label>Aporte mensal (R$)<input id="proj_aporte" type="number" min="0" step="0.01" value="0"></label>'+
+    '<label>Prazo em meses<input id="proj_meses" type="number" min="1" max="360" value="60"></label>'+
+    '<label>Taxa mensal hipotética (%)<input id="proj_taxa" type="number" min="-3" max="3" step="0.01" value="0"></label>'+
+    '<button class="cf-plan-wide" data-act="simularproj">Comparar cenários</button></div>'+
+    '<div id="proj_result" class="cf-projection-result" role="status">Informe os dados para comparar.</div>'+
+    '<p class="mu">Aportes no fim do mês. A simulação usa uma taxa constante e não inclui impostos, taxas de investimento ou inflação. Na prática, o resultado pode variar e o resgate pode ter prazo.</p></div></details>';
   return history+sim;
 }
 
@@ -5138,7 +5272,9 @@ document.addEventListener('click',async e=>{
     if(S.view==='plan')await carregarPlan();else render();
   }
   else if(a==='mobileadd'){
-    S.mobileAddOpen=!S.mobileAddOpen;
+    if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);
+    if(b.dataset.origem==='inicio'){S.view='planilha';S.mobileMore=false;S.mobileAddOpen=true;}
+    else S.mobileAddOpen=!S.mobileAddOpen;
     S.mobileAddType=b.dataset.tipo==='receita'?'receita':'despesa';
     render();
     if(S.mobileAddOpen){atualizarParcelamento();$('#n_desc')?.focus();}
@@ -5174,6 +5310,7 @@ document.addEventListener('click',async e=>{
   else if(a==='compromissos'){await mostrarCompromissos()}
   else if(a==='fecharcompromissos'){document.querySelector('.cf-compromissos-modal')?.remove()}
   else if(a==='add'){
+    if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);
     const valorBase=Number($('#n_valor').value),desc=$('#n_desc').value.trim(),tipo=$('#n_tipo').value;
     const parcelas=Number($('#n_parcelas')?.value||1),natureza=$('#n_natureza')?.value||'compra';
     if(!desc||desc.length>160||!Number.isFinite(valorBase)||valorBase<=0)return toast('Informe uma descrição de até 160 caracteres e um valor maior que zero.',1);
@@ -5231,19 +5368,44 @@ document.addEventListener('click',async e=>{
     S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
   else if(a==='delmem'){await q(sb.from('membros').delete().eq('id',b.dataset.id));S.membros=await q(sb.from('membros').select('*').eq('familia_id',S.fam.id).order('criado_em'));render()}
   else if(a==='metodo'){S.metodo=b.dataset.m;render()}
-  else if(a==='addmeta'){const n=$('#m_nome').value.trim(),v=parseFloat($('#m_alvo').value);if(!n||!(v>0))return toast('Informe nome e valor da meta',1);
-    await q(sb.from('metas').insert({familia_id:S.fam.id,nome:n,valor_alvo:v,prazo:$('#m_prazo').value||null,tipo:$('#m_tipo').value}));await carregarPlan()}
+  else if(a==='focodividas'){document.getElementById('cf-plan-dividas')?.focus()}
+  else if(a==='focometa'){
+    if(b.dataset.id){document.getElementById('cf-meta-'+b.dataset.id)?.focus();return;}
+    if(!canEdit())return;
+    $('#cf-nova-meta').open=true;
+    $('#m_tipo').value=b.dataset.tipo==='reserva_emergencia'?'reserva_emergencia':'sonho';
+    if(b.dataset.tipo==='reserva_emergencia'&&!$('#m_nome').value.trim())$('#m_nome').value='Reserva de emergência';
+    $('#m_nome').focus();
+  }
+  else if(a==='addmeta'){if(!canEdit())return;const n=$('#m_nome').value.trim(),v=Number($('#m_alvo').value);if(!n||!Number.isFinite(v)||v<=0)return toast('Informe nome e valor da meta',1);
+    await q(sb.from('metas').insert({familia_id:S.fam.id,nome:n,valor_alvo:v,prazo:$('#m_prazo').value||null,tipo:$('#m_tipo').value}));
+    S.planQuitada=null;await carregarPlan()}
   else if(a==='aporte'){const i=document.querySelector('[data-ap="'+b.dataset.id+'"]'),v=parseFloat(i.value);if(!(v>0))return toast('Digite o valor do aporte',1);
     await q(sb.from('aportes_meta').insert({familia_id:S.fam.id,meta_id:b.dataset.id,valor:v}));toast('Aporte registrado');await carregarPlan()}
   else if(a==='delmeta'){if(!confirm('Excluir esta meta?'))return;await q(sb.from('metas').delete().eq('id',b.dataset.id));await carregarPlan()}
   else if(a==='adddiv'){const n=$('#d_nome').value.trim(),v=parseFloat($('#d_saldo').value);if(!n||!(v>0))return toast('Informe nome e saldo da dívida',1);
     await q(sb.from('dividas').insert({familia_id:S.fam.id,nome:n,credor:$('#d_credor').value.trim()||null,saldo_devedor:v,taxa_juros_mensal:parseFloat($('#d_juros').value)||0,pagamento_minimo:parseFloat($('#d_min').value)||0}));await carregarPlan()}
-  else if(a==='deldiv'){if(!confirm('Marcar esta dívida como quitada?'))return;await q(sb.from('dividas').update({ativa:false}).eq('id',b.dataset.id));await carregarPlan()}
+  else if(a==='deldiv'){
+    if(!canEdit()||!confirm('Marcar esta dívida como quitada?'))return;
+    const familyId=S.fam.id,userId=S.user?.id;
+    const quitada=await q(sb.from('dividas').update({ativa:false}).eq('id',b.dataset.id).eq('familia_id',familyId).eq('ativa',true).select('id').maybeSingle());
+    if(quitada){S.planQuitada={familyId,userId};toast('Dívida marcada como quitada. Veja seu próximo passo em Metas.');}
+    await carregarPlan();
+  }
   else if(a==='additem'){const n=$('#p_nome').value.trim(),v=parseFloat($('#p_valor').value);if(!n||!(v>0))return toast('Informe nome e valor',1);
     await q(sb.from('patrimonio_itens').insert({familia_id:S.fam.id,tipo:$('#p_tipo').value,nome:n,valor:v}));await carregarPlan()}
   else if(a==='delitem'){await q(sb.from('patrimonio_itens').delete().eq('id',b.dataset.id));await carregarPlan()}
   else if(a==='registrarpat'){if(!planoTemRecurso('patrimonioHistorico'))return toast('O histórico patrimonial é um recurso do plano Ultra.',1);if(!canEdit())return toast('Somente quem edita pode registrar o patrimônio.',1);const p=S.plan?.pat||{},now=new Date(),data=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');await q(sb.from('patrimonio_snapshots').upsert({familia_id:S.fam.id,data,ativos:Number(p.ativos)||0,passivos:Number(p.passivos)||0,liquido:Number(p.liquido)||0},{onConflict:'familia_id,data'}));toast('Posição patrimonial registrada.');await carregarPlan()}
-  else if(a==='simularproj'){if(!planoTemRecurso('simulador'))return toast('O simulador de objetivos é um recurso do plano Ultra.',1);const inicial=Number($('#proj_inicial').value),aporte=Number($('#proj_aporte').value),meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;if(![inicial,aporte,meses,taxa].every(Number.isFinite)||inicial<0||aporte<0||meses<1||meses>360||!Number.isInteger(meses)||taxa<0||taxa>0.03)return toast('Confira os valores: prazo de 1 a 360 meses e taxa de 0% a 3% ao mês.',1);const fator=Math.pow(1+taxa,meses),futuro=taxa===0?inicial+aporte*meses:inicial*fator+aporte*((fator-1)/taxa),aportado=inicial+aporte*meses,out=$('#proj_result');if(out)out.innerHTML='<span>Resultado ilustrativo</span><strong>'+brl(futuro)+'</strong><p>Valor total colocado: '+brl(aportado)+' · diferença matemática: '+brl(futuro-aportado)+'</p>';}
+  else if(a==='simularproj'){
+    if(!planoTemRecurso('simulador'))return toast('O simulador de objetivos é um recurso do plano Ultra.',1);
+    const inicial=Number($('#proj_inicial').value),aporte=Number($('#proj_aporte').value);
+    const meses=Number($('#proj_meses').value),taxa=Number($('#proj_taxa').value)/100;
+    const comparacao=compararAportes(inicial,aporte,meses,taxa),out=$('#proj_result');
+    if(!comparacao){out.textContent='Confira os valores, o prazo de 1 a 360 meses e a taxa entre -3% e 3% ao mês.';return;}
+    out.innerHTML='<dl class="cf-plan-values"><div><dt>Sem rendimento</dt><dd>'+brl(comparacao.semRendimento)+
+      '</dd></div><div><dt>Com a taxa hipotética</dt><dd>'+brl(comparacao.comRendimento)+
+      '</dd></div><div><dt>Diferença simulada</dt><dd>'+brl(comparacao.comRendimento-comparacao.semRendimento)+'</dd></div></dl>';
+  }
   else if(a==='copiar'){await navigator.clipboard.writeText(S.pv.conteudo);toast('Copiado')}
   else if(a==='fecharmodal'){S.pv=null;S.sino=false;S.hist=null;render()}
   else if(a==='plano'){const p=b.dataset.plano;if(!PLANOS[p])return;S.planoEscolhido=p;PIX.valor=PLANOS[p].valor;renderPaywall();return}
