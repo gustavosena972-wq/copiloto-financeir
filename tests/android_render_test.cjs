@@ -63,6 +63,75 @@ test('home offers only the missing entry types and respects read-only and closed
  assert.doesNotMatch(summary([expense,{tipo:'receita',status:'pago',valor:'70.00'}]),/data-origem="inicio"/);
  assert.doesNotMatch(summary([],false),/data-origem="inicio"/);
  assert.doesNotMatch(summary([],true,false),/data-origem="inicio"/);
+ assert.match(summary([],false),/Nenhum lançamento disponível neste mês/);
+ assert.doesNotMatch(summary([],true,false),/Escolha o que você tem em mãos/);
+});
+
+test('the first-entry shortcut opens the correct form and cannot open a locked month',()=>{
+ const start=source.indexOf("  else if(a==='mobileadd')")+7;
+ const end=source.indexOf("  else if(a==='planilha-ajuda')",start);
+ const action=source.slice(start,end);
+ const run=(tipo,allowed,open,origem='inicio')=>{
+   const S={view:origem==='inicio'?'inicio':'planilha',mobileAddOpen:origem!=='inicio',mobileMore:true};
+   const messages=[];
+   const renders=[];
+   const focus=[];
+   vm.runInNewContext('(function(){'+action+'})()',{
+     S,a:'mobileadd',b:{dataset:{tipo,origem}},canEdit:()=>allowed,mesAberto:()=>open,
+     toast:message=>messages.push(message),render:()=>renders.push(S.view),atualizarParcelamento:()=>{},
+     $:selector=>({focus:()=>focus.push(selector)}),
+   });
+   return {S,messages,renders,focus};
+ };
+ for(const tipo of ['receita','despesa']){
+   const {S,renders,focus}=run(tipo,true,true);
+   assert.deepEqual(S,{view:'planilha',mobileAddOpen:true,mobileMore:false,mobileAddType:tipo});
+   assert.deepEqual(renders,['planilha']);
+   assert.deepEqual(focus,['#n_desc']);
+ }
+ assert.equal(run('despesa',true,true,'planilha').S.mobileAddOpen,false);
+ for(const [allowed,open] of [[false,true],[true,false]]){
+   const {S,messages,renders}=run('receita',allowed,open);
+   assert.equal(S.view,'inicio');
+   assert.equal(S.mobileAddOpen,false);
+   assert.equal(messages.length,1);
+   assert.deepEqual(renders,[]);
+ }
+});
+
+test('the ledger saves the first bill in the selected family and the summary includes it exactly once',async()=>{
+ const begin=source.indexOf("  else if(a==='add'){")+7;
+ const end=source.indexOf("  else if(a==='del'){",begin);
+ const fields={n_valor:'150.50',n_desc:'Energia',n_tipo:'despesa',n_data:'2026-11-17',n_status:'pendente',n_cat:'',n_mem:'member'};
+ const lanc=[];
+ const S={fam:{id:'family'},user:{id:'user'},ano:{ano:2026},mobileAddOpen:true};
+ const event=vm.runInNewContext('(async function(){'+source.slice(begin,end)+'})()',{
+   a:'add',S,canEdit:()=>true,mesAberto:()=>true,$:id=>id.slice(1) in fields?{value:fields[id.slice(1)]}:null,
+   toast:()=>{},q:async result=>result,
+   loadAno:async month=>assert.equal(month,11),
+   sb:{
+     rpc(name,args){
+       assert.equal(name,'garantir_mes');
+       assert.equal(args.p_fam,'family');
+       assert.equal(args.p_mes,11);
+       return 'month';
+     },
+     from(name){
+       if(name==='lancamentos')return {insert(row){lanc.push(row)}};
+       assert.equal(name,'anos');
+       return {select(){return this},eq(){return this},order(){return [S.ano]}};
+     },
+   },
+ });
+ await event;
+ assert.equal(S.mobileAddOpen,false);
+ assert.equal(lanc.length,1);
+ assert.equal(lanc[0].mes_id,'month');
+ assert.equal(lanc[0].familia_id,'family');
+ const html=monthlyFunction('mobileSmartContext','viewPlanilha',{lanc});
+ assert.match(html,/1 movimentação</);
+ assert.ok(html.includes(brl(150.50)));
+ assert.match(html,/data-tipo="receita" data-origem="inicio"/);
 });
 
 test('an import preview separates the scrollable table from the confirmation controls',()=>{
