@@ -4204,6 +4204,11 @@ function monthlyFinancialSnapshot(){
 }
 function mobileSmartContext(){
   const d=monthlyFinancialSnapshot(), format=value=>brl(value/100);
+  const primeiroPasso=canEdit()&&mesAberto()&&(d.income===0||d.expense===0)
+    ? '<div class="cf-sheet-start-actions" role="group" aria-label="Complete o resumo do mês">'+
+      (d.income===0?'<button type="button" data-act="mobileadd" data-tipo="receita" data-origem="inicio">Registrar o que entra</button>':'')+
+      (d.expense===0?'<button type="button" data-act="mobileadd" data-tipo="despesa" data-origem="inicio">Registrar uma conta</button>':'')+'</div>'
+    : '';
   const categoryRows=d.categories.slice(0,4).map(([name,amount])=>'<div class="cf-category-bar"><div><span>'+esc(name)+'</span><b>'+format(amount)+'</b></div><span class="cf-category-track" aria-hidden="true"><i style="width:'+Math.min(100,amount/d.expense*100).toFixed(2)+'%"></i></span></div>').join('');
   const dueRows=d.due.slice(0,3).map(row=>'<li><span>'+esc(row.descricao||'Conta sem descrição')+'<small>'+row.due.split('-').reverse().join('/')+(row.due<d.today?' · Em atraso':'')+'</small></span><b>'+format(row.cents)+'</b></li>').join('');
   const panels='<div class="cf-dashboard-panels"><section class="cf-finance-panel"><h3>Despesas por categoria</h3><p>O que mais pesa nos lançamentos do mês.</p>'+(categoryRows||'<p>Suas categorias aparecem aqui após registrar despesas.</p>')+'</section><section class="cf-finance-panel"><h3>Contas em aberto</h3><p>Vencimentos registrados que precisam de atenção.</p>'+(dueRows?'<ul class="cf-due-list">'+dueRows+'</ul>':'<p>Nenhuma conta com vencimento informado em aberto.</p>')+'</section></div>';
@@ -4217,7 +4222,10 @@ function mobileSmartContext(){
     '<p class="cf-amount-note">Valores dos lançamentos deste período. Não representam o saldo da sua conta bancária.</p>'+
     (d.ignored?'<p role="status" class="cf-validation-note">'+d.ignored+' registro(s) precisam de revisão para entrar no cálculo.</p>':'')+
     panels+
-    (!d.rows.length?'<p class="cf-empty-welcome">Vamos começar pelo primeiro lançamento. O Tamanduá acompanha você a partir dos seus dados.</p>':'')+
+    (!d.rows.length?'<p class="cf-empty-welcome">Vamos começar pelo primeiro lançamento. Escolha o que você tem em mãos.</p>':
+      (d.income===0?'<p class="cf-empty-welcome">Falta registrar o que entra para comparar com suas despesas.</p>':
+        (d.expense===0?'<p class="cf-empty-welcome">Falta registrar pelo menos uma despesa para comparar com suas receitas.</p>':'')))+
+    primeiroPasso+
     '</section>';
 }
 function viewPlanilha(ed){
@@ -4269,6 +4277,7 @@ function viewPlanilha(ed){
     <div class="cf-sheet-start-actions">
     ${ed&&!comMovimentos&&!S.mobileAddOpen?'<button type="button" data-act="mobileadd" data-tipo="receita">Registrar uma entrada</button>':''}
     ${ed&&comMovimentos&&S.lanc.some(row=>!row.categoria_id)?'<button type="button" data-act="planilha-categorias">Revisar categorias</button>':''}
+    ${comMovimentos?'<button type="button" class="sec" data-act="smartgo" data-v="inicio">Ver o resumo do mês</button>':''}
     <button type="button" class="sec" data-act="planilha-ajuda">Pedir ajuda ao Tamanduá</button>
     </div></section>`;
   const novo=ed?`<tr class="novo ${S.mobileAddOpen?'is-open':''}" id="novo"><td data-label="Vencimento"><input aria-label="Vencimento" type="date" id="n_data" value="${dataInicial}"></td><td data-label="Descrição"><div style="display:grid;gap:5px;min-width:0"><input id="n_desc" placeholder="${tipoInicial==='receita'?'Ex.: salário ou trabalho extra':'Ex.: mercado, aluguel ou internet'}" style="min-width:0"><div class="row" style="gap:5px;margin:0"><select id="n_natureza" onchange="atualizarParcelamento()" title="Tipo de compromisso" style="flex:1;min-width:0"><option value="compra">Compra parcelada</option><option value="financiamento">Prestação / financiamento</option></select><select id="n_parcelas" title="Número de parcelas" style="width:70px;flex-shrink:0">${Array.from({length:30},(_,i)=>`<option value="${i+1}">${i+1}x</option>`).join('')}</select></div><small id="n_valor_help" class="mu">Informe o valor total da compra; o sistema divide pelas parcelas.</small></div></td>
@@ -5199,7 +5208,9 @@ document.addEventListener('click',async e=>{
     if(S.view==='plan')await carregarPlan();else render();
   }
   else if(a==='mobileadd'){
-    S.mobileAddOpen=!S.mobileAddOpen;
+    if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);
+    if(b.dataset.origem==='inicio'){S.view='planilha';S.mobileMore=false;S.mobileAddOpen=true;}
+    else S.mobileAddOpen=!S.mobileAddOpen;
     S.mobileAddType=b.dataset.tipo==='receita'?'receita':'despesa';
     render();
     if(S.mobileAddOpen){atualizarParcelamento();$('#n_desc')?.focus();}
@@ -5235,6 +5246,7 @@ document.addEventListener('click',async e=>{
   else if(a==='compromissos'){await mostrarCompromissos()}
   else if(a==='fecharcompromissos'){document.querySelector('.cf-compromissos-modal')?.remove()}
   else if(a==='add'){
+    if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);
     const valorBase=Number($('#n_valor').value),desc=$('#n_desc').value.trim(),tipo=$('#n_tipo').value;
     const parcelas=Number($('#n_parcelas')?.value||1),natureza=$('#n_natureza')?.value||'compra';
     if(!desc||desc.length>160||!Number.isFinite(valorBase)||valorBase<=0)return toast('Informe uma descrição de até 160 caracteres e um valor maior que zero.',1);
