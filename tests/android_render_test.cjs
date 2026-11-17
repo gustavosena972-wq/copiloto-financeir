@@ -23,10 +23,10 @@ test('annual mobile view renders category target for each populated month',()=>{
  assert.match(result,/100,00/);
 });
 const CFMoney=require('../android-app/app/src/main/assets/finance-core.js');
-function monthlyFunction(name,next,state){
+function monthlyFunction(name,next,state,editable=true,monthOpen=true){
  const body=source.slice(source.indexOf('function '+name+'('),source.indexOf('function '+next+'('));
  return vm.runInNewContext(body+'; '+name+'()',{
-  S:state, CFMoney, brl, esc:v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])), canEdit:()=>true,mesAberto:()=>true,
+  S:state, CFMoney, brl, esc:v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])), canEdit:()=>editable,mesAberto:()=>monthOpen,
   monthlyFinancialSnapshot:()=>CFMoney.summarize(state.lanc,'2026-11-08')
  });
 }
@@ -52,6 +52,17 @@ test('empty monthly briefing requests real records without inventing a forecast'
  const html=monthlyFunction('mobileSmartContext','viewPlanilha',{lanc:[]});
  assert.match(html,/0 movimentações/);assert.match(html,/Vamos começar pelo primeiro lançamento/);
  assert.doesNotMatch(html,/safeToSpend|smartHealthScore/);
+});
+test('home offers only the missing entry types and respects read-only and closed months',()=>{
+ const summary=(lanc,editable=true,open=true)=>monthlyFunction('mobileSmartContext','viewPlanilha',{lanc},editable,open);
+ assert.match(summary([]),/data-tipo="receita" data-origem="inicio"/);
+ assert.match(summary([]),/data-tipo="despesa" data-origem="inicio"/);
+ const expense={tipo:'despesa',status:'pendente',valor:'30.00'};
+ assert.match(summary([expense]),/Falta registrar o que entra/);
+ assert.doesNotMatch(summary([expense]),/data-tipo="despesa"/);
+ assert.doesNotMatch(summary([expense,{tipo:'receita',status:'pago',valor:'70.00'}]),/data-origem="inicio"/);
+ assert.doesNotMatch(summary([],false),/data-origem="inicio"/);
+ assert.doesNotMatch(summary([],true,false),/data-origem="inicio"/);
 });
 
 test('an import preview separates the scrollable table from the confirmation controls',()=>{
@@ -84,6 +95,7 @@ test('a populated sheet offers category review only while editing is allowed',()
  const lanc=[{id:'expense',tipo:'despesa',valor:10,descricao:'Mercado',status:'pendente'}];
  const html=renderLedger({lanc});
  assert.match(html,/Melhore sua planilha/);
+ assert.match(html,/data-act="smartgo" data-v="inicio">Ver o resumo do mês/);
  assert.match(html,/data-act="planilha-categorias"/);
  assert.doesNotMatch(html,/data-tipo="receita">Registrar uma entrada/);
  assert.doesNotMatch(renderLedger({lanc},false),/data-act="planilha-categorias"/);
