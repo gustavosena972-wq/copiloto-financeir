@@ -265,6 +265,21 @@ export function simpleGreeting(message: string, language = "auto"): string | nul
   return greetings[base] + " Como você está?";
 }
 
+export function budgetStarterGuidance(message: string, language = "auto"): string | null {
+  if (!["auto", "pt", "pt-BR", "pt-br"].includes(language)) return null;
+  const text = message.toLocaleLowerCase("pt-BR").normalize("NFD").replace(/\p{Diacritic}/gu, "");
+  const asksForStarterBudget = /\b(?:planilha|orcamento)\b/.test(text)
+    && /\b(?:comec(?:ar|o|e|ando)|mont(?:ar|o|e|ando)|cri(?:ar|o|e|ando)|primeir[ao]|do zero)\b/.test(text);
+  if (!asksForStarterBudget) return null;
+  return [
+    "Para montar seu primeiro orçamento, abra Planilha e confira o mês selecionado.",
+    "1. Registre uma entrada real com data, descrição e valor. Se ainda não recebeu, deixe como pendente.",
+    "2. Registre os gastos que já conhece. Comece por moradia, alimentação, transporte e contas. Use só as categorias que fazem sentido para você.",
+    "3. Volte ao resumo do mês para conferir entradas, despesas e valores a pagar. Inclua os demais lançamentos aos poucos.",
+    "Você prefere começar por uma entrada ou por uma conta que precisa pagar?",
+  ].join("\n\n");
+}
+
 export function trimModelOutput(output: unknown): string {
   const value = cleanString(output, 5000);
   if (!value) throw new Error("Resposta vazia");

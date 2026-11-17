@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
-import { buildTamanduaInstructions, extractResponseText, normalizeBotInput, simpleGreeting, summarizeFinancialSignals } from "./bot-core.ts";
+import { budgetStarterGuidance, buildTamanduaInstructions, extractResponseText, normalizeBotInput, simpleGreeting, summarizeFinancialSignals } from "./bot-core.ts";
 
 const ORIGINS = new Set(["https://gustavosena972-wq.github.io", "https://copiloto-financeir.gustavosena972.workers.dev", "https://appassets.androidplatform.net"]);
 function headers(origin: string | null) {
@@ -48,11 +48,13 @@ Deno.serve(async (request) => {
       if (e || !c) return json(origin,{error:"Conversa indisponível para esta conta."},404);
       conversationId = c.id;
     }
-    const greeting = simpleGreeting(input.message, prefs?.idioma || "auto");
+    const language = prefs?.idioma || "auto";
+    const greeting = simpleGreeting(input.message, language);
+    const localAnswer = greeting ?? (apiKey ? null : budgetStarterGuidance(input.message, language));
     let answer: string;
     let knowledgeUsed = 0;
-    if (greeting) {
-      answer = greeting;
+    if (localAnswer) {
+      answer = localAnswer;
     } else {
       if (!apiKey) return json(origin,{error:"Assistente temporariamente indisponível."},503);
       const now = new Date();

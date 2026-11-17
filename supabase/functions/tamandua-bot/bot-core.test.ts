@@ -1,5 +1,6 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
+  budgetStarterGuidance,
   buildTamanduaInstructions,
   buildTamanduaMemoryKey,
   buildTamanduaMemoryUpdates,
@@ -8,6 +9,16 @@ import {
   simpleGreeting,
   summarizeFinancialSignals,
 } from "./bot-core.ts";
+
+Deno.test("orienta a primeira planilha quando o modelo externo não está configurado", () => {
+  const reply = budgetStarterGuidance("Minha planilha está vazia. Como começo o orçamento mensal?");
+  assert(reply?.includes("Registre uma entrada real"));
+  assert(reply?.includes("deixe como pendente"));
+  assert(!reply?.includes("R$"));
+  assertEquals(budgetStarterGuidance("Qual foi meu saldo no mês?"), null);
+  assertEquals(budgetStarterGuidance("Qual é o montante do meu orçamento?"), null);
+  assertEquals(budgetStarterGuidance("Quero começar uma planilha", "en"), null);
+});
 
 Deno.test("normaliza mensagem e contexto sem aceitar payload gigante", () => {
   const result = normalizeBotInput({
