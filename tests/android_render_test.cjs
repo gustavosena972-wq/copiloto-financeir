@@ -159,6 +159,8 @@ test('an empty sheet offers a first entry and prefills a date in the selected mo
  assert.match(html,/id="n_data" value="2026-08-01"/);
  assert.match(html,/id="n_cat" data-tipo="receita"/);
  assert.equal((html.match(/data-act="imp"/g)||[]).length,1);
+ assert.match(html,/<details class="cf-sheet-file-actions"><summary>Importar e exportar<\/summary>[\s\S]*?data-act="imp"[\s\S]*?id="arq"[\s\S]*?<\/details>/);
+ assert.equal((html.match(/id="arq"/g)||[]).length,1);
 });
 test('a populated sheet offers category review only while editing is allowed',()=>{
  const lanc=[{id:'expense',tipo:'despesa',valor:10,descricao:'Mercado',status:'pendente'}];
@@ -169,4 +171,21 @@ test('a populated sheet offers category review only while editing is allowed',()
  assert.doesNotMatch(html,/data-tipo="receita">Registrar uma entrada/);
  assert.doesNotMatch(renderLedger({lanc},false),/data-act="planilha-categorias"/);
  assert.doesNotMatch(renderLedger({lanc,mes:{mes:8,status:'fechado'}}),/data-act="planilha-categorias"/);
+});
+
+test('planning puts each editor under its own section and hides editors from readers',()=>{
+ const start=source.indexOf('function viewPlan(){');
+ const end=source.indexOf('function viewUltraExtras(',start);
+ const render=editable=>vm.runInNewContext(source.slice(start,end)+';viewPlan()',{
+   S:{fam:{plano:'pro'},plan:{metas:[],dividas:[],itens:[],pat:{}}},canEdit:()=>editable,
+   viewProximoPasso:()=>'',brl,esc:String,
+ });
+ const html=render(true);
+ for(const [id,form] of [['cf-metas-titulo','m_nome'],['cf-dividas-titulo','d_nome'],['cf-patrimonio-titulo','p_nome']]){
+   const section=html.split('aria-labelledby="'+id+'"')[1].split('</section>')[0];
+   assert.match(section,new RegExp('<details[^>]*>[\\s\\S]*id="'+form+'"'));
+   assert.doesNotMatch(render(false),new RegExp('id="'+form+'"'));
+ }
+ assert.doesNotMatch(html,/aria-label="Ordenar dívidas"/);
+ assert.match(html,/id="cf-nova-meta"><summary>Nova meta/);
 });
