@@ -19,7 +19,7 @@ function nextStepContext(family='family-a'){
   const start=source.indexOf('function parcelasDaMeta(');
   const end=source.indexOf('function viewPlan(){',start);
   assert.ok(start>=0&&end>start,'Android should include the planning journey');
-  return vm.runInNewContext(source.slice(start,end)+';({parcelasDaMeta,viewProximoPasso})',{
+  return vm.runInNewContext(source.slice(start,end)+';({parcelasDaMeta,viewProximoPasso,compararAportes})',{
     S:{fam:{id:family}},
     document:{addEventListener(){}},
     dataLocalISO:()=>'2026-11-17',
@@ -59,7 +59,30 @@ test('planning shows the amount still needed for an active goal and escapes the 
     {id:'goal-a',nome:'<curso>',valor_alvo:100,valor_atual:40,prazo:'2027-02-17'},
   ],dividas:[]},true);
   assert.match(html,/&lt;curso>/);
-  assert.match(html,/Faltam BRL 60/);
+  assert.match(html,/Ainda falta<\/dt><dd>BRL 60/);
+  assert.match(html,/Já guardado<\/dt><dd>BRL 40/);
   assert.match(html,/BRL 20 por mês/);
   assert.match(html,/data-id="goal-a"/);
+});
+
+test('the next step prioritizes the nearest current goal and acknowledges a missed deadline',()=>{
+  const {viewProximoPasso}=nextStepContext();
+  const goal=(nome,prazo)=>({id:nome,nome,prazo,valor_alvo:500,valor_atual:10});
+  const html=viewProximoPasso({metas:[goal('Viagem','2027-06-01'),goal('Curso','2027-02-01')],dividas:[]},true);
+  assert.match(html,/>Curso</);
+  assert.doesNotMatch(html,/>Viagem</);
+  const overdue=viewProximoPasso({metas:[goal('Curso','2026-11-15')],dividas:[]},false);
+  assert.match(overdue,/O prazo passou/);
+  assert.doesNotMatch(overdue,/por mês/);
+});
+
+test('projection compares the same end-of-month deposits with zero, positive and negative returns',()=>{
+  const {compararAportes}=nextStepContext();
+  const positive=compararAportes(1000,200,12,0.005);
+  assert.equal(positive.semRendimento,3400);
+  assert.equal(positive.comRendimento,3528.79);
+  assert.equal(compararAportes(1000,200,12,0).comRendimento,3400);
+  assert.ok(compararAportes(1000,200,12,-0.005).comRendimento<3400);
+  assert.equal(compararAportes(1000,200,0,0.005),null);
+  assert.equal(compararAportes(1000,200,12,0.04),null);
 });
