@@ -550,8 +550,8 @@ class MainActivityTest {
         assertTrue(html.contains("editfamily"))
         assertTrue(html.contains("editcategories"))
         assertTrue(html.contains("editaccount"))
-        assertTrue(html.contains("Membros da família"))
-        assertTrue(html.contains("Convites e acessos"))
+        assertTrue(html.contains("familyAreaHeader('membros','Pessoas e permissões'"))
+        assertTrue(html.contains("familyAreaHeader('convites','Convidar alguém'"))
         assertTrue(html.contains("Categorias e grupos"))
         assertTrue(html.contains("Conta e privacidade"))
     }
