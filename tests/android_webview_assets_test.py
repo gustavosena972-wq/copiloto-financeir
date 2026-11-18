@@ -13,8 +13,24 @@ assert ASSET.stat().st_size > 10000
 
 print("PASS: Android WebView uses a bundled Supabase runtime asset.")
 
+from xml.etree import ElementTree as ET
+ns = '{http://schemas.android.com/apk/res/android}'
+app = ET.parse(ROOT / 'android-app/app/src/main/AndroidManifest.xml').getroot().find('application')
+assert app.get(ns + 'icon') == '@mipmap/ic_launcher'
+assert app.get(ns + 'roundIcon') == '@mipmap/ic_launcher'
+res = ROOT / 'android-app/app/src/main/res'
+legacy = ET.parse(res / 'mipmap-anydpi/ic_launcher.xml').getroot()
+assert legacy.tag == 'vector' and legacy.get(ns + 'viewportWidth') == '48'
+adaptive = ET.parse(res / 'mipmap-anydpi-v26/ic_launcher.xml').getroot()
+assert adaptive.find('foreground').get(ns + 'drawable') == '@drawable/ic_launcher_foreground'
+assert adaptive.find('background').get(ns + 'drawable') == '@color/ic_launcher_background'
+foreground = ET.parse(res / 'drawable/ic_launcher_foreground.xml').getroot()
+assert foreground.tag == 'vector' and len(foreground.findall('.//path')) == 4
+assert ET.parse(res / 'values/launcher_colors.xml').getroot().find('color').get('name') == 'ic_launcher_background'
+print('PASS: Android has scalable legacy and adaptive launcher icons matching the Tamandua brand.')
+
 assert '<div id="app" class="wrap"><div class="cf-mobile-startup"' in html
-assert 'mobile.html?v=1.0.55' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
+assert 'mobile.html?v=1.0.56' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
 print("PASS: Android startup has visible fallback and cache-busted app entry.")
 
 
@@ -23,13 +39,13 @@ print("PASS: Android startup has visible fallback and cache-busted app entry.")
 assert html.count("function mostrarErroInicial(e)") == 1
 print("PASS: Android startup JavaScript parses past the initial error handler declaration.")
 
-# Release contract: the tested Android package is 1.0.55/versionCode 55.
+# Release contract: the tested Android package is 1.0.56/versionCode 56.
 gradle = (ROOT / "android-app/app/build.gradle.kts").read_text(encoding="utf-8")
-assert "versionCode = 55" in gradle
-assert 'versionName = "1.0.55"' in gradle
-print("PASS: Android release is pinned to 1.0.55/versionCode 55.")
+assert "versionCode = 56" in gradle
+assert 'versionName = "1.0.56"' in gradle
+print("PASS: Android release is pinned to 1.0.56/versionCode 56.")
 
-# CI release trigger marker: 1.0.55
+# CI release trigger marker: 1.0.56
 
 # Parse every classic inline script, rather than checking only one handler name.
 # Node parses syntax without executing application code or making network requests.
