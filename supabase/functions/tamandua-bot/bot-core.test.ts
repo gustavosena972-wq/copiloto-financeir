@@ -1,5 +1,6 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
+  financialGuidance,
   budgetStarterGuidance,
   buildTamanduaInstructions,
   buildTamanduaMemoryKey,
@@ -9,6 +10,25 @@ import {
   simpleGreeting,
   summarizeFinancialSignals,
 } from "./bot-core.ts";
+
+Deno.test("resumo usa totais autorizados e diferencia caixa, pendências e lucro",()=>{
+  const data={periodo_existente:true,mes:11,ano:2026,totais:{recebido:1200,pago:250,a_receber:300,a_pagar:100}};
+  const text=financialGuidance("Analise o caixa do meu negócio",data,"negocio");
+  assert(text?.includes("950,00"));
+  assert(text?.includes("custos, taxas e tributos"));
+  assert(!text?.includes("lucro de"));
+  assertEquals(financialGuidance("Oi",data),null);
+  assertEquals(financialGuidance("Meu saldo",{...data,totais:{...data.totais,pago:"inválido"}}),null);
+  assertEquals(financialGuidance("Meu saldo",data,"pessoal","en"),null);
+  assert(financialGuidance("Meu resumo",{periodo_existente:false})?.includes("Planilha"));
+});
+
+Deno.test("a orientação individual não presume parentes e a comercial usa as áreas reais",()=>{
+  const personal=buildTamanduaInstructions({usageMode:"pessoal",profile:null,knowledge:[],learnings:[],history:[]});
+  const business=buildTamanduaInstructions({usageMode:"negocio",profile:null,knowledge:[],learnings:[],history:[]});
+  assert(personal.includes("Não pressuponha cônjuge"));
+  assert(business.includes("Receita pendente não é dinheiro em caixa"));
+});
 
 Deno.test("orienta a primeira planilha quando o modelo externo não está configurado", () => {
   const reply = budgetStarterGuidance("Minha planilha está vazia. Como começo o orçamento mensal?");

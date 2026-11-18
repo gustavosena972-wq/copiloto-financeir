@@ -4,7 +4,7 @@ function navigation(view){const start=source.indexOf('function mobileNavigation(
 test('phone navigation has five destinations with a dedicated ledger and chat',()=>{const html=navigation('planilha');assert.equal((html.match(/<button /g)||[]).length,5);for(const name of ['Início','Planilha','Tamanduá','Metas','Mais'])assert.match(html,new RegExp('>'+name+'<'));assert.match(html,/data-v="planilha"[^>]*aria-current="page"/);assert.doesNotMatch(html,/data-v="ano"/);});
 test('the chat is a distinct active destination and does not activate the ledger',()=>{const html=navigation('tamandua');assert.match(html,/data-v="tamandua"[^>]*aria-current="page"/);assert.doesNotMatch(html,/data-v="planilha"[^>]*aria-current="page"/);});
 test('home presents the month analysis without duplicating the ledger navigation',()=>{
- const start=source.indexOf("body=(S.view==='inicio'");
+ const start=source.indexOf("S.view==='inicio'?mobileSmartContext()");
  const home=source.slice(start,source.indexOf(":S.view==='tamandua'",start));
  assert.match(home,/Análise do mês/);
  assert.doesNotMatch(home,/data-v="planilha"/);
