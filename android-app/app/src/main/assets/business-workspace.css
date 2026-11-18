@@ -1,4 +1,16 @@
 .cf-business{display:grid;gap:12px;min-width:0}
+.cf-business [hidden]{display:none!important}
+.cf-business-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;overscroll-behavior-x:contain;touch-action:pan-x pan-y}
+.cf-business-tabs button{flex:0 0 auto;min-height:44px;padding:10px 16px;white-space:nowrap}
+.cf-business-tabs button[aria-current=page]{background:#4a326a!important;border-color:#b193dc!important;color:#fff!important}
+.cf-business-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.cf-business-bar{height:6px;background:#252234;border-radius:6px;margin-top:8px;overflow:hidden}
+.cf-business-bar span{display:block;height:100%;background:#ae8ce0;border-radius:6px}
+.cf-business-page{display:flex;align-items:center;justify-content:center;min-width:100px}
+.cf-business .cf-plan-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.cf-business .cf-plan-fields label{display:grid;gap:6px;align-content:start;min-width:0}
+.cf-business .cf-plan-fields :is(input,select){width:100%;box-sizing:border-box}
+@media(max-width:600px){.cf-business-columns{grid-template-columns:1fr;gap:12px}.cf-business .cf-plan-fields{grid-template-columns:1fr}}
 body[data-ui="premium-fintech"] #app .app-shell[data-current-view="negocio"] .app-topbar{min-height:0!important;height:auto!important;padding:16px!important;margin-bottom:12px!important}
 body[data-ui="premium-fintech"] #app .app-shell[data-current-view="negocio"] .page-heading{max-width:none!important}
 .cf-business .card{margin:0;min-width:0}

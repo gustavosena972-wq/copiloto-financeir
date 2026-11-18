@@ -43,3 +43,25 @@ Em Negócio, o catálogo guarda nome, duração, materiais, custo da hora, parce
 Testes adicionais: cálculo no banco; precisão de centavos; edição e arquivamento; dados inválidos e nomes duplicados; leitura e gravação entre espaços; leitor; usuário sem acesso ao piloto; sessão anônima; preparação sem inserção automática. No aparelho, conferir o cadastro, teclado, foco, rolagem e receita preparada antes de salvar. Esses testes físicos continuam pendentes.
 
 Referências: [Fresha — preços e duração no catálogo](https://www.fresha.com/help-center/knowledge-base/catalog/76-set-advanced-pricing-and-durations-) e [Trinks — comissão e precificação](https://sistema.trinks.com/academia/financeiro/comissao-e-precificacao). A implementação usa conceitos de organização de serviços e custos; não oferece todas as funções dessas plataformas.
+
+
+## Gestão por áreas — Android 1.0.55
+
+O negócio passa a ter seis áreas: Caixa, Movimentações, Vencimentos, Resultados, Planejamento e Serviços. A troca entre áreas preserva os campos ainda não enviados do formulário visível. Cadastro e alteração de lançamentos continuam na Planilha; a lista empresarial abre diretamente o registro escolhido, preservando as permissões do responsável, editor ou leitor.
+
+- Movimentações: busca por descrição, filtro de tipo, categoria e situação, paginação de 25 registros e totais de todo o filtro.
+- Vencimentos: recebíveis e contas a pagar, agrupados em a vencer, 1–7 dias, 8–30 dias, mais de 30 dias e sem data. A baixa de despesa exige confirmação e atualiza somente o lançamento autorizado do mês. Não executa pagamento bancário.
+- Resultados: entradas e saídas realizadas, receitas e despesas registradas, composição dos custos por categoria, quantidade e média por lançamento de receita. Categorias são resolvidas a partir do cadastro autorizado. Não se presume que toda receita seja venda ou que a diferença seja lucro contábil.
+- Revisão: falta de categoria, pendência sem vencimento, registros inválidos e possíveis duplicações por descrição, tipo, valor, vencimento e categoria. Nada é mesclado ou excluído automaticamente.
+- Planejamento: cenário com custos fixos, faturamento previsto, percentuais estimados de custos variáveis e taxas, objetivo mensal e dias de trabalho. Calcula contribuição, faturamento para cobrir custos e buscar o objetivo, meta diária e diferença para o faturamento previsto. O cenário permanece somente na sessão e não altera lançamentos.
+- Caixa: prioridades calculadas dos dados atuais, com ações para abrir a área correspondente. Aportes, empréstimos, retiradas e custos ausentes exigem revisão antes de interpretar os resultados.
+
+Os relatórios carregam páginas de 500 lançamentos, limitadas por família e mês; não param silenciosamente na primeira página da API. Acima de 10 mil registros, a leitura falha com uma explicação e nenhum relatório parcial é apresentado. Consulta por várias páginas não equivale a um snapshot contábil: durante edição simultânea, atualize o mês antes de decisões ou fechamento. Filtros, cenário e área ativa são limpos na troca de sessão.
+
+Exemplo testado: custos fixos de R$ 3.000; custos variáveis de 30%; taxas de 10%; objetivo de R$ 2.000 e 20 dias de trabalho. Contribuição estimada de 60%, cobertura dos fixos em R$ 5.000, faturamento-alvo de R$ 8.333,34 e meta diária de R$ 416,67. Com R$ 10.000 de faturamento previsto, o cenário apresenta R$ 3.000 após esses custos informados. Valores monetários usam centavos inteiros e metas são arredondadas para cima.
+
+### Referências e limites
+
+[Conta Azul](https://contaazul.com/funcionalidades/gestao-financeira/) e [Bling](https://www.bling.com.br/funcionalidades/gerenciador-financeiro) orientam a separação de contas, caixa e análise. O [planejador do QuickBooks](https://quickbooks.intuit.com/learn-support/en-us/help-article/budget-forecast-reports/use-cash-flow-planner-quickbooks-online/L2l59mIqe_US_en_US) orienta cenários separados dos registros reais. A fórmula de cobertura de custos segue o [material do Sebrae](https://sebrae.com.br/Sebrae/Portal%20Sebrae/UFs/MS/Anexos/2024/como_calcular_o_ponto_de_equilibrio.pdf).
+
+Este incremento entrega gestão e simulação financeira. Conciliação bancária, estoque, integração fiscal, folha, agenda, CRM e DRE com classificação contábil ainda exigem módulos próprios e validação. Eles não são apresentados como disponíveis. A cobrança do plano Negócios continua pendente de catálogo e validação na Play; o Alpha permanece restrito a quem tem acesso ao piloto. O escopo não inclui alterações na web, ícone ou peças da loja.
