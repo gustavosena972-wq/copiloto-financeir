@@ -1,4 +1,6 @@
 .cf-business{display:grid;gap:12px;min-width:0}
+body[data-ui="premium-fintech"] #app .app-shell[data-current-view="negocio"] .app-topbar{min-height:0!important;height:auto!important;padding:16px!important;margin-bottom:12px!important}
+body[data-ui="premium-fintech"] #app .app-shell[data-current-view="negocio"] .page-heading{max-width:none!important}
 .cf-business .card{margin:0;min-width:0}
 .cf-business h2{font-size:1.125rem;margin:0 0 8px}
 .cf-business h3{font-size:1rem;margin:16px 0 8px}
