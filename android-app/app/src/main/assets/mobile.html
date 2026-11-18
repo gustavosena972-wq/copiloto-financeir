@@ -3667,7 +3667,7 @@ function scheduleBoot(){
 }
 
 function clearPrivateWorkspace(){
-  for(const key of ['lanc','sug','cats','contas','membros','anos','meses','resumo','meta','notifs'])S[key]=[];
+  for(const key of ['lanc','sug','cats','contas','membros','anos','meses','resumo','meta','notifs','servicos'])S[key]=[];
   for(const key of ['fam','me','ano','mes','plan','planQuitada','espaco','tamanduaProfile','imp','adm','hist','quickEdit','planoEscolhidoFamilia','tamanduaProactiveDismissedKey'])S[key]=null;
   clearTimeout(S.pw);S.pw=null;
   S.internalTester=false;S.mobileMore=false;S.mobileAddOpen=false;S.sino=false;
@@ -3700,6 +3700,7 @@ async function boot(){
   // Cada conta possui uma única família. A associação vem do banco; não há seletor local de família.
   S.me=rows[0];S.fam=S.me.familias;
   S.espaco=await q(sb.from('espaco_configuracao').select('modo,segmento').eq('familia_id',S.fam.id).maybeSingle());
+  await window.CFBusinessUI.loadServices();
   await loadTamanduaProfile();
   if(!S.admin&&!S.internalTester&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();

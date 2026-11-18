@@ -13,6 +13,11 @@ body[data-ui="premium-fintech"] #app .app-shell[data-current-view="negocio"] .pa
 .cf-business-list :is(strong,span){overflow-wrap:anywhere}
 .cf-business-list small{display:block;color:var(--mu);margin-top:4px}
 .cf-business-list button{grid-column:1/-1;min-height:44px}
+.cf-service-options{grid-column:1/-1}
+.cf-service-options summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
+.cf-service-options .cf-business-actions{padding:8px 0}
+#negocio-servico-form .cf-plan-expand-body>label{display:grid;gap:6px;margin:12px 0}
+#negocio-servico-form .cf-plan-expand-body>label input{width:100%;box-sizing:border-box}
 .cf-space-options{display:grid;gap:10px}
 .cf-space-options label{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid var(--bd);border-radius:12px}
 .cf-space-options input[type=radio]{width:20px;min-width:20px;margin:0}

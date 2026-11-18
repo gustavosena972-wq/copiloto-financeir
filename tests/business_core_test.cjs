@@ -13,8 +13,35 @@ test('a service price covers materials, working time, overhead, fees and desired
  assert.equal(p.base,35);
  assert.equal(p.margin,9.33);
  assert.ok(p.total*0.75>=35);
+ assert.equal(core.price(0.1,0,0,0.2,0,0).total,0.3);
+ assert.equal(core.price(10,30,20,5,5,20).total,33.34);
  for(const args of [[10,60,20,5,10,90],[-1,0,0,0,0,0],[NaN,0,0,0,0,0]])
    assert.equal(core.price(...args),null);
+});
+
+test('preparing a service opens a pending draft without inserting a ledger entry',async()=>{
+ const state={espaco:{modo:'negocio'},internalTester:true,servicos:[{id:'s1',nome:'Corte',preco:'46.67'}]};
+ const fields=Object.fromEntries(['n_desc','n_valor','n_tipo','n_status'].map(id=>[id,{value:'',focus(){}}]));
+ let renders=0;
+ const window={};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../android-app/app/src/main/assets/business-workspace.js'),'utf8'),{
+   window,S:state,CFBusiness:core,canEdit:()=>true,mesAberto:()=>true,
+   document:{getElementById:id=>fields[id]},render:()=>renders++,toast:()=>{},
+   sb:{from(){throw Error('A draft must not write to the database')}},
+ });
+ await window.CFBusinessUI.handle('negocio-usar-servico',{dataset:{id:'s1'}});
+ assert.equal(state.view,'planilha');assert.equal(state.mobileAddOpen,true);assert.equal(renders,1);
+ assert.equal(fields.n_desc.value,'Corte');assert.equal(fields.n_valor.value,'46.67');
+ assert.equal(fields.n_tipo.value,'receita');assert.equal(fields.n_status.value,'pendente');
+ state.servicos[0].preco=0;
+ await assert.rejects(window.CFBusinessUI.handle('negocio-usar-servico',{dataset:{id:'s1'}}),/sem preço/);
+});
+
+test('catalog safely escapes names and hides edit and prepare actions from readers',()=>{
+ const state={espaco:{modo:'negocio'},internalTester:true,me:{papel:'leitor'},servicos:[{id:'s',nome:'<img src=x>',preco:30,minutos:60}]};
+ const html=ui(state).view();
+ assert.match(html,/&lt;img src=x&gt;/);
+ for(const action of ['usar','editar','arquivar','salvar'])assert.doesNotMatch(html,new RegExp('data-act="negocio-'+action+'-servico"'));
 });
 test('pending revenue is separated from received cash and transfers do not inflate sales',()=>{
  const s=core.summary([

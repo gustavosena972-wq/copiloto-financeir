@@ -12,7 +12,7 @@ class MainActivityTest {
     @Test
     fun appStartsFromBundledFinanceUi() {
         assertEquals(
-            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.53",
+            "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.54",
             MainActivity.APP_ENTRY_URL
         )
     }
@@ -129,7 +129,7 @@ class MainActivityTest {
         assertTrue(html.contains("Falha ao inicializar o Supabase"))
         assertTrue(html.contains("sb.auth.getSession()"))
         assertTrue(html.contains("sb.auth.onAuthStateChange"))
-        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.53", MainActivity.APP_ENTRY_URL)
+        assertEquals("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.54", MainActivity.APP_ENTRY_URL)
 
     }
 
@@ -162,7 +162,7 @@ class MainActivityTest {
 
     @Test
     fun navigationOnlyKeepsTheExactBundledHttpsAssetOrigin() {
-        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.53"))
+        assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/mobile.html?v=1.0.54"))
         assertTrue(isTrustedAppAssetUrl("https://appassets.androidplatform.net/assets/privacidade.html"))
         assertTrue(!isTrustedAppAssetUrl("http://appassets.androidplatform.net/assets/mobile.html"))
         assertTrue(!isTrustedAppAssetUrl("https://appassets.androidplatform.net.evil.test/assets/mobile.html"))
@@ -597,8 +597,8 @@ class MainActivityTest {
         @Test
     fun releaseVersionAdvancesToTheCompanionGuidanceIteration() {
         val gradle = File("build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 53"))
-        assertTrue(gradle.contains("versionName = \"1.0.53\""))
+        assertTrue(gradle.contains("versionCode = 54"))
+        assertTrue(gradle.contains("versionName = \"1.0.54\""))
     }
 
     @Test

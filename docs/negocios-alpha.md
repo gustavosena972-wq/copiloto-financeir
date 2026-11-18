@@ -32,3 +32,14 @@ Verificação manual após liberar o Alpha:
 - [Bling — planos e preços](https://www.bling.com.br/planos-e-precos)
 
 As referências orientam o escopo de contas, fluxo, tarefas revisadas e preço de serviço. Emissão fiscal, agenda, folha e estoque exigem módulos e integrações próprios antes de serem oferecidos aos clientes.
+
+
+## Catálogo de serviços — Android 1.0.54
+
+Em Negócio, o catálogo guarda nome, duração, materiais, custo da hora, parcela de custos fixos, taxas estimadas e margem desejada. O banco calcula o preço; a prévia local usa centavos inteiros para evitar arredondamento binário. O limite é de 200 serviços ativos por espaço, sem nomes ativos repetidos. Nome e valores podem ser editados por dono ou editor. Arquivar preserva os lançamentos antigos.
+
+“Preparar lançamento” abre uma receita pendente na Planilha com nome e preço preenchidos. A pessoa confere vencimento, categoria e recebimento e só então salva. O catálogo não marca atendimentos, movimenta dinheiro ou cria vendas automaticamente. Um leitor apenas consulta. A base exige acesso de teste, modo Negócio e autorização no espaço em toda gravação, bloqueia alterações diretas na tabela e protege a consulta por RLS. Trocar a sessão limpa o catálogo carregado. Não é possível converter um espaço com serviços para uso doméstico.
+
+Testes adicionais: cálculo no banco; precisão de centavos; edição e arquivamento; dados inválidos e nomes duplicados; leitura e gravação entre espaços; leitor; usuário sem acesso ao piloto; sessão anônima; preparação sem inserção automática. No aparelho, conferir o cadastro, teclado, foco, rolagem e receita preparada antes de salvar. Esses testes físicos continuam pendentes.
+
+Referências: [Fresha — preços e duração no catálogo](https://www.fresha.com/help-center/knowledge-base/catalog/76-set-advanced-pricing-and-durations-) e [Trinks — comissão e precificação](https://sistema.trinks.com/academia/financeiro/comissao-e-precificacao). A implementação usa conceitos de organização de serviços e custos; não oferece todas as funções dessas plataformas.
