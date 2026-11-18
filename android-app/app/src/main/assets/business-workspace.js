@@ -5,6 +5,7 @@
   const modes={pessoal:'Individual',familiar:'Em família',negocio:'Negócio'};
   const priceFields=['materiais','minutos','custo_hora','custo_fixo','taxas','margem'];
   const priceIds=['preco-material','preco-minutos','preco-hora','preco-fixo','preco-taxas','preco-margem'];
+  const section=area=>window.CFBusinessReports?.section(area)||'<section class="card">';
   function mode(){return S.espaco?.modo||'familiar'}
   async function loadServices(){
     S.servicos=[];
@@ -16,7 +17,7 @@
     const ed=canEdit(),rows=(S.servicos||[]).map(row=>'<li><div><strong>'+escape(row.nome)+'</strong><small>'+escape(row.minutos)+' min · '+brl(row.preco)+'</small></div>'+
       (ed&&mesAberto()?'<button data-act="negocio-usar-servico" data-id="'+escape(row.id)+'">Preparar lançamento</button>':'')+
       (ed?'<details class="cf-service-options"><summary>Opções do serviço</summary><div class="cf-business-actions"><button class="sec" data-act="negocio-editar-servico" data-id="'+escape(row.id)+'">Editar preço e custos</button><button class="sec" data-act="negocio-arquivar-servico" data-id="'+escape(row.id)+'">Arquivar serviço</button></div></details>':'')+'</li>').join('');
-    return '<section class="card"><h2>Serviços do negócio</h2><p class="mu">Seu catálogo de preços e duração. Preparar um lançamento abre a Planilha para você conferir e salvar.</p><ul class="cf-business-list">'+
+    return section('services')+'<h2>Serviços do negócio</h2><p class="mu">Seu catálogo de preços e duração. Preparar um lançamento abre a Planilha para você conferir e salvar.</p><ul class="cf-business-list">'+
       (rows||'<li>Nenhum serviço salvo. Calcule o preço na ferramenta abaixo e salve o primeiro.</li>')+'</ul><button class="sec" data-act="negocio-atualizar-servicos">Atualizar catálogo</button></section>';
   }
   function options(selected='familiar'){
@@ -33,35 +34,45 @@
   }
   function view(){
     if(mode()!=='negocio'||!S.internalTester)return '<section class="card"><h2>Negócios no Alpha</h2><p>O piloto é configurado em Espaço e ajustes por quem administra um espaço dedicado ao negócio.</p></section>';
-    const d=CFBusiness.summary(S.lanc,localFinancialDate(),CFMoney),ed=canEdit()&&mesAberto();
+    const rows=(S.lanc||[]).map(r=>({...r,categoria:S.cats?.find(c=>c.id===r.categoria_id)?.nome||'Sem categoria'}));
+    const d=CFBusiness.summary(rows,localFinancialDate(),CFMoney),ed=canEdit()&&mesAberto();
     const overdue=d.pendingIncome.filter(row=>row.due&&row.due<d.today);
     const overdueCents=overdue.reduce((total,row)=>total+row.cents,0);
-    const categoryRows=d.categories.slice(0,5).map(([name,amount])=>'<li><strong>'+escape(name)+'</strong><span>'+money(amount)+'</span></li>').join('');
     const pending=d.pendingIncome.slice(0,30).map(row=>'<li><div><strong>'+escape(row.descricao)+'</strong><small>'+
       (row.due?row.due.split('-').reverse().join('/')+(row.due<d.today?' · Em atraso':''):'Sem vencimento informado')+
       '</small></div><span>'+money(row.cents)+'</span>'+(ed?'<button class="sec" data-act="negocio-recebido" data-id="'+escape(row.id)+'">Conferir recebimento</button>':'')+'</li>').join('');
-    return '<div class="cf-business"><section class="card"><h2>Caixa do negócio</h2><p class="mu">Mês selecionado. '+escape(S.espaco.segmento||'Pequeno negócio')+'.</p>'+
+    return '<div class="cf-business">'+(window.CFBusinessReports?.nav()||'')+section('overview')+'<h2>Caixa do negócio</h2><p class="mu">Mês selecionado. '+escape(S.espaco.segmento||'Pequeno negócio')+'.</p>'+
       '<dl class="cf-plan-values"><div><dt>Recebido</dt><dd>'+money(d.received)+'</dd></div><div><dt>Pago</dt><dd>'+money(d.paid)+'</dd></div><div><dt>A receber</dt><dd>'+money(d.receivable)+'</dd></div><div><dt>A pagar</dt><dd>'+money(d.payable)+'</dd></div></dl>'+
       '<p class="mu">Movimentações registradas. A diferença entre receitas e despesas não inclui custos ainda não lançados.</p><div class="cf-business-actions">'+
       (ed?'<button data-act="mobileadd" data-tipo="receita" data-origem="negocio">Registrar venda ou serviço</button><button class="sec" data-act="mobileadd" data-tipo="despesa" data-origem="negocio">Registrar custo</button>':'')+
       '<button class="sec" data-act="negocio-ajuda">Analisar com o Tamanduá</button></div></section>'+
-      '<section class="card"><h2>Recebimentos pendentes</h2>'+
+      section('receivables')+'<h2>Recebimentos pendentes</h2>'+
       (overdue.length?'<p role="status">'+overdue.length+' recebimento(s) com data vencida, somando '+money(overdueCents)+'. Confira se já recebeu antes de atualizar.</p>':'')+
       '<ul class="cf-business-list">'+(pending||'<li>Nenhum recebimento pendente neste mês.</li>')+'</ul>'+
       (d.pendingIncome.length>30?'<p>Mostrando 30 itens. Consulte os demais na Planilha.</p>':'')+'</section>'+
-      catalog()+'<section class="card"><h2>Vendas e custos do mês</h2><dl class="cf-plan-values"><div><dt>Vendas ou serviços registrados</dt><dd>'+d.salesCount+'</dd></div><div><dt>Média por lançamento de receita</dt><dd>'+money(d.salesCount?Math.round(d.income/d.salesCount):0)+'</dd></div></dl>'+
-      '<h3>Maiores categorias de despesa</h3><ul class="cf-business-list">'+(categoryRows||'<li>Registre custos para ver a distribuição.</li>')+'</ul></section>'+
-      '<section class="card"><h2>Ferramentas do negócio</h2>'+
+      catalog()+
+      section('services')+'<h2>Formação de preço</h2>'+
       '<details id="negocio-servico-form" class="cf-plan-form"><summary>Preço de um produto ou serviço</summary><div class="cf-plan-expand-body"><p class="mu">Inclua os custos e escolha uma margem. Revise o resultado antes de usar o preço.</p><input id="servico-id" type="hidden"><div class="cf-plan-fields">'+
       [['preco-material','Materiais e mercadoria (R$)'],['preco-minutos','Tempo de trabalho (minutos)'],['preco-hora','Custo da hora de trabalho (R$)'],['preco-fixo','Custos fixos por venda (R$)'],['preco-taxas','Taxas e tributos estimados (%)'],['preco-margem','Margem desejada sobre o preço (%)']].map(([id,label])=>'<label>'+label+'<input id="'+id+'" type="number" min="0" step="'+(id==='preco-minutos'?'1':'0.01')+'" value="0"></label>').join('')+
       '<button class="cf-plan-wide" data-act="negocio-preco">Calcular preço</button></div><div id="negocio-preco-resultado" role="status"></div>'+
-      (canEdit()?'<label>Nome do serviço<input id="servico-nome" maxlength="120" placeholder="Ex.: corte e finalização"></label><div class="cf-business-actions"><button data-act="negocio-salvar-servico">Salvar serviço no catálogo</button><button class="sec" data-act="negocio-limpar-servico">Novo serviço</button></div><p class="mu">Salvar o catálogo não registra uma venda nem altera lançamentos anteriores.</p>':'')+'</div></details>'+
+      (canEdit()?'<label>Nome do serviço<input id="servico-nome" maxlength="120" placeholder="Ex.: corte e finalização"></label><div class="cf-business-actions"><button data-act="negocio-salvar-servico">Salvar serviço no catálogo</button><button class="sec" data-act="negocio-limpar-servico">Novo serviço</button></div><p class="mu">Salvar o catálogo não registra uma venda nem altera lançamentos anteriores.</p>':'')+'</div></details></section>'+section('planning')+'<h2>Fluxo de caixa e conferência</h2>'+
       '<details class="cf-plan-form"><summary>Previsão de caixa em 30 dias</summary><div class="cf-plan-expand-body"><p class="mu">Informe o saldo disponível de hoje. Vou buscar os vencimentos registrados para os próximos 30 dias.</p>'+
       '<label>Saldo de hoje (R$)<input id="negocio-saldo" type="number" min="0" step="0.01"></label><button data-act="negocio-prever">Calcular cenário</button><div id="negocio-previsao" role="status"></div></div></details>'+
       '<details class="cf-plan-form"><summary>Planilha e fechamento do período</summary><div class="cf-plan-expand-body"><p class="mu">Revise lançamentos antes de exportar. A planilha contém os dados registrados e serve de apoio à revisão com sua contabilidade.</p><button class="sec" data-act="view" data-v="planilha">Abrir planilha</button></div></details></section>'+
-      '<section class="card"><h2>Plano Negócios</h2><p>Preço proposto de R$ 69,90 por 30 dias. Caixa, recebimentos, formação de preço e apoio do Tamanduá. Disponível para avaliação no Alpha.</p><p class="mu">A contratação será liberada após a configuração e validação do produto na Google Play.</p></section></div>';
+      (window.CFBusinessReports?.view()||'')+section('overview')+'<h2>Plano Negócios</h2><p>Preço proposto de R$ 69,90 por 30 dias. Caixa, recebimentos, formação de preço e apoio do Tamanduá. Disponível para avaliação no Alpha.</p><p class="mu">A contratação será liberada após a configuração e validação do produto na Google Play.</p></section></div>';
   }
   function assertBusiness(){if(mode()!=='negocio'||!S.internalTester)throw Error('Recurso disponível no piloto Negócios.');}
+  async function loadRows(){
+    assertBusiness();
+    const rows=[];
+    for(let from=0;from<=10000;from+=500){
+      const page=await q(sb.from('lancamentos').select('*').eq('familia_id',S.fam.id).eq('mes_id',S.mes.id)
+        .order('data_vencimento',{nullsFirst:false}).order('criado_em').order('id').range(from,from+499));
+      rows.push(...page);
+      if(rows.length>10000)throw Error('Este mês excede 10 mil registros. Solicite apoio para analisar o período completo; um relatório parcial não será exibido.');
+      if(page.length<500)return rows;
+    }
+  }
   async function handle(action,button){
     if(action==='salvar-espaco'){
       if(S.me?.papel!=='dono')return;
@@ -70,6 +81,7 @@
       render();toast('Organização do espaço salva.');return;
     }
     assertBusiness();
+    if(action.startsWith('negocio-relatorio-'))return window.CFBusinessReports.handle(action,button);
     if(action==='negocio-atualizar-servicos'){await loadServices();render();toast('Catálogo atualizado.');return;}
     if(action==='negocio-salvar-servico'){
       if(!canEdit())return;
@@ -90,6 +102,7 @@
       const row=(S.servicos||[]).find(x=>x.id===button.dataset.id);
       if(!row)throw Error('Atualize o catálogo para encontrar este serviço.');
       if(action==='negocio-editar-servico'){
+        S.businessArea='services';render();
         document.getElementById('negocio-servico-form').open=true;
         document.getElementById('servico-id').value=row.id;document.getElementById('servico-nome').value=row.nome;
         priceIds.forEach((id,i)=>document.getElementById(id).value=row[priceFields[i]]);
@@ -116,13 +129,14 @@
       const host=document.getElementById('negocio-preco-resultado');
       host.textContent=result?'Preço calculado: '+brl(result.total)+'. Base de custos: '+brl(result.base)+'. Margem estimada: '+brl(result.margin)+'. Todos os custos dependem dos valores que você informou.':'Confira os valores: minutos inteiros até 1440, custos até um milhão com duas casas e taxas mais margem abaixo de 100%.';return;
     }
-    if(action==='negocio-recebido'){
+    if(action==='negocio-recebido'||action==='negocio-quitar'){
       if(!canEdit()||!mesAberto())return;
-      const row=S.lanc.find(x=>x.id===button.dataset.id&&x.tipo==='receita'&&x.status!=='pago');
-      if(!row||!confirm('Confirmar que recebeu '+brl(row.valor)+' de '+row.descricao+'?'))return;
+      const kind=action==='negocio-recebido'?'receita':'despesa';
+      const row=S.lanc.find(x=>x.id===button.dataset.id&&x.tipo===kind&&x.status!=='pago');
+      if(!row||!confirm('Confirmar '+(kind==='receita'?'recebimento':'pagamento')+' de '+brl(row.valor)+' — '+row.descricao+'? Isso atualiza o registro; não movimenta dinheiro.'))return;
       const changed=await q(sb.from('lancamentos').update({status:'pago',data_pagamento:dataLocalISO()})
-        .eq('id',row.id).eq('familia_id',S.fam.id).eq('mes_id',S.mes.id).eq('tipo','receita').neq('status','pago').select('id').maybeSingle());
-      await loadMes();toast(changed?'Recebimento registrado.':'Esse recebimento já foi atualizado.');return;
+        .eq('id',row.id).eq('familia_id',S.fam.id).eq('mes_id',S.mes.id).eq('tipo',kind).neq('status','pago').select('id').maybeSingle());
+      await loadMes();toast(changed?'Registro atualizado.':'Esse lançamento já foi atualizado.');return;
     }
     if(action==='negocio-prever'){
       const raw=document.getElementById('negocio-saldo').value,opening=CFMoney.cents(raw);
@@ -142,5 +156,5 @@
         '. '+projection.assumption+' Valores já vencidos e receitas incertas precisam de revisão separada.';
     }
   }
-  window.CFBusinessUI={mode,options,settings,view,handle,loadServices};
+  window.CFBusinessUI={mode,options,settings,view,handle,loadServices,loadRows};
 })();

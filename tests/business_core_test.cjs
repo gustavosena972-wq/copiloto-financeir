@@ -86,3 +86,39 @@ test('space configuration is shown only to the owner',()=>{
  assert.match(owner.settings(),/value="pessoal" checked/);
  assert.match(owner.settings(),/data-act="salvar-espaco"/);
 });
+
+test('business review separates aging, missing information and possible duplicates without editing records',()=>{
+ const rows=[
+  {id:'a',descricao:'Corte',categoria:'Serviços',tipo:'receita',valor:100,status:'pendente',data_vencimento:'2026-11-10'},
+  {id:'b',descricao:'Corte',categoria:'Serviços',tipo:'receita',valor:100,status:'pendente',data_vencimento:'2026-11-10'},
+  {id:'c',descricao:'Aluguel',tipo:'despesa',valor:50,status:'pendente'},
+  {id:'d',tipo:'receita',valor:30,status:'pago'},
+  {id:'e',tipo:'receita',valor:20,status:'pendente',data_vencimento:'2026-10-01'},
+ ];
+ const before=JSON.stringify(rows),r=core.review(rows,'2026-11-18',money);
+ assert.equal(r.receivableAging.find(x=>x.key==='8-30').cents,20000);
+ assert.equal(r.receivableAging.find(x=>x.key==='31+').cents,2000);
+ assert.equal(r.payableAging.find(x=>x.key==='undated').cents,5000);
+ assert.equal(r.missingDue.length,1);assert.equal(r.duplicates.length,2);
+ assert.equal(r.missingCategory.length,3);assert.equal(JSON.stringify(rows),before);
+});
+
+test('business ledger combines filters, paginates and keeps totals for the complete filtered set',()=>{
+ const rows=Array.from({length:60},(_,i)=>({id:String(i),descricao:'Serviço '+i,tipo:'receita',valor:10,status:'pendente',data_vencimento:'2026-11-01',categoria_id:'c'}));
+ rows.push({id:'paid',descricao:'Serviço pago',tipo:'receita',valor:100,status:'pago'});
+ const s=core.summary(rows,'2026-11-18',money);
+ const r=core.ledger(s,{query:'serviço',status:'overdue',tipo:'receita',categoria:'c',page:2});
+ assert.equal(r.count,60);assert.equal(r.rows.length,25);assert.equal(r.page,2);assert.equal(r.income,60000);
+ assert.equal(core.ledger(s,{query:'inexistente'}).rows.length,0);
+ assert.equal(core.ledger(s,{page:999}).page,3);
+});
+
+test('business planning calculates contribution, break-even and daily targets with integer cents',()=>{
+ const p=core.plan({fixed:'3000',sales:'10000',variable:'30',tax:'10',target:'2000',days:'20'},money);
+ assert.equal(p.contributionRate,60);assert.equal(p.breakEven,500000);
+ assert.equal(p.targetRevenue,833334);assert.equal(p.dailyTarget,41667);
+ assert.equal(p.estimatedResult,300000);assert.equal(p.gap,0);
+ assert.equal(core.plan({fixed:'3000',sales:'4000',variable:'30',tax:'10',target:'2000',days:'20'},money).gap,433334);
+ assert.equal(core.plan({fixed:'3000',sales:'4000',variable:'90',tax:'10',target:'0',days:'20'},money),null);
+ assert.equal(core.plan({fixed:'1.001',sales:'0',variable:'0',tax:'0',target:'0',days:'0'},money),null);
+});

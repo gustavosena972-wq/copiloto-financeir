@@ -3668,7 +3668,7 @@ function scheduleBoot(){
 
 function clearPrivateWorkspace(){
   for(const key of ['lanc','sug','cats','contas','membros','anos','meses','resumo','meta','notifs','servicos'])S[key]=[];
-  for(const key of ['fam','me','ano','mes','plan','planQuitada','espaco','tamanduaProfile','imp','adm','hist','quickEdit','planoEscolhidoFamilia','tamanduaProactiveDismissedKey'])S[key]=null;
+  for(const key of ['fam','me','ano','mes','plan','planQuitada','espaco','tamanduaProfile','imp','adm','hist','quickEdit','planoEscolhidoFamilia','tamanduaProactiveDismissedKey','businessArea','businessFilters','businessScenario'])S[key]=null;
   clearTimeout(S.pw);S.pw=null;
   S.internalTester=false;S.mobileMore=false;S.mobileAddOpen=false;S.sino=false;
   S.familyAreas={membros:false,convites:false,categorias:false,conta:false};
@@ -3727,7 +3727,7 @@ async function loadAno(mesNum){
 }
 async function loadMes(rd=true,refreshAggregates=true){
   const[l,s]=await Promise.all([
-    q(sb.from('lancamentos').select('*').eq('mes_id',S.mes.id).order('data_vencimento',{nullsFirst:false}).order('criado_em')),
+    S.espaco?.modo==='negocio'&&S.internalTester?window.CFBusinessUI.loadRows():q(sb.from('lancamentos').select('*').eq('mes_id',S.mes.id).order('data_vencimento',{nullsFirst:false}).order('criado_em')),
     q(sb.from('sugestoes').select('*').eq('mes_id',S.mes.id).order('criado_em'))]);
   S.lanc=l;S.sug=s;
   if(rd)renderWorkspaceOrKeepTamandua();
@@ -5741,5 +5741,5 @@ function mountMobileCompanion(){
 }
 </script>
 
-<script src="business-workspace.js"></script><script src="structured-import.js"></script><script src="tamandua-task-core.js"></script><script src="tamandua-actions.js"></script><script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script><script src="immersive-finance.js"></script><script src="finance-particles.js"></script></html>
+<script src="business-reports.js"></script><script src="business-workspace.js"></script><script src="structured-import.js"></script><script src="tamandua-task-core.js"></script><script src="tamandua-actions.js"></script><script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script><script src="immersive-finance.js"></script><script src="finance-particles.js"></script></html>
 
