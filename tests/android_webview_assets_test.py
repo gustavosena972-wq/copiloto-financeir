@@ -29,6 +29,12 @@ assert foreground.tag == 'vector' and len(foreground.findall('.//path')) == 4
 assert ET.parse(res / 'values/launcher_colors.xml').getroot().find('color').get('name') == 'ic_launcher_background'
 print('PASS: Android has scalable legacy and adaptive launcher icons matching the Tamandua brand.')
 
+for packaged_asset in [HTML, *HTML.parent.glob('*.js')]:
+    content = packaged_asset.read_text(encoding='utf-8')
+    for fixture in ["'test-user'", "'test-family'", 'const storeScenes=', 'function showStoreScene(', 'const testRows=']:
+        assert fixture not in content, (packaged_asset.name, fixture)
+print('PASS: Screenshot fixture identities and sample records are excluded from packaged Android assets.')
+
 assert '<div id="app" class="wrap"><div class="cf-mobile-startup"' in html
 assert 'mobile.html?v=1.0.56' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
 print("PASS: Android startup has visible fallback and cache-busted app entry.")
