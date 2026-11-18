@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
-import { budgetStarterGuidance, buildTamanduaInstructions, extractResponseText, normalizeBotInput, simpleGreeting, summarizeFinancialSignals } from "./bot-core.ts";
+import { budgetStarterGuidance, buildTamanduaInstructions, extractResponseText, financialGuidance, normalizeBotInput, simpleGreeting, summarizeFinancialSignals } from "./bot-core.ts";
 
 const ORIGINS = new Set(["https://gustavosena972-wq.github.io", "https://copiloto-financeir.gustavosena972.workers.dev", "https://appassets.androidplatform.net"]);
 function headers(origin: string | null) {
@@ -48,6 +48,9 @@ Deno.serve(async (request) => {
       if (e || !c) return json(origin,{error:"Conversa indisponível para esta conta."},404);
       conversationId = c.id;
     }
+    const {data:space,error:spaceError}=await db.from("espaco_configuracao").select("modo").eq("familia_id",familyId).maybeSingle();
+    if(spaceError)return json(origin,{error:"Não consegui verificar a organização deste espaço."},503);
+    const usageMode=space?.modo||"familiar";
     const language = prefs?.idioma || "auto";
     const greeting = simpleGreeting(input.message, language);
     const localAnswer = greeting ?? (apiKey ? null : budgetStarterGuidance(input.message, language));
@@ -56,12 +59,16 @@ Deno.serve(async (request) => {
     if (localAnswer) {
       answer = localAnswer;
     } else {
-      if (!apiKey) return json(origin,{error:"Assistente temporariamente indisponível."},503);
       const now = new Date();
       const month = Number(input.context.mes || Number(new Intl.DateTimeFormat("en",{timeZone:"America/Sao_Paulo",month:"numeric"}).format(now)));
       const year = Number(input.context.ano || Number(new Intl.DateTimeFormat("en",{timeZone:"America/Sao_Paulo",year:"numeric"}).format(now)));
       const {data:financial,error:financialError} = await db.rpc("tamandua_contexto_financeiro",{p_mes:month,p_ano:year});
       if (financialError || !financial) return json(origin,{error:"Não consegui conferir seus dados financeiros com segurança. Tente novamente."},503);
+      const verifiedAnswer=!apiKey?financialGuidance(input.message,financial,usageMode,language):null;
+      if(verifiedAnswer){
+        answer=verifiedAnswer;
+      }else{
+      if(!apiKey)return json(origin,{error:"Posso ajudar com o resumo do mês, recebimentos, planilha e metas. Para esse pedido, preciso da conexão de IA avançada."},503);
       const [knowledgeResult,memoryResult,historyResult,profileResult] = await Promise.all([
         db.from("ia_conhecimento").select("titulo,conteudo,fonte,versao,revisado_em").eq("status","ativo").order("revisado_em",{ascending:false}).limit(8),
         remembers ? db.from("ia_aprendizados").select("chave,valor").eq("usuario_id",userId).eq("familia_id",familyId).neq("chave","estado_financeiro_atual").neq("chave","perfil_tamandua").order("atualizado_em",{ascending:false}).limit(12) : Promise.resolve({data:[],error:null}),
@@ -70,6 +77,7 @@ Deno.serve(async (request) => {
       ]);
       if (memoryResult.error || historyResult.error || profileResult.error) return json(origin,{error:"Não consegui verificar seu histórico com segurança."},503);
       const instructions = buildTamanduaInstructions({
+        usageMode,
         profile:profileResult.data?.valor,
         knowledge:(knowledgeResult.data || []).map(x=>JSON.stringify({titulo:x.titulo,conteudo:x.conteudo,fonte:x.fonte,versao:x.versao})),
         learnings:(memoryResult.data || []).map(x=>({key:x.chave,value:x.valor})),
@@ -100,6 +108,7 @@ Deno.serve(async (request) => {
         return json(origin,{error:"Não recebi uma resposta completa. Tente novamente."},502);
       }
       knowledgeUsed = knowledgeResult.data?.length || 0;
+      }
     }
     const {data:saved,error:saveError} = await db.rpc("tamandua_salvar_conversa_vinculada",{
       p_vinculo:member.id,p_familia:familyId,

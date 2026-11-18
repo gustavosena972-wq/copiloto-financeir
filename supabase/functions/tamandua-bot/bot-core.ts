@@ -189,6 +189,7 @@ export function summarizeFinancialSignals(input: unknown): Record<string, number
 }
 
 export function buildTamanduaInstructions(input: {
+  usageMode?: string;
   knowledge: Array<string>;
   learnings: Array<{ key: string; value: unknown }>;
   history?: Array<{ role: string; content: string }>;
@@ -223,6 +224,13 @@ export function buildTamanduaInstructions(input: {
 
   return [
     "Você é o Tamanduá, a inteligência financeira do Copiloto Financeiro.",
+    input.usageMode === "negocio"
+      ? "Este espaço é de um pequeno negócio. Adapte exemplos a vendas, serviços, recebimentos, fornecedores e custos. Receita pendente não é dinheiro em caixa. Diferença de entradas e saídas não comprova lucro contábil. Pergunte pelos custos e tributos ainda ausentes antes de discutir margem."
+      : input.usageMode === "pessoal"
+      ? "Este espaço é individual. Fale diretamente com a pessoa sobre seu orçamento. Não pressuponha cônjuge, filhos, dependentes ou participação de outras pessoas."
+      : "Este espaço é compartilhado. Adapte o planejamento aos objetivos que a pessoa informou e respeite as permissões de acesso.",
+    "Quando fizer uma análise financeira, organize a resposta em situação, evidência do período, ação que a pessoa pode conferir no app e dados que faltam. Quando houver pouco contexto, ofereça apenas o passo que os dados sustentam.",
+    "No modo negócio, o app oferece Negócio para recebimentos, formação de preço e cenário de caixa de 30 dias, com saldo inicial informado. A Planilha continua sendo a fonte dos registros. O usuário confirma qualquer baixa ou alteração. Agenda, estoque, emissão fiscal e movimentação bancária dependem de implementação específica e não devem ser descritos como disponíveis.",
     "Seu papel é conversar e orientar com clareza, contexto e respeito, sem julgar o usuário.",
     "Responda naturalmente a cumprimentos, conversa cotidiana e dúvidas gerais. Acompanhe o assunto e o tom da pessoa. Não transforme uma conversa casual em análise do mês e não mencione dados financeiros sem relação com o pedido.",
     "Em pedidos de ajuda, reconheça a situação e ofereça o próximo passo. Use o perfil, quando disponível, para adaptar prioridades, frequência e formato da resposta. Preferência por sugestões não autoriza notificações nem alterações de registros.",
@@ -277,6 +285,40 @@ export function budgetStarterGuidance(message: string, language = "auto"): strin
     "2. Registre os gastos que já conhece. Comece por moradia, alimentação, transporte e contas. Use só as categorias que fazem sentido para você.",
     "3. Volte ao resumo do mês para conferir entradas, despesas e valores a pagar. Inclua os demais lançamentos aos poucos.",
     "Você prefere começar por uma entrada ou por uma conta que precisa pagar?",
+  ].join("\n\n");
+}
+
+/** Uses only authenticated server totals when the external model is unavailable. */
+export function financialGuidance(message: string, financial: unknown, mode = "familiar", language = "auto"): string | null {
+  if (!["auto","pt","pt-BR","pt-br"].includes(language)) return null;
+  const text=message.toLocaleLowerCase("pt-BR").normalize("NFD").replace(/\p{Diacritic}/gu,"");
+  if (!/\b(?:analis\w*|resum\w*|receb\w*|caixa|saldo|despes\w*|orcamento|divid\w*|meta\w*|financeir\w*|mes)\b/.test(text)) return null;
+  if (!financial || typeof financial !== "object") return null;
+  const data=financial as Record<string,unknown>;
+  if (data.periodo_existente !== true || !data.totais || typeof data.totais !== "object")
+    return "Ainda não há um período financeiro disponível. Abra Planilha, escolha o mês e registre uma entrada ou uma conta para começarmos.";
+  const totals=data.totais as Record<string,unknown>;
+  const keys=["recebido","pago","a_receber","a_pagar"];
+  const values=keys.map(key=>Number(totals[key]));
+  if (!values.every(value=>Number.isFinite(value)&&value>=0&&Number.isSafeInteger(Math.round(value*100)))) return null;
+  const [received,paid,receivable,payable]=values;
+  const format=(value:number)=>value.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+  const period=Number(data.mes)+"/"+Number(data.ano);
+  if (!Number.isInteger(Number(data.mes)) || Number(data.mes)<1 || Number(data.mes)>12 || !Number.isInteger(Number(data.ano))) return null;
+  const delta=(Math.round(received*100)-Math.round(paid*100))/100;
+  const action=mode==="negocio"
+    ? "Abra Negócio para conferir os recebimentos pendentes. Para projetar o caixa, informe o saldo de hoje na ferramenta de 30 dias."
+    : payable>0
+    ? "Abra Planilha e confira os vencimentos pendentes antes de decidir o próximo aporte."
+    : "Abra Metas para revisar o valor que já guardou e o prazo do próximo objetivo.";
+  return [
+    "Resumo dos registros de "+period+".",
+    "Recebido: "+format(received)+". Pago: "+format(paid)+". Diferença realizada no período: "+format(delta)+".",
+    "Ainda a receber: "+format(receivable)+". Ainda a pagar: "+format(payable)+".",
+    action,
+    mode==="negocio"
+      ? "Para avaliar lucro, precisamos conferir se todos os custos, taxas e tributos foram registrados. Para saldo disponível, falta o saldo inicial."
+      : "Para avaliar o dinheiro disponível, falta o saldo inicial e a confirmação de que todas as contas foram registradas.",
   ].join("\n\n");
 }
 

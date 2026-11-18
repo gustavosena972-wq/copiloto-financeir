@@ -3419,7 +3419,7 @@ html,body,#app{max-width:100%;overflow-x:hidden}
 @keyframes cf-tamandua-proactive-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(max-width:640px){.cf-tamandua-proactive{margin:0 0 10px;padding:12px;border-radius:16px}.cf-tamandua-proactive-actions{display:grid;grid-template-columns:1fr}.cf-tamandua-proactive-action{width:100%}}
 @media(prefers-reduced-motion:reduce){.cf-tamandua-proactive{animation:none}}
-.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"><link rel="stylesheet" href="mobile-motion.css"><script src="file-export.js"></script><link rel="stylesheet" href="android-presentation.css"><link rel="stylesheet" href="product-panel.css"><link rel="stylesheet" href="tamandua-chat.css"><link rel="stylesheet" href="tamandua-workspace.css"><link rel="stylesheet" href="continuous-presentation.css"><link rel="stylesheet" href="navigation-drawer.css"><link rel="stylesheet" href="tamandua-cocoa.css"><link rel="stylesheet" href="atelier-polish.css"><link rel="stylesheet" href="mobile-scroll.css"><link rel="stylesheet" href="immersive-finance.css"><link rel="stylesheet" href="product-studio.css"></head>
+.cf-mobile-startup{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;background:linear-gradient(145deg,#07130f,#0b1d15 58%,#07130f);color:#f3fff7}.cf-mobile-startup-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#19e3c1,#6d5dfc);font-weight:900;letter-spacing:-.04em;box-shadow:0 12px 30px #0006}.cf-mobile-startup div:last-child{display:grid;gap:3px}.cf-mobile-startup b{font-size:18px}.cf-mobile-startup span{font-size:12px;color:#aeb6d5}</style><script src="finance-core.js"></script><script src="business-core.js"></script><link rel="stylesheet" href="business-workspace.css"><link rel="stylesheet" href="mobile-theme.css"><link rel="stylesheet" href="mobile-organization.css"><link rel="stylesheet" href="mobile-polish.css"><link rel="stylesheet" href="mobile-motion.css"><script src="file-export.js"></script><link rel="stylesheet" href="android-presentation.css"><link rel="stylesheet" href="product-panel.css"><link rel="stylesheet" href="tamandua-chat.css"><link rel="stylesheet" href="tamandua-workspace.css"><link rel="stylesheet" href="continuous-presentation.css"><link rel="stylesheet" href="navigation-drawer.css"><link rel="stylesheet" href="tamandua-cocoa.css"><link rel="stylesheet" href="atelier-polish.css"><link rel="stylesheet" href="mobile-scroll.css"><link rel="stylesheet" href="immersive-finance.css"><link rel="stylesheet" href="product-studio.css"></head>
 <body data-ui="premium-fintech">
 <div id="app" class="wrap"><div class="cf-mobile-startup" role="status" aria-live="polite"><div class="cf-mobile-startup-mark">CF</div><div><b>Copiloto Financeiro</b><span>Preparando seu financeiro…</span></div></div></div>
 <div id="toast"></div>
@@ -3668,7 +3668,7 @@ function scheduleBoot(){
 
 function clearPrivateWorkspace(){
   for(const key of ['lanc','sug','cats','contas','membros','anos','meses','resumo','meta','notifs'])S[key]=[];
-  for(const key of ['fam','me','ano','mes','plan','planQuitada','tamanduaProfile','imp','adm','hist','quickEdit','planoEscolhidoFamilia','tamanduaProactiveDismissedKey'])S[key]=null;
+  for(const key of ['fam','me','ano','mes','plan','planQuitada','espaco','tamanduaProfile','imp','adm','hist','quickEdit','planoEscolhidoFamilia','tamanduaProactiveDismissedKey'])S[key]=null;
   clearTimeout(S.pw);S.pw=null;
   S.internalTester=false;S.mobileMore=false;S.mobileAddOpen=false;S.sino=false;
   S.familyAreas={membros:false,convites:false,categorias:false,conta:false};
@@ -3699,6 +3699,7 @@ async function boot(){
   }
   // Cada conta possui uma única família. A associação vem do banco; não há seletor local de família.
   S.me=rows[0];S.fam=S.me.familias;
+  S.espaco=await q(sb.from('espaco_configuracao').select('modo,segmento').eq('familia_id',S.fam.id).maybeSingle());
   await loadTamanduaProfile();
   if(!S.admin&&!S.internalTester&&!(S.fam.acesso_ate&&new Date(S.fam.acesso_ate)>new Date()))return renderPaywall();
   ligarTempoReal();
@@ -3981,6 +3982,7 @@ function renderSemFamilia(){
   $('#app').innerHTML=`<div class="auth"><h1>Seu espaço financeiro</h1>
   <p class="mu">Organize suas contas sozinho ou com pessoas de confiança. Cada conta participa de um espaço por vez.</p>
   <section class="cf-family-join"><h2>Começar do zero</h2>
+  ${window.CFBusinessUI?.options('pessoal')||''}
   <p>Crie seu espaço para montar a planilha. Você pode convidar alguém depois.</p>
   <label>Nome do espaço<input id="fnome" placeholder="Ex.: Meu orçamento ou Família Silva"></label>
   <button data-act="criarfam">Criar meu espaço</button></section>
@@ -4022,9 +4024,10 @@ function mobileMoreMenu(){
       <section><h3>Análise financeira</h3>
         ${link('checape','Checape financeiro','Sugestões para o mês escolhido')}
         ${link('ano','Visão do ano','Compare entradas e despesas por mês')}${reports}
+        ${S.espaco?.modo==='negocio'?link('negocio','Negócio','Caixa, recebimentos e preço de serviço'):''}
       </section>
       <section><h3>Família e conta</h3>
-        ${link('família','Família e ajustes','Membros, convites e preferências')}
+        ${link('família','Espaço e ajustes','Organização, acessos e preferências')}
         <button type="button" class="mobile-more-signout" data-act="sair">Sair da conta</button>
       </section>
       ${admin}
@@ -4054,16 +4057,17 @@ function render(){
   const ed=canEdit()&&mesAberto();
   const ultra=planoTemRecurso('relatorios');
   if(S.view==='espacos')S.view='planilha';
-  const TL={planilha:'Lançamentos',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
+  const TL={negocio:'Negócio',planilha:'Lançamentos',ano:'Visão do ano',checape:'Checape',plan:'Planejamento',família:'Família e ajustes'};
   if(S.admin)TL.admin='Administração'+(S.admPend?' ('+S.admPend+')':'');
   const navItem=(t,label,icon)=>`<button type="button" class="nav-item ${S.view===t?'on':''}" data-act="view" data-v="${t}" ${S.view===t?'aria-current="page"':''}><span class="nav-icon">${icon}</span><span>${label}</span></button>`;
-  const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('inicio','Início','⌂')}${navItem('planilha','Planilha mensal','▦')}${navItem('tamandua','Tamanduá','◎')}${navItem('ano','Visão do ano','▤')}</section>
+  const nav=`<section class="nav-section"><span class="nav-section-title">FINANCEIRO</span>${navItem('inicio','Início','⌂')}${S.espaco?.modo==='negocio'?navItem('negocio','Negócio','▣'):''}${navItem('planilha','Planilha mensal','▦')}${navItem('tamandua','Tamanduá','◎')}${navItem('ano','Visão do ano','▤')}</section>
     <section class="nav-section"><span class="nav-section-title">ANÁLISE E PLANEJAMENTO</span>${navItem('checape','Checape','◈')}${navItem('plan','Planejamento','◎')}${ultra?navItem('relatorios','Relatórios','▥'):''}</section>
     <section class="nav-section"><span class="nav-section-title">FAMÍLIA</span>${navItem('família','Família e ajustes','♧')}</section>
     ${S.admin?`<section class="nav-section"><span class="nav-section-title">ADMINISTRAÇÃO</span>${navItem('admin','Administração','⚙')}</section>`:''}`;
   const anos=S.anos.map(a=>`<option value="${a.id}" ${a.id===S.ano.id?'selected':''}>${a.ano}${a.status==='fechado'?' (fechado)':''}</option>`).join('');
   const info={
-    inicio:['Vamos cuidar do seu mês.','Um passo de cada vez, com sua família.'],
+    inicio:S.espaco?.modo==='pessoal'?['Vamos cuidar do seu mês.','Suas contas, suas escolhas e seus objetivos.']:S.espaco?.modo==='negocio'?['Seu negócio, em dia.','Confira o caixa e os próximos recebimentos.']:['Vamos cuidar do seu mês.','Um passo de cada vez, com sua família.'],
+    negocio:['Negócio','Caixa e decisões do seu pequeno negócio.'],
     tamandua:['Tamanduá','Um espaço para conversar e cuidar das suas finanças.'],
     planilha:['Sua planilha','Consulte, edite, importe e exporte seus lançamentos.'],
     ano:['Visão do ano','Acompanhe os resultados financeiros e compare os meses do ano.'],
@@ -4075,15 +4079,15 @@ function render(){
     espacos:['Central de espaços','Cada conta pertence a uma única família.']
   }[S.view]||['Copiloto Financeiro','Gestão financeira familiar'];
   let body='';
-  body=(S.view==='inicio'?mobileSmartContext()+`<details class="mobile-analysis"><summary>Análise do mês</summary>${viewGrupos()}${viewCats()}</details>`:S.view==='tamandua'?`<section class="cf-chat-destination" aria-label="Conversa com o Tamanduá"><h2>Seu Tamanduá</h2><p>Converse sobre as finanças da sua família. Seu histórico e sua memória ficam neste espaço.</p></section>`:S.view==='planilha'?viewPlanilha(ed):S.view==='ano'?viewAno():S.view==='checape'?viewChecape(ed):S.view==='plan'?viewPlan():S.view==='relatorios'&&planoTemRecurso('relatorios')?viewRelatorios():S.view==='admin'?viewAdmin()+viewConfig():viewFamilia()+viewCats2()+viewConta());
-  const monthOptions=['inicio','planilha','checape'].includes(S.view)
+  body=(S.view==='negocio'?window.CFBusinessUI.view():S.view==='inicio'?mobileSmartContext()+`<details class="mobile-analysis"><summary>Análise do mês</summary>${viewGrupos()}${viewCats()}</details>`:S.view==='tamandua'?`<section class="cf-chat-destination" aria-label="Conversa com o Tamanduá"><h2>Seu Tamanduá</h2><p>Converse sobre suas finanças. Seu histórico e sua memória ficam neste espaço.</p></section>`:S.view==='planilha'?viewPlanilha(ed):S.view==='ano'?viewAno():S.view==='checape'?viewChecape(ed):S.view==='plan'?viewPlan():S.view==='relatorios'&&planoTemRecurso('relatorios')?viewRelatorios():S.view==='admin'?viewAdmin()+viewConfig():viewFamilia()+viewCats2()+viewConta());
+  const monthOptions=['inicio','planilha','checape','negocio'].includes(S.view)
     ?S.meses.map(m=>`<option value="${m.id}" ${m.id===S.mes.id?'selected':''}>${MN[m.mes-1]}${m.status==='fechado'?' (fechado)':''}</option>`).join('')
     :'';
   $('#app').innerHTML=`<div class="app-shell" data-current-view="${esc(S.view)}">
     <aside class="app-sidebar" aria-label="Navegação principal">
       <div class="sidebar-head">
         <div class="sidebar-brand">${LOGO}<div><strong>Copiloto</strong><small>FINANCEIRO</small></div></div>
-        <div class="sidebar-family"><small>FAMÍLIA ATIVA</small><strong title="${esc(S.fam.nome)}">${esc(S.fam.nome)}</strong><span><i></i> Sincronização ativa</span></div>
+        <div class="sidebar-family"><small>${S.espaco?.modo==='pessoal'?'SEU ESPAÇO':S.espaco?.modo==='negocio'?'NEGÓCIO ATIVO':'FAMÍLIA ATIVA'}</small><strong title="${esc(S.fam.nome)}">${esc(S.fam.nome)}</strong><span><i></i> Sincronização ativa</span></div>
       </div>
       <nav class="sidebar-nav">${nav}</nav>
       <button type="button" class="session-button" data-act="sair">Sair da conta</button>
@@ -5219,7 +5223,7 @@ function viewFamilia(){
     </div>
     </div>`:'';
   const pessoas=members.filter(member=>member.usuario_id).length;
-  return '<div class="cf-family-area-shell">'+
+  return '<div class="cf-family-area-shell">'+(window.CFBusinessUI?.settings()||'')+
     '<section class="cf-family-summary"><h2>'+esc(S.fam.nome)+'</h2><p class="cf-family-count">'+pessoas+(pessoas===1?' pessoa com acesso':' pessoas com acesso')+'</p><p>As pessoas com acesso compartilham a planilha deste espaço. Cada conta participa de um espaço por vez.</p></section>'+
     '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('convites','Convidar alguém',ed?'Escolha a permissão e envie o código.':'Peça a quem pode editar a planilha para criar um convite.',ed?'Criar convite':null)+inviteEdit+'</div></section>'+
     '<section class="cf-family-area"><div class="cf-family-area-body">'+familyAreaHeader('membros','Pessoas e permissões','Perfis sem login apenas identificam responsáveis por lançamentos.',ed?'Editar pessoas':null)+
@@ -5235,7 +5239,8 @@ document.addEventListener('click',async e=>{
   if(!LIVRE.includes(a))S.busy=true;
   try{
   if(['aprovar','recusar','aprovarplay','recusarplay','salvarcfg'].includes(a))await confirmarAdmin();
-  if(a==='entrar'||a==='cadastrar')await autenticar(a);
+  if(a==='salvar-espaco'||a.startsWith('negocio-'))await window.CFBusinessUI.handle(a,b);
+  else if(a==='entrar'||a==='cadastrar')await autenticar(a);
   else if(a==='escolherplano'){
     const plano=b.dataset.plano;
     if(!PLANOS[plano])return toast('Plano inválido. Atualize a página e tente novamente.',1);
@@ -5255,7 +5260,12 @@ document.addEventListener('click',async e=>{
     await boot();
     toast('Você saiu da família. Agora pode criar outra ou entrar por convite.');
   }
-  else if(a==='criarfam'){const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome da família',1);const id=await q(sb.rpc('criar_familia',{p_nome:n}));await boot()}
+  else if(a==='criarfam'){
+    const n=$('#fnome').value.trim();if(!n)return toast('Informe o nome do espaço',1);
+    const modo=document.querySelector('[name="espaco-modo"]:checked')?.value||'pessoal';
+    await q(sb.rpc('criar_familia',{p_nome:n}));
+    await q(sb.rpc('configurar_meu_espaco',{p_modo:modo,p_segmento:''}));await boot();
+  }
   else if(a==='entrarfam'){
     const codigo=$('#cod').value.trim();
     if(!codigo)return toast('Digite o código que você recebeu.',1);
@@ -5273,7 +5283,7 @@ document.addEventListener('click',async e=>{
   }
   else if(a==='mobileadd'){
     if(!canEdit()||!mesAberto())return toast('Este mês não está disponível para edição.',1);
-    if(b.dataset.origem==='inicio'){S.view='planilha';S.mobileMore=false;S.mobileAddOpen=true;}
+    if(['inicio','negocio'].includes(b.dataset.origem)){S.view='planilha';S.mobileMore=false;S.mobileAddOpen=true;}
     else S.mobileAddOpen=!S.mobileAddOpen;
     S.mobileAddType=b.dataset.tipo==='receita'?'receita':'despesa';
     render();
@@ -5730,5 +5740,5 @@ function mountMobileCompanion(){
 }
 </script>
 
-<script src="structured-import.js"></script><script src="tamandua-task-core.js"></script><script src="tamandua-actions.js"></script><script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script><script src="immersive-finance.js"></script><script src="finance-particles.js"></script></html>
+<script src="business-workspace.js"></script><script src="structured-import.js"></script><script src="tamandua-task-core.js"></script><script src="tamandua-actions.js"></script><script src="tamandua-session.js"></script><script src="tamandua-enhancements.js"></script><script src="mobile-polish.js"></script><script src="presentation-art.js"></script><script src="mobile-motion.js"></script><script src="tamandua-3d.js"></script><script src="tamandua-workspace.js"></script><script src="reminder-plan.js"></script><script src="tamandua-preferences.js"></script><script src="navigation-drawer.js"></script><script src="presentation-rebuild.js"></script><script src="tamandua-presence.js"></script><script src="sheet-workspace.js"></script><script src="immersive-finance.js"></script><script src="finance-particles.js"></script></html>
 
