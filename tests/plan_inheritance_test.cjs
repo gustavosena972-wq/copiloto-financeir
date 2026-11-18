@@ -6,3 +6,17 @@ test('Ultra preserves every enabled capability from Pro and Max',()=>{for(const 
 test('Ultra preserves the family capacity and adds the advanced capabilities',()=>{assert.ok(plans.ultra.limite===null||plans.ultra.limite>=plans.max.limite);for(const name of ['relatorios','patrimonioHistorico','simulador'])assert.equal(plans.ultra.recursos[name],true);assert.equal(plans.pro.valor,20.99);assert.equal(plans.max.valor,30.39);assert.equal(plans.ultra.valor,50);});
 test('the Ultra presentation explicitly includes both lower plans',()=>{const start=source.indexOf('<article class="landing-plan-card ultra"'),end=source.indexOf('</article>',start);assert.match(source.slice(start,end),/Tudo dos planos Pro e Max/);});
 
+test('Negocios explains the pilot without substituting a family purchase product',()=>{
+ const start=source.indexOf('id="plano-negocios"'),end=source.indexOf('</article>',start),html=source.slice(start,end);
+ assert.match(html,/Negócios/);assert.match(html,/Piloto em avaliação no Alpha/);
+ for(const term of ['busca e filtros','faixas de atraso','Formação de preço','metas por dia'])assert.ok(html.includes(term),term);
+ assert.match(html,/data-act="conhecernegocios"/);assert.doesNotMatch(html,/data-act="escolherplano"|data-plano="pro"/);
+ assert.equal(plans.negocios,undefined);
+});
+
+test('the public illustration starts without sample money, percentages or transactions',()=>{
+ const start=source.indexOf('<section class="cf-preview"'),end=source.indexOf('</section>',start),html=source.slice(start,end);
+ assert.doesNotMatch(html,/R\$|38%|27%|19%|16%/);
+ assert.match(html,/Nenhum lançamento/);assert.match(html,/Sua conta começa sem lançamentos/);
+});
+
