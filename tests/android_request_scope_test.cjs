@@ -5,11 +5,11 @@ test('an old family request cannot populate a new account',async()=>{const {S,q}
 test('a previous month cannot overwrite the selected month',async()=>{const {S,q}=setup();let resolve;const result=q(new Promise(r=>resolve=r));S.mes={id:'dec'};resolve({data:['november']});await assert.rejects(result,{name:'AbortError'});});
 test('same-account same-period requests still return their records',async()=>{const {q}=setup();assert.equal(await q(Promise.resolve({data:42})),42);});
 test('old private content disappears before a new session waits for configuration',()=>{
- const state={user:{id:'new-user'},fam:{id:'old-family'},lanc:[{descricao:'private'}],notifs:[{id:'old-notification'}]};
+ const state={user:{id:'new-user'},fam:{id:'old-family'},lanc:[{descricao:'private'}],notifs:[{id:'old-notification'}],servicos:[{nome:'private service'}]};
  const screen={innerHTML:'private content'};
  const body=source.slice(source.indexOf('function clearPrivateWorkspace()'),source.indexOf('function renderAuth()'));
  vm.runInNewContext(body+';boot()',{S:state,$:()=>screen,clearTimeout,carregarConfig:()=>new Promise(()=>{})});
  assert.doesNotMatch(screen.innerHTML,/private content/);
- assert.equal(state.fam,null);assert.equal(state.lanc.length,0);assert.equal(state.notifs.length,0);
+ assert.equal(state.fam,null);assert.equal(state.lanc.length,0);assert.equal(state.notifs.length,0);assert.equal(state.servicos.length,0);
 });
 

@@ -20,8 +20,8 @@ android {
         minSdk = 24
         targetSdk = 36
         buildConfigField("boolean", "INTERNAL_TESTING", providers.gradleProperty("copilotoInternalTest").getOrElse("false").toBooleanStrict().toString())
-        versionCode = 53
-        versionName = "1.0.53"
+        versionCode = 54
+        versionName = "1.0.54"
     }
 
     buildFeatures {
