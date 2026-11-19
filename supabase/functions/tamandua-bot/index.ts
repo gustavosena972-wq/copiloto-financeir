@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
-import { budgetStarterGuidance, buildTamanduaInstructions, extractResponseText, financialGuidance, normalizeBotInput, simpleGreeting, summarizeFinancialSignals } from "./bot-core.ts";
+import { businessProfileData, budgetStarterGuidance, buildTamanduaInstructions, extractResponseText, financialGuidance, normalizeBotInput, simpleGreeting, summarizeFinancialSignals } from "./bot-core.ts";
 
 const ORIGINS = new Set(["https://gustavosena972-wq.github.io", "https://copiloto-financeir.gustavosena972.workers.dev", "https://appassets.androidplatform.net"]);
 function headers(origin: string | null) {
@@ -48,7 +48,7 @@ Deno.serve(async (request) => {
       if (e || !c) return json(origin,{error:"Conversa indisponível para esta conta."},404);
       conversationId = c.id;
     }
-    const {data:space,error:spaceError}=await db.from("espaco_configuracao").select("modo").eq("familia_id",familyId).maybeSingle();
+    const {data:space,error:spaceError}=await db.from("espaco_configuracao").select("modo,segmento").eq("familia_id",familyId).maybeSingle();
     if(spaceError)return json(origin,{error:"Não consegui verificar a organização deste espaço."},503);
     const usageMode=space?.modo||"familiar";
     const language = prefs?.idioma || "auto";
@@ -95,6 +95,7 @@ Deno.serve(async (request) => {
           store:false,instructions,max_output_tokens:1000,
           input:[{role:"user",content:JSON.stringify({
             contexto_financeiro_autorizado:financial,
+            perfil_empresarial:usageMode==="negocio" ? businessProfileData(space?.segmento,profileResult.data?.valor) : undefined,
             indicadores_calculados:summarizeFinancialSignals(financial),
             idioma_manual:prefs?.idioma || "auto",
             mensagem:input.message

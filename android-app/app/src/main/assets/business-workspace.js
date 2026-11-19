@@ -29,7 +29,7 @@
   function settings(){
     if(S.me?.papel!=='dono')return '';
     return '<section class="cf-family-area"><div class="cf-family-area-body"><details><summary>Como você usa o Copiloto</summary><p>Escolha a organização deste espaço. Um negócio precisa de um espaço dedicado e vazio antes do primeiro registro.</p>'+
-      options(mode())+'<label class="cf-space-segment">Ramo do negócio (opcional)<input id="espaco-segmento" maxlength="80" value="'+escape(S.espaco?.segmento||'')+'" placeholder="Ex.: salão ou comércio"></label>'+
+      options(mode())+'<label class="cf-space-segment">Ramo do negócio (opcional)<input id="espaco-segmento" list="cf-ramos" maxlength="80" value="'+escape(S.espaco?.segmento||'')+'" placeholder="Escolha ou escreva seu ramo"><datalist id="cf-ramos"><option>Salão de manicure</option><option>Cabeleireiro</option><option>Loja de roupas</option><option>Escritório de serviços</option><option>Alimentação</option><option>Comércio online</option></datalist></label>'+
       '<button data-act="salvar-espaco">Salvar organização</button></details></div></section>';
   }
   function view(){
@@ -45,7 +45,7 @@
       '<dl class="cf-plan-values"><div><dt>Recebido</dt><dd>'+money(d.received)+'</dd></div><div><dt>Pago</dt><dd>'+money(d.paid)+'</dd></div><div><dt>A receber</dt><dd>'+money(d.receivable)+'</dd></div><div><dt>A pagar</dt><dd>'+money(d.payable)+'</dd></div></dl>'+
       '<p class="mu">Movimentações registradas. A diferença entre receitas e despesas não inclui custos ainda não lançados.</p><div class="cf-business-actions">'+
       (ed?'<button data-act="mobileadd" data-tipo="receita" data-origem="negocio">Registrar venda ou serviço</button><button class="sec" data-act="mobileadd" data-tipo="despesa" data-origem="negocio">Registrar custo</button>':'')+
-      '<button class="sec" data-act="negocio-ajuda">Analisar com o Tamanduá</button></div></section>'+
+      '<button class="sec" data-act="negocio-perfil">Meu perfil empresarial</button><button class="sec" data-act="negocio-ajuda">Analisar com o Tamanduá</button></div></section>'+
       section('receivables')+'<h2>Recebimentos pendentes</h2>'+
       (overdue.length?'<p role="status">'+overdue.length+' recebimento(s) com data vencida, somando '+money(overdueCents)+'. Confira se já recebeu antes de atualizar.</p>':'')+
       '<ul class="cf-business-list">'+(pending||'<li>Nenhum recebimento pendente neste mês.</li>')+'</ul>'+
@@ -82,6 +82,7 @@
     }
     assertBusiness();
     if(action==='negocio-projetar-atendimentos')return window.CFServiceDesk.project();
+    if(action==='negocio-perfil'){window.dispatchEvent(new Event('copiloto:perfil-empresarial'));return;}
     if(action==='negocio-barra'){
       const scope=JSON.stringify([S.user.id,S.fam.id]);
       const enabled=button.dataset.enabled==='true';

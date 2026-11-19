@@ -2,7 +2,7 @@
 (()=>{
  'use strict';
  const $=s=>document.querySelector(s);
- const questions=[
+ const personalQuestions=[
   ['nome_preferido','Como você prefere ser chamado?'],
   ['objetivo','Qual é sua prioridade agora?',['Organizar contas','Reduzir dívidas','Guardar dinheiro','Entender gastos']],
   ['organizacao_atual','Como você organiza suas contas hoje?',['Planilha','Outro app','Papel ou anotações','Ainda não organizo']],
@@ -14,8 +14,21 @@
   ['estilo_resposta','Como prefere receber as explicações?',['Direto ao ponto','Passo a passo','Com exemplos']],
   ['proatividade','Quando prefere receber sugestões do Tamanduá?',['Quando eu pedir','Quando eu revisar o mês','Quando houver algo relevante']]
  ];
+ const businessQuestions=[
+  ['ramo','Qual é o ramo do seu negócio? Escreva do seu jeito.'],
+  ['oferta','O que você vende?',['Produtos','Serviços','Produtos e serviços']],
+  ['equipe','Quem trabalha no negócio?',['Só eu','Eu e minha família','Tenho equipe ou parceiros']],
+  ['canal','Onde acontecem as vendas?',['No estabelecimento','Pela internet','No endereço do cliente','Em vários canais']],
+  ['cobranca','Como costuma receber?',['Na hora','Depois da entrega','Em parcelas','De várias formas']],
+  ['custos','Qual custo quer acompanhar mais de perto?',['Compra de mercadorias','Materiais e insumos','Tempo de trabalho','Despesas fixas']],
+  ['prioridade_negocio','Qual pergunta quer responder primeiro?',['Quanto sobra no mês?','Qual item dá mais margem?','Quanto cobrar?','Quem ainda precisa pagar?']],
+  ['organizacao_atual','Como registra suas vendas hoje?',['Planilha','Outro app','Papel ou anotações','Ainda não organizo']],
+  ['frequencia','Quando prefere revisar o negócio?',['Durante a semana','Uma vez por mês','Quando precisar']],
+  ['estilo_resposta','Como quer que eu explique os resultados?',['Direto ao ponto','Passo a passo','Com exemplos']]
+ ];
+ function isBusiness(){return state().espaco?.modo==='negocio'&&state().internalTester;}
  function state(){try{return typeof S!=='undefined'?S:window.S||{}}catch(_){return {}}}
- function welcomeKey(){return window.CFTamanduaSession?.onboardingKey(state())||null;}
+ function welcomeKey(){const key=window.CFTamanduaSession?.onboardingKey(state());return key&&isBusiness()?key+'_empresa':key||null;}
  function introduce(){
   const scope=welcomeKey();
   if(!scope||!$('.app-shell')||$('#cf-welcome'))return;
@@ -47,7 +60,9 @@
    </div>`;
   const form=dialog.querySelector('#cf-welcome-form');
   const draft={};
-  const previous=state().tamanduaProfile||{};
+  const questions=isBusiness()?businessQuestions:personalQuestions;
+  const previous={ramo:state().espaco?.segmento,...(state().tamanduaProfile||{})};
+  if(isBusiness())dialog.querySelector('.cf-welcome-copy > p').textContent='Conte o que sua empresa vende e como trabalha. Vou usar suas respostas para orientar preços, gastos e recebimentos.';
   for(const [key,,options] of questions){
    const value=previous[key];
    if(typeof value!=='string')continue;
@@ -73,9 +88,9 @@
     options.forEach(option=>answer.add(new Option(option,option)));
    }else{
     answer=document.createElement('input');
-    answer.autocomplete='given-name';
+    answer.autocomplete=key==='ramo'?'off':'given-name';
     answer.maxLength=60;
-    answer.placeholder='Seu primeiro nome';
+    answer.placeholder=key==='ramo'?'Ex.: cabeleireiro, loja de roupas, escritório de projetos':'Seu primeiro nome';
    }
    answer.id='cf-question-answer';
    answer.value=draft[key]||'';
@@ -132,6 +147,7 @@
   });
   dialog.showModal();
  }
+ window.addEventListener('copiloto:perfil-empresarial',()=>{if(isBusiness())introduce();});
  function polish(){
   const key=welcomeKey(),existing=$('#cf-welcome');
   if(existing&&existing.dataset.scope!==key)existing.close();
