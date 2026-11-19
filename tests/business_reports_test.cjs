@@ -62,3 +62,26 @@ test('business reports load beyond the first database page and scope every page 
  assert.equal(result.length,1201);assert.deepEqual(ranges,[[0,499],[500,999],[1000,1499]]);
  assert.deepEqual(scopes,[['familia_id','own-family'],['mes_id','own-month'],['familia_id','own-family'],['mes_id','own-month'],['familia_id','own-family'],['mes_id','own-month']]);
 });
+
+test('service pace preserves monthly overhead when volume falls and includes losses',()=>{
+ const today={sales:9000,cost:3000};
+ assert.deepEqual(core.serviceForecast(today,20,40000,100),{sales:180000,cost:100000,profit:80000});
+ assert.deepEqual(core.serviceForecast(today,20,40000,80),{sales:144000,cost:88000,profit:56000});
+ assert.equal(core.serviceForecast(today,1,10000,100).profit,-4000);
+ assert.throws(()=>core.serviceForecast(today,31,Number.MAX_SAFE_INTEGER,100));
+});
+test('service tap reuses the same receipt after interrupted network response',async()=>{
+ const memory=new Map(), calls=[];
+ const S={internalTester:true,espaco:{modo:'negocio'},user:{id:'u'},fam:{id:'f'},mes:{id:'m',mes:11},ano:{ano:2026},servicos:[{id:'s'}]};
+ const context={window:{},S,URLSearchParams,location:{search:'?open=services'},crypto:{randomUUID:()=>'event-1'},
+  localStorage:{getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)},
+  canEdit:()=>true,mesAberto:()=>true,localFinancialDate:()=>'2026-11-18',
+  sb:{rpc:(_,args)=>{calls.push(args);return args}},q:async()=>{if(calls.length===1)throw Error('offline')},
+  loadMes:async()=>{},toast:()=>{}};
+ vm.runInNewContext(fs.readFileSync(path.join(assets,'service-desk.js'),'utf8'),context);
+ const desk=context.window.CFServiceDesk,button={dataset:{id:'s'}};
+ desk.openShortcut();assert.equal(S.businessArea,'services');assert.equal(calls.length,0);
+ await assert.rejects(desk.record(button),/offline/);
+ await desk.record(button);assert.equal(calls.length,2);assert.equal(calls[0].p_evento,calls[1].p_evento);
+ assert.equal(memory.size,0);S.internalTester=false;await assert.rejects(desk.record(button),/permissão/);
+});

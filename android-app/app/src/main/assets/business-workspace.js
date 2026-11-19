@@ -17,7 +17,7 @@
     const ed=canEdit(),rows=(S.servicos||[]).map(row=>'<li><div><strong>'+escape(row.nome)+'</strong><small>'+escape(row.minutos)+' min · '+brl(row.preco)+'</small></div>'+
       (ed&&mesAberto()?'<button data-act="negocio-usar-servico" data-id="'+escape(row.id)+'">Preparar lançamento</button>':'')+
       (ed?'<details class="cf-service-options"><summary>Opções do serviço</summary><div class="cf-business-actions"><button class="sec" data-act="negocio-editar-servico" data-id="'+escape(row.id)+'">Editar preço e custos</button><button class="sec" data-act="negocio-arquivar-servico" data-id="'+escape(row.id)+'">Arquivar serviço</button></div></details>':'')+'</li>').join('');
-    return section('services')+'<h2>Serviços do negócio</h2><p class="mu">Seu catálogo de preços e duração. Preparar um lançamento abre a Planilha para você conferir e salvar.</p><ul class="cf-business-list">'+
+    return (window.CFServiceDesk?.view()||'')+section('services')+'<h2>Serviços do negócio</h2><p class="mu">Seu catálogo de preços e duração. Preparar um lançamento abre a Planilha para você conferir e salvar.</p><ul class="cf-business-list">'+
       (rows||'<li>Nenhum serviço salvo. Calcule o preço na ferramenta abaixo e salve o primeiro.</li>')+'</ul><button class="sec" data-act="negocio-atualizar-servicos">Atualizar catálogo</button></section>';
   }
   function options(selected='familiar'){
@@ -81,6 +81,8 @@
       render();toast('Organização do espaço salva.');return;
     }
     assertBusiness();
+    if(action==='negocio-projetar-atendimentos')return window.CFServiceDesk.project();
+    if(action==='negocio-atender')return window.CFServiceDesk.record(button);
     if(action.startsWith('negocio-relatorio-'))return window.CFBusinessReports.handle(action,button);
     if(action==='negocio-atualizar-servicos'){await loadServices();render();toast('Catálogo atualizado.');return;}
     if(action==='negocio-salvar-servico'){

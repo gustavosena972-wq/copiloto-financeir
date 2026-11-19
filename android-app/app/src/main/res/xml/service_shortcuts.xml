@@ -1,0 +1,7 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="completed_service" android:shortcutShortLabel="@string/service_shortcut">
+        <intent android:action="br.com.copiloto.financeiro.SERVICES"
+            android:targetPackage="br.com.copiloto.financeiro"
+            android:targetClass="br.com.copiloto.financeiro.MainActivity" />
+    </shortcut>
+</shortcuts>
