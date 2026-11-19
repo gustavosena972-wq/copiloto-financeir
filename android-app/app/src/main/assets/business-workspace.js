@@ -59,7 +59,7 @@
       '<details class="cf-plan-form"><summary>Previsão de caixa em 30 dias</summary><div class="cf-plan-expand-body"><p class="mu">Informe o saldo disponível de hoje. Vou buscar os vencimentos registrados para os próximos 30 dias.</p>'+
       '<label>Saldo de hoje (R$)<input id="negocio-saldo" type="number" min="0" step="0.01"></label><button data-act="negocio-prever">Calcular cenário</button><div id="negocio-previsao" role="status"></div></div></details>'+
       '<details class="cf-plan-form"><summary>Planilha e fechamento do período</summary><div class="cf-plan-expand-body"><p class="mu">Revise lançamentos antes de exportar. A planilha contém os dados registrados e serve de apoio à revisão com sua contabilidade.</p><button class="sec" data-act="view" data-v="planilha">Abrir planilha</button></div></details></section>'+
-      (window.CFBusinessReports?.view()||'')+section('overview')+'<h2>Plano Negócios</h2><p>Preço proposto de R$ 69,90 por 30 dias. Caixa, recebimentos, formação de preço e apoio do Tamanduá. Disponível para avaliação no Alpha.</p><p class="mu">A contratação será liberada após a configuração e validação do produto na Google Play.</p></section></div>';
+      (window.CFBusinessAgenda?.shell()||'')+(window.CFBusinessReports?.view()||'')+section('overview')+'<h2>Plano Negócios</h2><p>Preço proposto de R$ 69,90 por 30 dias. Caixa, recebimentos, formação de preço e apoio do Tamanduá. Disponível para avaliação no Alpha.</p><p class="mu">A contratação será liberada após a configuração e validação do produto na Google Play.</p></section></div>';
   }
   function assertBusiness(){if(mode()!=='negocio'||!S.internalTester)throw Error('Recurso disponível no piloto Negócios.');}
   async function loadRows(){
@@ -82,6 +82,7 @@
     }
     assertBusiness();
     if(action==='negocio-projetar-atendimentos')return window.CFServiceDesk.project();
+    if(action.startsWith('negocio-agenda-'))return window.CFBusinessAgenda.handle(action,button);
     if(action==='negocio-perfil'){window.dispatchEvent(new Event('copiloto:perfil-empresarial'));return;}
     if(action==='negocio-barra'){
       const scope=JSON.stringify([S.user.id,S.fam.id]);

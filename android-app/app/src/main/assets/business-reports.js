@@ -2,7 +2,7 @@
 (function(){
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const cash=cents=>brl(cents/100);
-  const areas={overview:'Caixa',ledger:'Movimentações',receivables:'Vencimentos',results:'Resultados',planning:'Planejamento',services:'Vendas'};
+  const areas={overview:'Caixa',ledger:'Movimentações',receivables:'Vencimentos',results:'Resultados',planning:'Planejamento',services:'Vendas',agenda:'Agenda e equipe'};
   const area=()=>Object.hasOwn(areas,S.businessArea)?S.businessArea:'overview';
   const section=key=>'<section class="card" data-business-section="'+key+'" '+(key===area()?'':'hidden')+'>';
   function nav(){return '<nav class="cf-business-tabs" aria-label="Áreas do negócio">'+Object.entries(areas).map(([key,label])=>
@@ -77,7 +77,7 @@
       document.querySelectorAll('[data-business-section]').forEach(node=>node.hidden=node.dataset.businessSection!==area());
       document.querySelectorAll('.cf-business-tabs button').forEach(node=>{
         if(node.dataset.area===area())node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');
-      });return;
+      });if(area()==='agenda')await window.CFBusinessAgenda.load();return;
     }
     if(action==='negocio-relatorio-filtrar'){
       const val=id=>document.getElementById(id).value;
