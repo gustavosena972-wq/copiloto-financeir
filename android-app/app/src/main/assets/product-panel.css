@@ -1,0 +1,488 @@
+/* The reference supplies composition and material, never third-party data. */
+body:has(.app-shell) {
+  background: #29241f !important;
+}
+body[data-ui="premium-fintech"] #app:has(.app-shell) {
+  max-width: 1480px !important;
+  padding: 16px !important;
+  background: transparent !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell {
+  background:
+    radial-gradient(ellipse at 0 0, #a78a5433, transparent 58%),
+    radial-gradient(ellipse at 100% 0, #35658036, transparent 60%), #2b2824f2 !important;
+  border: 0 !important;
+  box-shadow: 0 22px 65px #0c1f2338 !important;
+  border-radius: 20px !important;
+  overflow: hidden;
+}
+body[data-ui="premium-fintech"] #app .app-shell .app-sidebar {
+  background: linear-gradient(160deg, #79694ea6, #35302bcc) !important;
+  border: 0 !important;
+  backdrop-filter: blur(18px);
+  color: #f7f6e9 !important;
+  padding: 22px 18px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-brand strong,
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-brand small {
+  color: #f7f6e9 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-family {
+  background: #221f1c66 !important;
+  border: 0 !important;
+  padding: 15px !important;
+  margin-top: 24px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-family strong,
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-family small,
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-family span {
+  color: #e2eadc !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-nav {
+  display: grid !important;
+  gap: 6px !important;
+  margin-top: 28px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-nav button {
+  width: 100% !important;
+  justify-content: flex-start !important;
+  background: transparent !important;
+  color: #dce5d9 !important;
+  font-size: 13px !important;
+  font-weight: 550 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  min-height: 46px !important;
+  padding: 12px !important;
+  border-radius: 10px !important;
+  white-space: normal !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-nav button.active,
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-nav button.on {
+  background: #26b5ed42 !important;
+  color: #fffaf0 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-user b,
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-user small {
+  color: #e2eadc !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .app-main {
+  background: #1c20265c !important;
+  backdrop-filter: blur(18px);
+  padding: 26px 28px 112px !important;
+  min-width: 0 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading h1 {
+  color: #fff8e8 !important;
+  font-size: 30px !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.03em !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .page-heading p {
+  color: #d0ddce !important;
+  font-size: 14px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-tester-badge {
+  gap: 6px !important;
+  margin-bottom: 10px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-tester-badge span {
+  background: #3f5e477a !important;
+  color: #e5f0df !important;
+  font-size: 11px !important;
+  padding: 5px 8px !important;
+  border: 0 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .app-content {
+  padding: 0 !important;
+  min-width: 0 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-month-desk {
+  background: transparent !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  max-width: none !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-month-title h2 {
+  font-size: 22px !important;
+  font-weight: 550 !important;
+  color: #f5f6e9 !important;
+  letter-spacing: -0.02em !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-month-title > span {
+  color: #c8d8c9 !important;
+  font-size: 12px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px !important;
+  margin: 20px 0 14px !important;
+  font-variant-numeric: tabular-nums;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  min-width: 0;
+  min-height: 135px;
+  padding: 22px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, #62594fb8, #353330e8) !important;
+  box-shadow: 0 14px 26px #0e241f29 !important;
+  margin: 0 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger dt {
+  color: #e4dfd5 !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger dd {
+  color: #fffaf0 !important;
+  font-size: clamp(20px, 2.8vw, 30px) !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  letter-spacing: -0.03em !important;
+  margin: 0 !important;
+}
+body[data-ui="premium-fintech"]
+  #app
+  .app-shell
+  .cf-money-ledger
+  .cf-ledger-result {
+  background: linear-gradient(135deg, #5ccee9, #25acdb) !important;
+  box-shadow: 0 14px 26px #0e241f29 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-ledger-result dt,
+body[data-ui="premium-fintech"] #app .app-shell .cf-ledger-result dd {
+  color: #12313d !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-ledger-result dd.neg {
+  color: #84352c !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-cash-notes {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px !important;
+  margin: 0 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-cash-notes > span {
+  display: flex !important;
+  flex-direction: column;
+  gap: 9px;
+  background: #171d2461 !important;
+  color: #d8dce1 !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  padding: 15px 18px !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-cash-notes b {
+  font-size: 19px !important;
+  color: #f3f5e6 !important;
+  font-weight: 550 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-amount-note,
+body[data-ui="premium-fintech"] #app .app-shell .cf-empty-welcome {
+  color: #c6d8c5 !important;
+  font-size: 12px !important;
+  line-height: 1.65 !important;
+  margin: 14px 0 22px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-dashboard-panels {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 14px;
+  margin: 20px 0;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-finance-panel {
+  min-width: 0;
+  padding: 22px;
+  background: #383633 !important;
+  color: #f5efe5 !important;
+  border-radius: 14px;
+  box-shadow: 0 14px 28px #10241c1f;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-finance-panel h3 {
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #f5efe5;
+  margin: 0 0 6px;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-finance-panel > p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #d3cbc0;
+  margin: 0 0 20px;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-category-bar {
+  margin: 17px 0;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-category-bar > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #e7e0d7;
+  margin-bottom: 7px;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-category-bar b {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-category-track {
+  display: block;
+  height: 12px;
+  background: #5a534b;
+  border-radius: 4px;
+  overflow: hidden;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-category-track > i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #53d1f2, #139ccf);
+  box-shadow: 0 4px 8px #2d6f5333;
+  transform-origin: left;
+  animation: cf-category-in 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+body[data-ui="premium-fintech"]
+  #app
+  .app-shell
+  .cf-category-bar:first-of-type
+  .cf-category-track
+  > i {
+  background: linear-gradient(180deg, #53d1f2, #139ccf);
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-due-list {
+  display: grid;
+  gap: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-due-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 13px 0;
+  border-bottom: 1px solid #5a534b;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-due-list span {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #e7e0d7;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-due-list small {
+  display: block;
+  color: #c9c0b4;
+  font-size: 11px;
+  margin-top: 3px;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-due-list b {
+  font-size: 14px;
+  color: #8cdcf1;
+  white-space: nowrap;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-finance-panel button {
+  background: #32b5df !important;
+  color: #102f3d !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  min-height: 42px !important;
+  font-size: 12px !important;
+  border-radius: 9px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-month-actions {
+  margin: 18px 0 24px !important;
+  gap: 10px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-month-actions button {
+  background: #32b5df !important;
+  color: #102f3d !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 20px #0e251c24 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .mobile-analysis {
+  background: #383633 !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  padding: 18px !important;
+  color: #f5efe5 !important;
+  box-shadow: 0 12px 28px #0e251c24 !important;
+  margin-top: 18px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .card {
+  background: #faf7ef !important;
+  color: #f5efe5 !important;
+  border-color: #d8e1d0 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 26px #0e251c1c !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .period-toolbar {
+  margin-bottom: 20px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .period-toolbar .meses {
+  padding: 5px !important;
+  background: #1d222970 !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .period-toolbar .meses button {
+  background: transparent !important;
+  color: #ded9d1 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  min-height: 40px !important;
+}
+body[data-ui="premium-fintech"]
+  #app
+  .app-shell
+  .period-toolbar
+  .meses
+  button.on,
+body[data-ui="premium-fintech"]
+  #app
+  .app-shell
+  .period-toolbar
+  .meses
+  button.active {
+  background: #1585b3 !important;
+  color: #fffbed !important;
+}
+@keyframes cf-category-in {
+  from {
+    transform: scaleX(0.04);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (max-width: 760px) {
+  body[data-ui="premium-fintech"] #app:has(.app-shell) {
+    padding: 0 !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell {
+    border-radius: 0 !important;
+    min-height: 100dvh !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .app-sidebar {
+    padding: 14px 16px !important;
+    background: #655743b5 !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .sidebar-head {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .sidebar-family,
+  body[data-ui="premium-fintech"] #app .app-shell .sidebar-nav,
+  body[data-ui="premium-fintech"] #app .app-shell .sidebar-footer {
+    display: none !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .app-main {
+    padding: 20px 16px 110px !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .page-heading h1 {
+    font-size: 27px !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger > div {
+    min-height: 122px;
+    padding: 18px 16px !important;
+    gap: 14px !important;
+  }
+  body[data-ui="premium-fintech"]
+    #app
+    .app-shell
+    .cf-money-ledger
+    .cf-ledger-result {
+    grid-column: 1/-1;
+    min-height: 105px;
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .cf-money-ledger dd {
+    font-size: 23px !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .cf-ledger-result dd {
+    font-size: 28px !important;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .cf-dashboard-panels {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .cf-finance-panel {
+    padding: 20px;
+  }
+  body[data-ui="premium-fintech"] #app .app-shell .cf-month-title h2 {
+    font-size: 21px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-ui="premium-fintech"] #app .app-shell .cf-category-track > i {
+    animation: none !important;
+  }
+}
+
+body[data-ui="premium-fintech"] #app {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body[data-ui="premium-fintech"] #app .app-shell .card,
+body[data-ui="premium-fintech"] #app .app-shell .mobile-analysis {
+  background: #faf7ef !important;
+  color: #3b342d !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-nav button.active,
+body[data-ui="premium-fintech"] #app .app-shell .sidebar-nav button.on {
+  background: #159ed0 !important;
+  color: #fff !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-month-actions button {
+  background: #31b7df !important;
+  color: #103141 !important;
+}
+body[data-ui="premium-fintech"] #app .app-shell .cf-month-actions button svg {
+  stroke: #103141 !important;
+}
+body:has(.app-shell) .mobile-bottom-nav {
+  background: #faf7eff5 !important;
+  border-color: #d9d1c5 !important;
+}
+body:has(.app-shell) .mobile-bottom-nav .mobile-nav-item {
+  color: #675b4b !important;
+}
+body:has(.app-shell) .mobile-bottom-nav .mobile-nav-item.active,
+body:has(.app-shell) .mobile-bottom-nav .mobile-nav-item.on {
+  background: #dceff5 !important;
+  color: #174c64 !important;
+}

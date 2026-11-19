@@ -1,0 +1,5 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="horizontal"
+ android:layout_width="match_parent" android:layout_height="match_parent" android:background="#231C31" android:padding="4dp">
+ <Button android:id="@+id/widget_income" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:text="@string/widget_income"/>
+ <Button android:id="@+id/widget_expense" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:text="@string/widget_expense"/>
+</LinearLayout>

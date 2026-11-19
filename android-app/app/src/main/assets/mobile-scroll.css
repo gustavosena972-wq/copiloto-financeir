@@ -1,0 +1,26 @@
+/* One document scroll path. Horizontal clipping must not create nested
+   overflow-y:auto containers across the entire Android page. */
+html { overflow-x: clip !important; overflow-y: auto !important; }
+body:not(:has([data-current-view="tamandua"])) {
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+body[data-ui="premium-fintech"] #app {
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+/* A vertical swipe over the inline character belongs to the page; horizontal
+   dragging still rotates it. The enlarged viewer keeps its own orbit gestures. */
+#cf-tm-root .cf-inline-character .cf-world-canvas {
+  touch-action: pan-y pinch-zoom !important;
+}
+#cf-tm-root .cf-tm-body { -webkit-overflow-scrolling: touch; }
+@media (max-width:760px) {
+  html { scroll-behavior: auto !important; }
+  /* Keep colors and materials, without blurring full-page scrolling layers. */
+  body[data-ui="premium-fintech"] #app .app-main,
+  body[data-ui="premium-fintech"] #app .app-sidebar,
+  body[data-ui="premium-fintech"] #app .landing-page .landing-header {
+    backdrop-filter: none !important;
+  }
+}

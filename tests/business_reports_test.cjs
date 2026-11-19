@@ -1,0 +1,102 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const assets=path.join(__dirname,'../android-app/app/src/main/assets');
+const core=require(path.join(assets,'business-core.js')),money=require(path.join(assets,'finance-core.js'));
+function setup(overrides={},extra={}){
+ const S={espaco:{modo:'negocio'},internalTester:true,fam:{id:'own-family'},mes:{id:'own-month'},me:{papel:'dono'},
+  cats:[{id:'c',nome:'Custos <loja>'}],lanc:[{id:'l1',categoria_id:'c',descricao:'Aluguel <loja>',tipo:'despesa',valor:300,status:'pendente',data_vencimento:'2026-11-01'}],...overrides};
+ let renders=0;const window={};
+ const context={S,window,CFBusiness:core,CFMoney:money,brl:n=>Number(n).toFixed(2),localFinancialDate:()=>'2026-11-18',
+  canEdit:()=>S.me.papel!=='leitor',mesAberto:()=>true,render:()=>renders++,toast:()=>{},...extra};
+ vm.createContext(context);
+ for(const file of ['business-reports.js','business-workspace.js'])vm.runInContext(fs.readFileSync(path.join(assets,file),'utf8'),context);
+ return {S,window,renders:()=>renders};
+}
+test('business sections are independent, escape financial descriptions and name the category from the authorized workspace',()=>{
+ const {window}=setup({businessArea:'ledger'}),html=window.CFBusinessUI.view();
+ assert.match(html,/data-business-section="ledger" >/);
+ assert.match(html,/data-business-section="planning" hidden/);
+ assert.match(html,/Custos &lt;loja&gt;/);assert.match(html,/Aluguel &lt;loja&gt;/);
+ assert.doesNotMatch(html,/<loja>/);assert.match(html,/data-act="negocio-relatorio-abrir" data-id="l1"/);
+ assert.match(html,/data-v="plan"/);assert.doesNotMatch(html,/data-v="metas"/);
+});
+test('switching business areas preserves the existing forms instead of recreating the page',async()=>{
+ const sections=[{dataset:{businessSection:'overview'}},{dataset:{businessSection:'planning'}}];
+ const buttons=['overview','planning'].map(area=>({dataset:{area},setAttribute(k,v){this[k]=v},removeAttribute(k){delete this[k]}}));
+ const {S,window,renders}=setup({}, {document:{querySelectorAll:s=>s==='[data-business-section]'?sections:buttons}});
+ await window.CFBusinessUI.handle('negocio-relatorio-area',{dataset:{area:'planning'}});
+ assert.equal(S.businessArea,'planning');assert.equal(sections[0].hidden,true);assert.equal(sections[1].hidden,false);
+ assert.equal(buttons[1]['aria-current'],'page');assert.equal(renders(),0);
+});
+test('readers get analysis without controls that record a receipt or payment',()=>{
+ const html=setup({me:{papel:'leitor'}}).window.CFBusinessUI.view();
+ assert.match(html,/Plano de rendimento do negócio/);assert.doesNotMatch(html,/data-act="negocio-quitar"/);
+ for(const change of [{internalTester:false},{espaco:{modo:'pessoal'}}])assert.doesNotMatch(setup(change).window.CFBusinessUI.view(),/negocio-relatorio-simular/);
+});
+test('payment confirmation only updates the current workspace, month and expense',async()=>{
+ const filters=[],writes=[];let refreshed=0;
+ const query={eq(k,v){filters.push([k,v]);return this},neq(k,v){filters.push([k,v]);return this},select(){return this},maybeSingle(){return Promise.resolve({data:{id:'l1'}})}};
+ const sb={from(table){assert.equal(table,'lancamentos');return {update(values){writes.push(values);return query}}}};
+ const base={sb,q:async p=>(await p).data,confirm:()=>true,dataLocalISO:()=>'2026-11-18',loadMes:async()=>refreshed++};
+ const {window}=setup({},base);
+ await window.CFBusinessUI.handle('negocio-quitar',{dataset:{id:'l1'}});
+ assert.deepEqual(filters,[['id','l1'],['familia_id','own-family'],['mes_id','own-month'],['tipo','despesa'],['status','pago']]);
+ assert.equal(writes.length,1);assert.equal(writes[0].status,'pago');assert.equal(refreshed,1);
+ const denied=setup({me:{papel:'leitor'}},base);
+ await denied.window.CFBusinessUI.handle('negocio-quitar',{dataset:{id:'l1'}});assert.equal(writes.length,1);
+ const cancelled=setup({}, {...base,confirm:()=>false});
+ await cancelled.window.CFBusinessUI.handle('negocio-quitar',{dataset:{id:'l1'}});assert.equal(writes.length,1);
+});
+test('opening a missing ledger id cannot navigate to a different record',async()=>{
+ const {window,S}=setup();
+ await assert.rejects(window.CFBusinessUI.handle('negocio-relatorio-abrir',{dataset:{id:'outside'}}),/Atualize o mês/);
+ assert.equal(S.view,undefined);
+});
+
+test('business reports load beyond the first database page and scope every page to the current family and month',async()=>{
+ const ranges=[],scopes=[];
+ const records=Array.from({length:1201},(_,i)=>({id:String(i)}));
+ const sb={from(table){assert.equal(table,'lancamentos');return {select(){return this},eq(k,v){scopes.push([k,v]);return this},order(){return this},range(a,b){ranges.push([a,b]);return Promise.resolve({data:records.slice(a,b+1)})}}}};
+ const {window}=setup({}, {sb,q:async p=>(await p).data});
+ const result=await window.CFBusinessUI.loadRows();
+ assert.equal(result.length,1201);assert.deepEqual(ranges,[[0,499],[500,999],[1000,1499]]);
+ assert.deepEqual(scopes,[['familia_id','own-family'],['mes_id','own-month'],['familia_id','own-family'],['mes_id','own-month'],['familia_id','own-family'],['mes_id','own-month']]);
+});
+
+test('service pace preserves monthly overhead when volume falls and includes losses',()=>{
+ const today={sales:9000,cost:3000};
+ assert.deepEqual(core.serviceForecast(today,20,40000,100),{sales:180000,cost:100000,profit:80000});
+ assert.deepEqual(core.serviceForecast(today,20,40000,80),{sales:144000,cost:88000,profit:56000});
+ assert.equal(core.serviceForecast(today,1,10000,100).profit,-4000);
+ assert.throws(()=>core.serviceForecast(today,31,Number.MAX_SAFE_INTEGER,100));
+});
+test('service tap reuses the same receipt after interrupted network response',async()=>{
+ const memory=new Map(), calls=[];
+ const S={internalTester:true,espaco:{modo:'negocio'},user:{id:'u'},fam:{id:'f'},mes:{id:'m',mes:11},ano:{ano:2026},servicos:[{id:'s'}]};
+ const context={window:{},S,URLSearchParams,location:{search:'?open=services'},crypto:{randomUUID:()=>'event-1'},
+  localStorage:{getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)},
+  canEdit:()=>true,mesAberto:()=>true,localFinancialDate:()=>'2026-11-18',
+  sb:{rpc:(_,args)=>{calls.push(args);return args}},q:async()=>{if(calls.length===1)throw Error('offline')},
+  loadMes:async()=>{},toast:()=>{}};
+ vm.runInNewContext(fs.readFileSync(path.join(assets,'service-desk.js'),'utf8'),context);
+ const desk=context.window.CFServiceDesk,button={dataset:{id:'s'}};
+ desk.openShortcut();assert.equal(S.businessArea,'services');assert.equal(calls.length,0);
+ await assert.rejects(desk.record(button),/offline/);
+ await desk.record(button);assert.equal(calls.length,2);assert.equal(calls[0].p_evento,calls[1].p_evento);
+ assert.equal(memory.size,0);S.internalTester=false;await assert.rejects(desk.record(button),/permissão/);
+});
+
+test('monthly product mix uses historical cost and keeps different catalog items separate',()=>{
+ const window={CFBusinessReports:{section:()=>'<section>'}};
+ const S={ano:{ano:2026},mes:{mes:10},lanc:[
+ {servico_catalogo_id:'a',descricao:'Caneca',tipo:'receita',valor:50,servico_custo_direto:35},
+ {servico_catalogo_id:'a',descricao:'Caneca',tipo:'receita',valor:45,servico_custo_direto:30},
+ {servico_catalogo_id:'b',descricao:'Entrega',tipo:'receita',valor:10,servico_custo_direto:4},
+ {descricao:'Aporte',tipo:'receita',valor:1000}]};
+ vm.runInNewContext(fs.readFileSync(path.join(assets,'service-desk.js'),'utf8'),{
+ window,S,CFMoney:money,URLSearchParams,location:{search:''},brl:n=>'R$ '+n,localFinancialDate:()=>'2026-11-19'});
+ const html=window.CFServiceDesk.view();
+ assert.match(html,/2 venda\(s\) · Faturamento R\$ 95/);
+ assert.match(html,/Custo direto estimado R\$ 65 · Margem antes dos fixos R\$ 30/);
+ assert.match(html,/Entrega/);assert.doesNotMatch(html,/Aporte/);
+});

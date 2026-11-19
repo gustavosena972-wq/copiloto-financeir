@@ -1,0 +1,70 @@
+/* Observed reference: near-black, ivory, copper and deep electric blue.
+   The product's own content, character, and cocoa conversation remain intact. */
+body:has(.landing-page),body:has(.landing-page):before {
+  background:#050507 !important;color:#f3f0e8 !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-header {
+  background:#050507f5 !important;border-color:#f3f0e826 !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page :is(.landing-showcase,.landing-intro,.landing-benefits,.landing-plans-section,.landing-login-section) {
+  background:transparent !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page :is(h1,h2,h3,.cf-brand-reveal,.landing-brand strong) {color:#f3f0e8 !important;}
+body[data-ui="premium-fintech"] #app .landing-page :is(p,.cf-brand-benefit,.landing-nav a) {color:#d0cbc4 !important;}
+body[data-ui="premium-fintech"] #app .landing-page .cf-brand-reveal {
+  font-family:Inter,system-ui,sans-serif !important;font-weight:800 !important;
+  letter-spacing:-.04em !important;line-height:.98 !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .cf-brand-reveal>span {color:#f3f0e8 !important;}
+body[data-ui="premium-fintech"] #app .landing-page .cf-brand-reveal>span:first-child {
+  color:transparent !important;-webkit-text-stroke:1px #f3f0e8;
+}
+body[data-ui="premium-fintech"] #app .landing-page :is(.landing-plan-card,.app-feature-cards>article,.landing-login-card) {
+  background:#101016 !important;border-color:#36323c !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page :is(.landing-feature-grid.app-feature-cards,.landing-plan-grid>.landing-plan-card,.landing-login-section .landing-login-card) :is(h2,h3,strong,b,label,li) {color:#f3f0e8 !important;}
+body[data-ui="premium-fintech"] #app .landing-page :is(.landing-feature-grid.app-feature-cards,.landing-plan-grid>.landing-plan-card,.landing-login-section .landing-login-card) :is(p,small) {color:#d0cbc4 !important;}
+body[data-ui="premium-fintech"] #app .landing-page :is(input,select) {background:#17151e !important;color:#fff5e5 !important;border-color:#685d68 !important;}
+body[data-ui="premium-fintech"] #app .landing-page :is(.primary,.landing-hero-actions>a:first-child) {
+  background:#e38a52 !important;color:#1c100c !important;box-shadow:0 8px 24px #0006 !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-nav a:last-child {
+  background:#e38a52 !important;color:#1c100c !important;
+}
+.cf-liquid-track {position:absolute;left:0;top:-15px;width:20%;height:78px;pointer-events:none;z-index:0;transform-origin:center;}
+.cf-liquid-track svg {width:100%;height:100%;overflow:visible;fill:#17121d;}
+/* Keep highlighted plans in the same dark material, including the legacy
+   recommended modifier which previously overrode the shared card background. */
+body[data-ui="premium-fintech"] #app .landing-page .landing-plans-section .landing-plan-card {
+  background:#141219 !important;color:#f3f0e8 !important;border:1px solid #49404b !important;box-shadow:none !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plans-section .landing-plan-card.recommended {
+  background:#201921 !important;border-color:#bd805c !important;
+}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card :is(.landing-plan-top h3,.landing-price strong,.landing-feature-list li,.landing-feature-list li>span) {color:#f3f0e8 !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card :is(.landing-plan-top p,.landing-price>span,.landing-feature-heading) {color:#d0c4cc !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card :is(.landing-limit,.landing-ribbon) {background:#332731 !important;color:#f2c5a5 !important;border-color:#705045 !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card .landing-plan-status {color:#b4d9bb !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card .landing-plan-cta {background:#e38a52 !important;color:#25130d !important;box-shadow:none !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card .landing-plan-cta>span {color:inherit !important;}
+body[data-ui="premium-fintech"] #app .landing-page .landing-plan-card .landing-feature-list :is(.landing-feature-check,small) {background:#332731 !important;color:#f2c5a5 !important;}
+.cf-finance-orbit[data-particle-sculpture]>*:not(.cf-finance-particles){visibility:hidden !important;}
+.cf-finance-particles {position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+body:has(.app-shell){background:#09090c !important;}
+body[data-ui="premium-fintech"] #app .app-shell,
+body[data-ui="premium-fintech"] #app .app-shell .app-main {background:#0c0b10 !important;color:#f2ede7 !important;}
+body[data-ui="premium-fintech"] #app .app-shell :is(.card,.cf-month-desk,.mobile-entry-details) {background:#19161e !important;color:#f2ede7 !important;border-color:#423744 !important;}
+body[data-ui="premium-fintech"] #app .app-shell :is(.cf-ledger-result,.cf-mobile-balance) {background:#223ca0 !important;color:#fff5ea !important;}
+@media(max-width:760px){
+  body[data-ui="premium-fintech"] .mobile-bottom-nav {
+    background:#17121d !important;color:#dfd6e2 !important;border:1px solid #493b4e !important;
+    border-radius:22px 22px 0 0 !important;overflow:visible !important;
+    padding-top:4px !important;isolation:isolate;backdrop-filter:none !important;
+  }
+  body[data-ui="premium-fintech"] #app .mobile-bottom-nav .mobile-nav-item {position:relative;z-index:1;color:#d8cddd !important;background:transparent !important;min-height:65px !important;}
+  body[data-ui="premium-fintech"] #app .mobile-bottom-nav .mobile-nav-item.is-active {color:#ffb383 !important;}
+  .mobile-bottom-nav .mobile-nav-item svg {box-sizing:content-box;padding:10px;border-radius:50%;margin-top:-2px;transition:transform 200ms ease,background-color 200ms ease;}
+  .mobile-bottom-nav .mobile-nav-item.is-active svg {background:#ed8b4f;color:#28100a;transform:translateY(-12px);box-shadow:0 6px 16px #0008;}
+  .mobile-bottom-nav .mobile-nav-item span {margin-top:-5px;}
+}
+@media(prefers-reduced-motion:reduce){.mobile-bottom-nav .mobile-nav-item svg{transition:none !important;}}

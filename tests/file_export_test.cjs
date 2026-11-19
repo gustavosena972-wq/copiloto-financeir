@@ -1,0 +1,5 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const files=require('../android-app/app/src/main/assets/file-export.js');
+test('CSV preserves Portuguese, quotes and semicolons',()=>{assert.equal(files.csv([['Descrição','Valor'],['Mercado; João "A"','12,30']]),'\ufeff"Descrição";"Valor"\r\n"Mercado; João ""A""";"12,30"');});
+test('spreadsheet formula prefixes cannot execute when exported as CSV',()=>{for(const value of ['=HYPERLINK("https://example.invalid")',' +SUM(A1)','@cmd','-danger','\t=1'])assert.ok(files.safeCell(value).startsWith("'"));assert.equal(files.safeCell('Aluguel'),'Aluguel');assert.equal(files.safeCell('2026-11-08'),'2026-11-08');});
+test('UTF-8 bytes round-trip correctly in the native bridge',()=>{const value='Família: ação e R$ 12,30';assert.equal(Buffer.from(files.encode(value),'base64').toString('utf8'),value);});
+test('oversized exports are rejected before opening a document picker',async()=>{await assert.rejects(files.save('A'.repeat(12_000_000),'text/csv','large.csv'),/8 MB/);});

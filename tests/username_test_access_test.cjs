@@ -1,0 +1,42 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');
+const {PGlite}=require('@electric-sql/pglite');
+const U='00000000-0000-0000-0000-000000000001',V='00000000-0000-0000-0000-000000000002';
+test('username test access follows the server flag without crossing household boundaries',async t=>{
+ const db=new PGlite();
+ const login=async(sub=U,email='new-user.12345678@login.invalid',extra={})=>{await db.exec('reset role;set role authenticated;');await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({sub,email,...extra})]);};
+ const allowed=async()=>(await db.query('select public.is_internal_tester() as allowed')).rows[0].allowed;
+ const file=n=>fs.readFileSync(path.join(__dirname,'../supabase/migrations',n),'utf8').replace(/^\uFEFF/,'');
+ try{
+  await db.exec(`create role authenticated;create role anon;create schema private;create schema auth;grant usage on schema private,auth to authenticated;
+   create function auth.jwt() returns jsonb language sql as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;
+   create function auth.uid() returns uuid language sql as $$select (auth.jwt()->>'sub')::uuid$$;
+   create table private.app_flags(chave text primary key,valor text);insert into private.app_flags values('modo_teste_gratuito','true');
+   create function private.modo_teste_gratuito() returns boolean language sql stable security definer set search_path=pg_catalog,private as $$select coalesce((select valor='true' from private.app_flags where chave='modo_teste_gratuito'),false)$$;
+   revoke all on function private.modo_teste_gratuito() from public,anon,authenticated;
+   create table public.internal_testers(email text,acesso_ate timestamptz);
+   insert into public.internal_testers values('chosen@example.invalid',now()+interval '1 day'),('expired@example.invalid',now()-interval '1 day');
+   create table membros(usuario_id uuid,familia_id int);insert into membros values('${U}',1),('${V}',2);
+   create function private.eh_membro_base(fam int) returns boolean language sql stable security definer set search_path=pg_catalog,public as $$select exists(select 1 from membros where familia_id=fam and usuario_id=auth.uid())$$;
+   create table family_data(familia_id int,description text);insert into family_data values(1,'Family A'),(2,'Family B');
+   alter table family_data enable row level security;grant select,insert on family_data to authenticated;
+   create policy scoped on family_data to authenticated using(private.eh_membro_base(familia_id) and private.modo_teste_gratuito()) with check(private.eh_membro_base(familia_id) and private.modo_teste_gratuito());`);
+  await db.exec(file('20261107190000_harden_internal_tester_security.sql'));
+  await db.exec(file('20261110110825_restore_internal_tester_self_lookup.sql'));
+  await t.test('old Gmail lookup rejects a newly created username account despite active free-test mode',async()=>{await login();assert.equal(await allowed(),false);});
+  await db.exec('reset role;');
+  const migration=fs.readdirSync(path.join(__dirname,'../supabase/migrations')).find(n=>n.endsWith('_align_username_test_mode.sql'));
+  const migrationPath=migration?path.join(__dirname,'../supabase/migrations',migration):process.env.TEST_MODE_MIGRATION_PATH;
+  assert.ok(migrationPath,'The reviewed test-mode migration is required');await db.exec(fs.readFileSync(migrationPath,'utf8').replace(/^\uFEFF/,''));
+  await t.test('a signed-in username account is admitted while the server free-test flag is on',async()=>{await login();assert.equal(await allowed(),true);});
+  await t.test('free-test access still reads only the signed-in users family',async()=>{assert.deepEqual((await db.query('select * from family_data')).rows,[{familia_id:1,description:'Family A'}]);await assert.rejects(db.query("insert into family_data values(2,'forged')"),/row-level security/);});
+  await t.test('the second tester receives only their own family data',async()=>{await login(V);assert.deepEqual((await db.query('select * from family_data')).rows,[{familia_id:2,description:'Family B'}]);});
+  await t.test('authentication is required even while free-test mode is on',async()=>{await login(null);assert.equal(await allowed(),false);});
+  await t.test('anonymous Auth identities are not treated as registered testers',async()=>{await login(U,'anonymous@example.invalid',{is_anonymous:true});assert.equal(await allowed(),false);});
+  await t.test('authenticated users cannot change or read the private feature-flag table',async()=>{await login();await assert.rejects(db.query("update private.app_flags set valor='false'"),/permission denied/);await assert.rejects(db.query('select * from private.app_flags'),/permission denied/);});
+  await db.exec("reset role;update private.app_flags set valor='false';");
+  await t.test('turning the server flag off closes unlisted username accounts',async()=>{await login();assert.equal(await allowed(),false);});
+  await t.test('user-editable metadata cannot bypass a closed test',async()=>{await login(U,'outsider@example.invalid',{user_metadata:{internal_tester:true,email:'chosen@example.invalid'}});assert.equal(await allowed(),false);});
+  await t.test('explicit email access and expiry remain effective after the free-test phase',async()=>{await login(U,'CHOSEN@example.invalid');assert.equal(await allowed(),true);await login(U,'expired@example.invalid');assert.equal(await allowed(),false);});
+  await t.test('anonymous callers cannot execute the tester check or the private flag helper',async()=>{await db.exec('reset role;set role anon;');await assert.rejects(db.query('select public.is_internal_tester()'),/permission denied/);await assert.rejects(db.query('select private.modo_teste_gratuito()'),/permission denied/);});
+ }finally{await db.close();}
+});

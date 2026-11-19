@@ -1,0 +1,18 @@
+/* Clear sections on one scroll path; the same 3D pieces reconstruct underneath. */
+.cf-presentation-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+body[data-ui="premium-fintech"] #app .landing-page[data-screen] .landing-hero,
+body[data-ui="premium-fintech"] #app .landing-page[data-screen] .landing-benefits,
+body[data-ui="premium-fintech"] #app .landing-page[data-screen] .landing-plans-section,
+body[data-ui="premium-fintech"] #app .landing-page[data-screen] .landing-login-section{display:block!important;scroll-margin-top:110px}
+body[data-ui="premium-fintech"] #app .landing-page .landing-header{position:sticky!important;top:0!important;background:#0c1228ed!important;backdrop-filter:blur(18px);padding-inline:14px!important;margin-inline:-14px!important;z-index:10!important}
+body[data-ui="premium-fintech"] #app .landing-page .landing-hero{min-height:77dvh!important;display:flex!important;align-items:center!important;padding-bottom:70px!important}
+body[data-ui="premium-fintech"] #app .landing-page .landing-benefits,
+body[data-ui="premium-fintech"] #app .landing-page .landing-plans-section,
+body[data-ui="premium-fintech"] #app .landing-page .landing-login-section{padding-top:80px!important;padding-bottom:90px!important;border-top:1px solid #a8b9ec29!important}
+body[data-ui="premium-fintech"] #app .landing-page .landing-section-heading{max-width:760px!important}
+.cf-presentation-ready .cf-finance-orbit>*{visibility:hidden}
+.cf-presentation-ready .cf-finance-orbit:after{content:'Organize. Entenda. Avance.';position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#d0d7ed;font-size:12px;letter-spacing:.04em}
+body[data-ui="premium-fintech"] #app .landing-page .landing-login-section{display:grid!important;grid-template-columns:.85fr 1.15fr!important;align-items:center!important}
+@media(max-width:760px){body[data-ui="premium-fintech"] #app .landing-page .landing-hero{min-height:0!important;padding-bottom:50px!important}.cf-presentation-canvas{height:100%!important}.cf-presentation-ready .cf-finance-orbit{height:260px}body[data-ui="premium-fintech"] #app .landing-page .landing-benefits,body[data-ui="premium-fintech"] #app .landing-page .landing-plans-section,body[data-ui="premium-fintech"] #app .landing-page .landing-login-section{padding-top:55px!important;padding-bottom:55px!important;scroll-margin-top:145px}body[data-ui="premium-fintech"] #app .landing-page .landing-login-section{display:block!important}}
+
+body[data-ui="premium-fintech"] #app .landing-page .landing-intro{background:linear-gradient(90deg,#090e1cf0,#090e1c99 80%,transparent);border-radius:16px;padding:18px!important}

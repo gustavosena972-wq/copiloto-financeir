@@ -1,0 +1,58 @@
+.cf-business{display:grid;gap:12px;min-width:0}
+.landing-business-plan{display:grid!important;grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr);gap:24px!important;min-height:0!important;margin-top:20px;padding:24px!important;text-align:left}
+.landing-business-character{display:block;width:min(100%,240px);height:280px;object-fit:contain;object-position:center;margin:0 auto 16px;filter:drop-shadow(0 12px 18px #0003)}
+.landing-business-plan h3{font-size:28px;margin:10px 0}
+.landing-business-plan p{line-height:1.6}
+.landing-business-plan .landing-price{flex-wrap:wrap;gap:8px}
+@media(max-width:700px){.landing-business-plan{grid-template-columns:1fr;gap:12px!important;padding:20px!important}}
+.cf-business [hidden]{display:none!important}
+.cf-business-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;overscroll-behavior-x:contain;touch-action:pan-x pan-y}
+.cf-business-tabs button{flex:0 0 auto;min-height:44px;padding:10px 16px;white-space:nowrap}
+.cf-business-tabs button[aria-current=page]{background:#4a326a!important;border-color:#b193dc!important;color:#fff!important}
+.cf-business-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.cf-business-bar{height:6px;background:#252234;border-radius:6px;margin-top:8px;overflow:hidden}
+.cf-business-bar span{display:block;height:100%;background:#ae8ce0;border-radius:6px}
+.cf-business-page{display:flex;align-items:center;justify-content:center;min-width:100px}
+.cf-business .cf-plan-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.cf-business .cf-plan-fields label{display:grid;gap:6px;align-content:start;min-width:0}
+.cf-business .cf-plan-fields :is(input,select){width:100%;box-sizing:border-box}
+@media(max-width:600px){.cf-business-columns{grid-template-columns:1fr;gap:12px}.cf-business .cf-plan-fields{grid-template-columns:1fr}}
+body[data-ui="premium-fintech"] #app .app-shell[data-current-view="negocio"] .app-topbar{min-height:0!important;height:auto!important;padding:16px!important;margin-bottom:12px!important}
+body[data-ui="premium-fintech"] #app .app-shell[data-current-view="negocio"] .page-heading{max-width:none!important}
+.cf-business .card{margin:0;min-width:0}
+.cf-business h2{font-size:1.125rem;margin:0 0 8px}
+.cf-business h3{font-size:1rem;margin:16px 0 8px}
+.cf-business p{line-height:1.55}
+.cf-business-actions{display:flex;flex-wrap:wrap;gap:8px}
+.cf-business-actions button{min-height:44px;flex:1 1 140px;white-space:normal}
+.cf-business-list{list-style:none;margin:0;padding:0}
+.cf-business-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:12px 0;border-bottom:1px solid var(--bd)}
+.cf-business-list li:last-child{border:0}
+.cf-business-list :is(strong,span){overflow-wrap:anywhere}
+.cf-business-list small{display:block;color:var(--mu);margin-top:4px}
+.cf-business-list button{grid-column:1/-1;min-height:44px}
+.cf-service-options{grid-column:1/-1}
+.cf-service-options summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
+.cf-service-options .cf-business-actions{padding:8px 0}
+#negocio-servico-form .cf-plan-expand-body>label{display:grid;gap:6px;margin:12px 0}
+#negocio-servico-form .cf-plan-expand-body>label input{width:100%;box-sizing:border-box}
+.cf-space-options{display:grid;gap:10px}
+.cf-space-options label{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid var(--bd);border-radius:12px}
+.cf-space-options input[type=radio]{width:20px;min-width:20px;margin:0}
+.cf-space-options label:has(input:checked){border-color:#ac8ac9;background:#2a2033}
+details:not(:has(input[value="negocio"]:checked)) .cf-space-segment{display:none}
+.cf-business :is(input,select,button){min-height:44px}
+.cf-business [role=status]{overflow-wrap:anywhere;line-height:1.6}
+@media(max-width:400px){.cf-business-list li{grid-template-columns:minmax(0,1fr)}}
+#cf-agenda {min-width:0}
+#cf-agenda .cf-business-actions {margin-block:1rem}
+#cf-agenda button[aria-pressed=true] {border-color:currentColor;color:#d5baff}
+.cf-agenda-form {margin-block:1rem;border:1px solid #645771;border-radius:14px;padding:.75rem 1rem}
+.cf-agenda-form summary {cursor:pointer;font-weight:650;padding:.4rem 0}
+.cf-agenda-form form {display:grid;gap:.75rem;margin-top:.8rem}
+.cf-agenda-form label,.cf-agenda-date {display:grid;gap:.3rem}
+.cf-agenda-date {max-width:15rem}
+.cf-visit {display:flex;align-items:center;gap:.8rem;padding:.75rem 0;border-bottom:1px solid #645771}
+.cf-visit time {font-variant-numeric:tabular-nums;color:#d5baff}
+.cf-visit div {flex:1;min-width:0;overflow-wrap:anywhere}
+.cf-visit small {display:block}
