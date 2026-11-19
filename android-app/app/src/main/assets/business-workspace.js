@@ -17,8 +17,8 @@
     const ed=canEdit(),rows=(S.servicos||[]).map(row=>'<li><div><strong>'+escape(row.nome)+'</strong><small>'+escape(row.minutos)+' min · '+brl(row.preco)+'</small></div>'+
       (ed&&mesAberto()?'<button data-act="negocio-usar-servico" data-id="'+escape(row.id)+'">Preparar lançamento</button>':'')+
       (ed?'<details class="cf-service-options"><summary>Opções do serviço</summary><div class="cf-business-actions"><button class="sec" data-act="negocio-editar-servico" data-id="'+escape(row.id)+'">Editar preço e custos</button><button class="sec" data-act="negocio-arquivar-servico" data-id="'+escape(row.id)+'">Arquivar serviço</button></div></details>':'')+'</li>').join('');
-    return (window.CFServiceDesk?.view()||'')+section('services')+'<h2>Serviços do negócio</h2><p class="mu">Seu catálogo de preços e duração. Preparar um lançamento abre a Planilha para você conferir e salvar.</p><ul class="cf-business-list">'+
-      (rows||'<li>Nenhum serviço salvo. Calcule o preço na ferramenta abaixo e salve o primeiro.</li>')+'</ul><button class="sec" data-act="negocio-atualizar-servicos">Atualizar catálogo</button></section>';
+    return (window.CFServiceDesk?.view()||'')+section('services')+'<h2>Produtos e serviços</h2><p class="mu">Cadastre mercadorias com seu custo de compra e serviços com materiais e tempo de trabalho. Para revenda, use zero nos campos de tempo. Preparar um lançamento abre a Planilha para você conferir e salvar.</p><ul class="cf-business-list">'+
+      (rows||'<li>Nenhum item salvo. Calcule o preço na ferramenta abaixo e salve o primeiro.</li>')+'</ul><button class="sec" data-act="negocio-atualizar-servicos">Atualizar catálogo</button></section>';
   }
   function options(selected='familiar'){
     return '<div class="cf-space-options">'+Object.entries(modes).map(([value,title])=>
@@ -55,7 +55,7 @@
       '<details id="negocio-servico-form" class="cf-plan-form"><summary>Preço de um produto ou serviço</summary><div class="cf-plan-expand-body"><p class="mu">Inclua os custos e escolha uma margem. Revise o resultado antes de usar o preço.</p><input id="servico-id" type="hidden"><div class="cf-plan-fields">'+
       [['preco-material','Materiais e mercadoria (R$)'],['preco-minutos','Tempo de trabalho (minutos)'],['preco-hora','Custo da hora de trabalho (R$)'],['preco-fixo','Custos fixos por venda (R$)'],['preco-taxas','Taxas e tributos estimados (%)'],['preco-margem','Margem desejada sobre o preço (%)']].map(([id,label])=>'<label>'+label+'<input id="'+id+'" type="number" min="0" step="'+(id==='preco-minutos'?'1':'0.01')+'" value="0"></label>').join('')+
       '<button class="cf-plan-wide" data-act="negocio-preco">Calcular preço</button></div><div id="negocio-preco-resultado" role="status"></div>'+
-      (canEdit()?'<label>Nome do serviço<input id="servico-nome" maxlength="120" placeholder="Ex.: corte e finalização"></label><div class="cf-business-actions"><button data-act="negocio-salvar-servico">Salvar serviço no catálogo</button><button class="sec" data-act="negocio-limpar-servico">Novo serviço</button></div><p class="mu">Salvar o catálogo não registra uma venda nem altera lançamentos anteriores.</p>':'')+'</div></details></section>'+section('planning')+'<h2>Fluxo de caixa e conferência</h2>'+
+      (canEdit()?'<label>Nome do produto ou serviço<input id="servico-nome" maxlength="120" placeholder="Ex.: corte e finalização"></label><div class="cf-business-actions"><button data-act="negocio-salvar-servico">Salvar item no catálogo</button><button class="sec" data-act="negocio-limpar-servico">Novo item</button></div><p class="mu">Salvar o catálogo não registra uma venda nem altera lançamentos anteriores.</p>':'')+'</div></details></section>'+section('planning')+'<h2>Fluxo de caixa e conferência</h2>'+
       '<details class="cf-plan-form"><summary>Previsão de caixa em 30 dias</summary><div class="cf-plan-expand-body"><p class="mu">Informe o saldo disponível de hoje. Vou buscar os vencimentos registrados para os próximos 30 dias.</p>'+
       '<label>Saldo de hoje (R$)<input id="negocio-saldo" type="number" min="0" step="0.01"></label><button data-act="negocio-prever">Calcular cenário</button><div id="negocio-previsao" role="status"></div></div></details>'+
       '<details class="cf-plan-form"><summary>Planilha e fechamento do período</summary><div class="cf-plan-expand-body"><p class="mu">Revise lançamentos antes de exportar. A planilha contém os dados registrados e serve de apoio à revisão com sua contabilidade.</p><button class="sec" data-act="view" data-v="planilha">Abrir planilha</button></div></details></section>'+
@@ -82,6 +82,13 @@
     }
     assertBusiness();
     if(action==='negocio-projetar-atendimentos')return window.CFServiceDesk.project();
+    if(action==='negocio-barra'){
+      const scope=JSON.stringify([S.user.id,S.fam.id]);
+      const enabled=button.dataset.enabled==='true';
+      if(enabled&&!await window.requestCopilotoNotificationPermission?.())throw Error('Permita notificações do Copiloto nos ajustes do Android.');
+      if(scope!==JSON.stringify([S.user?.id,S.fam?.id]))return;
+      window.CopilotoAlerts.postMessage(JSON.stringify({action:'businessBar',scope,enabled}));return;
+    }
     if(action==='negocio-atender')return window.CFServiceDesk.record(button);
     if(action.startsWith('negocio-relatorio-'))return window.CFBusinessReports.handle(action,button);
     if(action==='negocio-atualizar-servicos'){await loadServices();render();toast('Catálogo atualizado.');return;}
@@ -97,7 +104,7 @@
     }
     if(action==='negocio-limpar-servico'){
       document.getElementById('servico-id').value='';document.getElementById('servico-nome').value='';
-      priceIds.forEach(id=>document.getElementById(id).value='0');document.getElementById('negocio-preco-resultado').textContent='Novo serviço. Preencha os custos.';return;
+      priceIds.forEach(id=>document.getElementById(id).value='0');document.getElementById('negocio-preco-resultado').textContent='Novo item. Preencha os custos.';return;
     }
     if(['negocio-editar-servico','negocio-arquivar-servico','negocio-usar-servico'].includes(action)){
       if(!canEdit())return;

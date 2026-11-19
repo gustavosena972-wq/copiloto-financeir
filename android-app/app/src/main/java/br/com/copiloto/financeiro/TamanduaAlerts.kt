@@ -72,13 +72,35 @@ internal class TamanduaAlerts(private val activity: Activity, private val webVie
             if (raw.length > 8192) return@addWebMessageListener
             val body = runCatching { JSONObject(raw) }.getOrNull() ?: return@addWebMessageListener
             when (body.optString("action")) {
+                "businessBar" -> businessBar(body)
                 "clear" -> synchronized(ReminderStore.lock) {
+                    ReminderStore.manager(activity).cancel(5457)
                     ReminderStore.prefs(activity).edit().clear().commit(); ReminderStore.cancel(activity)
                 }
                 "sync" -> synchronize(body)
                 "permission" -> requestPermission(body)
             }
         }
+    }
+    private fun businessBar(body: JSONObject) {
+        val manager = ReminderStore.manager(activity)
+        val scope = ReminderPolicy.scope(body.optString("scope")) ?: return
+        if (scope != ReminderStore.prefs(activity).getString("scope", null)) return
+        if (!body.optBoolean("enabled")) { manager.cancel(5457); return }
+        if (!ReminderStore.permitted(activity)) return
+        val channel = "business_quick_entry"
+        if (Build.VERSION.SDK_INT >= 26) manager.createNotificationChannel(
+            NotificationChannel(channel, "Caixa rápido", NotificationManager.IMPORTANCE_LOW))
+        fun open(command: String, id: Int) = PendingIntent.getActivity(activity, id,
+            Intent(activity, MainActivity::class.java).setAction("br.com.copiloto.financeiro." + command),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val sales = open("SERVICES", 5458)
+        val alert = NotificationCompat.Builder(activity, channel).setSmallIcon(android.R.drawable.ic_menu_edit)
+            .setContentTitle("Caixa rápido").setContentText("Registrar entrada ou saída")
+            .setContentIntent(sales).setOngoing(true).setOnlyAlertOnce(true).setSilent(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .addAction(0, "Recebi", sales).addAction(0, "Gastei", open("EXPENSE", 5459)).build()
+        manager.notify(5457, alert)
     }
     private fun synchronize(body: JSONObject) = synchronized(ReminderStore.lock) {
         val scope = ReminderPolicy.scope(body.optString("scope")) ?: return@synchronized
@@ -92,7 +114,7 @@ internal class TamanduaAlerts(private val activity: Activity, private val webVie
         if (prefs.getString("signature", null) == signature) return@synchronized
         val oldScope = prefs.getString("scope", null)
         val editor = prefs.edit().putString("scope", scope).putBoolean("enabled", enabled).putString("signature", signature)
-        if (oldScope != scope) editor.remove("ack")
+        if (oldScope != scope) { editor.remove("ack"); ReminderStore.manager(activity).cancel(5457) }
         editor.commit(); ReminderStore.cancel(activity)
         if (!enabled) return@synchronized
         ReminderStore.channel(activity)
