@@ -1,6 +1,6 @@
 .cf-business{display:grid;gap:12px;min-width:0}
 .landing-business-plan{display:grid!important;grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr);gap:24px!important;min-height:0!important;margin-top:20px;padding:24px!important;text-align:left}
-.landing-business-intro .cf-mark{display:block;width:56px;height:56px;margin-bottom:16px}
+.landing-business-character{display:block;width:min(100%,240px);height:280px;object-fit:contain;object-position:center;margin:0 auto 16px;filter:drop-shadow(0 12px 18px #0003)}
 .landing-business-plan h3{font-size:28px;margin:10px 0}
 .landing-business-plan p{line-height:1.6}
 .landing-business-plan .landing-price{flex-wrap:wrap;gap:8px}
