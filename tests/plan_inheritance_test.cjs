@@ -20,3 +20,9 @@ test('the public illustration starts without sample money, percentages or transa
  assert.match(html,/Nenhum lançamento/);assert.match(html,/Sua conta começa sem lançamentos/);
 });
 
+
+test('the plan overview keeps the duration beside the price without a long purchase footnote',()=>{
+ assert.doesNotMatch(source,/<p class="landing-plans-footnote">/);
+ const start=source.indexOf('id="plano-negocios"'),end=source.indexOf('</article>',start);
+ assert.match(source.slice(start,end),/30 dias/);
+});
