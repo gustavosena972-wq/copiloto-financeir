@@ -1,5 +1,6 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert@1";
 import {
+  businessProfileData,
   financialGuidance,
   budgetStarterGuidance,
   buildTamanduaInstructions,
@@ -199,4 +200,11 @@ Deno.test("separa caixa realizado de competência e orçamento", () => {
     resultado_por_competencia:59.90, diferenca_despesa_e_orcamento:5.20, contas_atrasadas_na_janela:1,
   });
   assertEquals(summarizeFinancialSignals({periodo_existente:true,totais:{quantidade:0}}),{tem_lancamentos_no_periodo:false});
+});
+
+Deno.test("business profile accepts custom sectors and uses workspace default when personal memory is absent",()=>{
+  assertEquals(businessProfileData("Comércio", {ramo:"Ateliê de cerâmica", oferta:"Produtos e serviços", segredo:"omitido"}),
+    {ramo:"Ateliê de cerâmica",oferta:"Produtos e serviços"});
+  assertEquals(businessProfileData("Escritório de projetos",null),{ramo:"Escritório de projetos"});
+  assertEquals(businessProfileData(null,null),{});
 });
