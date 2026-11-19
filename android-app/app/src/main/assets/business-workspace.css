@@ -44,3 +44,15 @@ details:not(:has(input[value="negocio"]:checked)) .cf-space-segment{display:none
 .cf-business :is(input,select,button){min-height:44px}
 .cf-business [role=status]{overflow-wrap:anywhere;line-height:1.6}
 @media(max-width:400px){.cf-business-list li{grid-template-columns:minmax(0,1fr)}}
+#cf-agenda {min-width:0}
+#cf-agenda .cf-business-actions {margin-block:1rem}
+#cf-agenda button[aria-pressed=true] {border-color:currentColor;color:#d5baff}
+.cf-agenda-form {margin-block:1rem;border:1px solid #645771;border-radius:14px;padding:.75rem 1rem}
+.cf-agenda-form summary {cursor:pointer;font-weight:650;padding:.4rem 0}
+.cf-agenda-form form {display:grid;gap:.75rem;margin-top:.8rem}
+.cf-agenda-form label,.cf-agenda-date {display:grid;gap:.3rem}
+.cf-agenda-date {max-width:15rem}
+.cf-visit {display:flex;align-items:center;gap:.8rem;padding:.75rem 0;border-bottom:1px solid #645771}
+.cf-visit time {font-variant-numeric:tabular-nums;color:#d5baff}
+.cf-visit div {flex:1;min-width:0;overflow-wrap:anywhere}
+.cf-visit small {display:block}
