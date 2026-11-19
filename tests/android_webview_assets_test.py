@@ -36,7 +36,7 @@ for packaged_asset in [HTML, *HTML.parent.glob('*.js')]:
 print('PASS: Screenshot fixture identities and sample records are excluded from packaged Android assets.')
 
 assert '<div id="app" class="wrap"><div class="cf-mobile-startup"' in html
-assert 'mobile.html?v=1.0.56' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
+assert 'mobile.html?v=1.0.57' in (ROOT / "android-app/app/src/main/java/br/com/copiloto/financeiro/MainActivity.kt").read_text(encoding="utf-8")
 print("PASS: Android startup has visible fallback and cache-busted app entry.")
 
 
@@ -45,13 +45,13 @@ print("PASS: Android startup has visible fallback and cache-busted app entry.")
 assert html.count("function mostrarErroInicial(e)") == 1
 print("PASS: Android startup JavaScript parses past the initial error handler declaration.")
 
-# Release contract: the tested Android package is 1.0.56/versionCode 56.
+# Release contract: the tested Android package is 1.0.57/versionCode 57.
 gradle = (ROOT / "android-app/app/build.gradle.kts").read_text(encoding="utf-8")
-assert "versionCode = 56" in gradle
-assert 'versionName = "1.0.56"' in gradle
-print("PASS: Android release is pinned to 1.0.56/versionCode 56.")
+assert "versionCode = 57" in gradle
+assert 'versionName = "1.0.57"' in gradle
+print("PASS: Android release is pinned to 1.0.57/versionCode 57.")
 
-# CI release trigger marker: 1.0.56
+# CI release trigger marker: 1.0.57
 
 # Parse every classic inline script, rather than checking only one handler name.
 # Node parses syntax without executing application code or making network requests.

@@ -81,5 +81,11 @@
     return {contributionRate:contribution/100,breakEven,targetRevenue,dailyTarget:Math.ceil(targetRevenue/days),
       estimatedResult,gap:Math.max(0,targetRevenue-sales),fixed,sales,target,days,variable:variable/100,tax:tax/100};
   }
-  return {price,summary,review,ledger,plan};
+  function serviceForecast(today,days,fixed,rate){
+    const scale=value=>Math.round(value*days*rate/100);
+    const sales=scale(today.sales),cost=scale(today.cost)+fixed,profit=sales-cost;
+    if(![sales,cost,profit].every(x=>Number.isSafeInteger(x*12)))throw Error('Valores acima do limite da projeção.');
+    return {sales,cost,profit};
+  }
+  return {price,summary,review,ledger,plan,serviceForecast};
 });
