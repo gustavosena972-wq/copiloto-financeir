@@ -10,6 +10,7 @@
   return new Promise(resolve=>{const timer=setTimeout(()=>{pending.delete(id);resolve(false);},60000);pending.set(id,{resolve,timer,ticket});window.CopilotoAlerts.postMessage(JSON.stringify({action:'permission',id,scope:scope()}));});
  }
  window.addEventListener('copiloto:alerts-permission',event=>{const result=event.detail||{},request=pending.get(result.id);if(!request)return;clearTimeout(request.timer);pending.delete(result.id);request.resolve(gate.accepts(request.ticket,state())&&result.granted===true);});
+ window.requestCopilotoNotificationPermission=permission;
  async function syncAlerts(){
   const s=state(),key=scope(),ticket=gate.ticket(s),db=client();if(!key||!ticket||!db||!window.CopilotoAlerts?.postMessage)return;
   const prefs=await db.from('tamandua_preferencias').select('acompanhamento_habilitado').eq('usuario_id',s.user.id).eq('familia_id',s.fam.id).maybeSingle();

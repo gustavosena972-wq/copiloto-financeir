@@ -37,7 +37,7 @@ import java.util.Locale
 
 class MainActivity : Activity(), PurchasesUpdatedListener {
     companion object {
-        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.57"
+        const val APP_ENTRY_URL = "https://appassets.androidplatform.net/assets/mobile.html?v=1.0.58"
         private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
         const val ACCEPT_WEBVIEW_COOKIES = false
         const val ACCEPT_THIRD_PARTY_COOKIES = false
@@ -187,7 +187,11 @@ class MainActivity : Activity(), PurchasesUpdatedListener {
             isAppearanceLightNavigationBars = false
         }
         ViewCompat.requestApplyInsets(content)
-        webView.loadUrl(if (intent.action == "br.com.copiloto.financeiro.SERVICES") APP_ENTRY_URL + "&open=services" else APP_ENTRY_URL)
+        webView.loadUrl(when (intent.action) {
+            "br.com.copiloto.financeiro.SERVICES" -> APP_ENTRY_URL + "&open=services"
+            "br.com.copiloto.financeiro.EXPENSE" -> APP_ENTRY_URL + "&open=expense"
+            else -> APP_ENTRY_URL
+        })
         connectBilling()
     }
 

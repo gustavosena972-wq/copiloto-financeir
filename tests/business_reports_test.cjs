@@ -85,3 +85,18 @@ test('service tap reuses the same receipt after interrupted network response',as
  await desk.record(button);assert.equal(calls.length,2);assert.equal(calls[0].p_evento,calls[1].p_evento);
  assert.equal(memory.size,0);S.internalTester=false;await assert.rejects(desk.record(button),/permissão/);
 });
+
+test('monthly product mix uses historical cost and keeps different catalog items separate',()=>{
+ const window={CFBusinessReports:{section:()=>'<section>'}};
+ const S={ano:{ano:2026},mes:{mes:10},lanc:[
+ {servico_catalogo_id:'a',descricao:'Caneca',tipo:'receita',valor:50,servico_custo_direto:35},
+ {servico_catalogo_id:'a',descricao:'Caneca',tipo:'receita',valor:45,servico_custo_direto:30},
+ {servico_catalogo_id:'b',descricao:'Entrega',tipo:'receita',valor:10,servico_custo_direto:4},
+ {descricao:'Aporte',tipo:'receita',valor:1000}]};
+ vm.runInNewContext(fs.readFileSync(path.join(assets,'service-desk.js'),'utf8'),{
+ window,S,CFMoney:money,URLSearchParams,location:{search:''},brl:n=>'R$ '+n,localFinancialDate:()=>'2026-11-19'});
+ const html=window.CFServiceDesk.view();
+ assert.match(html,/2 venda\(s\) · Faturamento R\$ 95/);
+ assert.match(html,/Custo direto estimado R\$ 65 · Margem antes dos fixos R\$ 30/);
+ assert.match(html,/Entrega/);assert.doesNotMatch(html,/Aporte/);
+});

@@ -13,6 +13,10 @@
         android:usesCleartextTraffic="false"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <receiver android:name=".TamanduaReminderAck" android:exported="false" />
+        <receiver android:name=".BusinessWidget" android:label="@string/widget_title" android:exported="false">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/business_widget_info" />
+        </receiver>
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
